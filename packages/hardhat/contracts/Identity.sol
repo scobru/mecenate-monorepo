@@ -15,7 +15,7 @@ contract Identity is ERC721URIStorage, Ownable {
   Counters.Counter private _tokenIds;
   uint256 public identityCreationFee;
 
-  constructor(uint256 _creationFee) ERC721("Identity", "ID") {
+  constructor(uint256 _creationFee) ERC721("Mecenate Creator Identity", "MCI") {
     identityCreationFee = _creationFee;
   }
 
@@ -24,24 +24,29 @@ contract Identity is ERC721URIStorage, Ownable {
     string name;
     string image;
     string description;
+    address owner;
   }
 
   // Create a mapping of identities
   mapping(uint256 => IdentityData) public identities;
+  mapping(address => uint256) public identityByAddress;
 
   function mint(IdentityData memory id) public payable {
-    require(msg.value == identityCreationFee, "Incorrect payment amount");
+    require(msg.value == SafeMath.mul(identityCreationFee, 1 wei), "Incorrect payment amount");
+    // only one identity can be minted
+    require(balanceOf(msg.sender) == 0, "You already have an identity");
     payable(owner()).transfer(msg.value);
     emit PaymentReceived(msg.sender, msg.value);
     _tokenIds.increment();
     uint256 newIdentityId = _tokenIds.current();
+    identityByAddress[msg.sender] = newIdentityId;
     _safeMint(msg.sender, newIdentityId);
     _setTokenURI(newIdentityId, id.image);
     identities[newIdentityId] = id;
     emit IdentityCreated(msg.sender, newIdentityId);
   }
 
-  function tokenURI(uint256 tokenId) public view virtual override(ERC721URIStorage) returns (string memory) {
+  function tokenURI(uint256 tokenId) public view override returns (string memory) {
     bytes memory dataURI = abi.encodePacked(
       "{",
       '"name":',
@@ -59,6 +64,10 @@ contract Identity is ERC721URIStorage, Ownable {
       "}"
     );
     return string(abi.encodePacked("data:application/json;base64,", Base64.encode(dataURI)));
+  }
+
+  function getOwnerById(uint256 tokenId) public view returns (address) {
+    return identities[tokenId].owner;
   }
 
   function changeImage(uint256 tokenId, string memory newImage) public {

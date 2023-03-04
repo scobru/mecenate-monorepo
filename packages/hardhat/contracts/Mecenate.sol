@@ -3,125 +3,94 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
-interface IMecenateSubscriptionFactory {
-  function subscribeFee() external view returns (uint256);
-
-  function owner() external view returns (address);
-}
+import "./interfaces/IFactory.sol";
 
 contract Mecenate is Ownable {
   using SafeMath for uint256;
 
+  address public creator;
   string public name;
-  mapping(uint256 => uint256) public monthlyFee;
-  mapping(address => uint256) public subscriberTier;
-  mapping(uint256 => string) public descriptionTier;
+  string public description;
+  uint256 public subscriptionDuration;
+  uint256 public fee;
+  uint256 public subscribeCount;
+  uint256 public totalFeeCreator;
+  address public factory;
+
   mapping(address => uint256) public lastPaymentTime;
 
-  uint256 public numTiers;
-  address public factory;
-  uint256 public subscriptionDuration = 30 days;
-
-  event SubscriptionRenewed(address indexed subscriber, uint256 payment, uint256 tier, uint256 nextPaymentTime);
-  event TierAdded(uint256 fee);
+  event SubscriptionRenewed(address indexed subscriber, uint256 payment, uint256 nextPaymentTime);
 
   constructor(
     address _creator,
     string memory _name,
-    uint256[] memory _monthlyFees,
-    string[] memory _descriptionTier
+    string memory _description,
+    uint256 _fee,
+    uint256 _subscriptionDuration
   ) {
-    require(_monthlyFees.length > 0, "Must provide at least one tier");
-    require(_monthlyFees.length == _descriptionTier.length, "Must provide at least one tier");
+    creator = _creator;
+
     name = _name;
-    for (uint256 i = 0; i < _monthlyFees.length; i++) {
-      addTierInternal(_monthlyFees[i], _descriptionTier[i]);
-    }
+
+    description = _description;
+
+    fee = _fee;
+
+    subscriptionDuration = _subscriptionDuration;
+
     transferOwnership(_creator);
+
     factory = msg.sender;
   }
 
-  function addTier(uint256 fee, string memory description) public onlyOwner {
-    addTierInternal(fee, description);
-  }
+  function subscribe() public payable {
+    require(msg.value == fee, "Incorrect payment amount");
 
-  function addTierInternal(uint256 fee, string memory description) private {
-    numTiers++;
-    monthlyFee[numTiers] = fee;
-    descriptionTier[numTiers] = description;
-    emit TierAdded(fee);
-  }
-
-  function subscribe(uint256 tier) public payable {
-    require(tier > 0 && tier <= getNumberOfTiers(), "Invalid tier");
-    require(msg.value == monthlyFee[tier], "Incorrect payment amount");
-    require(subscriberTier[msg.sender] != tier, "Already subscribed to this tier");
     require(lastPaymentTime[msg.sender] + subscriptionDuration <= block.timestamp, "Subscription still active");
+
+    subscribeCount++;
     // Send Fee
-    address factoryOwner = IMecenateSubscriptionFactory(factory).owner();
-    uint256 factoryFee = IMecenateSubscriptionFactory(factory).subscribeFee();
+    address factoryOwner = IFactory(factory).owner();
+
+    uint256 factoryFee = IFactory(factory).subscribeFeePercent();
+
     uint256 feeAmount = (msg.value * factoryFee) / 10000;
+
     payable(factoryOwner).transfer(feeAmount);
+
     uint256 amountAfter = msg.value - feeAmount;
 
-    subscriberTier[msg.sender] = tier;
+    totalFeeCreator += amountAfter;
+
+    payable(creator).transfer(amountAfter);
+
     lastPaymentTime[msg.sender] = block.timestamp;
+
     uint256 nextPaymentTime = block.timestamp + subscriptionDuration;
-    emit SubscriptionRenewed(msg.sender, amountAfter, tier, nextPaymentTime);
+
+    emit SubscriptionRenewed(msg.sender, amountAfter, nextPaymentTime);
   }
 
-  function isSubscribed(address subscriber) public view returns (bool) {
-    return subscriberTier[subscriber] != 0;
-  }
-
-  function changeMonthlyFee(uint256 tier, uint256 newFee) public onlyOwner {
-    require(tier > 0 && tier <= getNumberOfTiers(), "Invalid tier");
-    monthlyFee[tier] = newFee;
+  function changeMonthlyFee(uint256 newFee) public onlyOwner {
+    fee = newFee;
   }
 
   function changeName(string memory newName) public onlyOwner {
     name = newName;
   }
 
-  function changeDescriptionTier(uint256 tier, string memory newDescription) public onlyOwner {
-    require(tier > 0 && tier <= getNumberOfTiers(), "Invalid tier");
-    descriptionTier[tier] = newDescription;
+  function changeDescription(string memory newDescription) public onlyOwner {
+    description = newDescription;
   }
 
-  function withdrawFunds() public onlyOwner {
-    uint256 balance = address(this).balance;
-    (bool success, ) = msg.sender.call{value: balance}("");
-    require(success, "Withdrawal failed");
-  }
-
-  function getContractBalance() public view returns (uint256) {
-    return address(this).balance;
-  }
-
-  function getSubscriptionStatus(address subscriber) public view returns (bool, uint256) {
-    uint256 tier = subscriberTier[subscriber];
-    bool isSub = tier != 0;
+  function getSubscriptionStatus(address subscriber) public view returns (bool) {
     if (lastPaymentTime[subscriber] + subscriptionDuration <= block.timestamp) {
-      return (false, tier);
+      return false;
     } else {
-      return (isSub, tier);
+      return true;
     }
   }
 
-  function getMonthlyFee(uint256 tier) public view returns (uint256) {
-    require(tier > 0 && tier <= getNumberOfTiers(), "Invalid tier");
-    return monthlyFee[tier];
-  }
-
-  function getDescriptionTier(uint256 tier) public view returns (string memory) {
-    require(tier > 0 && tier <= getNumberOfTiers(), "Invalid tier");
-    return descriptionTier[tier];
-  }
-
-  function getNumberOfTiers() public view returns (uint256) {
-    return numTiers;
-  }
-
+  // payable fallback function to allow contract to receive ETH
   receive() external payable {}
 }

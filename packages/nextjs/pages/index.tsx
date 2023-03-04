@@ -16,15 +16,27 @@ const Home: NextPage = () => {
         <div className="px-5">
           <h1 className="text-center mb-8">
             <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">scaffold-eth 2</span>
+            <span className="block text-4xl font-bold">M E C E N A T E</span>
           </h1>
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold">packages/nextjs/pages/index.tsx</code>
+          <p className="text-center  text-lg w-1/3 justify-center mx-auto">
+            Mecenate is the perfect solution for creators seeking to monetize their content and fans looking to support
+            their favorite creators. With our smart contract platform, creators can set their own subscription fee and
+            duration, while fans can subscribe with just a few clicks to gain access to exclusive content. Join us today
+            on the Ethereum blockchain and start earning or supporting your favorite creators in a fair and transparent
+            way!
           </p>
-          <p className="text-center text-lg">
-            Edit your smart contract <code className="italic bg-base-300 text-base font-bold">YourContract.sol</code> in{" "}
-            <code className="italic bg-base-300 text-base font-bold">packages/hardhat/contracts</code>
+        </div>
+
+        <div className="px-5">
+          <h1 className="text-center">
+            <span className="block text-2xl font-bold my-5">Get Started</span>
+          </h1>
+          <p className="text-center text-lg justify-center mx-auto">
+            <li>Mint Your Creator Identity NFT</li>
+            <li>Create your subscription for your fan</li>
+            <button className="btn btn-primary my-5">
+              <a href="/createMecenate">Create</a>
+            </button>
           </p>
         </div>
 
@@ -33,21 +45,33 @@ const Home: NextPage = () => {
             <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
               <BugAntIcon className="h-8 w-8 fill-secondary" />
               <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contract
-                </Link>{" "}
-                tab.
+                <p className="text-center">
+                  <ul>
+                    <strong>CREATORS</strong>
+                  </ul>
+                  <br />
+                  <ul>Set your own subscription fee and duration</ul>
+                  <br />
+                  <ul>Complete control over your earnings</ul>
+                  <br />
+                  <ul>Built-in revenue sharing model ensures fair compensation for your hard work</ul>
+                  <br />
+                  <ul>Easy Smart Contract Implementation</ul>
+                </p>
               </p>
             </div>
             <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
               <SparklesIcon className="h-8 w-8 fill-secondary" />
               <p>
-                Experiment with{" "}
-                <Link href="/example-ui" passHref className="link">
-                  Example UI
-                </Link>{" "}
-                to build your own UI.
+                <p className="text-center">
+                  <ul>
+                    <strong>FAN</strong>
+                  </ul>
+                  <br />
+                  <ul>Subscribe with just a few clicks</ul>
+                  <br />
+                  <ul>Easy-to-use platform requires no technical knowledge</ul>
+                </p>
               </p>
             </div>
           </div>

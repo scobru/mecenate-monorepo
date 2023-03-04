@@ -86,12 +86,12 @@ export default function Header() {
           )}
         </div>
         <div className="hidden lg:flex items-center gap-2 mx-4">
-          <Link href="/" passHref className="flex relative w-10 h-10">
+          {/* <Link href="/" passHref className="flex relative w-10 h-10">
             <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
-          </Link>
+          </Link> */}
           <div className="flex flex-col">
-            <span className="font-bold">Scaffold-eth</span>
-            <span className="text-xs">Forkable Ethereum dev stack</span>
+            <span className="font-bold">M E C E N A T E</span>
+            <span className="text-xs">Decentralized Subscription Interface</span>
           </div>
         </div>
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>

@@ -6,20 +6,32 @@ import { MecenateInterface } from "../../hardhat/typechain-types/contracts/Mecen
 import { ContractInterface, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { useRouter } from "next/router";
+import mecenateABI from "../generated/mecenateABI.json";
+import { parseEther } from "ethers/lib/utils";
 
 const ViewMecenate: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
   const account = useAccount();
   const provider = useProvider();
-
   const router = useRouter();
   const { addr } = router.query;
-  const [tier, setTier] = useState(1);
-  const [currentTier, setCurrentTier] = useState(null);
-  const [tiers, setTiers] = useState([]);
-  const [monthlyFees, setMonthlyFees] = useState([]);
+  let user = "";
+  let owner = "";
+
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [fee, setFee] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isSub, setIsSub] = useState(false);
+  const [lastPayment, setLastPayment] = useState(0);
+
+  const [nftData, setNftData] = useState<any>([]);
+
+  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "Identity");
+
+  let identityAddress!: string;
+  let identityAbi: ContractInterface[] = [];
 
   const deployedContract = getDeployedContract(chain?.id.toString(), "Mecenate");
   let ctxAbi: MecenateInterface[] = [];
@@ -28,86 +40,104 @@ const ViewMecenate: NextPage = () => {
     ({ abi: ctxAbi } = deployedContract);
   }
 
-  const ctx = useContract({
-    address: String(addr),
-    abi: ctxAbi,
+  if (deployedContractIdentity) {
+    ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
+  }
+
+  const identity = useContract({
+    address: identityAddress,
+    abi: identityAbi,
     signerOrProvider: signer || provider,
   });
 
-  useEffect(() => {
-    async function fetchData() {
-      if (ctx && signer) {
-        const numTiers = await ctx.getNumberOfTiers();
-        setTiers(Array.from({ length: numTiers }, (_, i) => i + 1));
+  const ctx = useContract({
+    address: String(addr),
+    abi: mecenateABI,
+    signerOrProvider: signer || provider,
+  });
 
-        const fees = await Promise.all(
-          tiers.map(async tier => {
-            return ctx.getMonthlyFee(tier);
-          }),
-        );
-        setMonthlyFees(fees);
+  const fetchData = async function fetchData() {
+    if (ctx && signer && provider && router.isReady) {
+      const name = await ctx?.name();
+      setName(name);
+      const description = await ctx?.description();
+      setDescription(description);
+      const fee = await ctx?.fee();
+      setFee(fee);
+      const duration = await ctx?.subscriptionDuration();
+      setDuration(duration);
+      const lastPayment = await ctx?.lastPaymentTime(signer?.getAddress());
+      setLastPayment(lastPayment);
+      fetchDataIdentity();
+      const _isSub = await ctx?.getSubscriptionStatus(signer?.getAddress());
+      console.log(_isSub);
+      setIsSub(_isSub);
 
-        const subscriptionName = await ctx.name();
-        setName(subscriptionName);
-      }
+      user = String(signer?.getAddress());
+      owner = String(ctx?.owner());
     }
+  };
 
-    fetchData();
-  }, [ctx]);
+  const fetchDataIdentity = async function fetchDataIdentity() {
+    const _id = await identity?.identityByAddress(ctx?.owner());
+    const _nftData = await identity?.tokenURI(_id);
+    // fetch url content
+    const res = await fetch(_nftData);
+    const _nftDataJson = await res.json();
+    setNftData(_nftDataJson);
+    console.log(_nftData);
+  };
 
   useEffect(() => {
-    async function fetchData() {
-      if (signer && ctx) {
-        const [isSub, tier] = await ctx.getSubscriptionStatus(signer.getAddress());
-        if (isSub) {
-          setCurrentTier(tier);
-        }
-      }
+    try {
+      fetchData();
+    } catch (e) {
+      console.error(e);
     }
-
-    fetchData();
-  }, [ctx]);
+  }, [ctx, router.isReady]);
 
   async function subscribe() {
-    const monthlyFee = await ctx?.getMonthlyFee(tier);
-    const tx = await ctx?.subscribe(tier, {
-      value: monthlyFee,
+    event.preventDefault();
+    const tx = await ctx?.subscribe({
+      value: Number(fee),
     });
     await tx.wait();
-    setCurrentTier(tier);
-    alert("Subscribed successfully");
   }
 
-  useEffect(() => {}, [ctx]);
+  function formatDate(date: number) {
+    // convert timestamp to days
+    const days = Math.floor((date % 2629743) / 86400);
+
+    return `${days} days`;
+  }
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10">
-      <div className="flex flex-col items-center justify-center w-full max-w-md p-10 bg-white mt-6 text-black rounded-lg shadow-xl">
-        <h1 className="text-3xl mb-10">{name}</h1>
+      <div className="w-full max-w-md p-10 bg-slate-200 mt-6 text-black rounded-lg shadow-xl">
+        <h1 className="text-3xl mb-10 font-semibold">{name}</h1>
         <p className="mb-5">
-          Current tier: <span className="font-semibold">{currentTier ? `Tier ${currentTier}` : "Not subscribed"}</span>
+          Status: <span className="font-semibold">{isSub ? `Subscribed` : "Not subscribed"}</span>
         </p>
-        <form
-          onSubmit={e => {
-            e.preventDefault();
-            subscribe();
-          }}
-        >
+        <p className=" mb-5 font-medium uppercase"> {nftData.name}</p>
+        <img className="mb-5" width={50} height={50} src={nftData.image}></img>
+        <form onSubmit={subscribe}>
           <label className="mb-5 block">
-            <span className="text-lg mb-2">Tier:</span>
-            <select
-              className="form-select w-full text-xl py-2 px-4 rounded-lg shadow-lg border-0 text-black"
-              value={tier}
-              onChange={e => setTier(e.target.value)}
-            >
-              {tiers.map((tier, index) => (
-                <option key={tier} value={tier}>
-                  Tier {tier} ({String(monthlyFees[index])} ETH/month)
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col">
+              <div className="flex flex-col">
+                <span className="text-lg mb-2 font-base">
+                  Fee: <strong>{Number(fee)} ETH</strong>
+                </span>
+                <span className="text-lg mb-2 font-base">
+                  Duration: <strong>{formatDate(Number(duration))}</strong>{" "}
+                </span>
+              </div>
+              <span className="text-lg mb-2 font-base">{description}</span>
+            </div>
           </label>
-          <button type="submit" className="btn btn-primary" disabled={!account}>
+          <label className="mb-5 block">
+            Last Payment: <span className="font-base">{Date(Number(lastPayment))}</span>
+          </label>
+          <button type="submit" className="btn btn-primary" disabled={!account || !signer}>
             Subscribe
           </button>
         </form>
