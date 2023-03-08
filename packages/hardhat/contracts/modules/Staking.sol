@@ -1,0 +1,97 @@
+pragma solidity 0.8.19;
+
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./BurnNMR.sol";
+import "./Deposit.sol";
+
+/// @title Staking
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/modules/Staking.png
+contract Staking is Deposit, BurnNMR {
+  using SafeMath for uint256;
+
+  event StakeAdded(address staker, address funder, uint256 amount);
+  event StakeTaken(address staker, address recipient, uint256 amount);
+  event StakeBurned(address staker, uint256 amount);
+
+  function _addStake(
+    address staker,
+    address funder,
+    uint256 amountToAdd
+  ) internal {
+    // update deposit
+    Deposit._increaseDeposit(staker, amountToAdd);
+
+    // transfer the stake amount
+    require(
+      IERC20(BurnNMR.getTokenAddress()).transferFrom(funder, address(this), amountToAdd),
+      "token transfer failed"
+    );
+
+    // emit event
+    emit StakeAdded(staker, funder, amountToAdd);
+  }
+
+  function _takeStake(
+    address staker,
+    address recipient,
+    uint256 amountToTake
+  ) internal returns (uint256 newStake) {
+    // update deposit
+    uint256 newDeposit = Deposit._decreaseDeposit(staker, amountToTake);
+
+    // transfer the stake amount
+    require(IERC20(BurnNMR.getTokenAddress()).transfer(recipient, amountToTake), "token transfer failed");
+
+    // emit event
+    emit StakeTaken(staker, recipient, amountToTake);
+
+    // return
+    return newDeposit;
+  }
+
+  function _takeFullStake(address staker, address recipient) internal returns (uint256 amountTaken) {
+    // get deposit
+    uint256 currentDeposit = Deposit.getDeposit(staker);
+
+    // take full stake
+    _takeStake(staker, recipient, currentDeposit);
+
+    // return
+    return currentDeposit;
+  }
+
+  function _burnStake(address staker, uint256 amountToBurn) internal returns (uint256 newStake) {
+    // update deposit
+    uint256 newDeposit = Deposit._decreaseDeposit(staker, amountToBurn);
+
+    // burn the stake amount
+    BurnNMR._burn(amountToBurn);
+
+    // emit event
+    emit StakeBurned(staker, amountToBurn);
+
+    // return
+    return newDeposit;
+  }
+
+  function _burnFullStake(address staker) internal returns (uint256 amountBurned) {
+    // get deposit
+    uint256 currentDeposit = Deposit.getDeposit(staker);
+
+    // burn full stake
+    _burnStake(staker, currentDeposit);
+
+    // return
+    return currentDeposit;
+  }
+
+  // view functions
+
+  function getStake(address staker) public view returns (uint256 stake) {
+    return Deposit.getDeposit(staker);
+  }
+}

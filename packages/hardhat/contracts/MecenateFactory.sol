@@ -5,7 +5,7 @@ import {Mecenate} from "./Mecenate.sol";
 import {Identity} from "./Identity.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Factory is Ownable {
+contract MecenateFactory is Ownable {
   address[] public subscriptions;
   mapping(address => bool) public createdContracts;
 
@@ -17,11 +17,7 @@ contract Factory is Ownable {
 
   event MecenateSubscriptionCreated(address indexed subscriptionAddress);
 
-  constructor(
-    uint256 _creationFee,
-    uint256 _subscribeFeePercent,
-    address _identityContract
-  ) {
+  constructor(uint256 _creationFee, uint256 _subscribeFeePercent, address _identityContract) {
     creationFee = _creationFee;
     subscribeFeePercent = _subscribeFeePercent;
     identityContract = Identity(_identityContract);

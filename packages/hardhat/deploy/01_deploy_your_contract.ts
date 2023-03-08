@@ -30,7 +30,7 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
 
   identity.receipt && console.log("Identity deployed at:", identity.receipt.contractAddress);
 
-  const factory = await deploy("Factory", {
+  const factory = await deploy("MecenateFactory", {
     from: deployer,
     // Contract constructor arguments
     args: [parseEther("1"), 100, identity.address],
