@@ -167,7 +167,7 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   // Create Feed
   // ------------------------------------------------------------//
 
-  /* const message = "hi there!";
+  const message = "hi there!";
   console.log("IPFS node is ready");
 
   const content = Buffer.from(message);
@@ -203,7 +203,7 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   let callData = abiEncodeWithSelector("initialize", ["address", "bytes32", "bytes"], args);
 
   console.log("Deploy Feed Instance");
-
+  await feed_instance.connect(operator.address);
   // Connect feed_factory to deployer
   const feed_instance = await feed_factory.create(callData);
 
@@ -259,7 +259,7 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
     console.log(log);
   } else {
     console.error("no logs");
-  } */
+  }
 };
 
 export default deployYourContract;
