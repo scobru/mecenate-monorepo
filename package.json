@@ -1,0 +1,37 @@
+{
+  "name": "mecenate",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/hardhat",
+      "packages/nextjs",
+      "packages/client"
+    ]
+  },
+  "scripts": {
+    "account": "yarn workspace @mecenate/hardhat account",
+    "chain": "yarn workspace @mecenate/hardhat chain",
+    "fork": "yarn workspace @mecenate/hardhat fork",
+    "deploy": "yarn workspace @mecenate/hardhat deploy",
+    "verify": "yarn workspace @mecenate/hardhat verify",
+    "compile": "yarn workspace @mecenate/hardhat compile",
+    "generate": "yarn workspace @mecenate/hardhat generate",
+    "hardhat:lint": "yarn workspace @mecenate/hardhat lint",
+    "hardhat:lint-staged": "yarn workspace @mecenate/hardhat lint-staged",
+    "hardhat:test": "yarn workspace @mecenate/hardhat test",
+    "start": "yarn workspace @mecenate/nextjs dev",
+    "next:lint": "yarn workspace @mecenate/nextjs lint",
+    "next:format": "yarn workspace @mecenate/nextjs format",
+    "next:check-types": "yarn workspace @mecenate/nextjs check-types",
+    "postinstall": "husky install",
+    "precommit": "lint-staged",
+    "vercel": "yarn workspace @mecenate/nextjs vercel",
+    "vercel:yolo": "yarn workspace @mecenate/nextjs vercel:yolo"
+  },
+  "packageManager": "yarn@3.2.3",
+  "devDependencies": {
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3"
+  }
+}
