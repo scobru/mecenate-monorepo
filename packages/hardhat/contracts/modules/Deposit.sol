@@ -72,7 +72,7 @@ contract Deposit {
   /// @notice Get the current deposit of a user.
   /// @param user address of the user.
   /// @return deposit uint256 current amount of the deposit.
-  function getDeposit(address user) internal view returns (uint256 deposit) {
+  function _getDeposit(address user) internal view returns (uint256 deposit) {
     return _deposit[user];
   }
 }

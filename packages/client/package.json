@@ -23,12 +23,6 @@
     "typescript": "~4.9"
   },
   "scripts": {
-    "mecenate:createKey": "ts-node src/createKeyPair.ts",
-    "mecenate:createUser": "ts-node src/createUser.ts",
-    "mecenate:createId": "ts-node src/createIdentity.ts",
-    "mecenate:createFeed": "ts-node src/createFeed.ts",
-    "mecenate:createPost": "ts-node src/createPost.ts",
-    "mecenate:listFeed": "ts-node src/listFeed.ts",
     "start": "node build/src/main.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run lint",
@@ -38,7 +32,8 @@
     "lint": "eslint . --ext .ts --ext .mts",
     "test": "jest --coverage",
     "prettier": "prettier --config .prettierrc --write .",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "cli": "cd ./src/ && ts-node cli.ts "
   },
   "author": "scobru <https://github.com/scobru>",
   "license": "Apache-2.0",
@@ -51,6 +46,7 @@
     "bs58": "^5.0.0",
     "cmd-ts": "^0.12.1",
     "dotenv": "^16.0.3",
+    "envfile": "^6.18.0",
     "ethers": "^6.1.0",
     "figlet": "^1.5.2",
     "tslib": "~2.4",

@@ -17,7 +17,8 @@ abstract contract Acceptance is Data, Events, Staking {
    */
 
   function acceptPost(bytes memory publicKey) public payable virtual {
-    require(post.postdata.settings.status == Structures.PostStatus.Proposed, "Post is not proposed");
+    require(msg.value > 0 || post.postdata.escrot.payment > 0, "Payment is required");
+    require(post.postdata.settings.status == Structures.PostStatus.Proposed, "Post is not Proposed");
     uint256 stake = _addStake(msg.sender, msg.value);
     post.postdata.settings.buyer = msg.sender;
     post.postdata.settings.buyerPubKey = publicKey;

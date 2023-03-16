@@ -38,7 +38,7 @@ abstract contract Creation is Data, Events, Staking {
     Structures.PostType postType,
     Structures.PostDuration postDuration
   ) external payable returns (Structures.Post memory) {
-    require(msg.value > 0, "Stake must be greater than 0");
+    require(msg.value > 0 || post.postdata.escrow.stake > 0, "Stake is required");
     require(usersModuleContract != address(0), "Users module contract not set");
     require(identityContract != address(0), "Identity contract not set");
     require(
@@ -90,26 +90,6 @@ abstract contract Creation is Data, Events, Staking {
     emit Created(post);
 
     return Structures.Post({creator: creator, postdata: postdata});
-  }
-
-  function addStake() external payable returns (uint256) {
-    require(
-      post.postdata.settings.status == Structures.PostStatus.Waiting ||
-        post.postdata.settings.status == Structures.PostStatus.Finalized,
-      "Not Waiting or Finalized"
-    );
-
-    uint256 stakerBalance;
-
-    if (msg.sender == post.postdata.settings.buyer) {
-      stakerBalance = _addStake(msg.sender, msg.value);
-      post.postdata.escrow.payment = stakerBalance;
-    } else if (msg.sender == post.postdata.settings.seller) {
-      stakerBalance = _addStake(msg.sender, msg.value);
-      post.postdata.escrow.stake = stakerBalance;
-    }
-
-    return stakerBalance;
   }
 
   function changeUsersModuleContract(address _usersModuleContract) external onlyOwner {

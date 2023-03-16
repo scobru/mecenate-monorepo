@@ -27,7 +27,8 @@
     "postinstall": "husky install",
     "precommit": "lint-staged",
     "vercel": "yarn workspace @mecenate/nextjs vercel",
-    "vercel:yolo": "yarn workspace @mecenate/nextjs vercel:yolo"
+    "vercel:yolo": "yarn workspace @mecenate/nextjs vercel:yolo",
+    "cli": "yarn workspace @mecenate/client cli"
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {

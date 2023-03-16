@@ -22,6 +22,9 @@ import { createKeyPair } from "./createKeyPair";
 import { acceptFeed } from "./acceptFeed";
 import { submitHash } from "./submitHash";
 import { fetchData } from "./fetchData";
+import { finalizePost } from "./finalize";
+import { fetchBalance } from "./balance";
+import { takeStake, takeFullStake, addStake } from "./stake";
 
 const figlet = require("figlet");
 
@@ -132,6 +135,30 @@ const accept = command({
   },
 });
 
+const finalize = command({
+  name: "Finalize Post",
+  args: {
+    address: option({
+      type: string,
+      long: "address",
+      short: "a",
+    }),
+    valid: flag({
+      type: boolean,
+      long: "valid",
+      short: "v",
+    }),
+    punishment: option({
+      type: string,
+      long: "punishment",
+      short: "p",
+    }),
+  },
+  handler: async ({ address, valid, punishment }) => {
+    await finalizePost(address, valid, punishment);
+  },
+});
+
 const submit = command({
   name: "Submit Hash",
   args: {
@@ -157,6 +184,72 @@ const fetch = command({
   },
   handler: async ({ address }) => {
     await fetchData(address);
+  },
+});
+
+const balance = command({
+  name: "Fetch Balance",
+  args: {
+    address: option({
+      type: string,
+      long: "address",
+      short: "a",
+    }),
+  },
+  handler: async ({ address }) => {
+    await fetchBalance(address);
+  },
+});
+
+const unstake = command({
+  name: "Take Stake",
+  args: {
+    address: option({
+      type: string,
+      long: "address",
+      short: "a",
+    }),
+    stakeAmount: option({
+      type: string,
+      long: "stakeAmount",
+      short: "s",
+    }),
+  },
+  handler: async ({ address, stakeAmount }) => {
+    await takeStake(address, stakeAmount);
+  },
+});
+
+const unstakeFull = command({
+  name: "Take Full Stake",
+  args: {
+    address: option({
+      type: string,
+      long: "address",
+      short: "a",
+    }),
+  },
+  handler: async ({ address }) => {
+    await takeFullStake(address);
+  },
+});
+
+const stake = command({
+  name: "Add Stake",
+  args: {
+    address: option({
+      type: string,
+      long: "address",
+      short: "a",
+    }),
+    stakeAmount: option({
+      type: string,
+      long: "stakeAMount",
+      short: "s",
+    }),
+  },
+  handler: async ({ address, stakeAmount }) => {
+    await addStake(address, stakeAmount);
   },
 });
 
@@ -206,11 +299,16 @@ const subCommands = subcommands({
     post,
     accept,
     submit,
+    finalize,
     feed,
     info,
     user,
     fetch,
     keypair,
+    balance,
+    stake,
+    unstake,
+    unstakeFull,
   },
 });
 

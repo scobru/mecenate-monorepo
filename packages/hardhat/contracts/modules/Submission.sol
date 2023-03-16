@@ -17,7 +17,7 @@ abstract contract Submission is Data, Events {
    * @param  encryptedKey - encrypted hash of the post
    */
   function submitHash(bytes memory encryptedKey) public virtual {
-    require(post.postdata.settings.status == Structures.PostStatus.Accepted, "Post is not accepted");
+    require(post.postdata.settings.status == Structures.PostStatus.Accepted, "Post is not Accepted");
     require(post.creator.wallet == msg.sender, "You are not the creator");
     post.postdata.data.encryptedKey = encryptedKey;
     post.postdata.settings.status = Structures.PostStatus.Submitted;
@@ -32,7 +32,7 @@ abstract contract Submission is Data, Events {
    * @return bytes32 encryptedHash - encrypted hash of the post
    */
   function revealData(bytes memory decryptedData) public virtual returns (bytes memory) {
-    require(post.postdata.settings.status == Structures.PostStatus.Finalized, "Post is not finalized");
+    require(post.postdata.settings.status == Structures.PostStatus.Finalized, "Post is not Finalized");
     require(post.postdata.settings.seller == msg.sender, "You are not the buyer");
     post.postdata.data.decryptedData = decryptedData;
     post.postdata.settings.status = Structures.PostStatus.Revealed;

@@ -78,7 +78,7 @@ async function createPost(
   const abicoder = new ethers.AbiCoder();
   const publicKeyBytes = abicoder.encode(["string"], [publicKey]);
 
-  const RawData = "This is an example data";
+  const RawData = _RawData;
   const duration = _duration;
   const postType = _postType;
   const stake = parseEther(_stake);
@@ -96,11 +96,10 @@ async function createPost(
     console.log(JSON.stringify(ipfsData));
     console.log("Ipfs data saved!");
   } else {
+    fs.writeFileSync(ipfsPath, JSON.stringify(ipfsData));
+    console.log(JSON.stringify(ipfsData));
     console.log("Ipfs data already exists!");
   }
-
-  /*  const proofHash = ethers.toUtf8Bytes(ipfsData?.proofhash);
-  const proofHashSlice = proofHash.slice(0, 32); */
 
   const proofHash58 = await ErasureHelper.multihash({
     input: ipfsData?.proofhash,

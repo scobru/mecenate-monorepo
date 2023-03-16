@@ -344,10 +344,11 @@ async function submitData(
 
   if (!fs.existsSync(ipfsPath)) {
     fs.writeFileSync(ipfsPath, JSON.stringify(json_selldata_v120));
-
     console.log(JSON.stringify(json_selldata_v120));
     console.log("Ipfs data saved!");
   } else {
+    fs.writeFileSync(ipfsPath, JSON.stringify(json_selldata_v120));
+    console.log(JSON.stringify(json_selldata_v120));
     console.log("Ipfs data already exists!");
   }
 
@@ -388,8 +389,9 @@ async function retrievePost(JsonHash: string) {
   });
 
   console.log("Decoded Hash: ", decodeHash);
+
   //#endregion
-  const response = await axios.get(
+  const responseDecodeHash = await axios.get(
     "https://gateway.pinata.cloud/ipfs/" + decodeHash,
     {
       headers: {
@@ -398,8 +400,12 @@ async function retrievePost(JsonHash: string) {
     }
   );
 
+  const responseDecodeHahJSON = JSON.parse(
+    JSON.stringify(responseDecodeHash.data)
+  );
+
   const encryptedSymKey = JSON.parse(
-    JSON.stringify(response.data.encryptedSymKey)
+    JSON.stringify(responseDecodeHahJSON.encryptedSymKey)
   );
 
   console.log("Encrypted Symmetric Key: ", encryptedSymKey);
@@ -411,10 +417,8 @@ async function retrievePost(JsonHash: string) {
     keypair.secretKey
   );
 
-  console.log(decrypted);
-
-  const response_data = await axios.get(
-    "https://gateway.pinata.cloud/ipfs/" + response.data.proofhash,
+  const responseProofHash = await axios.get(
+    "https://gateway.pinata.cloud/ipfs/" + responseDecodeHahJSON.proofhash,
     {
       headers: {
         Accept: "text/plain",
@@ -422,10 +426,13 @@ async function retrievePost(JsonHash: string) {
     }
   );
 
-  const response_data_JSON = JSON.parse(JSON.stringify(response_data.data));
+  const responseProofHashJSON = JSON.parse(
+    JSON.stringify(responseProofHash.data)
+  );
 
-  const response_datahash = await axios.get(
-    "https://gateway.pinata.cloud/ipfs/" + response_data_JSON.encryptedDatahash,
+  const response_Encrypteddatahash = await axios.get(
+    "https://gateway.pinata.cloud/ipfs/" +
+      responseProofHashJSON.encryptedDatahash,
     {
       headers: {
         Accept: "text/plain",
@@ -433,37 +440,26 @@ async function retrievePost(JsonHash: string) {
     }
   );
 
-  const response_datahash_JSON = JSON.parse(
-    JSON.stringify(response_datahash.data)
+  const response_Encrypteddatahash_JSON = JSON.parse(
+    JSON.stringify(response_Encrypteddatahash.data)
   );
 
   const decriptFile = ErasureHelper.crypto.symmetric.decryptMessage(
     decrypted,
-    response_datahash_JSON.encryptedData
+    response_Encrypteddatahash_JSON.encryptedData
   );
 
-  console.log(decriptFile);
-
-  if (decrypted) {
-    console.log("Encrypted Data: ", decrypted);
-
+  // wait 10 seconds
+  if (decriptFile) {
+    console.log("Decrypted Data: ", decriptFile);
     const dataHash = await ErasureHelper.multihash({
-      input: decrypted,
+      input: decriptFile,
       inputType: "raw",
-      outputType: "b58",
+      outputType: "hex",
     });
 
-    const response = await axios.get(
-      "https://gateway.pinata.cloud/ipfs/" + dataHash,
-      {
-        headers: {
-          Accept: "text/plain",
-        },
-      }
-    );
-
-    const hashCheck = response.data.datahash === dataHash;
-
+    const hashCheck = responseProofHashJSON.datahash === dataHash;
+    console.log();
     return {
       rawData: decrypted,
       hashCheck: hashCheck,
@@ -496,11 +492,6 @@ async function createKeyPair() {
   console.log("Keypair created successfully!");
   return keyPair;
 }
-
-const fromHexString = (hexString: any) =>
-  new Uint8Array(
-    hexString.match(/.{1,2}/g).map((byte: string) => parseInt(byte, 32))
-  );
 
 export {
   retrievePost,

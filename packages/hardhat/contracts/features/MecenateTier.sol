@@ -49,25 +49,21 @@ contract MecenateTier is Ownable {
     require(lastPaymentTime[msg.sender] + subscriptionDuration <= block.timestamp, "Subscription still active");
 
     subscribeCount++;
+
     // Send Fee
     address factoryOwner = IFactory(factory).owner();
-
     uint256 factoryFee = IFactory(factory).subscribeFeePercent();
-
     uint256 feeAmount = (msg.value * factoryFee) / 10000;
 
     payable(factoryOwner).transfer(feeAmount);
 
     uint256 amountAfter = msg.value - feeAmount;
-
     totalFeeCreator += amountAfter;
 
     payable(creator).transfer(amountAfter);
-
     lastPaymentTime[msg.sender] = block.timestamp;
 
     uint256 nextPaymentTime = block.timestamp + subscriptionDuration;
-
     emit SubscriptionRenewed(msg.sender, amountAfter, nextPaymentTime);
   }
 
