@@ -852,117 +852,119 @@ const ViewFeed: NextPage = () => {
               ))}
           </div>
           <div className="divider" />
-          <div className="card w-fit">
-            <div className="card-body">
-              <h2 className="text-xl font-bold">Creator Information</h2>
-              <div className="mt-5">
-                <p className="text-lg">
-                  <span className="font-bold">Post Status:</span>{" "}
-                  {feedData.postdata.settings.status === 4
-                    ? "Finalized"
-                    : feedData.postdata.settings.status === 3
-                    ? "Submitted"
-                    : feedData.postdata.settings.status === 2
-                    ? "Accepted"
-                    : feedData.postdata.settings.status === 1
-                    ? "Proposed"
-                    : "Waiting for Creator"}
-                </p>
-                <div className="w-1/2">
+          <div className="flex flex-col  p-5 w-full items-left justify-center">
+            <div className="card w-fit">
+              <div className="card-body">
+                <h2 className="text-xl font-bold">Creator Information</h2>
+                <div className="mt-5">
                   <p className="text-lg">
-                    <span className="font-bold">Seller Stake:</span> {sellerStake} ETH
+                    <span className="font-bold">Post Status:</span>{" "}
+                    {feedData.postdata.settings.status === 4
+                      ? "Finalized"
+                      : feedData.postdata.settings.status === 3
+                      ? "Submitted"
+                      : feedData.postdata.settings.status === 2
+                      ? "Accepted"
+                      : feedData.postdata.settings.status === 1
+                      ? "Proposed"
+                      : "Waiting for Creator"}
                   </p>
-                </div>
-                <div className="w-1/2">
+                  <div className="w-1/2">
+                    <p className="text-lg">
+                      <span className="font-bold">Seller Stake:</span> {sellerStake} ETH
+                    </p>
+                  </div>
+                  <div className="w-1/2">
+                    <p className="text-lg">
+                      <span className="font-bold">Buyer Stake:</span> {buyerStake} ETH
+                    </p>
+                  </div>
                   <p className="text-lg">
-                    <span className="font-bold">Buyer Stake:</span> {buyerStake} ETH
+                    <span className="font-bold">Mecenate ID:</span> {feedData[0][0].toString()}
                   </p>
-                </div>
-                <p className="text-lg">
-                  <span className="font-bold">Mecenate ID:</span> {feedData[0][0].toString()}
-                </p>
-                <p className="text-lg">
-                  <span className="font-bold">Wallet:</span> {feedData[0][1].toString()}
-                </p>
-                {/* <p className="text-lg">
+                  <p className="text-lg">
+                    <span className="font-bold">Wallet:</span> {feedData[0][1].toString()}
+                  </p>
+                  {/* <p className="text-lg">
         <span className="font-bold">Public Key:</span>{" "}
         {feedData[0][2].toString()}
       </p> */}
+                </div>
               </div>
             </div>
-          </div>
-          <div className="divider" />
+            <div className="divider" />
 
-          <div className="card w-full md:w-fit">
-            <div className="card-body">
-              <h2 className="text-xl font-bold">Post Settings</h2>
-              <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p>
-                  <span className="font-bold">Buyer:</span> {feedData[1][0].buyer.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">Buyer Public Key:</span>{" "}
-                  <span className="break-all">{feedData[1][0].buyerPubKey.toString()}</span>
-                </p>
-                <p>
-                  <span className="font-bold">Seller:</span> {feedData[1][0].seller.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">Creation Timestamp:</span> {feedData[1][0].creationTimeStamp.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">End Timestamp:</span> {feedData[1][0].endTimeStamp.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">Duration:</span> {feedData[1][0].duration.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">Post Type:</span> {feedData[1][0].postType.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">Status:</span> {feedData[1][0].status.toString()}
-                </p>
+            <div className="card w-full md:w-fit">
+              <div className="card-body">
+                <h2 className="text-xl font-bold">Post Settings</h2>
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <p>
+                    <span className="font-bold">Buyer:</span> {feedData[1][0].buyer.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Buyer Public Key:</span>{" "}
+                    <span className="break-all">{feedData[1][0].buyerPubKey.toString()}</span>
+                  </p>
+                  <p>
+                    <span className="font-bold">Seller:</span> {feedData[1][0].seller.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Creation Timestamp:</span> {feedData[1][0].creationTimeStamp.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">End Timestamp:</span> {feedData[1][0].endTimeStamp.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Duration:</span> {feedData[1][0].duration.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Post Type:</span> {feedData[1][0].postType.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Status:</span> {feedData[1][0].status.toString()}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="divider" />
+            <div className="divider" />
 
-          <div className="card w-fit">
-            <div className="card-body">
-              <h2 className="text-xl font-bold">Punishments</h2>
-              <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p>
-                  <span className="font-bold">Buyer Punishment:</span> {feedData[1][1].buyerPunishment.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">Seller Punishment:</span> {feedData[1][1].punishment.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">Seller Stake:</span> {feedData[1][1].stake.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">Buyer Payment:</span> {feedData[1][1].payment.toString()}
-                </p>
+            <div className="card w-fit">
+              <div className="card-body">
+                <h2 className="text-xl font-bold">Punishments</h2>
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <p>
+                    <span className="font-bold">Buyer Punishment:</span> {feedData[1][1].buyerPunishment.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Seller Punishment:</span> {feedData[1][1].punishment.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Seller Stake:</span> {feedData[1][1].stake.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Buyer Payment:</span> {feedData[1][1].payment.toString()}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="divider" />
+            <div className="divider" />
 
-          <div className="card w-fit">
-            <div className="card-body">
-              <h2 className="text-xl font-bold">Data</h2>
-              <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p>
-                  <span className="font-bold">Encrypted Data:</span>{" "}
-                  <span className="break-all">{feedData[1][2].encryptedData.toString()}</span>
-                </p>
-                <p>
-                  <span className="font-bold">Encrypted Key:</span> {feedData[1][2].encryptedKey.toString()}
-                </p>
-                <p>
-                  <span className="font-bold">Decrypted Data:</span>
-                  <span className="break-all"> {feedData[1][2].decryptedData.toString()}</span>
-                </p>
+            <div className="card w-fit">
+              <div className="card-body">
+                <h2 className="text-xl font-bold">Data</h2>
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <p>
+                    <span className="font-bold">Encrypted Data:</span>{" "}
+                    <span className="break-all">{feedData[1][2].encryptedData.toString()}</span>
+                  </p>
+                  <p>
+                    <span className="font-bold">Encrypted Key:</span> {feedData[1][2].encryptedKey.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Decrypted Data:</span>
+                    <span className="break-all"> {feedData[1][2].decryptedData.toString()}</span>
+                  </p>
+                </div>
               </div>
             </div>
           </div>

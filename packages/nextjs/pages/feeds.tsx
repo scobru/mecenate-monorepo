@@ -83,23 +83,20 @@ const Feeds: NextPage = () => {
     if (factoryCtx) {
       factoryCtx.on("FeedCreated", (feedAddress: string, owner: string, event: any) => {
         if (DEBUG) console.log("FeedCreated", feedAddress, owner, event);
-        notification.info("New Feed Created");
+        notification.success("New Feed Created");
         getFeeds();
       });
     }
-  }, [factoryCtx, feeds]);
+  });
 
   return (
     <div className="flex flex-col items-center pt-10 text-black">
       <div className="flex items-center mb-5">
-        <button
-          className="bg-primary-500 hover:bg-primary-700  font-bold py-2 px-4 rounded-md mr-2"
-          onClick={buildFeed}
-        >
-          <i className="fas fa-plus mr-2"></i> Create Feed
+        <button className="bg-primary  hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2" onClick={buildFeed}>
+          Create Feed
         </button>
         <button
-          className="bg-primary-500 hover:bg-primary-700  font-bold py-2 px-4 rounded-md mr-2"
+          className="bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md mr-2"
           onClick={async () => {
             await getFeedsOwned();
           }}
@@ -107,7 +104,7 @@ const Feeds: NextPage = () => {
           <i className="fas fa-user-alt mr-2"></i> Your Feeds
         </button>
         <button
-          className="bg-primary-500 hover:bg-primary-700  font-bold py-2 px-4 rounded-md"
+          className="bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md"
           onClick={async () => {
             await getFeeds();
           }}
@@ -120,7 +117,7 @@ const Feeds: NextPage = () => {
         {feeds.map((feed, i) => (
           <div key={i} className="bg-white shadow-sm rounded-md my-5">
             <a href={`/viewFeed?addr=${feed}`} className="text-indigo-600 hover:text-indigo-900">
-              <div className="grid grid-cols-2 gap-5 p-5">
+              <div className="grid grid-cols-2 gap-10 p-5">
                 <div className="col-span-1">
                   <div className="font-bold text-lg mb-2">Feed Address:</div>
                   <div className="text-gray-700 mb-2">{feed}</div>

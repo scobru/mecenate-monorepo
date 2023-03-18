@@ -70,6 +70,12 @@ export default function Header() {
           Feeds
         </NavLink>
       </li>
+      <li>
+        <NavLink href="/tiers">
+          <SparklesIcon className="h-4 w-4" />
+          Tiers
+        </NavLink>
+      </li>
     </>
   );
 
