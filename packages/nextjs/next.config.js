@@ -12,6 +12,9 @@ const nextConfig = {
   env: {
     INFURA_PROJECT_ID: "2FMUdMfqb8YwcclqJQhPHYlUHx5",
     INFURA_PROJECT_SECRET: "076b6e972ec77f21521ac05108a2c645",
+    PINATA_API_KEY: "dad6ed453a132d8b9f34",
+    PINATA_API_SECRET: "698a5222b379fb4a9be1347f2862998e5334d5b01985bcbc0d8fa3ddac951747"
+
   },
   images: {
     remotePatterns: [

@@ -13,8 +13,8 @@ import {MecenateIdentity} from "../token/MecenateIdentity.sol";
  */
 contract MecenateUsers {
   using EnumerableSet for EnumerableSet.AddressSet;
-  EnumerableSet.AddressSet private _users;
 
+  EnumerableSet.AddressSet private _users;
   mapping(address => Structures.User) private _metadata;
 
   event UserRegistered(address indexed user, Structures.User data);
@@ -52,6 +52,10 @@ contract MecenateUsers {
 
   function getUserCount() public view returns (uint256 count) {
     count = _users.length();
+  }
+
+  function checkifUserExist(address user) public view returns (bool) {
+    return _users.contains(user);
   }
 
   // Note: startIndex is inclusive, endIndex exclusive

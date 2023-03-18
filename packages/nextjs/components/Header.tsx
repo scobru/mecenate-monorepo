@@ -53,9 +53,21 @@ export default function Header() {
         </NavLink>
       </li> */}
       <li>
-        <NavLink href="/createMecenate">
+        <NavLink href="/createID">
           <SparklesIcon className="h-4 w-4" />
-          Create
+          ID
+        </NavLink>
+      </li>
+      <li>
+        <NavLink href="/createUser">
+          <SparklesIcon className="h-4 w-4" />
+          Join
+        </NavLink>
+      </li>
+      <li>
+        <NavLink href="/feeds">
+          <SparklesIcon className="h-4 w-4" />
+          Feeds
         </NavLink>
       </li>
     </>

@@ -3,6 +3,11 @@ pragma solidity 0.8.19;
 
 import {MecenateFeed} from "../features/MecenateFeed.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import {MecenateIdentity} from "../token/MecenateIdentity.sol";
+
+interface IMecenateUsers {
+  function checkifUserExist(address user) external view returns (bool);
+}
 
 contract MecenateFeedFactory is Ownable {
   uint256 numFeeds;
@@ -20,7 +25,9 @@ contract MecenateFeedFactory is Ownable {
   }
 
   function buildFeed() public returns (address) {
-    MecenateFeed feed = new MecenateFeed(usersMouduleContract, identityContract);
+    require(MecenateIdentity(identityContract).balanceOf(msg.sender) > 0, "user does not have identity");
+    require(IMecenateUsers(usersMouduleContract).checkifUserExist(msg.sender), "user does not exist");
+    MecenateFeed feed = new MecenateFeed(msg.sender, usersMouduleContract, identityContract);
     feeds.push(address(feed));
     numFeeds++;
     createdContracts[address(feed)] = true;

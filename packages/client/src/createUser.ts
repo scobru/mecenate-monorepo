@@ -68,8 +68,6 @@ async function createUser() {
     mecenateID: mecenateID,
     wallet: signer.address,
     publicKey: publicKey,
-    reputation: { trusted: 0, untrusted: 0 },
-    activity: { createdPosts: [], acceptedPosts: [] },
   };
 
   console.log("User Data: ", UserData);

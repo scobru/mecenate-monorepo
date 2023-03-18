@@ -30,7 +30,7 @@ type ImageProps = {
   cid: string;
 };
 
-const CreateMecenate: NextPage = () => {
+const CreateID: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
   const account = useAccount();
@@ -51,8 +51,8 @@ const CreateMecenate: NextPage = () => {
   const [subscriptionFee, setSubscriptionFee] = React.useState(0);
   const [subscriptionDuration, setSubscriptionDuration] = React.useState(0);
 
-  const deployedContractFactory = getDeployedContract(chain?.id.toString(), "Factory");
-  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "Identity");
+  const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateTierFactory");
+  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
 
   const IPFS_HOST = "ipfs.infura.io";
   const IPFS_PORT = 5001;
@@ -345,7 +345,7 @@ const CreateMecenate: NextPage = () => {
         ) : (
           <div></div>
         )}
-
+        {/* 
         <div className="divider"></div>
         <h1 className="text-3xl font-bold mb-6 text-primary">Create Subscription</h1>
         <form onSubmit={createMecenateSubscription} className="text-secondary">
@@ -406,10 +406,10 @@ const CreateMecenate: NextPage = () => {
                 </a>
               </div>
             ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );
 };
 
-export default CreateMecenate;
+export default CreateID;

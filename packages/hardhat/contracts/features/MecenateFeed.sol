@@ -13,7 +13,11 @@ import "../modules/Data.sol";
 contract MecenateFeed is Ownable, Data, Creation, Acceptance, Submission, Finalization {
   using Structures for Structures.Post;
 
-  constructor(address _usersModuleContract, address _identityContract)
-    Creation(_usersModuleContract, _identityContract)
-  {}
+  constructor(
+    address owner,
+    address _usersModuleContract,
+    address _identityContract
+  ) Creation(_usersModuleContract, _identityContract) {
+    _transferOwnership(owner);
+  }
 }

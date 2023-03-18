@@ -17,6 +17,7 @@ abstract contract Submission is Data, Events {
    * @param  encryptedKey - encrypted hash of the post
    */
   function submitHash(bytes memory encryptedKey) public virtual {
+    require(IUsers(usersModuleContract).checkifUserExist(msg.sender), "User does not exist");
     require(post.postdata.settings.status == Structures.PostStatus.Accepted, "Post is not Accepted");
     require(post.creator.wallet == msg.sender, "You are not the creator");
     post.postdata.data.encryptedKey = encryptedKey;

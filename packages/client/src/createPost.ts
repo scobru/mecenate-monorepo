@@ -118,4 +118,20 @@ async function createPost(
   console.log("Post created!");
 }
 
-export { createPost };
+async function createPostFrontend(_RawData: string, _pubKey: string) {
+  const abicoder = new ethers.AbiCoder();
+  const publicKeyBytes = abicoder.encode(["string"], [_pubKey]);
+
+  const RawData = _RawData;
+  const ipfsData = await savePost(RawData, signer.address, publicKeyBytes);
+
+  const proofHash58 = await ErasureHelper.multihash({
+    input: ipfsData?.proofhash,
+    inputType: "raw",
+    outputType: "digest",
+  });
+
+  return proofHash58;
+}
+
+export { createPost, createPostFrontend };
