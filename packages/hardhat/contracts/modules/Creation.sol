@@ -36,7 +36,8 @@ abstract contract Creation is Data, Events, Staking {
     require(identityContract != address(0), "Identity contract not set");
     require(
       post.postdata.settings.status == Structures.PostStatus.Waiting ||
-        post.postdata.settings.status == Structures.PostStatus.Finalized,
+        post.postdata.settings.status == Structures.PostStatus.Finalized ||
+        post.postdata.settings.status == Structures.PostStatus.Revealed,
       "Not Wating or Finalized"
     );
 
@@ -79,6 +80,8 @@ abstract contract Creation is Data, Events, Staking {
     Structures.Post memory _post = Structures.Post({creator: creator, postdata: postdata});
 
     post = _post;
+
+    postCount++;
 
     emit Created(post);
 

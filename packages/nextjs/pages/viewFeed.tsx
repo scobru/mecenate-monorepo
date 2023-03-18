@@ -30,12 +30,15 @@ const ViewFeed: NextPage = () => {
   const [postDuration, setPostDuration] = useState<any>([]);
   const [postStake, setPostStake] = useState<any>([]);
   const [postRawData, setPostRawData] = useState<any>([]);
-  const [postProofHash, setPostProofHash] = useState<any>([]);
   const [postPayment, setPostPayment] = useState<any>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [symmetricKey, setSymmetricKey] = useState<any>([]);
-  const [encryptedData, setEncryptedData] = useState<any>([]);
   const [secretKey, setSecretKey] = useState<any>([]);
+  const [valid, setValid] = useState<boolean>();
+  const [punishment, setPunishment] = useState<any>(0);
+  const [sellerStake, setSellerStake] = useState<any>(0);
+  const [buyerStake, setBuyerStake] = useState<any>(0);
+  const [totalStaked, setTotalStaked] = useState<any>(0);
+  const [stakeAmount, setStakeAmount] = useState<any>(0);
 
   let user = "";
   let owner = "";
@@ -72,18 +75,16 @@ const ViewFeed: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  function showModal() {
-    setIsModalOpen(true);
-  }
-
-  function hideModal() {
-    setIsModalOpen(false);
-  }
-
   const fetchData = async function fetchData() {
     if (feedCtx && signer) {
       const data = await feedCtx?.post();
       const user = await usersCtx?.getUserData(signer?.getAddress());
+      const sellerDeposit = await feedCtx?.getStake(data.postdata.settings.seller);
+      const buyerDeposit = await feedCtx?.getStake(data.postdata.settings.buyer);
+      const totalStaked = await feedCtx?.getTotalStaked();
+      setSellerStake(formatEther(sellerDeposit));
+      setBuyerStake(formatEther(buyerDeposit));
+      setTotalStaked(formatEther(totalStaked));
       setUserData(user);
       setFeedData(data);
       console.log(data);
@@ -100,10 +101,16 @@ const ViewFeed: NextPage = () => {
     notification.success("PROOF OF HASH: " + dataSaved?.proofhash);
     notification.warning("Save this data");
 
-    const abicoder = new AbiCoder();
-    const proofOfHashEcnode = abicoder.encode(["string"], [dataSaved?.proofhash]);
+    /* const abicoder = new AbiCoder();
+    const proofOfHashEcnode = abicoder.encode(["string"], [dataSaved?.proofhash]); */
 
-    const tx = await feedCtx?.createPost(proofOfHashEcnode, Number(postType), Number(postDuration), {
+    const proofOfHashEncode = await ErasureHelper.multihash({
+      input: dataSaved?.proofhash,
+      inputType: "b58",
+      outputType: "digest",
+    });
+
+    const tx = await feedCtx?.createPost(proofOfHashEncode, Number(postType), Number(postDuration), {
       value: parseEther(postStake),
     });
   };
@@ -403,6 +410,81 @@ const ViewFeed: NextPage = () => {
     }
   }
 
+  async function revealPost() {
+    const symKeyHash = await ErasureHelper.multihash({
+      input: JSON.stringify({ symmetricKey: symmetricKey }),
+      inputType: "raw",
+      outputType: "b58",
+    });
+
+    const rawDataHash = await ErasureHelper.multihash({
+      input: JSON.stringify({ rawData: postRawData }),
+      inputType: "raw",
+      outputType: "b58",
+    });
+
+    // IPFS needs Pinata account credentials.
+    if (pinataApiKey === undefined || pinataApiSecret === undefined) {
+      console.log("Please call with Pinata Account Credentials");
+      return;
+    }
+
+    // Make sure Pinata is authenticating.
+    const pinata = await new pinataSDK(pinataApiKey, pinataApiSecret);
+    var pinataAuth = await pinata.testAuthentication();
+    if (pinataAuth.authenticated !== true) {
+      console.log("Pinata Authentication Failed.");
+      return;
+    }
+
+    // Saves the SymKey to IPFS.
+
+    var pin = await pinata.pinJSONToIPFS({ symmetricKey: symmetricKey });
+
+    // Saves the data to IPFS.
+
+    pin = await pinata.pinJSONToIPFS({ rawData: postRawData });
+
+    console.log("Data Saved.");
+
+    const AbiCoder = new ethers.utils.AbiCoder();
+    const dataEncoded = AbiCoder.encode(["string", "string"], [symKeyHash, rawDataHash]);
+
+    const tx = await feedCtx?.revealData(dataEncoded);
+    await tx.wait();
+    await fetchData();
+
+    if (tx.hash) {
+      notification.success("Post Revealed");
+    }
+  }
+
+  async function addStake() {
+    console.log("Adding Stake...");
+    const tx = await feedCtx?.addStake({ value: parseEther(stakeAmount) });
+    await tx.wait();
+    await fetchData();
+  }
+
+  async function takeStake() {
+    console.log("Adding Stake...");
+    const tx = await feedCtx?.takeStake(parseEther(stakeAmount));
+    await tx.wait();
+    await fetchData();
+  }
+
+  async function finalizePost() {
+    console.log("Finalizing Data...");
+    if (valid == true) {
+      const tx = await feedCtx?.finalizePost(valid, parseEther("0"));
+    } else {
+      const tx = await feedCtx?.finalizePost(valid, parseEther(punishment));
+    }
+
+    await tx.wait();
+    await fetchData();
+  }
+
   useEffect(() => {
     try {
       fetchData();
@@ -412,248 +494,476 @@ const ViewFeed: NextPage = () => {
   }, [feedCtx, router.isReady]);
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10">
+    <div className="flex-1">
       {feedData[0] != null ? (
-        <div className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-          <label for="modal-create" className="btn btn-primary modal-button">
-            create
-          </label>
-          <input type="checkbox" id="modal-create" className="modal-toggle" />
-          <div className="modal">
-            <div className="modal-box">
-              <div className="modal-header">
-                <div className="modal-title text-2xl font-bold">Create Post</div>
-                <label htmlFor="modal-create" className="btn btn-ghost">
-                  <i className="fas fa-times"></i>
-                </label>
-              </div>
-              <div className="modal-body space-y-4">
-                Duration {""}
-                <select className="form-select" value={postDuration} onChange={e => setPostDuration(e.target.value)}>
-                  <option value="0">3 Day</option>
-                  <option value="1">1 Week</option>
-                  <option value="2">2 Weeks</option>
-                  <option value="3">1 Month</option>
-                </select>
-                <br />
-                Stake Amount {""}
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Stake"
-                  value={postStake}
-                  onChange={e => setPostStake(e.target.value)}
-                />
-                <br />
-                Filé Type {""}
-                <select className="form-select" value={postType} onChange={e => setPostType(e.target.value)}>
-                  <option value="0">Text</option>
-                  <option value="1">Image</option>
-                  <option value="2">Video</option>
-                  <option value="3">Audio</option>
-                  <option value="4">File</option>
-                </select>
-                <br />
-                Rawdata {""}
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Data"
-                  value={postRawData}
-                  onChange={e => setPostRawData(e.target.value)}
-                />
-                <br />
-                <button
-                  className="btn btn-primary w-full"
-                  onClick={async () => {
-                    let postData = await createPost();
-                    console.log(postData);
-                  }}
-                >
-                  Create Post
-                </button>
-              </div>
-              <div className="modal-action space-x-2 mt-4">
-                <label htmlFor="modal-create" className="btn btn-primary">
-                  Accept
-                </label>
-                <label htmlFor="modal-create" className="btn">
-                  Close
-                </label>
+        <div className="flex flex-col px-5 py-5">
+          <div className="flex flex-row gap-3 items-center justify-center w-full flex-1 px-20 text-center py-5">
+            <label htmlFor="modal-create" className="btn modal-button">
+              Create
+            </label>
+            <input type="checkbox" id="modal-create" className="modal-toggle" />
+            <div className="modal">
+              <div className="modal-box rounded-lg shadow-xl">
+                <div className="modal-header">
+                  <div className="modal-title text-2xl font-bold">Create Post</div>
+                  <label htmlFor="modal-create" className="btn btn-ghost">
+                    <i className="fas fa-times"></i>
+                  </label>
+                </div>
+                <div className="modal-body w-auto space-y-6 text-left">
+                  <label className="block text-gray-700">Duration</label>
+                  <select
+                    className="form-select w-full"
+                    value={postDuration}
+                    onChange={e => setPostDuration(e.target.value)}
+                  >
+                    <option value="0">3 Days</option>
+                    <option value="1">1 Week</option>
+                    <option value="2">2 Weeks</option>
+                    <option value="3">1 Month</option>
+                  </select>
+                  <label className="block text-gray-700">Stake</label>
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Amount"
+                    value={postStake}
+                    onChange={e => setPostStake(e.target.value)}
+                  />
+                  <label className="block text-gray-700">Type</label>
+                  <select className="form-select w-full" value={postType} onChange={e => setPostType(e.target.value)}>
+                    <option value="0">Text</option>
+                    <option value="1">Image</option>
+                    <option value="2">Video</option>
+                    <option value="3">Audio</option>
+                    <option value="4">File</option>
+                  </select>
+                  <label className="block text-gray-700">Message</label>
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Data"
+                    value={postRawData}
+                    onChange={e => setPostRawData(e.target.value)}
+                  />
+                  <button
+                    className="btn btn-primary w-full mt-4"
+                    onClick={async () => {
+                      let postData = await createPost();
+                      console.log(postData);
+                    }}
+                  >
+                    Create Post
+                  </button>
+                </div>
+                <div className="modal-action space-x-2 mt-4">
+                  <label htmlFor="modal-create" className="btn">
+                    Accept
+                  </label>
+                  <label htmlFor="modal-create" className="btn">
+                    Close
+                  </label>
+                </div>
               </div>
             </div>
-          </div>
 
-          <label for="modal-accept" className="btn btn-primary modal-button">
-            accept
-          </label>
-          <input type="checkbox" id="modal-accept" className="modal-toggle" />
-          <div className="modal">
-            <div className="modal-box">
-              <div className="modal-header">
-                <div className="modal-title text-2xl font-bold">Accept Post</div>
-                <label htmlFor="modal-accept" className="btn btn-ghost">
-                  <i className="fas fa-times"></i>
-                </label>
-              </div>
-              <div className="modal-body space-y-4">
-                Amount to Pay for Data {""}
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Amount"
-                  value={postPayment}
-                  onChange={e => setPostPayment(e.target.value)}
-                />
-                <br />
-                <button
-                  className="btn btn-primary w-full"
-                  onClick={async () => {
-                    let postData = await acceptPost();
-                    console.log(postData);
-                  }}
-                >
-                  Accept Post
-                </button>
-              </div>
-              <div className="modal-action space-x-2 mt-4">
-                <label htmlFor="modal-accept" className="btn btn-primary">
-                  Accept
-                </label>
-                <label htmlFor="modal-accept" className="btn">
-                  Close
-                </label>
+            <label for="modal-accept" className="btn  modal-button">
+              accept
+            </label>
+            <input type="checkbox" id="modal-accept" className="modal-toggle" />
+            <div className="modal">
+              <div className="modal-box">
+                <div className="modal-header">
+                  <div className="modal-title text-2xl font-bold">Accept Post</div>
+                  <label htmlFor="modal-accept" className="btn btn-ghost">
+                    <i className="fas fa-times"></i>
+                  </label>
+                </div>
+                <div className="modal-body space-y-4 text-left">
+                  Amount to Pay for Data {""}
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Amount"
+                    value={postPayment}
+                    onChange={e => setPostPayment(e.target.value)}
+                  />
+                  <br />
+                  <button
+                    className="btn  w-full"
+                    onClick={async () => {
+                      let postData = await acceptPost();
+                      console.log(postData);
+                    }}
+                  >
+                    Accept Post
+                  </button>
+                </div>
+                <div className="modal-action space-x-2 mt-4">
+                  <label htmlFor="modal-accept" className="btn ">
+                    Accept
+                  </label>
+                  <label htmlFor="modal-accept" className="btn">
+                    Close
+                  </label>
+                </div>
               </div>
             </div>
-          </div>
 
-          <label for="modal-submit" className="btn btn-primary modal-button">
-            submit
-          </label>
-          <input type="checkbox" id="modal-submit" className="modal-toggle" />
-          <div className="modal">
-            <div className="modal-box">
-              <div className="modal-header">
-                <div className="modal-title text-2xl font-bold">Accept Post</div>
-                <label htmlFor="modal-submit" className="btn btn-ghost">
-                  <i className="fas fa-times"></i>
-                </label>
-              </div>
-              <div className="modal-body space-y-4">
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Symmetric Key"
-                  value={symmetricKey}
-                  onChange={e => setSymmetricKey(e.target.value)}
-                />
-                <br />
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Secret Key"
-                  value={secretKey}
-                  onChange={e => setSecretKey(e.target.value)}
-                />
-                <br />
-                <button
-                  className="btn btn-primary w-full"
-                  onClick={async () => {
-                    let postData = await submitData();
-                    console.log(postData);
-                  }}
-                >
-                  Submit
-                </button>
-              </div>
-              <div className="modal-action space-x-2 mt-4">
-                <label htmlFor="modal-submit" className="btn btn-primary">
-                  Accept
-                </label>
-                <label htmlFor="modal-submit" className="btn">
-                  Close
-                </label>
-              </div>
-            </div>
-          </div>
-          <label for="modal-retrieve" className="btn btn-primary modal-button">
-            Retrieve
-          </label>
-          <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
-          <div className="modal">
-            <div className="modal-box">
-              <div className="modal-header">
-                <div className="modal-title text-2xl font-bold">Accept Post</div>
-                <label htmlFor="modal-retrieve" className="btn btn-ghost">
-                  <i className="fas fa-times"></i>
-                </label>
-              </div>
-              <div className="modal-body space-y-4">
-                <br />
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Secret Key"
-                  value={secretKey}
-                  onChange={e => setSecretKey(e.target.value)}
-                />
-                <br />
-                <button
-                  className="btn btn-primary w-full"
-                  onClick={async () => {
-                    let postData = await retrievePost();
-                    console.log(postData);
-                  }}
-                >
-                  Submit
-                </button>
-              </div>
-              <div className="modal-action space-x-2 mt-4">
-                <label htmlFor="modal-retrieve" className="btn">
-                  Close
-                </label>
+            <label for="modal-submit" className="btn  modal-button">
+              submit
+            </label>
+            <input type="checkbox" id="modal-submit" className="modal-toggle" />
+            <div className="modal">
+              <div className="modal-box">
+                <div className="modal-header">
+                  <div className="modal-title text-2xl font-bold">Submit Post</div>
+                  <label htmlFor="modal-submit" className="btn btn-ghost">
+                    <i className="fas fa-times"></i>
+                  </label>
+                </div>
+                <div className="modal-body space-y-4 text-left">
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Symmetric Key"
+                    value={symmetricKey}
+                    onChange={e => setSymmetricKey(e.target.value)}
+                  />
+                  <br />
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Secret Key"
+                    value={secretKey}
+                    onChange={e => setSecretKey(e.target.value)}
+                  />
+                  <br />
+                  <button
+                    className="btn  w-full"
+                    onClick={async () => {
+                      let postData = await submitData();
+                      console.log(postData);
+                    }}
+                  >
+                    Submit
+                  </button>
+                </div>
+                <div className="modal-action space-x-2 mt-4">
+                  <label htmlFor="modal-submit" className="btn ">
+                    Accept
+                  </label>
+                  <label htmlFor="modal-submit" className="btn">
+                    Close
+                  </label>
+                </div>
               </div>
             </div>
+
+            <label for="modal-retrieve" className="btn  modal-button">
+              Retrieve
+            </label>
+            <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
+            <div className="modal">
+              <div className="modal-box">
+                <div className="modal-header">
+                  <div className="modal-title text-2xl font-bold">Retrieve Post</div>
+                  <label htmlFor="modal-retrieve" className="btn btn-ghost">
+                    <i className="fas fa-times"></i>
+                  </label>
+                </div>
+                <div className="modal-body space-y-4 text-left">
+                  <br />
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Secret Key"
+                    value={secretKey}
+                    onChange={e => setSecretKey(e.target.value)}
+                  />
+                  <br />
+                  <button
+                    className="btn  w-full"
+                    onClick={async () => {
+                      let postData = await retrievePost();
+                      console.log(postData);
+                    }}
+                  >
+                    Submit
+                  </button>
+                </div>
+                <div className="modal-action space-x-2 mt-4">
+                  <label htmlFor="modal-retrieve" className="btn">
+                    Close
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <label for="modal-finalize" className="btn  modal-button">
+              Finalize
+            </label>
+            <input type="checkbox" id="modal-finalize" className="modal-toggle" />
+            <div className="modal">
+              <div className="modal-box">
+                <div className="modal-header">
+                  <div className="modal-title text-2xl font-bold">Finalize Post</div>
+                  <label htmlFor="modal-finalize" className="btn btn-ghost">
+                    <i className="fas fa-times"></i>
+                  </label>
+                </div>
+                <div className="modal-body space-y-4 text-left">
+                  <br />
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Punishment"
+                    disabled={valid}
+                    value={punishment}
+                    onChange={e => setPunishment(e.target.value)}
+                  />
+                  <br />
+                  <input
+                    type="checkbox"
+                    className="form-checkbox"
+                    checked={valid}
+                    onChange={e => setValid(e.target.checked)}
+                  />
+                  <label className="ml-2">Valid</label>
+                  <br />
+
+                  <button
+                    className="btn  w-full"
+                    onClick={async () => {
+                      let postData = await finalizePost();
+                      console.log(postData);
+                    }}
+                  >
+                    Submit
+                  </button>
+                </div>
+                <div className="modal-action space-x-2 mt-4">
+                  <label htmlFor="modal-finalize" className="btn">
+                    Close
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <label for="modal-reveal" className="btn  modal-button">
+              Reveal
+            </label>
+            <input type="checkbox" id="modal-reveal" className="modal-toggle" />
+            <div className="modal">
+              <div className="modal-box">
+                <div className="modal-header">
+                  <div className="modal-title text-2xl font-bold">Reveal Post</div>
+                  <label htmlFor="modal-reveal" className="btn btn-ghost">
+                    <i className="fas fa-times"></i>
+                  </label>
+                </div>
+                <div className="modal-body space-y-4 text-left">
+                  <br />
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Symmetric Key"
+                    value={symmetricKey}
+                    onChange={e => setSymmetricKey(e.target.value)}
+                  />
+                  <br />
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="RawData"
+                    value={postRawData}
+                    onChange={e => setPostRawData(e.target.value)}
+                  />
+                  <button
+                    className="btn  w-full"
+                    onClick={async () => {
+                      let postData = await revealPost();
+                      console.log(postData);
+                    }}
+                  >
+                    Submit
+                  </button>
+                </div>
+                <div className="modal-action space-x-2 mt-4">
+                  <label htmlFor="modal-reveal" className="btn">
+                    Close
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {signer?.getAddress() == feedData.postdata.settings.seller ||
+              (feedData.postdata.settings.buyer && (
+                <div>
+                  <label for="modal-stake" className="btn  modal-button">
+                    Stake
+                  </label>
+                  <input type="checkbox" id="modal-stake" className="modal-toggle" />
+                  <div className="modal">
+                    <div className="modal-box">
+                      <div className="modal-header">
+                        <div className="modal-title text-2xl font-bold">Stake</div>
+                        <label htmlFor="modal-stake" className="btn btn-ghost">
+                          <i className="fas fa-times"></i>
+                        </label>
+                      </div>
+                      <div className="modal-body space-y-4 text-left">
+                        <br />
+                        <input
+                          type="text"
+                          className="input w-full"
+                          placeholder="Stake Amount"
+                          value={stakeAmount}
+                          onChange={e => setStakeAmount(e.target.value)}
+                        />
+                        <br />
+                        <button
+                          className="btn  w-full"
+                          onClick={async () => {
+                            let postData = await addStake();
+                            console.log(postData);
+                          }}
+                        >
+                          Add Stake
+                        </button>
+                        <button
+                          className="btn  w-full"
+                          onClick={async () => {
+                            let postData = await takeStake();
+                            console.log(postData);
+                          }}
+                        >
+                          Take Stake
+                        </button>
+                      </div>
+                      <div className="modal-action space-x-2 mt-4">
+                        <label htmlFor="modal-stake" className="btn">
+                          Close
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
           </div>
-          <div className="card w-full">
+          <div className="divider" />
+          <div className="card w-fit">
             <div className="card-body">
-              <h2 className="text-xl font-bold">Creator</h2>
-              <p>Mecenate ID: {feedData[0][0].toString()}</p>
-              <p>Wallet: {feedData[0][1].toString()}</p>
-              {/* <p>PubKey: {feedData[0][2].toString()}</p> */}
+              <h2 className="text-xl font-bold">Creator Information</h2>
+              <div className="mt-5">
+                <p className="text-lg">
+                  <span className="font-bold">Post Status:</span>{" "}
+                  {feedData.postdata.settings.status === 4
+                    ? "Finalized"
+                    : feedData.postdata.settings.status === 3
+                    ? "Submitted"
+                    : feedData.postdata.settings.status === 2
+                    ? "Accepted"
+                    : feedData.postdata.settings.status === 1
+                    ? "Proposed"
+                    : "Waiting for Creator"}
+                </p>
+                <div className="w-1/2">
+                  <p className="text-lg">
+                    <span className="font-bold">Seller Stake:</span> {sellerStake} ETH
+                  </p>
+                </div>
+                <div className="w-1/2">
+                  <p className="text-lg">
+                    <span className="font-bold">Buyer Stake:</span> {buyerStake} ETH
+                  </p>
+                </div>
+                <p className="text-lg">
+                  <span className="font-bold">Mecenate ID:</span> {feedData[0][0].toString()}
+                </p>
+                <p className="text-lg">
+                  <span className="font-bold">Wallet:</span> {feedData[0][1].toString()}
+                </p>
+                {/* <p className="text-lg">
+        <span className="font-bold">Public Key:</span>{" "}
+        {feedData[0][2].toString()}
+      </p> */}
+              </div>
             </div>
           </div>
-          <div className="divider my-4"></div>
-          <div className="card w-full">
+          <div className="divider" />
+
+          <div className="card w-full md:w-fit">
             <div className="card-body">
-              <h2 className="text-xl font-bold">Settings</h2>
-              <p>Buyer: {feedData[1][0].buyer.toString()}</p>
-              <p>Buyer PubKey: {feedData[1][0].buyerPubKey.toString()}</p>
-              <p>Seller: {feedData[1][0].seller.toString()}</p>
-              <p>Creation Timestamp: {feedData[1][0].creationTimeStamp.toString()}</p>
-              <p>End Timestamp: {feedData[1][0].endTimeStamp.toString()}</p>
-              <p>Duration: {feedData[1][0].duration.toString()}</p>
-              <p>Post Type: {feedData[1][0].postType.toString()}</p>
-              <p>Status: {feedData[1][0].status.toString()}</p>
+              <h2 className="text-xl font-bold">Post Settings</h2>
+              <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p>
+                  <span className="font-bold">Buyer:</span> {feedData[1][0].buyer.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">Buyer Public Key:</span>{" "}
+                  <span className="break-all">{feedData[1][0].buyerPubKey.toString()}</span>
+                </p>
+                <p>
+                  <span className="font-bold">Seller:</span> {feedData[1][0].seller.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">Creation Timestamp:</span> {feedData[1][0].creationTimeStamp.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">End Timestamp:</span> {feedData[1][0].endTimeStamp.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">Duration:</span> {feedData[1][0].duration.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">Post Type:</span> {feedData[1][0].postType.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">Status:</span> {feedData[1][0].status.toString()}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="divider my-4"></div>
-          <div className="card w-full">
+          <div className="divider" />
+
+          <div className="card w-fit">
             <div className="card-body">
               <h2 className="text-xl font-bold">Punishments</h2>
-              <p>Buyer Punishment: {feedData[1][1].buyerPunishment.toString()}</p>
-              <p>Seller Punishment: {feedData[1][1].punishment.toString()}</p>
-              <p>Seller Stake: {feedData[1][1].stake.toString()}</p>
-              <p>Buyer Payment: {feedData[1][1].payment.toString()}</p>
+              <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p>
+                  <span className="font-bold">Buyer Punishment:</span> {feedData[1][1].buyerPunishment.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">Seller Punishment:</span> {feedData[1][1].punishment.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">Seller Stake:</span> {feedData[1][1].stake.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">Buyer Payment:</span> {feedData[1][1].payment.toString()}
+                </p>
+              </div>
             </div>
           </div>
-          <div className="divider my-4"></div>
-          <div className="card w-full">
+          <div className="divider" />
+
+          <div className="card w-fit">
             <div className="card-body">
               <h2 className="text-xl font-bold">Data</h2>
-              <p>Encrypted Data: {feedData[1][2].encryptedData.toString()}</p>
-              <p>Encrypted Key: {feedData[1][2].encryptedKey.toString()}</p>
-              <p>Decrypted Data: {feedData[1][2].decryptedData.toString()}</p>
+              <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p>
+                  <span className="font-bold">Encrypted Data:</span>{" "}
+                  <span className="break-all">{feedData[1][2].encryptedData.toString()}</span>
+                </p>
+                <p>
+                  <span className="font-bold">Encrypted Key:</span> {feedData[1][2].encryptedKey.toString()}
+                </p>
+                <p>
+                  <span className="font-bold">Decrypted Data:</span>
+                  <span className="break-all"> {feedData[1][2].decryptedData.toString()}</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>

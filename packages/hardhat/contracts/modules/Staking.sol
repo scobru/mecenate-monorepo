@@ -88,11 +88,11 @@ contract Staking is Data, Deposit {
     return amount;
   }
 
-  function getTotalStaked() public view returns (uint256, uint256) {
+  function getTotalStaked() public view returns (uint256) {
     uint256 amountSeller = Deposit._getDeposit(post.postdata.settings.seller);
     uint256 amountBuyer = Deposit._getDeposit(post.postdata.settings.buyer);
 
-    return (amountSeller, amountBuyer);
+    return (amountSeller + amountBuyer);
   }
 
   function addStake() external payable returns (uint256) {

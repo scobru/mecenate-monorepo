@@ -67,4 +67,14 @@ library Structures {
     address wallet;
     bytes publicKey;
   }
+
+  struct Feed {
+    address operator;
+    address buyer;
+    address seller;
+    uint256 sellerStake;
+    uint256 buyerStake;
+    uint256 totalStake;
+    uint256 postCount;
+  }
 }

@@ -5,6 +5,7 @@ import { notification } from "~~/utils/scaffold-eth";
 const crypto = require("asymmetric-crypto");
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { Contract, ContractInterface, ethers, utils } from "ethers";
+import { formatEther } from "ethers/lib/utils.js";
 const DEBUG = true;
 
 const Feeds: NextPage = () => {
@@ -18,6 +19,17 @@ const Feeds: NextPage = () => {
 
   const [pubKey, setPubKey] = React.useState<string>("");
   const [feeds, setFeeds] = React.useState<string[]>([]);
+  const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
+
+  type Feed = {
+    operator: string;
+    buyer: string;
+    seller: string;
+    buyerStake: string;
+    sellerStake: string;
+    totalStaked: string;
+    totalCount: string;
+  };
 
   let factoryAddress!: string;
   let factoryAbi: ContractInterface[] = [];
@@ -40,7 +52,9 @@ const Feeds: NextPage = () => {
 
   async function getFeeds() {
     const _feeds = await factoryCtx?.getFeeds();
+    const _feedsInfo = await factoryCtx?.getFeedsInfo();
     setFeeds(_feeds);
+    setFeedsInfos(_feedsInfo);
     if (DEBUG) console.log(feeds);
   }
 
@@ -76,36 +90,52 @@ const Feeds: NextPage = () => {
   }, [factoryCtx, feeds]);
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10 text-black">
-      <button
-        className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
-        onClick={buildFeed}
-      >
-        Build Feed
-      </button>
-      <div>
+    <div className="flex flex-col items-center pt-10 text-black">
+      <div className="flex items-center mb-5">
         <button
-          className="btn w-2/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 mx-2"
+          className="bg-primary-500 hover:bg-primary-700  font-bold py-2 px-4 rounded-md mr-2"
+          onClick={buildFeed}
+        >
+          <i className="fas fa-plus mr-2"></i> Create Feed
+        </button>
+        <button
+          className="bg-primary-500 hover:bg-primary-700  font-bold py-2 px-4 rounded-md mr-2"
           onClick={async () => {
             await getFeedsOwned();
           }}
         >
-          Your Feeds
+          <i className="fas fa-user-alt mr-2"></i> Your Feeds
         </button>
         <button
-          className="btn w-2/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 mx-2"
+          className="bg-primary-500 hover:bg-primary-700  font-bold py-2 px-4 rounded-md"
           onClick={async () => {
             await getFeeds();
           }}
         >
-          All Feeds
+          <i className="fas fa-globe mr-2"></i> All Feeds
         </button>
       </div>
-      <div className="flex flex-col w-full text-secondary items-center my-2 ">
+
+      <div className="w-full max-w-3xl">
         {feeds.map((feed, i) => (
-          <div key={i} className="card border-2 py-2 px-2 my-2">
+          <div key={i} className="bg-white shadow-sm rounded-md my-5">
             <a href={`/viewFeed?addr=${feed}`} className="text-indigo-600 hover:text-indigo-900">
-              {feed}
+              <div className="grid grid-cols-2 gap-5 p-5">
+                <div className="col-span-1">
+                  <div className="font-bold text-lg mb-2">Feed Address:</div>
+                  <div className="text-gray-700 mb-2">{feed}</div>
+                  <div className="text-gray-700 mb-2">Seller: {feedsInfos[i].seller}</div>
+                  <div className="text-gray-700 mb-2">Buyer: {feedsInfos[i].buyer}</div>
+                  <div className="text-gray-700 mb-2">Operator: {feedsInfos[i].operator}</div>
+                </div>
+                <div className="col-span-1">
+                  <div className="font-bold text-lg mb-2">Feed Info:</div>
+                  <div className="text-gray-700 mb-2">Seller Stake: {formatEther(feedsInfos[i].sellerStake)}</div>
+                  <div className="text-gray-700 mb-2">Buyer Stake: {formatEther(feedsInfos[i].buyerStake)}</div>
+                  <div className="text-gray-700 mb-2">Total Stake: {feedsInfos[i].totalStaked}</div>
+                  <div className="text-gray-700 mb-2">Hash Count: {feedsInfos[i].totalCount}</div>
+                </div>
+              </div>
             </a>
           </div>
         ))}

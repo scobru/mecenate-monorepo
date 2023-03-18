@@ -20,4 +20,12 @@ contract MecenateFeed is Ownable, Data, Creation, Acceptance, Submission, Finali
   ) Creation(_usersModuleContract, _identityContract) {
     _transferOwnership(owner);
   }
+
+  function getSeller() public view returns (address) {
+    return post.postdata.settings.seller;
+  }
+
+  function getBuyer() public view returns (address) {
+    return post.postdata.settings.buyer;
+  }
 }
