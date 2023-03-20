@@ -21,6 +21,8 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
+  console.log(deployer);
+
   const identity = await deploy("MecenateIdentity", {
     from: deployer,
     args: [parseEther("1")],
@@ -77,6 +79,18 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   });
 
   feed.receipt && console.log("Feed deployed at:", feed.receipt.contractAddress);
+
+  const box = await deploy("MecenateBox", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  box.receipt && console.log("Box deployed at:", box.receipt.contractAddress);
 };
 
 export default deployYourContract;

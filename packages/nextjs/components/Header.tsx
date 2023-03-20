@@ -76,6 +76,12 @@ export default function Header() {
           Tiers
         </NavLink>
       </li>
+      <li>
+        <NavLink href="/box">
+          <SparklesIcon className="h-4 w-4" />
+          Box
+        </NavLink>
+      </li>
     </>
   );
 

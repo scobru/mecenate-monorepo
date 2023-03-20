@@ -8,7 +8,7 @@ import { notification } from "~~/utils/scaffold-eth";
 import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
 import { Buffer } from "buffer";
-import { formatEther } from "ethers/lib/utils.js";
+import { formatEther, parseEther } from "ethers/lib/utils.js";
 import Image from "next/image";
 
 /* configure Infura auth settings */
@@ -135,7 +135,7 @@ const Tiers: NextPage = () => {
         signer?.getAddress(),
         subscriptionName,
         subscriptionDescription,
-        subscriptionFee,
+        parseEther(subscriptionFee.toString()),
         subscriptionDuration,
         {
           value: fee,
@@ -161,7 +161,7 @@ const Tiers: NextPage = () => {
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black">
       <div className="max-w-lg mx-auto">
-        <div className="px-2 py-2">
+        <div className="flex flex-col px-2 py-2">
           <h1 className="text-3xl font-bold mb-6 text-primary">Create Subscription</h1>
           <form onSubmit={createMecenateSubscription} className="text-secondary">
             <label htmlFor="name" className="block font-medium">
@@ -171,7 +171,7 @@ const Tiers: NextPage = () => {
               type="text"
               name="subscriptionName"
               id="subscriptionName"
-              className="block w-full px-3 py-2 mt-1 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionName(e.target.value)}
             />
             <label htmlFor="name" className="block font-medium">
@@ -181,7 +181,7 @@ const Tiers: NextPage = () => {
               type="text"
               name="subscriptionDescription"
               id="subscriptionDescription"
-              className="block w-full px-3 py-2 mt-1 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionDescription(e.target.value)}
             />
             <label htmlFor="name" className="block font-medium">
@@ -191,7 +191,7 @@ const Tiers: NextPage = () => {
               type="text"
               name="subscriptionDuration"
               id="subscriptionDuration"
-              className="block w-full px-3 py-2 mt-1 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionDuration(Number(e.target.value))}
             />
             <label htmlFor="name" className="block font-medium">
@@ -201,8 +201,8 @@ const Tiers: NextPage = () => {
               type="text"
               name="subscriptionFee"
               id="subscriptionfee"
-              className="block w-full px-3 py-2 mt-1 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              onChange={e => setSubscriptionFee(Number(e.target.value))}
+              className="block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              onChange={e => setSubscriptionFee(e.target.value)}
             />
             <button
               type="submit"

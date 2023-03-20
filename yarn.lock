@@ -25086,6 +25086,7 @@ __metadata:
   resolution: "mecenate@workspace:."
   dependencies:
     asymmetric-crypto: ^1.0.2
+    eth-crypto: ^2.6.0
     husky: ^8.0.1
     lint-staged: ^13.0.3
   languageName: unknown
