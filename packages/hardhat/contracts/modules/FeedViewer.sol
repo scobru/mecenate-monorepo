@@ -17,7 +17,7 @@ interface IFeed {
   function owner() external view returns (address);
 }
 
-abstract contract Viewer {
+abstract contract FeedViewer {
   function _getFeedInfo(address feed) internal view returns (Structures.Feed memory) {
     Structures.Feed memory f;
     f.operator = IFeed(feed).owner();

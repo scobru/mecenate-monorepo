@@ -240,7 +240,7 @@ const ViewFeed: NextPage = () => {
   async function submitData() {
     const abiCoder = new ethers.utils.AbiCoder();
     const buyerPubKeyDecoded = abiCoder.decode(["string"], feedData[1][0].buyerPubKey);
-    const proofhash = abiCoder.decode(["string"], feedData[1][2].encryptedData);
+    const proofhash = abiCoder.decode(["bytes32"], feedData[1][2].encryptedData);
 
     //const proofhash = abiCoder.decode(["string"], feedData[1][2].encryptedData);
     const sellerPubKeyDecoded = abiCoder.decode(["string"], userData.publicKey);
@@ -327,8 +327,6 @@ const ViewFeed: NextPage = () => {
   async function retrievePost() {
     console.log("Retrieving Data...");
     await fetchData();
-    const abiCoder = new ethers.utils.AbiCoder();
-    console.log(feedData[1][2].encryptedKey);
 
     var decodeHash = await ErasureHelper.multihash({
       input: feedData[1][2].encryptedKey,
@@ -345,9 +343,9 @@ const ViewFeed: NextPage = () => {
       },
     });
 
-    const responseDecodeHahJSON = JSON.parse(JSON.stringify(responseDecodeHash.data));
+    const responseDecodeHahJSON = await JSON.parse(JSON.stringify(responseDecodeHash.data));
 
-    const encryptedSymKey = JSON.parse(JSON.stringify(responseDecodeHahJSON.encryptedSymKey));
+    const encryptedSymKey = await JSON.parse(JSON.stringify(responseDecodeHahJSON.encryptedSymKey));
 
     console.log("Encrypted Symmetric Key: ", encryptedSymKey);
 
@@ -361,7 +359,17 @@ const ViewFeed: NextPage = () => {
     console.log(decrypted);
     console.log(responseDecodeHahJSON.proofhash);
 
-    const responseProofHash = await axios.get("https://gateway.pinata.cloud/ipfs/" + responseDecodeHahJSON.proofhash, {
+    var _decodeHash = await ErasureHelper.multihash({
+      input: responseDecodeHahJSON.proofhash.toString(),
+      inputType: "sha2-256",
+      outputType: "b58",
+    });
+
+    const url = "https://gateway.pinata.cloud/ipfs/" + _decodeHash;
+
+    console.log(url);
+
+    const responseProofHash = await axios.get(url, {
       headers: {
         Accept: "text/plain",
       },
@@ -481,7 +489,6 @@ const ViewFeed: NextPage = () => {
       const tx = await feedCtx?.finalizePost(valid, parseEther(punishment));
     }
 
-    await tx.wait();
     await fetchData();
   }
 

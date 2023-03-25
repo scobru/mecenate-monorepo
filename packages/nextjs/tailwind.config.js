@@ -6,6 +6,30 @@ module.exports = {
   // DaisyUI theme colors
   daisyui: {
     themes: [
+      {
+        custom: {
+
+          "primary": "#8feab6",
+
+          "secondary": "#066e7a",
+
+          "accent": "#ffc9d5",
+
+          "neutral": "#292631",
+
+          "base-100": "#392B55",
+
+          "info": "#90D1E4",
+
+          "success": "#146753",
+
+          "warning": "#BC840B",
+
+          "error": "#EF484B",
+        },
+
+      },
+
       "light",
       "dark",
       "cupcake",
@@ -35,7 +59,17 @@ module.exports = {
       "night",
       "coffee",
       "winter",
+
     ],
+    fontFamily: {
+      'sans': ['ui-sans-serif', 'system-ui'],
+      'serif': ['ui-serif', 'Georgia'],
+      'mono': ['ui-monospace', 'SFMono-Regular'],
+      'display': ['Oswald'],
+      'body': ["Roboto", "sans-serif"],
+      "bai-jamjuree": ["Bai Jamjuree", "sans-serif"],
+      "proxima": ["Proxima Nova", "sans-serif"],
+    }
   },
   theme: {
     // Extend Tailwind classes (e.g. font-bai-jamjuree, animate-grow)

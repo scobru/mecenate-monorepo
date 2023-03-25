@@ -37,8 +37,8 @@ export default function Header() {
 
   const navLinks = (
     <>
-      <li>
-        <NavLink href="/">Home</NavLink>
+      <li className="font-semibold">
+        <NavLink href="/">HOME</NavLink>
       </li>
       {/* <li>
         <NavLink href="/debug">
@@ -52,35 +52,17 @@ export default function Header() {
           Example UI
         </NavLink>
       </li> */}
-      <li>
-        <NavLink href="/createID">
-          <SparklesIcon className="h-4 w-4" />
-          ID
-        </NavLink>
+      <li className="font-semibold">
+        <NavLink href="/createID">ID</NavLink>
       </li>
-      <li>
-        <NavLink href="/createUser">
-          <SparklesIcon className="h-4 w-4" />
-          Join
-        </NavLink>
+      <li className="font-semibold">
+        <NavLink href="/feeds">FEEDS</NavLink>
       </li>
-      <li>
-        <NavLink href="/feeds">
-          <SparklesIcon className="h-4 w-4" />
-          Feeds
-        </NavLink>
+      <li className="font-semibold">
+        <NavLink href="/tiers">TIERS</NavLink>
       </li>
-      <li>
-        <NavLink href="/tiers">
-          <SparklesIcon className="h-4 w-4" />
-          Tiers
-        </NavLink>
-      </li>
-      <li>
-        <NavLink href="/box">
-          <SparklesIcon className="h-4 w-4" />
-          Box
-        </NavLink>
+      <li className="font-semibold">
+        <NavLink href="/box">BOX</NavLink>
       </li>
     </>
   );

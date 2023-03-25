@@ -10,6 +10,8 @@ import { create } from "ipfs-http-client";
 import { Buffer } from "buffer";
 import { formatEther } from "ethers/lib/utils.js";
 import Image from "next/image";
+import { utils } from "ethers";
+const crypto = require("asymmetric-crypto");
 
 /* configure Infura auth settings */
 const projectId = process.env.INFURA_PROJECT_ID;
@@ -44,6 +46,7 @@ const CreateID: NextPage = () => {
   const [image, setImage] = React.useState("");
   const [nftBalance, setNftBalance] = React.useState(0);
   const [nftMetadata, setNftMetadata] = React.useState<nftMetadata[]>([]);
+  const [pubKey, setPubKey] = React.useState<string>("");
 
   const [subscriptions, setSubscriptions] = React.useState<Array<string>>([]);
   const [subscriptionName, setSubscriptionName] = React.useState("");
@@ -53,6 +56,7 @@ const CreateID: NextPage = () => {
 
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateTierFactory");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
+  const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
 
   const IPFS_HOST = "ipfs.infura.io";
   const IPFS_PORT = 5001;
@@ -67,6 +71,15 @@ const CreateID: NextPage = () => {
     },
   });
 
+  let UsersAddress!: string;
+  let UsersAbi: ContractInterface[] = [];
+
+  type UserData = {
+    mecenateID: Number;
+    wallet: String;
+    publicKey: String;
+  };
+
   let factoryAddress!: string;
   let factoryAbi: MecenateSubscriptionFactoryInterface[] = [];
 
@@ -80,6 +93,16 @@ const CreateID: NextPage = () => {
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
   }
+
+  if (deployedContractUser) {
+    ({ address: UsersAddress, abi: UsersAbi } = deployedContractUser);
+  }
+
+  const usersCtx = useContract({
+    address: UsersAddress,
+    abi: UsersAbi,
+    signerOrProvider: signer || provider,
+  });
 
   const factory = useContract({
     address: factoryAddress,
@@ -174,6 +197,52 @@ const CreateID: NextPage = () => {
       notification.success("Identity minted successfully!");
     }
   };
+
+  async function createPair() {
+    console.log("Generating Key Pair...");
+    const kp = crypto.keyPair();
+    const keypairJSON = JSON.stringify({
+      publicKey: kp.publicKey,
+      secretKey: kp.secretKey,
+    });
+    console.log(keypairJSON);
+    setPubKey(kp.publicKey.toString());
+    notification.success("Key pair created");
+    notification.warning("Save your key pair");
+    notification.info(
+      <div>
+        <p>
+          PUBLIC KEY : <br /> {kp.publicKey.toString()}
+        </p>
+        <p>
+          SECRET KEY : <br /> {kp.secretKey.toString()}
+        </p>
+      </div>,
+    );
+  }
+
+  async function signIn() {
+    const abicoder = new utils.AbiCoder();
+    const publicKey = abicoder.encode(["string"], [pubKey]);
+    const seller = await signer?.getAddress();
+    const mecenateID = await identity?.identityByAddress(seller);
+    console.log(publicKey);
+    console.log(seller);
+    console.log(mecenateID);
+
+    if (seller) {
+      const user: UserData = {
+        mecenateID: mecenateID,
+        wallet: seller,
+        publicKey: publicKey,
+      };
+      const tx = await usersCtx?.registerUser(user);
+
+      notification.success("User registered");
+
+      notification.info("Transaction hash: " + tx.hash);
+    }
+  }
 
   const handleNameChange = (event: { target: { value: React.SetStateAction<string> } }) => {
     setName(event.target.value);
@@ -337,7 +406,7 @@ const CreateID: NextPage = () => {
             </div>
             <button
               type="submit"
-              className="bg-indigo-500 text-white font-medium py-2 px-6 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
             >
               Mint
             </button>
@@ -407,6 +476,24 @@ const CreateID: NextPage = () => {
               </div>
             ))}
         </div> */}
+        <div className="my-5">
+          <button
+            className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
+            onClick={createPair}
+            disabled={nftBalance == 0}
+          >
+            Create Key Pair
+          </button>
+          <button
+            className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700"
+            onClick={async () => {
+              await signIn();
+            }}
+            disabled={nftBalance == 0}
+          >
+            Sign In
+          </button>
+        </div>
       </div>
     </div>
   );

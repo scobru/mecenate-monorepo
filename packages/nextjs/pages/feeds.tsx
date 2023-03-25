@@ -113,25 +113,40 @@ const Feeds: NextPage = () => {
         </button>
       </div>
 
-      <div className="w-full max-w-3xl">
+      <div className="w-full">
         {feeds.map((feed, i) => (
-          <div key={i} className="bg-white shadow-sm rounded-md my-5">
-            <a href={`/viewFeed?addr=${feed}`} className="text-indigo-600 hover:text-indigo-900">
-              <div className="grid grid-cols-2 gap-10 p-5">
+          <div key={i} className="card w-full bg-base-100 shadow-xl px-2 py-2 text-info">
+            <a href={`/viewFeed?addr=${feed}`}>
+              <div className="grid grid-cols-1 p-5">
                 <div className="col-span-1">
-                  <div className="font-bold text-lg mb-2">Feed Address:</div>
-                  <div className="text-gray-700 mb-2">{feed}</div>
-                  <div className="text-gray-700 mb-2">Seller: {feedsInfos[i].seller}</div>
-                  <div className="text-gray-700 mb-2">Buyer: {feedsInfos[i].buyer}</div>
-                  <div className="text-gray-700 mb-2">Operator: {feedsInfos[i].operator}</div>
+                  <div className=" mb-2">
+                    <strong>Address:</strong>
+                    {feed}
+                  </div>
+                  <div className=" mb-2">
+                    <strong>Seller:</strong> {feedsInfos[i].seller}
+                  </div>
+                  <div className=" mb-2">
+                    <strong>Seller Stake</strong> {formatEther(feedsInfos[i].sellerStake)}
+                  </div>
+                  <div className=" mb-2">
+                    <strong>Buyer:</strong> {feedsInfos[i].buyer}
+                  </div>
+                  <div className=" mb-2">
+                    <strong>Buyer Stake</strong>
+                    {formatEther(feedsInfos[i].buyerStake)}
+                  </div>
+                  <div className=" mb-2">
+                    <strong>Operator::</strong> {feedsInfos[i].operator}
+                  </div>
+                  <div className=" mb-2">
+                    <strong>Total Stake</strong> {feedsInfos[i].totalStaked}
+                  </div>
+                  <div className=" mb-2">
+                    <strong>Hash count</strong> {feedsInfos[i].totalCount}
+                  </div>
                 </div>
-                <div className="col-span-1">
-                  <div className="font-bold text-lg mb-2">Feed Info:</div>
-                  <div className="text-gray-700 mb-2">Seller Stake: {formatEther(feedsInfos[i].sellerStake)}</div>
-                  <div className="text-gray-700 mb-2">Buyer Stake: {formatEther(feedsInfos[i].buyerStake)}</div>
-                  <div className="text-gray-700 mb-2">Total Stake: {feedsInfos[i].totalStaked}</div>
-                  <div className="text-gray-700 mb-2">Hash Count: {feedsInfos[i].totalCount}</div>
-                </div>
+                <div className="col-span-1"></div>
               </div>
             </a>
           </div>

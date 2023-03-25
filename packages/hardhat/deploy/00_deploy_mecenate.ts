@@ -91,6 +91,18 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   });
 
   box.receipt && console.log("Box deployed at:", box.receipt.contractAddress);
+
+  const dcaFactory = await deploy("MecenateDCAFactory", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [identity.address],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  dcaFactory.receipt && console.log("DCA Factory deployed at:", dcaFactory.receipt.contractAddress);
 };
 
 export default deployYourContract;

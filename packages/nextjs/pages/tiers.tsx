@@ -160,10 +160,10 @@ const Tiers: NextPage = () => {
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black">
-      <div className="max-w-lg mx-auto">
-        <div className="flex flex-col px-2 py-2">
-          <h1 className="text-3xl font-bold mb-6 text-primary">Create Subscription</h1>
-          <form onSubmit={createMecenateSubscription} className="text-secondary">
+      <div className="w-max">
+        <div className="card w-96 bg-base-100 shadow-xl px-5 py-5">
+          <h1 className="card-title text-primary text-4xl">Create Tier</h1>
+          <form onSubmit={createMecenateSubscription} className="text-secondary w-full">
             <label htmlFor="name" className="block font-medium">
               Subscription Name{" "}
             </label>
