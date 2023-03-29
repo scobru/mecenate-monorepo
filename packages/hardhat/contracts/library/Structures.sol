@@ -83,6 +83,7 @@ library Structures {
     uint256 stake;
     address postAddress;
     bool accepted;
+    uint256 postCount;
   }
 
   struct Feed {
@@ -94,6 +95,5 @@ library Structures {
     uint256 totalStake;
     uint256 postCount;
     uint256 buyerPayment;
-    uint256 sellerPayment;
   }
 }

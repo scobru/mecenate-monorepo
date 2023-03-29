@@ -37,8 +37,10 @@ const ViewFeed: NextPage = () => {
   const [punishment, setPunishment] = useState<any>(0);
   const [sellerStake, setSellerStake] = useState<any>(0);
   const [buyerStake, setBuyerStake] = useState<any>(0);
+  const [buyerPayment, setBuyerPayment] = useState<any>("");
   const [totalStaked, setTotalStaked] = useState<any>(0);
   const [stakeAmount, setStakeAmount] = useState<any>(0);
+  const [buyer, setBuyer] = useState<any>("");
 
   let user = "";
   let owner = "";
@@ -110,9 +112,15 @@ const ViewFeed: NextPage = () => {
       outputType: "digest",
     });
 
-    const tx = await feedCtx?.createPost(proofOfHashEncode, Number(postType), Number(postDuration), {
-      value: parseEther(postStake),
-    });
+    const tx = await feedCtx?.createPost(
+      proofOfHashEncode,
+      Number(postType),
+      Number(postDuration),
+      parseEther(buyerPayment),
+      {
+        value: parseEther(postStake),
+      },
+    );
   };
 
   async function acceptPost() {
@@ -537,6 +545,13 @@ const ViewFeed: NextPage = () => {
                     value={postStake}
                     onChange={e => setPostStake(e.target.value)}
                   />
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Put 0 to allow buyer decide the payment"
+                    value={buyerPayment}
+                    onChange={e => setBuyerPayment(e.target.value)}
+                  />
                   <label className="block text-gray-700">Type</label>
                   <select className="form-select w-full" value={postType} onChange={e => setPostType(e.target.value)}>
                     <option value="0">Text</option>
@@ -553,6 +568,7 @@ const ViewFeed: NextPage = () => {
                     value={postRawData}
                     onChange={e => setPostRawData(e.target.value)}
                   />
+
                   <button
                     className="btn btn-primary w-full mt-4"
                     onClick={async () => {

@@ -29,15 +29,19 @@ contract MecenateFeed is Ownable, Data, Creation, Acceptance, Submission, Finali
     return post.postdata.settings.buyer;
   }
 
-  function getStake(address user) public view returns (uint256) {
-    return post.postdata.settings.stakes[user];
-  }
-
   function getBuyerPayment() public view returns (uint256) {
     return post.postdata.escrow.payment;
   }
 
   function getSellerPayment() public view returns (uint256) {
     return post.postdata.escrow.stake;
+  }
+
+  function getPostStatus() public view returns (Structures.PostStatus) {
+    return post.postdata.settings.status;
+  }
+
+  function getPostCount() public view returns (uint256) {
+    return postCount;
   }
 }

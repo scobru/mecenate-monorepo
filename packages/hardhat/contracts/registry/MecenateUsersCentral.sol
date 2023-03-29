@@ -27,7 +27,7 @@ contract MecenateUsersCentral {
     identityContract = _identityContract;
   }
 
-  function registerUser(Structures.User memory data) public {
+  function registerUser(Structures.UserCentral memory data) public {
     require(!_users.contains(msg.sender), "user already exists");
     require(MecenateIdentity(identityContract).balanceOf(msg.sender) > 0, "user does not have identity");
     // add user

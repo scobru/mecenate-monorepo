@@ -98,8 +98,11 @@ contract Staking is Data, Deposit {
   function addStake() external payable returns (uint256) {
     require(
       post.postdata.settings.status == Structures.PostStatus.Waiting ||
-        post.postdata.settings.status == Structures.PostStatus.Finalized,
-      "Not Waiting or Finalized"
+        post.postdata.settings.status == Structures.PostStatus.Finalized ||
+        post.postdata.settings.status == Structures.PostStatus.Revealed ||
+        post.postdata.settings.status == Structures.PostStatus.Punished ||
+        post.postdata.settings.status == Structures.PostStatus.Proposed,
+      "Not Waiting or Finalized or Proposed"
     );
 
     uint256 stakerBalance;
@@ -118,8 +121,11 @@ contract Staking is Data, Deposit {
   function takeStake(uint256 amountToTake) external payable returns (uint256) {
     require(
       post.postdata.settings.status == Structures.PostStatus.Waiting ||
-        post.postdata.settings.status == Structures.PostStatus.Finalized,
-      "Not Waiting or Finalized"
+        post.postdata.settings.status == Structures.PostStatus.Finalized ||
+        post.postdata.settings.status == Structures.PostStatus.Revealed ||
+        post.postdata.settings.status == Structures.PostStatus.Punished ||
+        post.postdata.settings.status == Structures.PostStatus.Proposed,
+      "Not Waiting or Finalized or Proposed"
     );
     uint256 currentDeposit = Deposit._getDeposit(msg.sender);
     uint256 stakerBalance;

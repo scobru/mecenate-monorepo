@@ -171,7 +171,7 @@ const Tiers: NextPage = () => {
         </p>
       </div>
       <div className="w-max">
-        <div className="card w-96 bg-base-100 shadow-xl px-5 py-5 mb-20">
+        <div className="card w-96 bg-base-100 shadow-2xl px-5 py-5 mb-20 ">
           <h1 className="card-title text-base-content text-4xl text-center">Create Tier</h1>
           <form onSubmit={createMecenateSubscription} className="text-secondary w-full my-2">
             <label htmlFor="name" className="block font-medium text-neutral-400">
@@ -181,7 +181,7 @@ const Tiers: NextPage = () => {
               type="text"
               name="subscriptionName"
               id="subscriptionName"
-              className="text-neutral-500 block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="text-neutral-500 input-lg text-xl block w-full px-3 py-3 my-5  border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionName(e.target.value)}
             />
             <label htmlFor="name" className="block font-medium text-neutral-400">
@@ -191,7 +191,7 @@ const Tiers: NextPage = () => {
               type="text"
               name="subscriptionDescription"
               id="subscriptionDescription"
-              className="text-neutral-500 block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="text-neutral-500 input-lg text-xl block w-full px-3 py-3 my-5  border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionDescription(e.target.value)}
             />
             <label htmlFor="name" className="block font-medium text-neutral-400">
@@ -201,7 +201,7 @@ const Tiers: NextPage = () => {
               type="text"
               name="subscriptionDuration"
               id="subscriptionDuration"
-              className=" text-neutral-500 block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="text-neutral-500 input-lg text-xl block w-full px-3 py-3 my-5  border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionDuration(Number(e.target.value))}
             />
             <label htmlFor="name" className="block font-medium text-neutral-400">
@@ -211,12 +211,12 @@ const Tiers: NextPage = () => {
               type="text"
               name="subscriptionFee"
               id="subscriptionfee"
-              className=" text-neutral-500 block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="text-neutral-500 input-lg text-xl block w-full px-3 py-3 my-5  border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionFee(e.target.value)}
             />
             <button
               type="submit"
-              className="btn-wide text-base-content bg-secondary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
+              className="btn-wide text-center items-center justify-center text-base-content bg-secondary hover:bg-accent font-bold py-2 px-4 my-5 rounded-md"
             >
               Create Subscription
             </button>
@@ -226,7 +226,7 @@ const Tiers: NextPage = () => {
             {subscriptions &&
               subscriptions.map((subscription, index) => (
                 <div key={index} className="mt-2">
-                  <a href={`/viewMecenate?addr=${subscription}`} className="text-indigo-600 hover:text-indigo-900">
+                  <a href={`/viewTier?addr=${subscription}`} className="text-indigo-600 hover:text-indigo-900">
                     {subscription}
                   </a>
                 </div>

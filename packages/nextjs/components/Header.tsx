@@ -56,6 +56,9 @@ export default function Header() {
         <NavLink href="/createID">ID</NavLink>
       </li>
       <li className="font-semibold">
+        <NavLink href="/bay">BAY</NavLink>
+      </li>
+      <li className="font-semibold">
         <NavLink href="/feeds">FEEDS</NavLink>
       </li>
       <li className="font-semibold">

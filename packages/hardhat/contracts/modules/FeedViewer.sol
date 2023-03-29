@@ -2,24 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "../library/Structures.sol";
-
-interface IFeed {
-  function getStake(address user) external view returns (uint256);
-
-  function getTotalStaked() external view returns (uint256);
-
-  function getSeller() external view returns (address);
-
-  function getBuyer() external view returns (address);
-
-  function getBuyerPayment() external view returns (uint256);
-
-  function getSellerPayment() external view returns (uint256);
-
-  function postCount() external view returns (uint256);
-
-  function owner() external view returns (address);
-}
+import "../interfaces/IFeed.sol";
 
 abstract contract FeedViewer {
   function _getFeedInfo(address feed) internal view returns (Structures.Feed memory) {
@@ -32,7 +15,6 @@ abstract contract FeedViewer {
     f.totalStake = IFeed(feed).getTotalStaked();
     f.postCount = IFeed(feed).postCount();
     f.buyerPayment = IFeed(feed).getBuyerPayment();
-    f.sellerStake = IFeed(feed).getSellerPayment();
     return f;
   }
 

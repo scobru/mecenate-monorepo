@@ -16,17 +16,22 @@ abstract contract Acceptance is Data, Events, Staking {
    * @notice Accepts the post and sets the buyer
    */
 
-  function acceptPost(bytes memory publicKey) public payable virtual {
-    require(IUsers(usersModuleContract).checkifUserExist(msg.sender), "User does not exist");
+  function acceptPost(bytes memory publicKey, address _buyer) public payable virtual {
+    require(IUsers(usersModuleContract).checkifUserExist(_buyer), "User does not exist");
     require(msg.value > 0 || post.postdata.escrow.payment > 0, "Payment is required");
     require(post.postdata.settings.status == Structures.PostStatus.Proposed, "Post is not Proposed");
-    require(msg.value == post.postdata.escrow.payment, "Payment is not correct");
-    require(msg.sender == post.postdata.settings.buyer, "Only Buyer can accept the post");
-    uint256 stake = _addStake(msg.sender, msg.value);
-    post.postdata.settings.buyer = msg.sender;
+    require(_buyer == post.postdata.settings.buyer, "Only Buyer can accept the post");
+
+    if (post.postdata.escrow.payment > 0) {
+      require(msg.value == post.postdata.escrow.payment, "Payment is not correct");
+    }
+
+    uint256 stake = _addStake(_buyer, msg.value);
+
+    post.postdata.settings.buyer = _buyer;
     post.postdata.settings.buyerPubKey = publicKey;
 
-    //post.postdata.escrow.payment = stake;
+    post.postdata.escrow.payment = stake;
 
     post.postdata.settings.status = Structures.PostStatus.Accepted;
 

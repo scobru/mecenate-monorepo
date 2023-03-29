@@ -5,7 +5,7 @@ import { notification } from "~~/utils/scaffold-eth";
 const crypto = require("asymmetric-crypto");
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { Contract, ContractInterface, ethers, utils } from "ethers";
-import { formatEther } from "ethers/lib/utils.js";
+import { formatEther, parseEther } from "ethers/lib/utils.js";
 const DEBUG = true;
 
 const Feeds: NextPage = () => {
@@ -29,6 +29,8 @@ const Feeds: NextPage = () => {
     sellerStake: string;
     totalStaked: string;
     totalCount: string;
+    buyerPayment: string;
+    sellerPayment: string;
   };
 
   let factoryAddress!: string;
@@ -174,6 +176,13 @@ const Feeds: NextPage = () => {
                     </td>
                     <td className="px-2 py-1">{feedsInfos[i].totalStaked} ETH</td>
                   </tr>
+                  <tr>
+                    <td className="px-2 py-1 border-r border-base-300">
+                      <strong>BuyerPayment:</strong>
+                    </td>
+                    <td className="px-2 py-1">{String(feedsInfos[i].buyerPayment)} ETH</td>
+                  </tr>
+
                   <tr>
                     <td className="px-2 py-1 border-r border-base-300">
                       <strong>Hash Count:</strong>

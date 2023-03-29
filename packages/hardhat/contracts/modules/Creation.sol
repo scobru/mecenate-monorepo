@@ -29,19 +29,21 @@ abstract contract Creation is Data, Events, Staking {
     bytes memory encryptedHash,
     Structures.PostType postType,
     Structures.PostDuration postDuration,
-    address buyer
+    address buyer,
+    uint256 payment
   ) external payable returns (Structures.Post memory) {
     require(IUsers(usersModuleContract).checkifUserExist(msg.sender), "User does not exist");
-    require(msg.value > 0 && post.postdata.escrow.stake > 0, "Stake is required");
-    require(post.postdata.escrow.payment > 0, "Payment is required");
+    require(msg.value > 0, "Stake is required");
 
     require(usersModuleContract != address(0), "Users module contract not set");
     require(identityContract != address(0), "Identity contract not set");
     require(
       post.postdata.settings.status == Structures.PostStatus.Waiting ||
         post.postdata.settings.status == Structures.PostStatus.Finalized ||
-        post.postdata.settings.status == Structures.PostStatus.Revealed,
-      "Not Wating or Finalized"
+        post.postdata.settings.status == Structures.PostStatus.Revealed ||
+        post.postdata.settings.status == Structures.PostStatus.Punished ||
+        post.postdata.settings.status == Structures.PostStatus.Proposed,
+      "Not Wating or Finalized or Revealed or Proposed"
     );
 
     uint256 stake = _addStake(msg.sender, msg.value);
@@ -77,7 +79,7 @@ abstract contract Creation is Data, Events, Staking {
         endTimeStamp: 0,
         duration: duration
       }),
-      escrow: Structures.PostEscrow({stake: stake, payment: 0, punishment: 0, buyerPunishment: 0}),
+      escrow: Structures.PostEscrow({stake: stake, payment: payment, punishment: 0, buyerPunishment: 0}),
       data: Structures.PostEncryptedData({encryptedData: encryptedHash, encryptedKey: "0x00", decryptedData: "0x00"})
     });
 

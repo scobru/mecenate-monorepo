@@ -41,25 +41,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     return address(feed);
   }
 
-  function buildFeedFromBay(address _seller) public returns (address) {
-    require(authorized[msg.sender], "not authorized");
-
-    require(MecenateIdentity(identityContract).balanceOf(_seller) > 0, "user does not have identity");
-    require(IMecenateUsers(usersMouduleContract).checkifUserExist(_seller), "user does not exist");
-
-    MecenateFeed feed = new MecenateFeed(_seller, usersMouduleContract, identityContract);
-
-    feeds.push(address(feed));
-
-    numFeeds++;
-
-    createdContracts[address(feed)] = true;
-
-    emit FeedCreated(address(feed));
-
-    return address(feed);
-  }
-
   function getFeeds() public view returns (address[] memory) {
     return feeds;
   }
