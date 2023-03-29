@@ -25,7 +25,7 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
 
   const identity = await deploy("MecenateIdentity", {
     from: deployer,
-    args: [parseEther("1")],
+    args: [parseEther("0.001")],
     log: true,
     autoMine: true,
   });
@@ -35,7 +35,7 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   const factory = await deploy("MecenateTierFactory", {
     from: deployer,
     // Contract constructor arguments
-    args: [parseEther("1"), 100, identity.address],
+    args: [parseEther("0.0001"), 100, identity.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.

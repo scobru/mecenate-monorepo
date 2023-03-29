@@ -28,6 +28,7 @@ const Box: NextPage = () => {
   const [amountToSend, setAmountToSend] = React.useState<string>("");
   const [hash, setHash] = React.useState<string>("");
   const recoveredAddress = React.useRef<string>();
+  const [lockDuration, setLockDuration] = React.useState<string>("");
 
   const { data, error, isLoading, signMessage } = useSignMessage({
     onSuccess(data, variables) {
@@ -60,7 +61,7 @@ const Box: NextPage = () => {
   async function deposit() {
     // encrypt amount to sha256
 
-    const tx = await boxCtx?.deposit({ value: parseEther(amountToSend) });
+    const tx = await boxCtx?.deposit(lockDuration, { value: parseEther(amountToSend) });
 
     setSignature(await tx?.toString()!);
   }
@@ -77,6 +78,13 @@ const Box: NextPage = () => {
         placeholder="Amount"
         value={amountToSend}
         onChange={e => setAmountToSend(e.target.value)}
+      />
+
+      <input
+        className="input w-1/2 p-2 border rounded-md shadow-sm my-2 text-primary-focus"
+        placeholder="Lock Duration in seconds"
+        value={lockDuration}
+        onChange={e => setLockDuration(e.target.value)}
       />
 
       <input

@@ -308,191 +308,148 @@ const CreateID: NextPage = () => {
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black">
-      <div className="max-w-lg mx-auto">
-        <div className="bg-slate-200 rounded-lg shadow-lg px-2 py-2">
-          <h1 className="text-3xl font-bold p-6 ">
-            {nftBalance > 0 ? (
-              <div className="flex items-center justify-center">Your ID</div>
-            ) : (
-              <div>Mint a Creator ID</div>
-            )}
-          </h1>
-          <div className="p-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div>
-              <div className="text-gray-700 font-bold mb-2">Identity Fee</div>
-              <div className="text-gray-600">{identityFee ? `${formatEther(String(identityFee))} ETH` : "-"}</div>
-            </div>
-            <div>
-              <div className="text-gray-700 font-bold mb-2">Subscription Fee</div>
-              <div className="text-gray-600">{fee ? `${formatEther(String(fee))} ETH` : "-"}</div>
-            </div>
-            {/*  <div className="border-b lg:border-b-0">
+      <div class="flex flex-col items-center justify-center">
+        <div class="max-w-3xl text-center">
+          <h1 class="text-6xl font-bold mb-8">Identity NFT DApp</h1>
+          <p class="text-xl  mb-8">
+            Elevate your identity with Identity NFTs - the new way to express who you are. Our DApp lets you create your
+            own unique NFT-based identity, complete with customizable name, description, and image. Once created, your
+            identity is stored on the Ethereum blockchain, giving you complete control and ownership over your digital
+            identity.
+          </p>
+        </div>
+        <div className="max-w-lg">
+          <div className="card bg-slate-200 rounded-lg shadow-lg px-2 py-2">
+            <h1 className="text-3xl font-bold p-6 ">
+              {nftBalance > 0 ? (
+                <div className="flex items-center justify-center">Your ID</div>
+              ) : (
+                <div>Mint a Creator ID</div>
+              )}
+            </h1>
+            <div className="p-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div>
+                <div className="text-gray-700 font-bold mb-2">Identity Fee</div>
+                <div className="text-gray-600">{identityFee ? `${formatEther(String(identityFee))} ETH` : "-"}</div>
+              </div>
+              <div>
+                <div className="text-gray-700 font-bold mb-2">Subscription Fee</div>
+                <div className="text-gray-600">{fee ? `${formatEther(String(fee))} ETH` : "-"}</div>
+              </div>
+              {/*  <div className="border-b lg:border-b-0">
               <div className="text-gray-700 font-bold mb-2">Balance</div>
               <div className="text-gray-600">{nftBalance ? Number(nftBalance) : "-"}</div>
             </div> */}
-            <div>
-              <div className="text-gray-700 font-bold mb-2">Name</div>
-              <div className="text-gray-600">{nftMetadata ? nftMetadata["name"] : "-"}</div>
-            </div>
-            <div>
-              <div className="text-gray-700 font-bold mb-2">Description</div>
-              <div className="text-gray-600">{nftMetadata ? nftMetadata["description"] : "-"}</div>
-            </div>
-            <div>
-              <div className="text-gray-600">
-                {nftMetadata["image"] ? (
-                  <Image
-                    decoding="async"
-                    loading="lazy"
-                    width={80}
-                    height={80}
-                    alt="image"
-                    src={nftMetadata["image"]}
-                  />
-                ) : (
-                  "-"
-                )}
+              <div>
+                <div className="text-gray-700 font-bold mb-2">Name</div>
+                <div className="text-gray-600">{nftMetadata ? nftMetadata["name"] : "-"}</div>
+              </div>
+              <div>
+                <div className="text-gray-700 font-bold mb-2">Description</div>
+                <div className="text-gray-600">{nftMetadata ? nftMetadata["description"] : "-"}</div>
+              </div>
+              <div>
+                <div className="text-gray-600">
+                  {nftMetadata["image"] ? (
+                    <Image
+                      decoding="async"
+                      loading="lazy"
+                      width={80}
+                      height={80}
+                      alt="image"
+                      src={nftMetadata["image"]}
+                    />
+                  ) : (
+                    "-"
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        {nftBalance == 0 ? (
-          <form onSubmit={handleFormSubmit}>
-            <div className="mb-4 my-5">
-              <label htmlFor="name" className="block font-medium mb-2">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={name}
-                onChange={handleNameChange}
-                className="w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="description" className="block font-medium mb-2">
-                Description
-              </label>
-              <input
-                type="text"
-                id="description"
-                name="description"
-                value={description}
-                onChange={handleDescriptionChange}
-                className="w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="image" className="block font-medium mb-2">
-                Image
-              </label>
-              <Dropzone onDrop={handleImageDrop}>
-                {({ getRootProps, getInputProps }) => (
-                  <div
-                    {...getRootProps()}
-                    className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
-                  >
-                    <input {...getInputProps()} />
-                    {imageFile ? (
-                      <p>{imageFile.name}</p>
-                    ) : (
-                      <p>Drag 'n' drop an image here, or click to select a file</p>
-                    )}
-                  </div>
-                )}
-              </Dropzone>
-            </div>
-            <button
-              type="submit"
-              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
-            >
-              Mint
-            </button>
-          </form>
-        ) : (
-          <div></div>
-        )}
-        {/* 
-        <div className="divider"></div>
-        <h1 className="text-3xl font-bold mb-6 text-primary">Create Subscription</h1>
-        <form onSubmit={createMecenateSubscription} className="text-secondary">
-          <label htmlFor="name" className="block font-medium">
-            Subscription Name{" "}
-          </label>
-          <input
-            type="text"
-            name="subscriptionName"
-            id="subscriptionName"
-            className="block w-full px-3 py-2 mt-1 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            onChange={e => setSubscriptionName(e.target.value)}
-          />
-          <label htmlFor="name" className="block font-medium">
-            Subscription Description{" "}
-          </label>
-          <input
-            type="text"
-            name="subscriptionDescription"
-            id="subscriptionDescription"
-            className="block w-full px-3 py-2 mt-1 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            onChange={e => setSubscriptionDescription(e.target.value)}
-          />
-          <label htmlFor="name" className="block font-medium">
-            Subscription Duration{" "}
-          </label>
-          <input
-            type="text"
-            name="subscriptionDuration"
-            id="subscriptionDuration"
-            className="block w-full px-3 py-2 mt-1 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            onChange={e => setSubscriptionDuration(Number(e.target.value))}
-          />
-          <label htmlFor="name" className="block font-medium">
-            Subscription Fee{" "}
-          </label>{" "}
-          <input
-            type="text"
-            name="subscriptionFee"
-            id="subscriptionfee"
-            className="block w-full px-3 py-2 mt-1 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            onChange={e => setSubscriptionFee(Number(e.target.value))}
-          />
-          <button
-            type="submit"
-            className="bg-indigo-500 text-white font-medium py-2 px-6 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 my-5"
-          >
-            Create Subscription
-          </button>
-        </form>
-        <div className="flex flex-col items-center justify-center w-full max-w-md p-10 bg-slate-200 mt-6">
-          <h2 className="text-lg font-medium text-gray-900">Mecenate Subscriptions</h2>
-          {subscriptions &&
-            subscriptions.map((subscription, index) => (
-              <div key={index} className="mt-2">
-                <a href={`/viewMecenate?addr=${subscription}`} className="text-indigo-600 hover:text-indigo-900">
-                  {subscription}
-                </a>
+          {nftBalance == 0 ? (
+            <form onSubmit={handleFormSubmit}>
+              <div className="mb-4 my-5">
+                <label htmlFor="name" className="block font-medium mb-2">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={name}
+                  onChange={handleNameChange}
+                  className="w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+                />
               </div>
-            ))}
-        </div> */}
-        <div className="my-5">
-          <button
-            className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
-            onClick={createPair}
-            disabled={nftBalance == 0}
-          >
-            Create Key Pair
-          </button>
-          <button
-            className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700"
-            onClick={async () => {
-              await signIn();
-            }}
-            disabled={nftBalance == 0}
-          >
-            Sign In
-          </button>
+              <div className="mb-4">
+                <label htmlFor="description" className="block font-medium mb-2">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  id="description"
+                  name="description"
+                  value={description}
+                  onChange={handleDescriptionChange}
+                  className="w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="image" className="block font-medium mb-2">
+                  Image
+                </label>
+                <Dropzone onDrop={handleImageDrop}>
+                  {({ getRootProps, getInputProps }) => (
+                    <div
+                      {...getRootProps()}
+                      className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
+                    >
+                      <input {...getInputProps()} />
+                      {imageFile ? (
+                        <p>{imageFile.name}</p>
+                      ) : (
+                        <p>Drag 'n' drop an image here, or click to select a file</p>
+                      )}
+                    </div>
+                  )}
+                </Dropzone>
+              </div>
+              <button
+                type="submit"
+                className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
+              >
+                Mint
+              </button>
+            </form>
+          ) : (
+            <div></div>
+          )}
+          <div class="max-w-3xl text-center my-20">
+            <h1 class="text-6xl font-bold mb-8">Generate your KeyPair.</h1>
+            <p class="text-xl  mb-8">
+              Once you create your identity, you will be able to generate your own personal public and private key that
+              will allow you to interact with the protocol. You can encrypt and decrypt the information you want to
+              share with other users in a completely anonymous and decentralized manner.
+            </p>
+          </div>
+          <div className="my-5">
+            <button
+              className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
+              onClick={createPair}
+              disabled={nftBalance == 0}
+            >
+              Create Key Pair
+            </button>
+            <button
+              className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700"
+              onClick={async () => {
+                await signIn();
+              }}
+              disabled={nftBalance == 0 || pubKey == ""}
+            >
+              Sign In
+            </button>
+          </div>
         </div>
       </div>
     </div>

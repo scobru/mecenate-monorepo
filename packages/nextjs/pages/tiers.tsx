@@ -48,7 +48,7 @@ const Tiers: NextPage = () => {
   const [subscriptions, setSubscriptions] = React.useState<Array<string>>([]);
   const [subscriptionName, setSubscriptionName] = React.useState("");
   const [subscriptionDescription, setSubscriptionDescription] = React.useState("");
-  const [subscriptionFee, setSubscriptionFee] = React.useState(0);
+  const [subscriptionFee, setSubscriptionFee] = React.useState("");
   const [subscriptionDuration, setSubscriptionDuration] = React.useState(0);
 
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateTierFactory");
@@ -135,7 +135,7 @@ const Tiers: NextPage = () => {
         signer?.getAddress(),
         subscriptionName,
         subscriptionDescription,
-        parseEther(subscriptionFee.toString()),
+        parseEther(subscriptionFee),
         subscriptionDuration,
         {
           value: fee,

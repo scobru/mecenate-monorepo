@@ -32,7 +32,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     feeds.push(address(feed));
     numFeeds++;
     createdContracts[address(feed)] = true;
-
     emit FeedCreated(address(feed));
     return address(feed);
   }

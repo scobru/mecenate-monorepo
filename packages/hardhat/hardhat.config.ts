@@ -77,6 +77,10 @@ const config: HardhatUserConfig = {
       url: `https://polygon-mumbai.g.alchemy.com/v2/${providerApiKey}`,
       accounts: [deployerPrivateKey],
     },
+    bscTestnet: {
+      url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
+      accounts: [deployerPrivateKey],
+    },
   },
   verify: {
     etherscan: {

@@ -7,7 +7,7 @@ import { ContractInterface, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { useRouter } from "next/router";
 import mecenateABI from "../generated/mecenateABI.json";
-import { parseEther } from "ethers/lib/utils";
+import { formatEther, parseEther } from "ethers/lib/utils";
 
 const ViewMecenate: NextPage = () => {
   const { chain } = useNetwork();
@@ -28,12 +28,12 @@ const ViewMecenate: NextPage = () => {
 
   const [nftData, setNftData] = useState<any>([]);
 
-  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "Identity");
+  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
 
   let identityAddress!: string;
   let identityAbi: ContractInterface[] = [];
 
-  const deployedContract = getDeployedContract(chain?.id.toString(), "Mecenate");
+  const deployedContract = getDeployedContract(chain?.id.toString(), "MecenateTier");
   let ctxAbi: MecenateInterface[] = [];
 
   if (deployedContract) {
@@ -79,8 +79,11 @@ const ViewMecenate: NextPage = () => {
   };
 
   const fetchDataIdentity = async function fetchDataIdentity() {
-    const _id = await identity?.identityByAddress(ctx?.owner());
-    const _nftData = await identity?.tokenURI(_id);
+    const owner = await ctx?.owner();
+    const _id = await identity?.identityByAddress(owner);
+    console.log(_id);
+    const _nftData = await identity?.tokenURI(await _id);
+    console.log(_nftData);
     // fetch url content
     const res = await fetch(_nftData);
     const _nftDataJson = await res.json();
@@ -125,7 +128,7 @@ const ViewMecenate: NextPage = () => {
             <div className="flex flex-col">
               <div className="flex flex-col">
                 <span className="text-lg mb-2 font-base">
-                  Fee: <strong>{Number(fee)} ETH</strong>
+                  Fee: <strong>{formatEther(fee)} ETH</strong>
                 </span>
                 <span className="text-lg mb-2 font-base">
                   Duration: <strong>{formatDate(Number(duration))}</strong>{" "}
@@ -137,7 +140,7 @@ const ViewMecenate: NextPage = () => {
           <label className="mb-5 block">
             Last Payment: <span className="font-base">{Date(Number(lastPayment))}</span>
           </label>
-          <button type="submit" className="btn btn-primary" disabled={!account || !signer}>
+          <button type="submit" className="btn btn-primary" disabled={!account || !signer || isSub}>
             Subscribe
           </button>
         </form>

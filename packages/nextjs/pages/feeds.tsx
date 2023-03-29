@@ -91,12 +91,25 @@ const Feeds: NextPage = () => {
 
   return (
     <div className="flex flex-col items-center pt-10 text-black">
+      <div className="max-w-3xl text-center my-20">
+        <h1 className="text-6xl font-bold mb-8">Data Privacy and Security Redefined with Mecenate Protocol</h1>
+        <p className="text-xl  mb-8">
+          Introducing my personal feed, powered by Mecenate Protocol, where I can share information and find anonymous,
+          trustless buyers. Mecenate Protocol allows me to securely and privately post my information and receive
+          payments directly from interested parties without any intermediaries. With Mecenate Protocol, I can be
+          confident that my information is protected and that I'm getting fair compensation for it. Join me in
+          revolutionizing the way we share information with Mecenate Protocol.
+        </p>
+      </div>
       <div className="flex items-center mb-5">
-        <button className="bg-primary  hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2" onClick={buildFeed}>
-          Create Feed
+        <button
+          className="btn-wide bg-primary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
+          onClick={buildFeed}
+        >
+          Create
         </button>
         <button
-          className="bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md mr-2"
+          className="btn-wide bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md mr-2"
           onClick={async () => {
             await getFeedsOwned();
           }}
@@ -104,7 +117,7 @@ const Feeds: NextPage = () => {
           <i className="fas fa-user-alt mr-2"></i> Your Feeds
         </button>
         <button
-          className="bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md"
+          className="btn-wide bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md"
           onClick={async () => {
             await getFeeds();
           }}
@@ -113,41 +126,62 @@ const Feeds: NextPage = () => {
         </button>
       </div>
 
-      <div className="w-full">
+      <div className="grid grid-cols-1 gap-4 my-10">
         {feeds.map((feed, i) => (
-          <div key={i} className="card w-full bg-base-100 shadow-xl px-2 py-2 text-info">
+          <div key={i} className="card bg-base-100 shadow-xl p-2">
             <a href={`/viewFeed?addr=${feed}`}>
-              <div className="grid grid-cols-1 p-5">
-                <div className="col-span-1">
-                  <div className=" mb-2">
-                    <strong>Address:</strong>
-                    {feed}
-                  </div>
-                  <div className=" mb-2">
-                    <strong>Seller:</strong> {feedsInfos[i].seller}
-                  </div>
-                  <div className=" mb-2">
-                    <strong>Seller Stake</strong> {formatEther(feedsInfos[i].sellerStake)}
-                  </div>
-                  <div className=" mb-2">
-                    <strong>Buyer:</strong> {feedsInfos[i].buyer}
-                  </div>
-                  <div className=" mb-2">
-                    <strong>Buyer Stake</strong>
-                    {formatEther(feedsInfos[i].buyerStake)}
-                  </div>
-                  <div className=" mb-2">
-                    <strong>Operator::</strong> {feedsInfos[i].operator}
-                  </div>
-                  <div className=" mb-2">
-                    <strong>Total Stake</strong> {feedsInfos[i].totalStaked}
-                  </div>
-                  <div className=" mb-2">
-                    <strong>Hash count</strong> {feedsInfos[i].totalCount}
-                  </div>
-                </div>
-                <div className="col-span-1"></div>
-              </div>
+              <table className="w-full border border-base-300">
+                <tbody>
+                  <tr>
+                    <td className="px-2 py-1 border-r border-base-300">
+                      <strong>Address:</strong>
+                    </td>
+                    <td className="px-2 py-1">{feed}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 border-r border-base-300">
+                      <strong>Seller:</strong>
+                    </td>
+                    <td className="px-2 py-1">{feedsInfos[i].seller}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 border-r border-base-300">
+                      <strong>Seller Stake:</strong>
+                    </td>
+                    <td className="px-2 py-1">{formatEther(feedsInfos[i].sellerStake)} ETH</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 border-r border-base-300">
+                      <strong>Buyer:</strong>
+                    </td>
+                    <td className="px-2 py-1">{feedsInfos[i].buyer}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 border-r border-base-300">
+                      <strong>Buyer Stake:</strong>
+                    </td>
+                    <td className="px-2 py-1">{formatEther(feedsInfos[i].buyerStake)} ETH</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 border-r border-base-300">
+                      <strong>Operator:</strong>
+                    </td>
+                    <td className="px-2 py-1">{feedsInfos[i].operator}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 border-r border-base-300">
+                      <strong>Total Stake:</strong>
+                    </td>
+                    <td className="px-2 py-1">{feedsInfos[i].totalStaked} ETH</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 border-r border-base-300">
+                      <strong>Hash Count:</strong>
+                    </td>
+                    <td className="px-2 py-1">{feedsInfos[i].totalCount}</td>
+                  </tr>
+                </tbody>
+              </table>
             </a>
           </div>
         ))}

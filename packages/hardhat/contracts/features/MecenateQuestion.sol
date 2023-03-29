@@ -1,9 +1,11 @@
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract MecenateQuestion is Ownable {
+  using SafeMath for uint256;
+
   enum Choice {
     Yes,
     No,
@@ -36,12 +38,14 @@ contract MecenateQuestion is Ownable {
   mapping(uint256 => mapping(Choice => mapping(address => uint256))) public shares;
   mapping(uint256 => mapping(address => Choice)) public vote;
   mapping(uint256 => address[]) public stakers;
+  mapping(uint256 => mapping(address => uint256)) public penalties;
+
+  Prediction[] public predictionList;
 
   uint256 public voteCounter;
   uint256 public predictionCount;
-  uint256 public creatorFee = 100;
-  uint256 public votingPeriod = 3 days;
-  uint256 public claimingPeriod = 7 days;
+  uint256 public votingPeriod = 5 days;
+  uint256 public claimingPeriod = 1 days;
   address public treasury;
 
   constructor(address _treasury, address _creator) {
@@ -49,7 +53,7 @@ contract MecenateQuestion is Ownable {
     _transferOwnership(_creator);
   }
 
-  function createPrediction(string memory _question, uint256 _endTime) public payable {
+  function createPrediction(string memory _question, uint256 _endTime) external payable {
     require(msg.value > 0, "Amount should be greater than 0");
     require(_endTime > block.timestamp, "End time should be in the future");
 
@@ -66,72 +70,54 @@ contract MecenateQuestion is Ownable {
       fees: 0
     });
 
+    stakers[predictionCount].push(msg.sender);
+    predictionList.push(predictions[predictionCount]);
     predictionCount++;
   }
 
-  function stake(uint256 _predictionId, Choice _choice) public payable {
+  function stake(uint256 _predictionId, bool _choice) external payable {
     require(msg.value > 0, "Amount should be greater than 0");
     require(predictions[_predictionId].endTime > block.timestamp, "Prediction has ended");
     require(predictions[_predictionId].status == Status.Open, "Prediction is not Open");
 
     // subtract creator Fee
-    uint256 creatorFeeAmount = (msg.value * creatorFee) / 10000;
-    predictions[_predictionId].fees = predictions[_predictionId].fees + creatorFeeAmount;
-    uint256 amountAfter = (msg.value - creatorFeeAmount);
+    uint256 creatorFeeAmount = (msg.value).mul(100).div(10000);
+    uint256 amountAfter = (msg.value).sub(creatorFeeAmount);
 
-    uint256 sharesToMint = getTokensToMint(
-      amountAfter,
-      predictions[_predictionId].totalYesStaked,
-      predictions[_predictionId].totalNoStaked,
-      _choice
-    );
+    predictions[_predictionId].fees += creatorFeeAmount;
 
-    if (_choice == Choice.Yes) {
-      predictions[_predictionId].totalYesStaked = predictions[_predictionId].totalYesStaked + amountAfter;
-      shares[_predictionId][Choice.Yes][msg.sender] = shares[_predictionId][Choice.Yes][msg.sender] + sharesToMint;
-    } else if (_choice == Choice.No) {
-      predictions[_predictionId].totalNoStaked = (predictions[_predictionId].totalNoStaked + amountAfter);
-      shares[_predictionId][Choice.No][msg.sender] = (shares[_predictionId][Choice.No][msg.sender] + sharesToMint);
+    if (_choice == true) {
+      predictions[_predictionId].totalYesStaked += amountAfter;
+      shares[_predictionId][Choice.Yes][msg.sender] += amountAfter;
     }
 
-    for (uint256 i = 0; i < stakers[_predictionId].length; i++) {
-      if (stakers[_predictionId][i] == msg.sender) {
-        vote[_predictionId][msg.sender] = Choice.None;
-      } else {
-        stakers[_predictionId].push(msg.sender);
-        vote[_predictionId][msg.sender] = Choice.None;
-      }
+    if (_choice == false) {
+      predictions[_predictionId].totalNoStaked += amountAfter;
+      shares[_predictionId][Choice.No][msg.sender] += amountAfter;
     }
 
-    emit UserAction(_predictionId, msg.sender, "stake", msg.value);
+    stakers[_predictionId].push(msg.sender);
+
+    vote[_predictionId][msg.sender] = Choice.None;
+
+    emit UserAction(_predictionId, msg.sender, "stake", amountAfter);
   }
 
-  function getTokensToMint(
-    uint256 _amount,
-    uint256 _totalYesStaked,
-    uint256 _totalNoStaked,
-    Choice _choice
-  ) public view returns (uint256) {
-    uint256 existingStakedAmount = (_choice == Choice.Yes) ? _totalYesStaked : _totalNoStaked;
-    uint256 existingShares = 1e18; // 1:1 ratio for the first user
-    if (existingStakedAmount > 0) {
-      existingShares = (_amount * 1e18) / existingStakedAmount;
-    }
-
-    return existingShares;
-  }
-
-  function resolvePrediction(uint256 _predictionId, Choice _choice) public {
+  function resolvePrediction(uint256 _predictionId, bool _choice) public {
     Prediction storage prediction = predictions[_predictionId];
     require(prediction.status == Status.Open, "Prediction is not Open");
     require(msg.sender == prediction.creator, "Only the creator can resolve the prediction");
     require(prediction.endTime <= block.timestamp, "Prediction time has not ended");
-    require(_choice == Choice.Yes || _choice == Choice.No, "Answer should be Yes or No");
+    require(_choice == true || _choice == false, "Answer should be Yes or No");
     prediction.status = Status.Resolve;
-    prediction.answer = _choice;
+    if (_choice == true) {
+      prediction.answer = Choice.Yes;
+    } else {
+      prediction.answer = Choice.No;
+    }
   }
 
-  function voteForCorrectAnswer(uint256 _predictionId, Choice _choice) public {
+  function voteForCorrectAnswer(uint256 _predictionId, bool _choice) public {
     Prediction storage prediction = predictions[_predictionId];
     require(
       prediction.status == Status.Resolve || prediction.status == Status.Close,
@@ -139,20 +125,26 @@ contract MecenateQuestion is Ownable {
     );
     require(vote[_predictionId][msg.sender] == Choice.None, "You have already voted");
     require(msg.sender != prediction.creator, "Creator cannot vote");
-    require(_choice == Choice.Yes || _choice == Choice.No, "Answer should be Yes or No");
+    require(_choice == true || _choice == false, "Answer should be Yes or No");
     require(
       shares[_predictionId][Choice.Yes][msg.sender] > 0 || shares[_predictionId][Choice.No][msg.sender] > 0,
       "You have no shares to vote"
     );
 
-    vote[_predictionId][msg.sender] = _choice;
+    if (_choice == true) {
+      vote[_predictionId][msg.sender] = Choice.Yes;
+    } else {
+      vote[_predictionId][msg.sender] = Choice.No;
+    }
+
     voteCounter++;
+
     if (block.timestamp > (prediction.endTime + votingPeriod)) {
       prediction.status = Status.Vote;
     }
   }
 
-  function countVote(uint256 _predictionId) public {
+  function countVote(uint256 _predictionId) private {
     require(voteCounter > 0, "No vote to count");
     Prediction storage prediction = predictions[_predictionId];
     uint256 yesVoteWeight = 0;
@@ -180,6 +172,9 @@ contract MecenateQuestion is Ownable {
     Prediction storage prediction = predictions[_predictionId];
     require(prediction.endTime <= block.timestamp, "Prediction time has not ended");
     require(prediction.status == Status.Vote, "Prediction is not Voted");
+    if (voteCounter > 0) {
+      countVote(_predictionId);
+    }
     if (prediction.correctAnswer == prediction.answer) {
       prediction.status = Status.Resolve;
     } else {
@@ -189,62 +184,51 @@ contract MecenateQuestion is Ownable {
   }
 
   function claim(uint256 _predictionId) public {
-    require(predictions[_predictionId].status == Status.Resolve, "Prediction is not Resolved");
     Prediction storage prediction = predictions[_predictionId];
+    require(prediction.status == Status.Resolve, "Prediction is not Resolved");
     uint256 userShares;
-
     uint256 reward;
 
     if (prediction.correctAnswer == Choice.Yes) {
       userShares = shares[_predictionId][Choice.Yes][msg.sender];
       require(userShares > 0, "No shares to claim");
       shares[_predictionId][Choice.Yes][msg.sender] = 0;
-      reward = (prediction.totalYesStaked / 1e18) * userShares;
-      payable(msg.sender).transfer(reward);
+      reward = (prediction.totalNoStaked / 1 ether) * userShares;
     } else if (prediction.correctAnswer == Choice.No) {
       userShares = shares[_predictionId][Choice.No][msg.sender];
       require(userShares > 0, "No shares to claim");
       shares[_predictionId][Choice.No][msg.sender] = 0;
-      reward = (prediction.totalNoStaked / 1e18) * userShares;
-      payable(msg.sender).transfer(reward);
+      reward = (prediction.totalYesStaked / 1 ether) * userShares;
+    } else {
+      revert("Prediction is not resolved yet");
     }
+
+    if (penalties[_predictionId][msg.sender] > 0) {
+      reward = reward - penalties[_predictionId][msg.sender];
+      penalties[_predictionId][msg.sender] = 0;
+    }
+
+    require(reward > 0, "Reward should be greater than 0");
+    payable(msg.sender).transfer(reward);
 
     emit UserAction(_predictionId, msg.sender, "claim", reward);
   }
 
-  function punishCreator(uint256 _predictionId) internal {
+  function punishCreator(uint256 _predictionId) private {
     Prediction storage prediction = predictions[_predictionId];
-    uint256 penalty = (prediction.totalStaked / 10);
-    uint256 totalUserStakes = (prediction.totalYesStaked + prediction.totalNoStaked);
+    uint256 penalty = prediction.totalStaked / 10;
 
-    if (totalUserStakes == 0) {
+    // Distribute the penalty equally to all stakers
+    uint256 stakerCount = stakers[_predictionId].length;
+    if (stakerCount == 0) {
       return;
     }
 
-    // Burn the creator's tokens in totalStaked
-    prediction.totalStaked = 0;
-
-    for (uint256 i = 0; i < stakers[_predictionId].length; i++) {
+    uint256 userLoss = penalty / stakerCount;
+    for (uint256 i = 0; i < stakerCount; i++) {
       address currentUser = stakers[_predictionId][i];
-      uint256 userYesStake = shares[_predictionId][Choice.Yes][currentUser];
-      uint256 userNoStake = shares[_predictionId][Choice.No][currentUser];
-      uint256 userTotalStakes = userYesStake + userNoStake;
-
-      if (userTotalStakes > 0) {
-        uint256 userLoss = (penalty * userTotalStakes) / totalUserStakes;
-
-        // Prevent underflow in the following calculations
-        if (userLoss < userYesStake) {
-          shares[_predictionId][Choice.Yes][currentUser] = (userYesStake - userLoss);
-        } else {
-          shares[_predictionId][Choice.Yes][currentUser] = 0;
-        }
-
-        if (userLoss < userNoStake) {
-          shares[_predictionId][Choice.No][currentUser] = (userYesStake - userLoss);
-        } else {
-          shares[_predictionId][Choice.No][currentUser] = 0;
-        }
+      if (shares[_predictionId][Choice.Yes][currentUser] + shares[_predictionId][Choice.No][currentUser] > 0) {
+        penalties[_predictionId][currentUser] += userLoss;
       }
     }
 
@@ -266,9 +250,9 @@ contract MecenateQuestion is Ownable {
     require(prediction.endTime + votingPeriod + claimingPeriod < block.timestamp, "Prediction is still active");
     require(prediction.correctAnswer == Choice.None, "Prediction already resolved");
 
-    uint256 balance = address(this).balance;
-    if (balance > 0) {
-      payable(treasury).transfer(balance);
+    uint256 predictionBalance = prediction.totalYesStaked + prediction.totalNoStaked + prediction.fees;
+    if (predictionBalance > 0) {
+      payable(treasury).transfer(predictionBalance);
     }
 
     prediction.status = Status.Open;
@@ -278,7 +262,8 @@ contract MecenateQuestion is Ownable {
     prediction.fees = 0;
     prediction.correctAnswer = Choice.None;
     prediction.answer = Choice.None;
-    prediction.endTime = 0;
     voteCounter = 0;
   }
+
+  receive() external payable {}
 }
