@@ -7,6 +7,8 @@ import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 import "../library/Structures.sol";
 import "../modules/FeedViewer.sol";
 
+// Comment
+
 interface IUsers {
   function getUserData(address user) external view returns (Structures.User memory);
 
