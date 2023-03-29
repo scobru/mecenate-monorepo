@@ -28,10 +28,13 @@ abstract contract Creation is Data, Events, Staking {
   function createPost(
     bytes memory encryptedHash,
     Structures.PostType postType,
-    Structures.PostDuration postDuration
+    Structures.PostDuration postDuration,
+    address buyer
   ) external payable returns (Structures.Post memory) {
     require(IUsers(usersModuleContract).checkifUserExist(msg.sender), "User does not exist");
-    require(msg.value > 0 || post.postdata.escrow.stake > 0, "Stake is required");
+    require(msg.value > 0 && post.postdata.escrow.stake > 0, "Stake is required");
+    require(post.postdata.escrow.payment > 0, "Payment is required");
+
     require(usersModuleContract != address(0), "Users module contract not set");
     require(identityContract != address(0), "Identity contract not set");
     require(
@@ -42,6 +45,7 @@ abstract contract Creation is Data, Events, Staking {
     );
 
     uint256 stake = _addStake(msg.sender, msg.value);
+
     uint256 duration;
 
     if (Structures.PostDuration(postDuration) == Structures.PostDuration.OneDay) {
@@ -66,7 +70,7 @@ abstract contract Creation is Data, Events, Staking {
       settings: Structures.PostSettings({
         postType: Structures.PostType(postType),
         status: Structures.PostStatus.Proposed,
-        buyer: address(0),
+        buyer: buyer,
         buyerPubKey: "0x00",
         seller: msg.sender,
         creationTimeStamp: block.timestamp,

@@ -68,6 +68,23 @@ library Structures {
     bytes publicKey;
   }
 
+  struct UserCentral {
+    uint256 mecenateID;
+    address wallet;
+    bytes publicKey;
+    bytes secretKey;
+  }
+
+  struct BayRequest {
+    bytes32 request;
+    address buyer;
+    address seller;
+    uint256 payment;
+    uint256 stake;
+    address postAddress;
+    bool accepted;
+  }
+
   struct Feed {
     address operator;
     address buyer;
@@ -76,5 +93,7 @@ library Structures {
     uint256 buyerStake;
     uint256 totalStake;
     uint256 postCount;
+    uint256 buyerPayment;
+    uint256 sellerPayment;
   }
 }

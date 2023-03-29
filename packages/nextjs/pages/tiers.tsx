@@ -159,54 +159,64 @@ const Tiers: NextPage = () => {
   }, [signer]);
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10 text-black">
+    <div className="flex items-center flex-col flex-grow pt-10 text-base-content">
+      <div className="max-w-3xl text-center my-20">
+        <h1 className="text-6xl font-bold mb-20">
+          Monetize your products, DApps, or content with our Tier Subscription
+        </h1>
+        <p className="text-xl  mb-8">
+          Increase user loyalty by offering premium content and exclusive rewards to subscribers, unlocking a new
+          revenue stream for your business. Try our Patreon-like service now and enjoy guaranteed, recurring income for
+          your app
+        </p>
+      </div>
       <div className="w-max">
-        <div className="card w-96 bg-base-100 shadow-xl px-5 py-5">
-          <h1 className="card-title text-primary text-4xl">Create Tier</h1>
-          <form onSubmit={createMecenateSubscription} className="text-secondary w-full">
-            <label htmlFor="name" className="block font-medium">
+        <div className="card w-96 bg-base-100 shadow-xl px-5 py-5 mb-20">
+          <h1 className="card-title text-base-content text-4xl text-center">Create Tier</h1>
+          <form onSubmit={createMecenateSubscription} className="text-secondary w-full my-2">
+            <label htmlFor="name" className="block font-medium text-neutral-400">
               Subscription Name{" "}
             </label>
             <input
               type="text"
               name="subscriptionName"
               id="subscriptionName"
-              className="block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="text-neutral-500 block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionName(e.target.value)}
             />
-            <label htmlFor="name" className="block font-medium">
+            <label htmlFor="name" className="block font-medium text-neutral-400">
               Subscription Description{" "}
             </label>
             <input
               type="text"
               name="subscriptionDescription"
               id="subscriptionDescription"
-              className="block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="text-neutral-500 block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionDescription(e.target.value)}
             />
-            <label htmlFor="name" className="block font-medium">
+            <label htmlFor="name" className="block font-medium text-neutral-400">
               Subscription Duration{" "}
             </label>
             <input
               type="text"
               name="subscriptionDuration"
               id="subscriptionDuration"
-              className="block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className=" text-neutral-500 block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionDuration(Number(e.target.value))}
             />
-            <label htmlFor="name" className="block font-medium">
+            <label htmlFor="name" className="block font-medium text-neutral-400">
               Subscription Fee{" "}
             </label>{" "}
             <input
               type="text"
               name="subscriptionFee"
               id="subscriptionfee"
-              className="block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className=" text-neutral-500 block w-full px-3 py-2 my-5 text-sm border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionFee(e.target.value)}
             />
             <button
               type="submit"
-              className="bg-primary text-white font-medium py-2 px-6 rounded-md hover:bg-accent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 my-5"
+              className="btn-wide text-base-content bg-secondary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
             >
               Create Subscription
             </button>

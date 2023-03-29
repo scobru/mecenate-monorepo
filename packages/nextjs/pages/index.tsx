@@ -18,6 +18,19 @@ const Home: NextPage = () => {
             <span className="block text-2xl mb-2">Welcome to</span>
             <span className="block text-4xl font-bold">M E C E N A T E</span>
           </h1>
+          <h1 className="text-center mb-8">
+            <span className="block text-2xl mb-2 font-bold">ID</span>
+          </h1>
+          <p className="text-center  text-lg w-1/3 justify-center mx-auto">Create your own unique NFT-based identity</p>
+          <h1 className="text-center mb-8">
+            <span className="block text-2xl mb-2 font-bold">FEEDS</span>
+          </h1>
+          <p className="text-center  text-lg w-1/3 justify-center mx-auto">
+            Lock up a cryptocurrency reward. Anyone can respond. Destroy their stake if you don't get what you want.
+          </p>
+          <h1 className="text-center mb-8 mt-8">
+            <span className="block text-2xl mb-2 font-bold">TIERS</span>
+          </h1>
           <p className="text-center  text-lg w-1/3 justify-center mx-auto">
             Mecenate is the perfect solution for creators seeking to monetize their content and fans looking to support
             their favorite creators. With our smart contract platform, creators can set their own subscription fee and
@@ -25,21 +38,14 @@ const Home: NextPage = () => {
             on the Ethereum blockchain and start earning or supporting your favorite creators in a fair and transparent
             way!
           </p>
-        </div>
-
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl font-bold my-5">Get Started</span>
+          <h1 className="text-center mb-8">
+            <span className="block text-2xl mb-2 font-bold">BOX</span>
           </h1>
-          <p className="text-center text-lg justify-center mx-auto">
-            <li>Mint Your Creator Identity NFT</li>
-            <li>Create your subscription for your fan</li>
-            <button className="btn btn-primary my-5">
-              <a href="/createMecenate">Create</a>
-            </button>
+          <p className="text-center  text-lg w-1/3 justify-center mx-auto">
+            Lock up a cryptocurrency for a selected period of time. Withdraw your stake at any time, with a secret
+            signature.
           </p>
         </div>
-
         <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
           <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
             <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">

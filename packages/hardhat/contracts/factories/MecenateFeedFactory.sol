@@ -14,6 +14,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
   uint256 numFeeds;
   address[] public feeds;
   mapping(address => bool) public createdContracts;
+  mapping(address => bool) public authorized;
   address public identityContract;
   address public usersMouduleContract;
 
@@ -25,6 +26,10 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     _transferOwnership(msg.sender);
   }
 
+  function setAuthorized(address _addr) public onlyOwner {
+    authorized[_addr] = true;
+  }
+
   function buildFeed() public returns (address) {
     require(MecenateIdentity(identityContract).balanceOf(msg.sender) > 0, "user does not have identity");
     require(IMecenateUsers(usersMouduleContract).checkifUserExist(msg.sender), "user does not exist");
@@ -33,6 +38,25 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     numFeeds++;
     createdContracts[address(feed)] = true;
     emit FeedCreated(address(feed));
+    return address(feed);
+  }
+
+  function buildFeedFromBay(address _seller) public returns (address) {
+    require(authorized[msg.sender], "not authorized");
+
+    require(MecenateIdentity(identityContract).balanceOf(_seller) > 0, "user does not have identity");
+    require(IMecenateUsers(usersMouduleContract).checkifUserExist(_seller), "user does not exist");
+
+    MecenateFeed feed = new MecenateFeed(_seller, usersMouduleContract, identityContract);
+
+    feeds.push(address(feed));
+
+    numFeeds++;
+
+    createdContracts[address(feed)] = true;
+
+    emit FeedCreated(address(feed));
+
     return address(feed);
   }
 

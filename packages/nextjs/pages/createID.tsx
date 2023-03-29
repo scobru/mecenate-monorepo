@@ -307,11 +307,11 @@ const CreateID: NextPage = () => {
   }, [signer]);
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10 text-black">
-      <div class="flex flex-col items-center justify-center">
-        <div class="max-w-3xl text-center">
-          <h1 class="text-6xl font-bold mb-8">Identity NFT DApp</h1>
-          <p class="text-xl  mb-8">
+    <div className="flex items-center flex-col flex-grow pt-10 text-base-content">
+      <div className="flex flex-col items-center justify-center">
+        <div className="max-w-3xl text-center">
+          <h1 className="text-6xl font-bold mb-8">Identity NFT DApp</h1>
+          <p className="text-xl  mb-8">
             Elevate your identity with Identity NFTs - the new way to express who you are. Our DApp lets you create your
             own unique NFT-based identity, complete with customizable name, description, and image. Once created, your
             identity is stored on the Ethereum blockchain, giving you complete control and ownership over your digital
@@ -424,9 +424,10 @@ const CreateID: NextPage = () => {
           ) : (
             <div></div>
           )}
-          <div class="max-w-3xl text-center my-20">
-            <h1 class="text-6xl font-bold mb-8">Generate your KeyPair.</h1>
-            <p class="text-xl  mb-8">
+          <div className="divider"></div>
+          <div className="max-w-3xl text-center my-20 text-base-content">
+            <h1 className="text-6xl font-bold mb-8">Generate your KeyPair.</h1>
+            <p className="text-xl  mb-8">
               Once you create your identity, you will be able to generate your own personal public and private key that
               will allow you to interact with the protocol. You can encrypt and decrypt the information you want to
               share with other users in a completely anonymous and decentralized manner.

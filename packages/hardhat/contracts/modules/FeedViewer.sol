@@ -12,6 +12,10 @@ interface IFeed {
 
   function getBuyer() external view returns (address);
 
+  function getBuyerPayment() external view returns (uint256);
+
+  function getSellerPayment() external view returns (uint256);
+
   function postCount() external view returns (uint256);
 
   function owner() external view returns (address);
@@ -27,6 +31,8 @@ abstract contract FeedViewer {
     f.buyerStake = IFeed(feed).getStake(f.buyer);
     f.totalStake = IFeed(feed).getTotalStaked();
     f.postCount = IFeed(feed).postCount();
+    f.buyerPayment = IFeed(feed).getBuyerPayment();
+    f.sellerStake = IFeed(feed).getSellerPayment();
     return f;
   }
 

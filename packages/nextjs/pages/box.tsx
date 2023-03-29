@@ -73,6 +73,13 @@ const Box: NextPage = () => {
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black">
+      <div className="max-w-3xl text-center my-20 text-base-content">
+        <h1 className="text-6xl font-bold mb-8">Lock your eth into the box</h1>
+        <p className="text-xl  mb-8">
+          Secure Your Crypto and Plan for the Future with Our Locked Savings Contract: Lock Your ETH for Your Preferred
+          Timeframe and Retrieve it with a Signature Upon Expiration!
+        </p>
+      </div>
       <input
         className="input w-1/2 p-2 border rounded-md shadow-sm my-2 text-primary-focus"
         placeholder="Amount"

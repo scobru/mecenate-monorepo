@@ -90,8 +90,8 @@ const Feeds: NextPage = () => {
   });
 
   return (
-    <div className="flex flex-col items-center pt-10 text-black">
-      <div className="max-w-3xl text-center my-20">
+    <div className="flex flex-col items-center pt-10">
+      <div className="max-w-3xl text-center my-20 text-base-content">
         <h1 className="text-6xl font-bold mb-8">Data Privacy and Security Redefined with Mecenate Protocol</h1>
         <p className="text-xl  mb-8">
           Introducing my personal feed, powered by Mecenate Protocol, where I can share information and find anonymous,
@@ -103,13 +103,13 @@ const Feeds: NextPage = () => {
       </div>
       <div className="flex items-center mb-5">
         <button
-          className="btn-wide bg-primary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
+          className="btn-wide text-base-content bg-secondary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
           onClick={buildFeed}
         >
           Create
         </button>
         <button
-          className="btn-wide bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md mr-2"
+          className="btn-wide text-base-content bg-secondary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
           onClick={async () => {
             await getFeedsOwned();
           }}
@@ -117,7 +117,7 @@ const Feeds: NextPage = () => {
           <i className="fas fa-user-alt mr-2"></i> Your Feeds
         </button>
         <button
-          className="btn-wide bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md"
+          className="btn-wide text-base-content bg-secondary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
           onClick={async () => {
             await getFeeds();
           }}
