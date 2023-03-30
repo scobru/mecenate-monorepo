@@ -1,6 +1,6 @@
 pragma solidity 0.8.19;
 
-interface IFactory {
+interface IMecenateFactory {
   function subscribeFeePercent() external view returns (uint256);
 
   function creationFee() external view returns (uint256);

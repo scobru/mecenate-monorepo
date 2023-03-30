@@ -83,7 +83,7 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
     // Contract constructor arguments
-    args: [identity.address],
+    args: [identity.address, users.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.

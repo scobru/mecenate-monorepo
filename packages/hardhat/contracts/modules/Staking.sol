@@ -3,20 +3,11 @@ pragma solidity 0.8.19;
 import "./Deposit.sol";
 import "./Data.sol";
 
-/// @title Staking
-/// @author scobru
-/// @dev Security contact: security@numer.ai
-/// @dev Version: 1.0.0
-/// @notice This module wraps the Deposit functions and the ERC20 functions to provide combined actions.
 contract Staking is Data, Deposit {
   using SafeMath for uint256;
 
   event StakeBurned(address staker, uint256 amount);
 
-  /// @notice Transfer and deposit ERC20 tokens to this contract.
-  /// @param staker Address of the staker who owns the stake.
-  /// @param amountToAdd uint256 amount of tokens (18 decimals) to be added to the stake.
-  /// @return newStake uint256 amount of tokens (18 decimals) remaining in the stake.
   function _addStake(address staker, uint256 amountToAdd) internal returns (uint256 newStake) {
     // update deposit
     newStake = Deposit._increaseDeposit(staker, amountToAdd);
@@ -24,10 +15,6 @@ contract Staking is Data, Deposit {
     return newStake;
   }
 
-  /// @notice Withdraw some deposited stake and transfer to recipient.
-  /// @param staker Address of the staker who owns the stake.
-  /// @param amountToTake uint256 amount of tokens (18 decimals) to be remove from the stake.
-  /// @return newStake uint256 amount of tokens (18 decimals) remaining in the stake.
   function _takeStake(address staker, uint256 amountToTake) internal returns (uint256 newStake) {
     // update deposit
     newStake = Deposit._decreaseDeposit(staker, amountToTake);
@@ -35,9 +22,6 @@ contract Staking is Data, Deposit {
     return newStake;
   }
 
-  /// @notice Withdraw all deposited stake and transfer to recipient.
-  /// @param staker Address of the staker who owns the stake.
-  /// @return amountTaken uint256 amount of tokens (18 decimals) taken from the stake.
   function _takeFullStake(address staker) internal returns (uint256 amountTaken) {
     // get deposit
     uint256 currentDeposit = Deposit._getDeposit(staker);
@@ -49,10 +33,6 @@ contract Staking is Data, Deposit {
     return currentDeposit;
   }
 
-  /// @notice Burn some deposited stake.
-  /// @param staker Address of the staker who owns the stake.
-  /// @param amountToBurn uint256 amount of tokens (18 decimals) to be burn from the stake.
-  /// @return newStake uint256 amount of tokens (18 decimals) remaining in the stake.
   function _burnStake(address staker, uint256 amountToBurn) internal returns (uint256 newStake) {
     // update deposit
     uint256 newDeposit = Deposit._decreaseDeposit(staker, amountToBurn);
@@ -64,9 +44,6 @@ contract Staking is Data, Deposit {
     return newDeposit;
   }
 
-  /// @notice Burn all deposited stake.
-  /// @param staker Address of the staker who owns the stake.
-  /// @return amountBurned uint256 amount of tokens (18 decimals) taken from the stake.
   function _burnFullStake(address staker) internal returns (uint256 amountBurned) {
     // get deposit
     uint256 currentDeposit = Deposit._getDeposit(staker);
@@ -78,9 +55,6 @@ contract Staking is Data, Deposit {
     return currentDeposit;
   }
 
-  /// @notice Get the amount of tokens (18 decimals) in the stake of a user.
-  /// @param staker Address of the staker who owns the stake.
-  /// @return amount uint256 amount of tokens (18 decimals) in the stake.
   function getStake(address staker) public view returns (uint256 amount) {
     // get deposit
     amount = Deposit._getDeposit(staker);

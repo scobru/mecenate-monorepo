@@ -13,13 +13,6 @@ import "./Events.sol";
 import "./Staking.sol";
 
 abstract contract Finalization is Data, Events, Staking {
-  /**
-   * @notice Finalizes a post
-   * @param  valid - if the post is valid
-   * @param  punishment - punishment for the seller
-   * @return bool - if the post is valid
-   */
-
   function finalizePost(bool valid, uint256 punishment) public virtual returns (bool) {
     require(post.postdata.settings.status == Structures.PostStatus.Submitted, "Post is not Submitted");
 

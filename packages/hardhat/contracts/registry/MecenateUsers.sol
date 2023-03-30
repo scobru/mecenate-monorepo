@@ -6,11 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../library/Structures.sol";
 import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 
-/**
- * @title Users
- * @notice Contract for managing users
- * @dev Contract for managing users
- */
 contract MecenateUsers {
   using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -20,8 +15,6 @@ contract MecenateUsers {
   event UserRegistered(address indexed user, Structures.User data);
 
   address public identityContract;
-
-  // state functions
 
   constructor(address _identityContract) {
     identityContract = _identityContract;
@@ -39,8 +32,6 @@ contract MecenateUsers {
     // emit event
     emit UserRegistered(msg.sender, data);
   }
-
-  // view functions
 
   function getUserData(address user) public view returns (Structures.User memory data) {
     data = _metadata[user];

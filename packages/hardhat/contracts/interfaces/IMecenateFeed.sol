@@ -1,6 +1,6 @@
 pragma solidity 0.8.19;
 
-interface IFeed {
+interface IMecenateFeed {
   function getStake(address user) external view returns (uint256);
 
   function getTotalStaked() external view returns (uint256);

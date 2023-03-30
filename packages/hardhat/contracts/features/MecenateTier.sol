@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "../interfaces/IFactory.sol";
+import "../interfaces/IMecenateFactory.sol";
 
 contract MecenateTier is Ownable {
   using SafeMath for uint256;
@@ -51,8 +51,8 @@ contract MecenateTier is Ownable {
     subscribeCount++;
 
     // Send Fee
-    address factoryOwner = IFactory(factory).owner();
-    uint256 factoryFee = IFactory(factory).subscribeFeePercent();
+    address factoryOwner = IMecenateFactory(factory).owner();
+    uint256 factoryFee = IMecenateFactory(factory).subscribeFeePercent();
     uint256 feeAmount = (msg.value * factoryFee) / 10000;
 
     payable(factoryOwner).transfer(feeAmount);

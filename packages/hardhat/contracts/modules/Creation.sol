@@ -6,11 +6,6 @@ import "./Data.sol";
 import "./Events.sol";
 import "./Staking.sol";
 
-/**
- * @title Creation
- * @author scobru
- * @notice Contract for creating posts
- */
 abstract contract Creation is Data, Events, Staking {
   constructor(address _usersModuleContract, address _identityContract) {
     usersModuleContract = _usersModuleContract;
@@ -18,13 +13,6 @@ abstract contract Creation is Data, Events, Staking {
     post.postdata.settings.status = Structures.PostStatus.Waiting;
   }
 
-  /**
-   * @dev Creates a new post
-   * @param encryptedHash -uploaded ipfs hash
-   * @param postType - type of post
-   * @param postDuration - duration of post
-   * @return post - created post
-   */
   function createPost(
     bytes memory encryptedHash,
     Structures.PostType postType,
@@ -32,9 +20,8 @@ abstract contract Creation is Data, Events, Staking {
     address buyer,
     uint256 payment
   ) external payable returns (Structures.Post memory) {
-    require(IUsers(usersModuleContract).checkifUserExist(msg.sender), "User does not exist");
+    require(IMecenateUsers(usersModuleContract).checkifUserExist(msg.sender), "User does not exist");
     require(msg.value > 0, "Stake is required");
-
     require(usersModuleContract != address(0), "Users module contract not set");
     require(identityContract != address(0), "Identity contract not set");
     require(
@@ -63,9 +50,9 @@ abstract contract Creation is Data, Events, Staking {
     }
 
     Structures.User memory creator = Structures.User({
-      mecenateID: IIdentity(identityContract).identityByAddress(msg.sender),
+      mecenateID: IMecenateIdentity(identityContract).identityByAddress(msg.sender),
       wallet: msg.sender,
-      publicKey: bytes(IUsers(usersModuleContract).getUserData(msg.sender).publicKey)
+      publicKey: bytes(IMecenateUsers(usersModuleContract).getUserData(msg.sender).publicKey)
     });
 
     Structures.PostData memory postdata = Structures.PostData({

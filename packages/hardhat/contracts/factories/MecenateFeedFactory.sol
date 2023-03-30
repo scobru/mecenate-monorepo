@@ -2,20 +2,23 @@
 pragma solidity 0.8.19;
 
 import {MecenateFeed} from "../features/MecenateFeed.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import {MecenateIdentity} from "../token/MecenateIdentity.sol";
-import "../modules/FeedViewer.sol";
 
-interface IMecenateUsers {
-  function checkifUserExist(address user) external view returns (bool);
-}
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "../interfaces/IMecenateUsers.sol";
+import "../modules/FeedViewer.sol";
 
 contract MecenateFeedFactory is Ownable, FeedViewer {
   uint256 numFeeds;
+
   address[] public feeds;
+
   mapping(address => bool) public createdContracts;
+
   mapping(address => bool) public authorized;
+
   address public identityContract;
+
   address public usersMouduleContract;
 
   event FeedCreated(address indexed addr);

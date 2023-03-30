@@ -6,11 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../library/Structures.sol";
 import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 
-/**
- * @title Users
- * @notice Contract for managing users
- * @dev Contract for managing users
- */
 contract MecenateUsersCentral {
   using EnumerableSet for EnumerableSet.AddressSet;
 
