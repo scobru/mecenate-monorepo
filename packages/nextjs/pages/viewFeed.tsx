@@ -116,7 +116,9 @@ const ViewFeed: NextPage = () => {
       proofOfHashEncode,
       Number(postType),
       Number(postDuration),
+      buyer,
       parseEther(buyerPayment),
+
       {
         value: parseEther(postStake),
       },
@@ -545,12 +547,23 @@ const ViewFeed: NextPage = () => {
                     value={postStake}
                     onChange={e => setPostStake(e.target.value)}
                   />
+                  <label className="block text-gray-700">Buyer Payment </label>
+
                   <input
                     type="text"
                     className="input w-full"
                     placeholder="Put 0 to allow buyer decide the payment"
                     value={buyerPayment}
                     onChange={e => setBuyerPayment(e.target.value)}
+                  />
+                  <label className="block text-gray-700">Buyer Addreess </label>
+
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Put address 0 to make this public to anyone who wants to buy"
+                    value={buyer}
+                    onChange={e => setBuyer(e.target.value)}
                   />
                   <label className="block text-gray-700">Type</label>
                   <select className="form-select w-full" value={postType} onChange={e => setPostType(e.target.value)}>

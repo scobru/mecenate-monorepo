@@ -6,14 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 import "../library/Structures.sol";
 import "../modules/FeedViewer.sol";
-
-// Comment
-
-interface IUsers {
-  function getUserData(address user) external view returns (Structures.User memory);
-
-  function checkifUserExist(address user) external view returns (bool);
-}
+import "../interfaces/IMecenateUsers.sol";
 
 contract MecenateBay is Ownable, FeedViewer {
   address public identityContract;
@@ -57,7 +50,7 @@ contract MecenateBay is Ownable, FeedViewer {
     allRequests[index].postAddress = _feed;
     allRequests[index].postCount = feed.postCount;
 
-    bytes memory publicKey = IUsers(usersMouduleContract).getUserData(allRequests[index].buyer).publicKey;
+    bytes memory publicKey = IMecenateUsers(usersMouduleContract).getUserData(allRequests[index].buyer).publicKey;
     IFeed(_feed).acceptPost{value: allRequests[index].payment}(publicKey, allRequests[index].buyer);
 
     emit RequestAccepted(msg.sender, allRequests[index], index);
