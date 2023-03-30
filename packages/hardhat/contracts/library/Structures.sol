@@ -75,17 +75,6 @@ library Structures {
     bytes secretKey;
   }
 
-  struct BayRequest {
-    bytes32 request;
-    address buyer;
-    address seller;
-    uint256 payment;
-    uint256 stake;
-    address postAddress;
-    bool accepted;
-    uint256 postCount;
-  }
-
   struct Feed {
     address operator;
     address buyer;
@@ -95,5 +84,16 @@ library Structures {
     uint256 totalStake;
     uint256 postCount;
     uint256 buyerPayment;
+  }
+
+  struct BayRequest {
+    bytes32 request;
+    address buyer;
+    address seller;
+    uint256 payment;
+    uint256 stake;
+    address postAddress;
+    bool accepted;
+    uint256 postCount;
   }
 }

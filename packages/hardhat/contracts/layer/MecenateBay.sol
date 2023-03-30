@@ -9,20 +9,22 @@ import "../modules/FeedViewer.sol";
 import "../interfaces/IMecenateUsers.sol";
 
 contract MecenateBay is Ownable, FeedViewer {
+  Structures.BayRequest[] public allRequests;
+
   address public identityContract;
+
   address public usersMouduleContract;
 
+  mapping(address => Structures.BayRequest[]) public requests;
+
   event RequestCreated(address indexed user, Structures.BayRequest, uint256 indexed index);
+
   event RequestAccepted(address indexed user, Structures.BayRequest, uint256 indexed index);
 
   constructor(address _identityContract, address _usersMouduleContract) {
     identityContract = _identityContract;
     usersMouduleContract = _usersMouduleContract;
   }
-
-  mapping(address => Structures.BayRequest[]) public requests;
-
-  Structures.BayRequest[] public allRequests;
 
   function createRequest(Structures.BayRequest memory request) public payable returns (Structures.BayRequest memory) {
     require(MecenateIdentity(identityContract).balanceOf(msg.sender) > 0, "user does not have identity");
@@ -51,7 +53,7 @@ contract MecenateBay is Ownable, FeedViewer {
     allRequests[index].postCount = feed.postCount;
 
     bytes memory publicKey = IMecenateUsers(usersMouduleContract).getUserData(allRequests[index].buyer).publicKey;
-    IFeed(_feed).acceptPost{value: allRequests[index].payment}(publicKey, allRequests[index].buyer);
+    IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(publicKey, allRequests[index].buyer);
 
     emit RequestAccepted(msg.sender, allRequests[index], index);
   }

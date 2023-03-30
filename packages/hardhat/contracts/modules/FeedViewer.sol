@@ -2,19 +2,19 @@
 pragma solidity ^0.8.9;
 
 import "../library/Structures.sol";
-import "../interfaces/IFeed.sol";
+import "../interfaces/IMecenateFeed.sol";
 
 abstract contract FeedViewer {
   function _getFeedInfo(address feed) internal view returns (Structures.Feed memory) {
     Structures.Feed memory f;
-    f.operator = IFeed(feed).owner();
-    f.buyer = IFeed(feed).getBuyer();
-    f.seller = IFeed(feed).getSeller();
-    f.sellerStake = IFeed(feed).getStake(f.seller);
-    f.buyerStake = IFeed(feed).getStake(f.buyer);
-    f.totalStake = IFeed(feed).getTotalStaked();
-    f.postCount = IFeed(feed).postCount();
-    f.buyerPayment = IFeed(feed).getBuyerPayment();
+    f.operator = IMecenateFeed(feed).owner();
+    f.buyer = IMecenateFeed(feed).getBuyer();
+    f.seller = IMecenateFeed(feed).getSeller();
+    f.sellerStake = IMecenateFeed(feed).getStake(f.seller);
+    f.buyerStake = IMecenateFeed(feed).getStake(f.buyer);
+    f.totalStake = IMecenateFeed(feed).getTotalStaked();
+    f.postCount = IMecenateFeed(feed).postCount();
+    f.buyerPayment = IMecenateFeed(feed).getBuyerPayment();
     return f;
   }
 
