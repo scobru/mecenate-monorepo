@@ -11,6 +11,8 @@ import { Buffer } from "buffer";
 import { formatEther } from "ethers/lib/utils.js";
 import Image from "next/image";
 import { utils } from "ethers";
+import CopyToClipboard from "react-copy-to-clipboard";
+
 const crypto = require("asymmetric-crypto");
 
 /* configure Infura auth settings */
@@ -208,15 +210,69 @@ const CreateID: NextPage = () => {
     console.log(keypairJSON);
     setPubKey(kp.publicKey.toString());
     notification.success("Key pair created");
-    notification.warning("Save your key pair");
-    notification.info(
-      <div>
-        <p>
-          PUBLIC KEY : <br /> {kp.publicKey.toString()}
-        </p>
-        <p>
-          SECRET KEY : <br /> {kp.secretKey.toString()}
-        </p>
+    notification.warning(
+      <div
+        id="alert-additional-content-3"
+        className="p-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
+        role="alert"
+      >
+        <div className="flex items-center">
+          <svg
+            aria-hidden="true"
+            className="w-5 h-5 mr-2"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          <span className="sr-only">Info</span>
+          <h3 className="text-lg font-medium">Save Your Key Pair!</h3>
+        </div>
+        <div className="mt-2 mb-4 text-sm">
+          <div>
+            <p>
+              PUBLIC KEY : <br /> {kp.publicKey.toString()}
+            </p>
+            <p>
+              SECRET KEY : <br /> {kp.secretKey.toString()}
+            </p>
+          </div>
+        </div>
+        <div className="flex">
+          <button
+            type="button"
+            className="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+            onClick={async () => {
+              let data = {
+                publicKey: await kp.publicKey.toString(),
+                secretKey: await kp.secretKey.toString(),
+              };
+              navigator.clipboard.writeText(JSON.stringify(data));
+              notification.success("Public key copied to clipboard");
+            }}
+          >
+            <svg
+              aria-hidden="true"
+              className="-ml-0.5 mr-2 h-4 w-4"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+              <path
+                fill-rule="evenodd"
+                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            Copy to clipboard
+          </button>
+        </div>
       </div>,
     );
   }
@@ -308,10 +364,10 @@ const CreateID: NextPage = () => {
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-base-content">
-      <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center mb-20">
         <div className="max-w-3xl text-center">
           <h1 className="text-6xl font-bold mb-8">Identity NFT DApp</h1>
-          <p className="text-xl  mb-8">
+          <p className="text-xl  mb-20">
             Elevate your identity with Identity NFTs - the new way to express who you are. Our DApp lets you create your
             own unique NFT-based identity, complete with customizable name, description, and image. Once created, your
             identity is stored on the Ethereum blockchain, giving you complete control and ownership over your digital
@@ -319,37 +375,39 @@ const CreateID: NextPage = () => {
           </p>
         </div>
         <div className="max-w-lg">
-          <div className="card bg-slate-200 rounded-lg shadow-lg px-2 py-2">
+          <div className="card-bordered bg-primary rounded-3xl shadow-lg border-2 shadow-primary  px-2 py-2 text-base-content text-lg">
             <h1 className="text-3xl font-bold p-6 ">
               {nftBalance > 0 ? (
                 <div className="flex items-center justify-center">Your ID</div>
               ) : (
-                <div>Mint a Creator ID</div>
+                <div className="text-primary-focus">Mint a Creator ID</div>
               )}
             </h1>
             <div className="p-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div>
-                <div className="text-gray-700 font-bold mb-2">Identity Fee</div>
-                <div className="text-gray-600">{identityFee ? `${formatEther(String(identityFee))} ETH` : "-"}</div>
+                <div className="text-secondary-content font-bold mb-2">Identity Fee</div>
+                <div className="text-primary-content">
+                  {identityFee ? `${formatEther(String(identityFee))} ETH` : "-"}
+                </div>
               </div>
               <div>
-                <div className="text-gray-700 font-bold mb-2">Subscription Fee</div>
-                <div className="text-gray-600">{fee ? `${formatEther(String(fee))} ETH` : "-"}</div>
+                <div className="text-secondary-content font-bold mb-2">Subscription Fee</div>
+                <div className="text-primary-content">{fee ? `${formatEther(String(fee))} ETH` : "-"}</div>
               </div>
               {/*  <div className="border-b lg:border-b-0">
-              <div className="text-gray-700 font-bold mb-2">Balance</div>
-              <div className="text-gray-600">{nftBalance ? Number(nftBalance) : "-"}</div>
+              <div className="text-secondary-content font-bold mb-2">Balance</div>
+              <div className="text-primary-content">{nftBalance ? Number(nftBalance) : "-"}</div>
             </div> */}
               <div>
-                <div className="text-gray-700 font-bold mb-2">Name</div>
-                <div className="text-gray-600">{nftMetadata ? nftMetadata["name"] : "-"}</div>
+                <div className="text-secondary-content font-bold mb-2">Name</div>
+                <div className="text-primary-content">{nftMetadata ? nftMetadata["name"] : "-"}</div>
               </div>
               <div>
-                <div className="text-gray-700 font-bold mb-2">Description</div>
-                <div className="text-gray-600">{nftMetadata ? nftMetadata["description"] : "-"}</div>
+                <div className="text-secondary-content font-bold mb-2">Description</div>
+                <div className="text-primary-content">{nftMetadata ? nftMetadata["description"] : "-"}</div>
               </div>
               <div>
-                <div className="text-gray-600">
+                <div className="text-primary-content">
                   {nftMetadata["image"] ? (
                     <Image
                       decoding="async"
@@ -368,8 +426,8 @@ const CreateID: NextPage = () => {
           </div>
           {nftBalance == 0 ? (
             <form onSubmit={handleFormSubmit}>
-              <div className="mb-4 my-5">
-                <label htmlFor="name" className="block font-medium mb-2">
+              <div className="my-5">
+                <label htmlFor="name" className="block font-medium mb-5">
                   Name
                 </label>
                 <input
@@ -378,11 +436,11 @@ const CreateID: NextPage = () => {
                   name="name"
                   value={name}
                   onChange={handleNameChange}
-                  className="w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+                  className="input w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="description" className="block font-medium mb-2">
+                <label htmlFor="description" className="block font-medium mb-5">
                   Description
                 </label>
                 <input
@@ -391,7 +449,7 @@ const CreateID: NextPage = () => {
                   name="description"
                   value={description}
                   onChange={handleDescriptionChange}
-                  className="w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+                  className="input w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
                 />
               </div>
               <div className="mb-4">
@@ -424,7 +482,6 @@ const CreateID: NextPage = () => {
           ) : (
             <div></div>
           )}
-          <div className="divider"></div>
           <div className="max-w-3xl text-center my-20 text-base-content">
             <h1 className="text-6xl font-bold mb-8">Generate your KeyPair.</h1>
             <p className="text-xl  mb-8">

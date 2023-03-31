@@ -211,21 +211,21 @@ const ViewQuestion: NextPage = () => {
       <div className="flex flex-col items-center justify-center w-full">
         <input
           type="text"
-          className="input-lg w-1/2 p-2 rounded-md my-2 bg-transparent"
+          className="input-lg w-1/2 p-2 border rounded-md my-2 bg-transparent"
           placeholder="Question"
           value={question}
           onChange={e => setQuestion(e.target.value)}
         />
         <input
           type="text"
-          className="input-lg w-1/2 p-2 rounded-md my-2 bg-transparent"
+          className="input-lg w-1/2 p-2 border rounded-md my-2 bg-transparent"
           placeholder="End Time"
           value={endTime}
           onChange={e => setEndTime(e.target.value)}
         />
         <input
           type="text"
-          className="input-lg w-1/2 p-2 rounded-md my-2 bg-transparent"
+          className="input-lg w-1/2 p-2 border rounded-md my-2 bg-transparent"
           placeholder="Stake"
           value={stake}
           onChange={e => setStake(e.target.value)}
@@ -233,49 +233,77 @@ const ViewQuestion: NextPage = () => {
 
         <input
           type="text"
-          className="input-lg w-1/2 p-2 rounded-md my-2 bg-transparent"
+          className="input-lg w-1/2 p-2 border rounded-md my-2 bg-transparent"
           placeholder="Punishment Percent"
           value={punishmentPercentage}
           onChange={e => setPunishmentPercentage(e.target.value)}
         />
-        <button className="w-1/2 p-2 border border-gray-300 rounded-md my-2" onClick={createPrediction}>
+        <button className="btn-primary  w-1/2 p-2 border border-gray-300 rounded-md my-2" onClick={createPrediction}>
           Ask
         </button>
       </div>
       <div className="flex flex-col-2 gap-4  w-full md:w-fit my-5">
         {isFetch && (
-          <div className="bg-white flex flex-col shadow-md rounded-lg p-6 w-full my-2">
+          <div className="bg-neutral text-base-content font-medium flex flex-col shadow-md rounded-lg p-6 w-full my-2">
             <div className="font-bold text-lg mb-2">{question}</div>
-            <div className="text-gray-700 mb-2">Creator: {creator}</div>
-
-            <div className="text-gray-700 mb-2">
-              Community Answer: {communityAnswer == 0 ? "Yes" : communityAnswer == 1 ? "No" : "None"}
+            <div className=" mb-2">
+              <strong>CREATOR:</strong> {creator}
             </div>
-            <div className="text-gray-700 mb-2">
-              Creator Answer: {creatorAnswer == 0 ? "Yes" : creatorAnswer == 1 ? "No" : "None"}
+            <br></br>
+            <div className=" mb-2">
+              <strong>COMMUNITY ANSWER:</strong> {communityAnswer == 0 ? "Yes" : communityAnswer == 1 ? "No" : "None"}
             </div>
-            <div className="text-gray-700 mb-2">End time: {convertToDate(String(endTime))}</div>
-            <div className="text-gray-700 mb-2">Voting Period: {convertToMinute(String(votingPeriod))} minutes</div>
-            <div className="text-gray-700 mb-2">Claim Period: {convertToMinute(String(claimPeriod))} minutes</div>
+            <div className=" mb-2">
+              <strong>CREATOR ANSWER:</strong> {creatorAnswer == 0 ? "Yes" : creatorAnswer == 1 ? "No" : "None"}
+            </div>
+            <br></br>
 
-            <div className="text-gray-700 mb-2">Total staked: {formatEther(String(creatorStaked))} ETH</div>
-            <div className="text-green-700 mb-2">Total yes staked: {formatEther(String(totalYesStaked))} ETH</div>
-            <div className="text-red-700 mb-2">Total no staked: {formatEther(String(totalNoStaked))} ETH</div>
-            <div className="text-red-700 mb-2">Creator Fees: {formatEther(String(fees))} ETH</div>
+            <div className=" mb-2">
+              <strong>END TIME:</strong> {convertToDate(String(endTime))}
+            </div>
+            <div className=" mb-2">
+              <strong>VOTING DURATION:</strong> {convertToMinute(String(votingPeriod))} minutes
+            </div>
+            <div className=" mb-2">
+              <strong>CLAIM DURATION:</strong> {convertToMinute(String(claimPeriod))} minutes
+            </div>
+            <br></br>
 
-            <div className="text-green-700 mb-2 ">Status: {getStatus(status)}</div>
+            <div className=" mb-2">
+              <strong>CREATOR STAKE</strong> {formatEther(String(creatorStaked))} ETH
+            </div>
+            <div className=" mb-2">
+              <strong>YES STAKED:</strong> {formatEther(String(totalYesStaked))} ETH
+            </div>
+            <div className=" mb-2">
+              <strong>NO STAKED:</strong> {formatEther(String(totalNoStaked))} ETH
+            </div>
+            <br></br>
 
-            <div className="text-gray-700 mb-2">Yes shares: {String(yesShares)}</div>
-            <div className="text-gray-700 mb-2">No shares: {String(noShares)}</div>
+            <div className=" mb-2">
+              <strong>CREATOR FEES:</strong> {formatEther(String(fees))} ETH
+            </div>
+
+            <div className=" mb-2 ">
+              <strong>STATUS:</strong> {getStatus(status)}
+            </div>
+            <br></br>
+
+            <div className=" mb-2">
+              <strong>YES SHARES:</strong> {String(yesShares)}
+            </div>
+            <div className=" mb-2">
+              {" "}
+              <strong>NO SHARES:</strong> {String(noShares)}
+            </div>
           </div>
         )}
         <div className="w-full">
           <div>
             <br></br>
-
             <input
               type="input text"
-              className="w-min p-2 border border-gray-300 rounded-md my-2 "
+              className="input-bordered w-min p-2 border-2 border-gray-500 rounded-md my-2 "
               placeholder="Stake"
               value={stake}
               onChange={e => setStake(e.target.value)}

@@ -98,9 +98,68 @@ const ViewFeed: NextPage = () => {
     await fetchData();
     const pubKey = userData.publicKey;
     const dataSaved = await savePost(postRawData, String(signer?.getAddress()), pubKey);
-    notification.success("SYMMETIC KEY: " + dataSaved?.symmetricKey);
+
+    notification.warning(
+      <div
+        id="alert-additional-content-3"
+        className="p-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
+        role="alert"
+      >
+        <div className="flex items-center">
+          <svg
+            aria-hidden="true"
+            className="w-5 h-5 mr-2"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          <span className="sr-only">Info</span>
+          <h3 className="text-lg font-medium">Save Your Key Pair!</h3>
+        </div>
+        <div className="mt-2 mb-4 text-sm">
+          <div>
+            <p>
+              RESULT : <br /> {JSON.stringify(dataSaved)}
+            </p>
+          </div>
+        </div>
+        <div className="flex">
+          <button
+            type="button"
+            className="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+            onClick={async () => {
+              navigator.clipboard.writeText(JSON.stringify(dataSaved));
+              notification.success("Symmetric key copied to clipboard");
+            }}
+          >
+            <svg
+              aria-hidden="true"
+              className="-ml-0.5 mr-2 h-4 w-4"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+              <path
+                fill-rule="evenodd"
+                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            Copy to clipboard
+          </button>
+        </div>
+      </div>,
+    );
+    /*  notification.success("SYMMETIC KEY: " + dataSaved?.symmetricKey);
     notification.success("ENCRYPTED DATA: " + dataSaved?.encryptedData);
-    notification.success("PROOF OF HASH: " + dataSaved?.proofhash);
+    notification.success("PROOF OF HASH: " + dataSaved?.proofhash); */
     notification.warning("Save this data");
 
     /* const abicoder = new AbiCoder();
@@ -511,7 +570,7 @@ const ViewFeed: NextPage = () => {
   }, [feedCtx, router.isReady]);
 
   return (
-    <div className="flex-1">
+    <div className="container mx-auto px-20">
       {feedData[0] != null ? (
         <div className="flex flex-col px-5 py-5">
           <div className="flex flex-row gap-3 items-center justify-center w-full flex-1 px-20 text-center py-5">
@@ -528,9 +587,9 @@ const ViewFeed: NextPage = () => {
                   </label>
                 </div>
                 <div className="modal-body w-auto space-y-6 text-left">
-                  <label className="block text-gray-700">Duration</label>
+                  <label className="block text-base-500">Duration</label>
                   <select
-                    className="form-select w-full"
+                    className="form-select w-full mb-8"
                     value={postDuration}
                     onChange={e => setPostDuration(e.target.value)}
                   >
@@ -539,7 +598,7 @@ const ViewFeed: NextPage = () => {
                     <option value="2">2 Weeks</option>
                     <option value="3">1 Month</option>
                   </select>
-                  <label className="block text-gray-700">Stake</label>
+                  <label className="block text-base-500 mt-8">Stake</label>
                   <input
                     type="text"
                     className="input w-full"
@@ -547,7 +606,7 @@ const ViewFeed: NextPage = () => {
                     value={postStake}
                     onChange={e => setPostStake(e.target.value)}
                   />
-                  <label className="block text-gray-700">Buyer Payment </label>
+                  <label className="block text-base-500 mt-8">Buyer Payment </label>
 
                   <input
                     type="text"
@@ -556,7 +615,7 @@ const ViewFeed: NextPage = () => {
                     value={buyerPayment}
                     onChange={e => setBuyerPayment(e.target.value)}
                   />
-                  <label className="block text-gray-700">Buyer Addreess </label>
+                  <label className="block text-base-500">Buyer Addreess </label>
 
                   <input
                     type="text"
@@ -565,7 +624,7 @@ const ViewFeed: NextPage = () => {
                     value={buyer}
                     onChange={e => setBuyer(e.target.value)}
                   />
-                  <label className="block text-gray-700">Type</label>
+                  <label className="block text-base-500">Type</label>
                   <select className="form-select w-full" value={postType} onChange={e => setPostType(e.target.value)}>
                     <option value="0">Text</option>
                     <option value="1">Image</option>
@@ -573,7 +632,7 @@ const ViewFeed: NextPage = () => {
                     <option value="3">Audio</option>
                     <option value="4">File</option>
                   </select>
-                  <label className="block text-gray-700">Message</label>
+                  <label className="block text-base-500">Message</label>
                   <input
                     type="text"
                     className="input w-full"
@@ -593,9 +652,6 @@ const ViewFeed: NextPage = () => {
                   </button>
                 </div>
                 <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-create" className="btn">
-                    Accept
-                  </label>
                   <label htmlFor="modal-create" className="btn">
                     Close
                   </label>
@@ -619,7 +675,7 @@ const ViewFeed: NextPage = () => {
                   Amount to Pay for Data {""}
                   <input
                     type="text"
-                    className="input w-full"
+                    className="input w-full mt-8"
                     placeholder="Amount"
                     value={postPayment}
                     onChange={e => setPostPayment(e.target.value)}
@@ -636,9 +692,6 @@ const ViewFeed: NextPage = () => {
                   </button>
                 </div>
                 <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-accept" className="btn ">
-                    Accept
-                  </label>
                   <label htmlFor="modal-accept" className="btn">
                     Close
                   </label>
@@ -660,7 +713,7 @@ const ViewFeed: NextPage = () => {
                 </div>
                 <div className="modal-body space-y-4 text-left">
                   <input
-                    type="text"
+                    type="password"
                     className="input w-full"
                     placeholder="Symmetric Key"
                     value={symmetricKey}
@@ -668,7 +721,7 @@ const ViewFeed: NextPage = () => {
                   />
                   <br />
                   <input
-                    type="text"
+                    type="password"
                     className="input w-full"
                     placeholder="Secret Key"
                     value={secretKey}
@@ -686,9 +739,6 @@ const ViewFeed: NextPage = () => {
                   </button>
                 </div>
                 <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-submit" className="btn ">
-                    Accept
-                  </label>
                   <label htmlFor="modal-submit" className="btn">
                     Close
                   </label>
@@ -711,7 +761,7 @@ const ViewFeed: NextPage = () => {
                 <div className="modal-body space-y-4 text-left">
                   <br />
                   <input
-                    type="text"
+                    type="password"
                     className="input w-full"
                     placeholder="Secret Key"
                     value={secretKey}
@@ -801,7 +851,7 @@ const ViewFeed: NextPage = () => {
                 <div className="modal-body space-y-4 text-left">
                   <br />
                   <input
-                    type="text"
+                    type="password"
                     className="input w-full"
                     placeholder="Symmetric Key"
                     value={symmetricKey}

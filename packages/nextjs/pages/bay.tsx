@@ -115,9 +115,15 @@ const Bay: NextPage = () => {
   }, [bayCtx, signer]);
 
   return (
-    <div className="flex flex-col items-center pt-10">
+    <div className="flex flex-col items-center pt-10 ">
+      <div className="max-w-3xl text-center my-2 text-base-content">
+        <h1 className="text-6xl font-bold mb-8">Request any information</h1>
+        <p className="text-xl  mb-8">
+          Lock up a cryptocurrency reward. Anyone can respond. Destroy their stake if you don't get what you want.
+        </p>
+      </div>
       <div className="flex flex-col items-center space-y-4">
-        <div className="card bg-slate-200 rounded-lg shadow-2xl px-2 py-2 my-10">
+        <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary px-2 py-2 my-10">
           <label className="text-black font-semibold text-sm" htmlFor="request">
             What do you want?
           </label>
@@ -194,6 +200,51 @@ const Bay: NextPage = () => {
           </div>
         );
       })}
+      <div className="max-w-3xl text-center my-20 text-base-content">
+        <h1 className="text-6xl font-bold mb-8">Information finds you 🔮</h1>
+        <p className="text-xl  mb-8">
+          {" "}
+          Lock up a cryptocurrency reward. Anyone in the world can fulfill it. They must stake cryptocurrency and upload
+          a file containing the requested information.
+        </p>
+        <p className="text-xl  mb-8">
+          Release the reward if you are satisfied with the upload. Destroy their stake if you are dissatisfied 🔥
+        </p>
+        <p className="text-xl  mb-8">
+          Mecenate Bay is decentralized, encrypted, and unstoppable. All requests are public.
+        </p>
+        <h2 className="text-2xl font-semibold mb-4">Make a request 📣</h2>
+      </div>
+      <div className="flex-grow bg-base-300 max-w-3xl mt-16 px-8 py-12">
+        <p className="text-xl  mb-8">
+          <strong>Question</strong> Enter a short explanation of what you're looking for. This can include links,
+          Twitter handles and hastags. Make your descriptions as clear as possible.
+        </p>
+        <p className="text-xl  mb-8">
+          <strong>Reward</strong> An amount of ETH cryptocurrency you are locking up as a reward. This will be
+          transferred into an escrow when you make the request, you make sure you have this in your wallet. Like this
+          fulfillers can see you really have the money and will take your request seriously. (Once someone fulfills your
+          request it is added to their stake and you will not get it back, you can only punish it.)
+        </p>
+        <p className="text-xl  mb-8">
+          <strong>Fulfiller</strong> stake This is what makes Erasure Bay powerful. This is how much DAI cryptocurrency
+          someone will need to deposit when fulfilling your request. You can destroy a fraction or all of their staked
+          money if you are dissatisfied with what they provide. This will stop people responding with spam or bad
+          information. It usually makes sense to have this be roughly 10% - 50% of the reward.
+        </p>
+        <p className="text-xl  mb-8">
+          <strong> Punish ratio</strong> How many ETH it will cost you to destroy one dollar of the fulfiller's stake.
+          For example; if you set the ratio to 0.1 and punish a fulfiller who staked 100 ETH, it will cost you 10 ETH to
+          destroy their entire stake. This protects the fulfiller from reckless punishment. The default value is good
+          for most requests.
+        </p>
+        <p className="text-xl  mb-8">
+          <strong>Punish period</strong> How many days after your request is fulfilled you have to verify the quality of
+          the information provided. Within this window, you may punish the fulfiller. After this time their stake and
+          reward are released. You may decide to release it early if you are satisfied with the submission. The default
+          value is good for most requests.
+        </p>
+      </div>
     </div>
   );
 };

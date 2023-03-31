@@ -158,45 +158,6 @@ contract MecenateQuestion is Ownable {
     } else if (_choice == Choice.No) {
       noVoteWeight = (noVoteWeight + shares[Choice.No][msg.sender]);
     }
-
-    voteCounter++;
-  }
-
-  function countVote() private {
-    require(voteCounter > 0, "No vote to count");
-
-    uint256 yesVoteWeight = 0;
-
-    uint256 noVoteWeight = 0;
-
-    for (uint256 i = 0; i < stakers.length; i++) {
-      // Get the current user address
-      address currentUser = stakers[i];
-      // Get the user's shares for Yes and No
-      uint256 userYesShares = shares[Choice.Yes][currentUser];
-
-      uint256 userNoShares = shares[Choice.No][currentUser];
-
-      // Update the vote weights based on the user's vote
-      if (vote[currentUser] == Choice.Yes) {
-        yesVoteWeight = (yesVoteWeight + userYesShares);
-      } else if (vote[currentUser] == Choice.No) {
-        noVoteWeight = (noVoteWeight + userNoShares);
-      }
-    }
-
-    // Set the correctAnswer of the prediction based on the highest vote weight
-    if (yesVoteWeight > noVoteWeight) {
-      communityAnswer = Choice.Yes;
-    } else {
-      communityAnswer = Choice.No;
-    }
-
-    uint256 predictionBalance = address(this).balance - (creatorStaked + fees + totalNoStaked + totalYesStaked);
-
-    if (predictionBalance > 0) {
-      payable(treasury).transfer(predictionBalance);
-    }
   }
 
   function resolve() public {
@@ -293,7 +254,8 @@ contract MecenateQuestion is Ownable {
 
     require(reward > 0, "Reward should be greater than 0");
 
-    payable(msg.sender).transfer(reward);
+    (bool success, ) = msg.sender.call{value: reward}("");
+    require(success, "Transfer failed");
 
     emit UserAction(msg.sender, "claim", reward);
   }
@@ -304,7 +266,8 @@ contract MecenateQuestion is Ownable {
     uint256 amount = fees + creatorStaked;
     fees = 0;
     creatorStaked = 0;
-    payable(msg.sender).transfer(amount);
+    (bool success, ) = msg.sender.call{value: amount}("");
+    require(success, "Transfer failed");
   }
 
   function reset() public onlyOwner {
@@ -314,7 +277,8 @@ contract MecenateQuestion is Ownable {
     uint256 predictionBalance = address(this).balance - (creatorStaked + fees);
 
     if (predictionBalance > 0) {
-      payable(treasury).transfer(predictionBalance);
+      (bool success, ) = treasury.call{value: predictionBalance}("");
+      require(success, "Transfer failed");
     }
 
     status = Status.Open;
@@ -322,7 +286,9 @@ contract MecenateQuestion is Ownable {
     totalNoStaked = 0;
     creatorAnswer = Choice.None;
     communityAnswer = Choice.None;
-    voteCounter = 0;
+    yesVoteWeight = 0;
+    noVoteWeight = 0;
+    amountToClaim = 0;
     delete stakers;
   }
 

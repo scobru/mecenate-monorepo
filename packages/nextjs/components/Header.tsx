@@ -7,6 +7,16 @@ import { Bars3Icon, BugAntIcon, SparklesIcon } from "@heroicons/react/24/outline
 import { useRouter } from "next/router";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 
+import {
+  QuestionMarkCircleIcon,
+  LockClosedIcon,
+  TicketIcon,
+  UserIcon,
+  Square3Stack3DIcon,
+  MegaphoneIcon,
+  HomeIcon,
+} from "@heroicons/react/24/outline";
+
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const router = useRouter();
   const isActive = router.pathname === href;
@@ -37,8 +47,11 @@ export default function Header() {
 
   const navLinks = (
     <>
-      <li className="font-semibold">
-        <NavLink href="/">HOME</NavLink>
+      <li className="font-base">
+        <NavLink href="/">
+          {" "}
+          <HomeIcon className="h-4 w-4" />
+        </NavLink>
       </li>
       {/* <li>
         <NavLink href="/debug">
@@ -52,23 +65,41 @@ export default function Header() {
           Example UI
         </NavLink>
       </li> */}
-      <li className="font-semibold">
-        <NavLink href="/createID">ID</NavLink>
+      <li className="font-base">
+        <NavLink href="/createID">
+          <UserIcon className="h-4 w-4" />
+          Identity
+        </NavLink>
       </li>
-      <li className="font-semibold">
-        <NavLink href="/bay">BAY</NavLink>
+      <li className="font-base">
+        <NavLink href="/bay">
+          <MegaphoneIcon className="h-4 w-4" />
+          Bay
+        </NavLink>
       </li>
-      <li className="font-semibold">
-        <NavLink href="/feeds">FEEDS</NavLink>
+      <li className="font-base">
+        <NavLink href="/feeds">
+          <Square3Stack3DIcon className="h-4 w-4" />
+          Feeds
+        </NavLink>
       </li>
-      <li className="font-semibold">
-        <NavLink href="/tiers">TIERS</NavLink>
+      <li className="font-base">
+        <NavLink href="/tiers">
+          <TicketIcon className="h-4 w-4" />
+          Tiers
+        </NavLink>
       </li>
-      <li className="font-semibold">
-        <NavLink href="/box">BOX</NavLink>
+      <li className="font-base">
+        <NavLink href="/box">
+          <LockClosedIcon className="h-4 w-4" />
+          Box
+        </NavLink>
       </li>
-      <li className="font-semibold">
-        <NavLink href="/question">QUESTION</NavLink>
+      <li className="font-base">
+        <NavLink href="/question">
+          <QuestionMarkCircleIcon className="h-4 w-4" />
+          Question
+        </NavLink>
       </li>
     </>
   );
@@ -102,8 +133,9 @@ export default function Header() {
             <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
           </Link> */}
           <div className="flex flex-col">
-            <span className="font-bold">M E C E N A T E</span>
-            <span className="text-xs">Decentralized Encrypted Data Protocol</span>
+            <span className="font-extrabold font-proxima text-2xl">MECENATE</span>
+            {/*             <span className="text-base font-proxima">Decentralized Encrypted Data Sharing Protocol</span>
+             */}{" "}
           </div>
         </div>
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>

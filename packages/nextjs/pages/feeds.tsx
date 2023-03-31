@@ -94,13 +94,15 @@ const Feeds: NextPage = () => {
   return (
     <div className="flex flex-col items-center pt-10">
       <div className="max-w-3xl text-center my-20 text-base-content">
-        <h1 className="text-6xl font-bold mb-8">Data Privacy and Security Redefined with Mecenate Protocol</h1>
+        <h1 className="text-6xl font-bold mb-8">Data Privacy and Security Redefined.</h1>
         <p className="text-xl  mb-8">
-          Introducing my personal feed, powered by Mecenate Protocol, where I can share information and find anonymous,
-          trustless buyers. Mecenate Protocol allows me to securely and privately post my information and receive
-          payments directly from interested parties without any intermediaries. With Mecenate Protocol, I can be
-          confident that my information is protected and that I'm getting fair compensation for it. Join me in
-          revolutionizing the way we share information with Mecenate Protocol.
+          <strong>Mecenate Feeds </strong> allows me to securely and privately post my information and receive payments
+          directly from interested parties without any intermediaries. With Mecenate Protocol, I can be confident that
+          my information is protected and that I'm getting fair compensation for it.
+        </p>
+        <p className="text-xl  mb-8">
+          <strong>Mecenate Feeds</strong> is a base layer where <strong>Mecenate Bay</strong> is built on top of.
+          Mecenate Bay is a marketplace where you can buy and sell data feeds.
         </p>
       </div>
       <div className="flex items-center mb-5">

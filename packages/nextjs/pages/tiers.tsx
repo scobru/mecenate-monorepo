@@ -222,7 +222,7 @@ const Tiers: NextPage = () => {
             </button>
           </form>
           <div className="flex flex-col items-center justify-center w-full max-w-md p-10 text-primary mt-6">
-            <h2 className="text-lg font-medium">Mecenate Subscriptions</h2>
+            <h2 className="text-lg font-medium">Mecenate Tiers</h2>
             {subscriptions &&
               subscriptions.map((subscription, index) => (
                 <div key={index} className="mt-2">
