@@ -47,12 +47,12 @@ const ViewQuestion: NextPage = () => {
   const [noShares, setNoShares] = useState<string>();
   const [votingPeriod, setVotingPeriod] = useState<string>();
   const [claimPeriod, setClaimPeriod] = useState<string>();
-  const [duration, setDuration] = useState<string>();
   const [status, setStatus] = useState<string>();
   const [creator, setCreator] = useState<string>();
   const [fees, setFees] = useState<string>();
   const [prediction, setPrediction] = useState<[]>();
   const [punishmentPercentage, setPunishmentPercentage] = useState<string>();
+  const [yourAnswer, setYourAnswer] = useState<boolean>();
 
   const [isFetch, setIsFetch] = useState<boolean>(false);
 
@@ -83,7 +83,7 @@ const ViewQuestion: NextPage = () => {
   async function submit() {
     if (ctx && signer && provider && router.isReady) {
       let _creatorAnswer;
-      if (creatorAnswer == true) {
+      if (yourAnswer == true) {
         _creatorAnswer = 0;
       } else {
         _creatorAnswer = 1;
@@ -116,7 +116,7 @@ const ViewQuestion: NextPage = () => {
   async function vote() {
     if (ctx && signer && provider && router.isReady) {
       let _creatorAnswer;
-      if (creatorAnswer == true) {
+      if (yourAnswer == true) {
         _creatorAnswer = 0;
       } else {
         _creatorAnswer = 1;
@@ -211,21 +211,21 @@ const ViewQuestion: NextPage = () => {
       <div className="flex flex-col items-center justify-center w-full">
         <input
           type="text"
-          className="w-1/2 p-2 border border-gray-300 rounded-md"
+          className="input-lg w-1/2 p-2 rounded-md my-2 bg-transparent"
           placeholder="Question"
           value={question}
           onChange={e => setQuestion(e.target.value)}
         />
         <input
           type="text"
-          className="w-1/2 p-2 border border-gray-300 rounded-md"
+          className="input-lg w-1/2 p-2 rounded-md my-2 bg-transparent"
           placeholder="End Time"
           value={endTime}
           onChange={e => setEndTime(e.target.value)}
         />
         <input
           type="text"
-          className="w-1/2 p-2 border border-gray-300 rounded-md"
+          className="input-lg w-1/2 p-2 rounded-md my-2 bg-transparent"
           placeholder="Stake"
           value={stake}
           onChange={e => setStake(e.target.value)}
@@ -233,26 +233,26 @@ const ViewQuestion: NextPage = () => {
 
         <input
           type="text"
-          className="w-1/2 p-2 border border-gray-300 rounded-md"
+          className="input-lg w-1/2 p-2 rounded-md my-2 bg-transparent"
           placeholder="Punishment Percent"
           value={punishmentPercentage}
           onChange={e => setPunishmentPercentage(e.target.value)}
         />
-        <button className="w-1/2 p-2 border border-gray-300 rounded-md" onClick={createPrediction}>
-          Create Prediction
+        <button className="w-1/2 p-2 border border-gray-300 rounded-md my-2" onClick={createPrediction}>
+          Ask
         </button>
       </div>
-      <div className="card  w-full md:w-fit my-5">
+      <div className="flex flex-col-2 gap-4  w-full md:w-fit my-5">
         {isFetch && (
           <div className="bg-white flex flex-col shadow-md rounded-lg p-6 w-full my-2">
             <div className="font-bold text-lg mb-2">{question}</div>
             <div className="text-gray-700 mb-2">Creator: {creator}</div>
 
             <div className="text-gray-700 mb-2">
-              Correct creatorAnswer: {communityAnswer == 0 ? "Yes" : communityAnswer == 1 ? "No" : "None"}
+              Community Answer: {communityAnswer == 0 ? "Yes" : communityAnswer == 1 ? "No" : "None"}
             </div>
             <div className="text-gray-700 mb-2">
-              User creatorAnswer: {creatorAnswer == 0 ? "Yes" : creatorAnswer == 1 ? "No" : "None"}
+              Creator Answer: {creatorAnswer == 0 ? "Yes" : creatorAnswer == 1 ? "No" : "None"}
             </div>
             <div className="text-gray-700 mb-2">End time: {convertToDate(String(endTime))}</div>
             <div className="text-gray-700 mb-2">Voting Period: {convertToMinute(String(votingPeriod))} minutes</div>
@@ -264,148 +264,141 @@ const ViewQuestion: NextPage = () => {
             <div className="text-red-700 mb-2">Creator Fees: {formatEther(String(fees))} ETH</div>
 
             <div className="text-green-700 mb-2 ">Status: {getStatus(status)}</div>
+
             <div className="text-gray-700 mb-2">Yes shares: {String(yesShares)}</div>
             <div className="text-gray-700 mb-2">No shares: {String(noShares)}</div>
+          </div>
+        )}
+        <div className="w-full">
+          <div>
+            <br></br>
 
             <input
               type="input text"
-              className="w-1/2 p-2 border border-gray-300 rounded-md my-2"
+              className="w-min p-2 border border-gray-300 rounded-md my-2 "
               placeholder="Stake"
               value={stake}
               onChange={e => setStake(e.target.value)}
             />
-            <div>
-              <button
-                className="btn w-1/2 p-2 border border-gray-300 rounded-md"
-                onClick={() => {
-                  stakePrediction();
-                }}
-              >
-                Stake
-              </button>
-              <input
-                className="checkbox mx-2"
-                type="radio"
-                id="yes"
-                name="creatorAnswer"
-                value="yes"
-                onChange={e => setCreatorAnswer(true)}
-              />
-              <label htmlFor="yes">Yes</label>
-              <input
-                className="checkbox mx-2"
-                type="radio"
-                id="no"
-                name="creatorAnswer"
-                value="no"
-                onChange={e => setCreatorAnswer(false)}
-              />
-              <label htmlFor="no">No</label>
-            </div>
-            <br></br>
-
-            <div>
-              <button
-                className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
-                onClick={async () => {
-                  await submit();
-                }}
-              >
-                Submit
-              </button>
-              <input
-                className="checkbox mx-2"
-                type="radio"
-                id="yes"
-                name="creatorAnswer"
-                value="yes"
-                onChange={e => setCreatorAnswer(true)}
-              />
-              <label htmlFor="yes">Yes</label>
-              <input
-                className="checkbox mx-2"
-                type="radio"
-                id="no"
-                name="creatorAnswer"
-                value="no"
-                onChange={e => setCreatorAnswer(false)}
-              />
-              <label htmlFor="no">No</label>
-            </div>
-            <br></br>
-
-            <div>
-              <button
-                className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
-                onClick={async () => {
-                  await vote();
-                }}
-              >
-                Vote
-              </button>
-              <input
-                className="checkbox mx-2"
-                type="radio"
-                id="yes"
-                name="creatorAnswer"
-                value="yes"
-                onChange={e => setCreatorAnswer(true)}
-              />
-              <label htmlFor="yes">Yes</label>
-              <input
-                className="checkbox mx-2"
-                type="radio"
-                id="no"
-                name="creatorAnswer"
-                value="no"
-                onChange={e => setCreatorAnswer(false)}
-              />
-              <label htmlFor="no">No</label>
-            </div>
-            <br></br>
-            <div>
-              <button
-                className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
-                onClick={async () => {
-                  await resolve();
-                }}
-              >
-                Resolve
-              </button>
-            </div>
-            <br></br>
             <button
-              className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
-              onClick={async () => {
-                await claim();
+              className="btn w-1/2 p-2 border border-gray-300 rounded-md"
+              onClick={() => {
+                stakePrediction();
               }}
             >
-              Claim
+              Stake
             </button>
-            <br></br>
-
+            <input
+              className="checkbox mx-2 my-2"
+              type="radio"
+              id="yes"
+              name="creatorAnswer"
+              value="yes"
+              onChange={e => setYourAnswer(true)}
+            />
+            <label htmlFor="yes">Yes</label>
+            <input
+              className="checkbox mx-2 my-2"
+              type="radio"
+              id="no"
+              name="creatorAnswer"
+              value="no"
+              onChange={e => setYourAnswer(false)}
+            />
+            <label htmlFor="no">No</label>
+          </div>
+          <br></br>
+          <div>
             <button
               className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
-              disabled={signer?.getAddress() == creator}
               onClick={async () => {
-                await withdrawFees();
+                await submit();
               }}
             >
-              Withdraw Fees
+              Submit
             </button>
-            <br></br>
-
+            <input
+              className="checkbox mx-2"
+              type="radio"
+              id="yes"
+              name="creatorAnswer"
+              value="yes"
+              onChange={e => setYourAnswer(true)}
+            />
+            <label htmlFor="yes">Yes</label>
+            <input className="checkbox mx-2" type="radio" id="no" name="creatorAnswer" value="no" setYourAnswer />
+            <label htmlFor="no">No</label>
+          </div>
+          <br></br>
+          <div>
             <button
               className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
-              disabled={signer?.getAddress() == creator}
               onClick={async () => {
-                await reset();
+                await vote();
               }}
             >
-              Reset
+              Vote
+            </button>
+            <input
+              className="checkbox mx-2"
+              type="radio"
+              id="yes"
+              name="creatorAnswer"
+              value="yes"
+              onChange={e => setYourAnswer(true)}
+            />
+            <label htmlFor="yes">Yes</label>
+            <input
+              className="checkbox mx-2"
+              type="radio"
+              id="no"
+              name="creatorAnswer"
+              value="no"
+              onChange={e => setYourAnswer(false)}
+            />
+            <label htmlFor="no">No</label>
+          </div>
+          <br></br>
+          <div>
+            <button
+              className="btn hover:bg-accent-focus w-1/2 p-2 border border-gray-300 rounded-md my-2"
+              onClick={async () => {
+                await resolve();
+              }}
+            >
+              Resolve
             </button>
           </div>
-        )}
+          <br></br>
+          <button
+            className="btn  w-1/2 p-2 border border-gray-300 rounded-md my-2"
+            onClick={async () => {
+              await claim();
+            }}
+          >
+            Claim
+          </button>
+          <br></br>
+          <button
+            className="btn  w-1/2 p-2 border border-gray-300 rounded-md my-2"
+            disabled={signer?.getAddress() == creator}
+            onClick={async () => {
+              await withdrawFees();
+            }}
+          >
+            Withdraw Fees
+          </button>
+          <br></br>
+          <button
+            className="btn  w-1/2 p-2 border border-gray-300 rounded-md my-2"
+            disabled={signer?.getAddress() == creator}
+            onClick={async () => {
+              await reset();
+            }}
+          >
+            Reset
+          </button>
+        </div>
       </div>
     </div>
   );
