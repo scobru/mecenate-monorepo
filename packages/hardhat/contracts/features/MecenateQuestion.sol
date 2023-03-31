@@ -46,7 +46,9 @@ contract MecenateQuestion is Ownable {
 
   address[] public stakers;
 
-  uint256 public voteCounter;
+  uint256 public yesVoteWeight;
+
+  uint256 public noVoteWeight;
 
   uint256 public questionCounter;
 
@@ -152,9 +154,9 @@ contract MecenateQuestion is Ownable {
     require(shares[Choice.Yes][msg.sender] > 0 || shares[Choice.No][msg.sender] > 0, "You have no shares to vote");
 
     if (_choice == Choice.Yes) {
-      vote[msg.sender] = Choice.Yes;
+      yesVoteWeight = (yesVoteWeight + shares[Choice.Yes][msg.sender]);
     } else if (_choice == Choice.No) {
-      vote[msg.sender] = Choice.No;
+      noVoteWeight = (noVoteWeight + shares[Choice.No][msg.sender]);
     }
 
     voteCounter++;
@@ -200,8 +202,10 @@ contract MecenateQuestion is Ownable {
   function resolve() public {
     require(status == Status.Submit, "Prediction is not Voted");
 
-    if (voteCounter > 0) {
-      countVote();
+    if (yesVoteWeight > noVoteWeight) {
+      communityAnswer = Choice.Yes;
+    } else {
+      communityAnswer = Choice.No;
     }
 
     if (communityAnswer == creatorAnswer) {
