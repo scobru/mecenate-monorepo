@@ -18,19 +18,6 @@ const ViewQuestion: NextPage = () => {
 
   const DEBUG = true;
 
-  type Prediction = {
-    question: string;
-    correctAnswer: Choice;
-    answer: Choice;
-    endTime: string;
-    creator: string;
-    totalStaked: string;
-    totalYesStaked: string;
-    totalNoStaked: string;
-    status: Status;
-    fees: number;
-  };
-
   enum Choice {
     Yes,
     No,
@@ -39,19 +26,36 @@ const ViewQuestion: NextPage = () => {
 
   enum Status {
     Open,
-    Resolve,
-    Vote,
+    Sumbit,
     Close,
   }
 
   // set type array with question tupe
-  const [predictions, setPredictions] = useState<Prediction>();
   const [question, setQuestion] = useState<string>();
   const [endTime, setEndTime] = useState<string>();
-  const [predictionsList, setPredictionsList] = useState<Prediction[]>([]);
   const [stake, setStake] = useState<string>();
+
   const deployedContract = getDeployedContract(chain?.id.toString(), "MecenateQuestion");
-  const [answer, setAnswer] = useState<Boolean>(false);
+
+  const [creatorAnswer, setCreatorAnswer] = useState<boolean>();
+  const [communityAnswer, setCommunityAnswer] = useState<number>();
+
+  const [creatorStaked, setTotalStaked] = useState<string>();
+  const [totalYesStaked, setTotalYesStaked] = useState<string>();
+  const [totalNoStaked, setTotalNoStaked] = useState<string>();
+  const [yesShares, setYesShares] = useState<string>();
+  const [noShares, setNoShares] = useState<string>();
+  const [votingPeriod, setVotingPeriod] = useState<string>();
+  const [claimPeriod, setClaimPeriod] = useState<string>();
+  const [duration, setDuration] = useState<string>();
+  const [status, setStatus] = useState<string>();
+  const [creator, setCreator] = useState<string>();
+  const [fees, setFees] = useState<string>();
+  const [prediction, setPrediction] = useState<[]>();
+  const [punishmentPercentage, setPunishmentPercentage] = useState<string>();
+
+  const [isFetch, setIsFetch] = useState<boolean>(false);
+
   let ctxAbi: ContractInterface[] = [];
 
   if (deployedContract) {
@@ -64,40 +68,99 @@ const ViewQuestion: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  const fetchData = async function fetchData() {
+  // convert second to date
+  function convertToDate(seconds: number) {
+    const date = new Date(seconds * 1000);
+    return date.toLocaleString();
+  }
+
+  // convert milliecond to minute
+  function convertToMinute(milliSeconds: number) {
+    const minutes = milliSeconds / 60;
+    return minutes;
+  }
+
+  async function submit() {
     if (ctx && signer && provider && router.isReady) {
-      const _predictionsCount = await ctx?.predictionCount();
-      console.log(Number(_predictionsCount));
-      for (let i = 0; i < Number(_predictionsCount); i++) {
-        const _predictions = await ctx?.predictionList(i);
-        setPredictionsList(prevState => [...prevState, _predictions]);
+      let _creatorAnswer;
+      if (creatorAnswer == true) {
+        _creatorAnswer = 0;
+      } else {
+        _creatorAnswer = 1;
       }
-      console.log(predictionsList);
-      console.log("hi");
+      const tx = await ctx?.submit(_creatorAnswer);
+      await tx.wait();
+    }
+  }
+
+  async function resolve() {
+    if (ctx && signer && provider && router.isReady) {
+      const tx = await ctx?.resolve();
+      await tx.wait();
+    }
+  }
+
+  async function reset() {
+    if (ctx && signer && provider && router.isReady) {
+      const tx = await ctx?.reset();
+      await tx.wait();
+    }
+  }
+
+  async function claim() {
+    if (ctx && signer && provider && router.isReady) {
+      const tx = await ctx?.claim();
+      await tx.wait();
+    }
+  }
+  async function vote() {
+    if (ctx && signer && provider && router.isReady) {
+      let _creatorAnswer;
+      if (creatorAnswer == true) {
+        _creatorAnswer = 0;
+      } else {
+        _creatorAnswer = 1;
+      }
+      const tx = await ctx?.voteAnswer(_creatorAnswer);
+      await tx.wait();
+    }
+  }
+
+  const fetchData = async function fetchData() {
+    try {
+      if (ctx && signer && provider && router.isReady) {
+        const _predictionsCount = await ctx?.questionCounter();
+        console.log(Number(_predictionsCount));
+        let _yesShare: any;
+        let _noShare: any;
+        let _creatorStaked: any;
+        let _totalYesStaked: any;
+        let _totalNoStaked: any;
+
+        setTotalStaked(await ctx?.creatorStaked());
+        setTotalNoStaked(await ctx?.totalNoStaked());
+        setTotalYesStaked(await ctx?.totalYesStaked());
+        setQuestion(await ctx?.question());
+        setEndTime(await ctx?.endTime());
+        setYesShares(await ctx?.shares(Choice.Yes, await signer?.getAddress()));
+        setNoShares(await ctx?.shares(Choice.No, await signer?.getAddress()));
+        setVotingPeriod(await ctx?.votingPeriod());
+        setClaimPeriod(await ctx?.claimingPeriod());
+        setFees(await ctx?.fees());
+        setStatus(await ctx?.status());
+        setCreatorAnswer(await ctx?.creatorAnswer());
+        setCommunityAnswer(await ctx?.communityAnswer());
+        setCreator(await ctx?.creator());
+        setPrediction(await ctx?.getPrediction());
+
+        console.log(prediction);
+
+        setIsFetch(true);
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
-
-  async function getYesShares(predictionId: number) {
-    const yesShare = await ctx?.shares(predictionId, Choice.Yes, await signer?.getAddress());
-    console.log("Yes Share ", Number(yesShare));
-    return yesShare;
-  }
-
-  async function getNoShares(predictionId: number) {
-    const noShare = ctx?.shares(predictionId, Choice.No, await signer?.getAddress());
-    console.log("No Share ", Number(noShare));
-    return noShare;
-  }
-
-  function getChoice(choice: number) {
-    if (choice === 0) {
-      return "Yes";
-    }
-    if (choice === 1) {
-      return "No";
-    }
-    return "None";
-  }
 
   function getStatus(status: number) {
     if (status === 0) {
@@ -113,11 +176,26 @@ const ViewQuestion: NextPage = () => {
   }
 
   async function createPrediction() {
-    const tx = await ctx?.createPrediction(question, endTime, { value: parseEther(String(stake)) });
+    const tx = await ctx?.create(question, endTime, Number(punishmentPercentage) * 100, {
+      value: parseEther(String(stake)),
+    });
   }
 
-  async function stakePrediction(predictionId: number) {
-    const tx = await ctx?.stake(predictionId, answer, { value: parseEther(String(stake)) });
+  async function stakePrediction() {
+    let _creatorAnswer: number;
+    if (creatorAnswer == true) {
+      _creatorAnswer = 0;
+    } else {
+      _creatorAnswer = 1;
+    }
+
+    console.log(stake);
+
+    const tx = await ctx?.stake(_creatorAnswer, { value: parseEther(String(stake)) });
+  }
+
+  async function withdrawFees() {
+    const tx = await ctx?.withdrawFees();
   }
 
   useEffect(() => {
@@ -152,47 +230,182 @@ const ViewQuestion: NextPage = () => {
           value={stake}
           onChange={e => setStake(e.target.value)}
         />
+
+        <input
+          type="text"
+          className="w-1/2 p-2 border border-gray-300 rounded-md"
+          placeholder="Punishment Percent"
+          value={punishmentPercentage}
+          onChange={e => setPunishmentPercentage(e.target.value)}
+        />
         <button className="w-1/2 p-2 border border-gray-300 rounded-md" onClick={createPrediction}>
           Create Prediction
         </button>
       </div>
-      <div className="card w-full md:w-fit my-5">
-        {predictionsList.map((prediction, index) => (
-          <div key={index} className="bg-white shadow-md rounded-lg p-6 w-full my-2">
-            <div className="font-bold text-lg mb-2">{prediction.question}</div>
-            <div className="text-gray-700 mb-2">Correct answer: {getChoice(prediction.correctAnswer)}</div>
-            <div className="text-gray-700 mb-2">User answer: {getChoice(prediction.answer)}</div>
-            <div className="text-gray-700 mb-2">End time: {String(prediction.endTime)}</div>
-            <div className="text-gray-700 mb-2">Creator: {prediction.creator}</div>
-            <div className="text-gray-700 mb-2">Total staked: {formatEther(String(prediction.totalStaked))}</div>
-            <div className="text-green-700 mb-2">Total yes staked: {String(prediction.totalYesStaked)}</div>
-            <div className="text-red-700 mb-2">Total no staked: {Number(prediction.totalNoStaked)}</div>
-            <div className="text-green-700 mb-2 ">Status: {getStatus(prediction.status)}</div>
-            <div className="text-gray-700">Fees: {formatEther(Number(prediction.fees))}</div>
-            <div className="text-gray-700">Yes shares: {Number(getYesShares(index))}</div>
-            <div className="text-gray-700">No shares: {Number(getNoShares(index))}</div>
+      <div className="card  w-full md:w-fit my-5">
+        {isFetch && (
+          <div className="bg-white flex flex-col shadow-md rounded-lg p-6 w-full my-2">
+            <div className="font-bold text-lg mb-2">{question}</div>
+            <div className="text-gray-700 mb-2">Creator: {creator}</div>
+
+            <div className="text-gray-700 mb-2">
+              Correct creatorAnswer: {communityAnswer == 0 ? "Yes" : communityAnswer == 1 ? "No" : "None"}
+            </div>
+            <div className="text-gray-700 mb-2">
+              User creatorAnswer: {creatorAnswer == 0 ? "Yes" : creatorAnswer == 1 ? "No" : "None"}
+            </div>
+            <div className="text-gray-700 mb-2">End time: {convertToDate(String(endTime))}</div>
+            <div className="text-gray-700 mb-2">Voting Period: {convertToMinute(String(votingPeriod))} minutes</div>
+            <div className="text-gray-700 mb-2">Claim Period: {convertToMinute(String(claimPeriod))} minutes</div>
+
+            <div className="text-gray-700 mb-2">Total staked: {formatEther(String(creatorStaked))} ETH</div>
+            <div className="text-green-700 mb-2">Total yes staked: {formatEther(String(totalYesStaked))} ETH</div>
+            <div className="text-red-700 mb-2">Total no staked: {formatEther(String(totalNoStaked))} ETH</div>
+            <div className="text-red-700 mb-2">Creator Fees: {formatEther(String(fees))} ETH</div>
+
+            <div className="text-green-700 mb-2 ">Status: {getStatus(status)}</div>
+            <div className="text-gray-700 mb-2">Yes shares: {String(yesShares)}</div>
+            <div className="text-gray-700 mb-2">No shares: {String(noShares)}</div>
 
             <input
-              type="text"
-              className="w-1/2 p-2 border border-gray-300 rounded-md"
+              type="input text"
+              className="w-1/2 p-2 border border-gray-300 rounded-md my-2"
               placeholder="Stake"
               value={stake}
               onChange={e => setStake(e.target.value)}
             />
-            <input type="radio" id="yes" name="answer" value="yes" onChange={e => setAnswer(true)} />
-            <label htmlFor="yes">Yes</label>
-            <input type="radio" id="no" name="answer" value="no" onChange={e => setAnswer(false)} />
-            <label htmlFor="no">No</label>
+            <div>
+              <button
+                className="btn w-1/2 p-2 border border-gray-300 rounded-md"
+                onClick={() => {
+                  stakePrediction();
+                }}
+              >
+                Stake
+              </button>
+              <input
+                className="checkbox mx-2"
+                type="radio"
+                id="yes"
+                name="creatorAnswer"
+                value="yes"
+                onChange={e => setCreatorAnswer(true)}
+              />
+              <label htmlFor="yes">Yes</label>
+              <input
+                className="checkbox mx-2"
+                type="radio"
+                id="no"
+                name="creatorAnswer"
+                value="no"
+                onChange={e => setCreatorAnswer(false)}
+              />
+              <label htmlFor="no">No</label>
+            </div>
+            <br></br>
+
+            <div>
+              <button
+                className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
+                onClick={async () => {
+                  await submit();
+                }}
+              >
+                Submit
+              </button>
+              <input
+                className="checkbox mx-2"
+                type="radio"
+                id="yes"
+                name="creatorAnswer"
+                value="yes"
+                onChange={e => setCreatorAnswer(true)}
+              />
+              <label htmlFor="yes">Yes</label>
+              <input
+                className="checkbox mx-2"
+                type="radio"
+                id="no"
+                name="creatorAnswer"
+                value="no"
+                onChange={e => setCreatorAnswer(false)}
+              />
+              <label htmlFor="no">No</label>
+            </div>
+            <br></br>
+
+            <div>
+              <button
+                className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
+                onClick={async () => {
+                  await vote();
+                }}
+              >
+                Vote
+              </button>
+              <input
+                className="checkbox mx-2"
+                type="radio"
+                id="yes"
+                name="creatorAnswer"
+                value="yes"
+                onChange={e => setCreatorAnswer(true)}
+              />
+              <label htmlFor="yes">Yes</label>
+              <input
+                className="checkbox mx-2"
+                type="radio"
+                id="no"
+                name="creatorAnswer"
+                value="no"
+                onChange={e => setCreatorAnswer(false)}
+              />
+              <label htmlFor="no">No</label>
+            </div>
+            <br></br>
+            <div>
+              <button
+                className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
+                onClick={async () => {
+                  await resolve();
+                }}
+              >
+                Resolve
+              </button>
+            </div>
+            <br></br>
             <button
-              className="w-1/2 p-2 border border-gray-300 rounded-md"
-              onClick={() => {
-                stakePrediction(index);
+              className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
+              onClick={async () => {
+                await claim();
               }}
             >
-              Stake
+              Claim
+            </button>
+            <br></br>
+
+            <button
+              className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
+              disabled={signer?.getAddress() == creator}
+              onClick={async () => {
+                await withdrawFees();
+              }}
+            >
+              Withdraw Fees
+            </button>
+            <br></br>
+
+            <button
+              className="btn  w-1/2 p-2 border border-gray-300 rounded-md"
+              disabled={signer?.getAddress() == creator}
+              onClick={async () => {
+                await reset();
+              }}
+            >
+              Reset
             </button>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

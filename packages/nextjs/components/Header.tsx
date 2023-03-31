@@ -67,6 +67,9 @@ export default function Header() {
       <li className="font-semibold">
         <NavLink href="/box">BOX</NavLink>
       </li>
+      <li className="font-semibold">
+        <NavLink href="/question">QUESTION</NavLink>
+      </li>
     </>
   );
 

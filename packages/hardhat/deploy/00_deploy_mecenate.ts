@@ -115,6 +115,28 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   });
 
   dcaFactory.receipt && console.log("DCA Factory deployed at:", dcaFactory.receipt.contractAddress);
+
+  const questionFactory = await deploy("MecenateQuestionFactory", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [identity.address, deployer],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  questionFactory.receipt && console.log("Question Factory deployed at:", questionFactory.receipt.contractAddress);
+
+  const question = await deploy("MecenateQuestion", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [deployer, deployer],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
 };
 
 export default deployYourContract;
