@@ -22,7 +22,7 @@ async function connectWallet() {
   // Create a new provider instance
   const provider = new ethers.JsonRpcProvider(providerUrl);
   // Wallet instance from PrivateKey in env file
-  signer = new ethers.Wallet(String(process.env.PRIVATEKEY2), provider);
+  signer = new ethers.Wallet(String(process.env.PRIVATEKEY), provider);
   console.log("Wallet address: ", signer.address);
 
   const network = await provider.getNetwork();
@@ -70,9 +70,13 @@ async function acceptFeed(_feedAddr: string, payment: string) {
 
   MecenateFeed.connect(signer);
 
-  const tx = await MecenateFeed.acceptPost(publicKeyBytes, {
-    value: parseEther(payment),
-  });
+  const tx = await MecenateFeed.acceptPost(
+    publicKeyBytes,
+    signer?.getAddress(),
+    {
+      value: parseEther(payment),
+    }
+  );
   await tx.wait();
 
   console.log("Feed accepted!");

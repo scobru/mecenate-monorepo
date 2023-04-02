@@ -1,7 +1,11 @@
 pragma solidity 0.8.19;
 
-interface IMecenate {
-  function isValidSubscription(address _subscriber) external view returns (bool);
+interface IMecenateTier {
+    function isValidSubscription(
+        address _subscriber
+    ) external view returns (bool);
 
-  function subscribe() external payable;
+    function subscribe() external payable;
+
+    function fee() external view returns (uint256);
 }

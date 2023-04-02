@@ -1,9 +1,11 @@
 pragma solidity 0.8.19;
 
 interface IMecenateFactory {
-  function subscribeFeePercent() external view returns (uint256);
+    function owner() external view returns (address payable);
 
-  function creationFee() external view returns (uint256);
+    function treasuryContract() external view returns (address payable);
 
-  function owner() external view returns (address payable);
+    function identityContract() external view returns (address);
+
+    function contractCounter() external view returns (uint256);
 }

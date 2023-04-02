@@ -3,10 +3,8 @@ import React, { useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract, useAccount } from "wagmi";
 import { notification } from "~~/utils/scaffold-eth";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { Contract, ContractInterface, ethers, providers } from "ethers";
-import EthCrypto from "eth-crypto";
-import { AbiCoder, parseEther } from "ethers/lib/utils.js";
-import { useSignMessage } from "wagmi";
+import { ContractInterface, providers } from "ethers";
+import { parseEther } from "ethers/lib/utils.js";
 
 const DEBUG = true;
 
@@ -15,10 +13,15 @@ const Box: NextPage = () => {
   const provider = useProvider();
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
+
   const deployedContractBox = getDeployedContract(chain?.id.toString(), "MecenateBox");
+  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
 
   let boxAddress!: string;
   let boxAbi: ContractInterface[] = [];
+
+  let identityAddress: string = "";
+  let identityAbi: ContractInterface[] = [];
 
   const [signature, setSignature] = React.useState<string>("");
   const [balance, setBalance] = React.useState<string>("");
@@ -29,27 +32,14 @@ const Box: NextPage = () => {
   const [hash, setHash] = React.useState<string>("");
   const recoveredAddress = React.useRef<string>();
   const [lockDuration, setLockDuration] = React.useState<string>("");
-
-  const { data, error, isLoading, signMessage } = useSignMessage({
-    onSuccess(data, variables) {
-      // Verify signature when sign message succeeds
-      setSignature(data);
-
-      async function verifySignature() {
-        if (signature !== undefined) {
-          const result = await receiveDonation();
-          console.log(result);
-        }
-      }
-
-      verifySignature();
-
-      const address = ethers.utils.verifyMessage(variables.message, data);
-    },
-  });
+  const [haveID, setHaveID] = React.useState<boolean>(false);
 
   if (deployedContractBox) {
     ({ address: boxAddress, abi: boxAbi } = deployedContractBox);
+  }
+
+  if (deployedContractIdentity) {
+    ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
   }
 
   const boxCtx = useContract({
@@ -58,22 +48,39 @@ const Box: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
+  const identityCtx = useContract({
+    address: identityAddress,
+    abi: identityAbi,
+    signerOrProvider: signer || provider,
+  });
+
   async function deposit() {
-    // encrypt amount to sha256
+    const tx = await boxCtx?.callStatic.deposit(Number(lockDuration), { value: parseEther(amountToSend) });
+    await boxCtx?.deposit(Number(lockDuration), { value: parseEther(amountToSend) });
 
-    const tx = await boxCtx?.deposit(lockDuration, { value: parseEther(amountToSend) });
-
-    setSignature(await tx?.toString()!);
+    if (tx) {
+      notification.success("Deposit Done");
+    }
+    setSignature(await tx);
   }
 
   async function withdraw() {
     const tx = await boxCtx?.withdraw(signature);
-    // split the ésignature using ethers
   }
+
+  useEffect(() => {
+    async function getBalance() {
+      const balance = await identityCtx?.balanceOf(signer?.getAddress());
+      if (balance > 0) {
+        setHaveID(true);
+      }
+    }
+    getBalance();
+  }, [boxCtx]);
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black">
-      <div className="max-w-3xl text-center my-20 text-base-content">
+      <div className="max-w-3xl text-center my-2 text-base-content">
         <h1 className="text-6xl font-bold mb-8">Lock your eth into the box</h1>
         <p className="text-xl  mb-8">
           Secure Your Crypto and Plan for the Future with Our Locked Savings Contract: Lock Your ETH for Your Preferred
@@ -102,7 +109,8 @@ const Box: NextPage = () => {
       />
 
       <button
-        className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
+        className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500  hover:bg-primary-700 my-2"
+        disabled={!haveID}
         onClick={async () => {
           await deposit();
         }}
@@ -111,7 +119,8 @@ const Box: NextPage = () => {
       </button>
 
       <button
-        className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700"
+        className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700"
+        disabled={!haveID}
         onClick={async () => {
           await withdraw();
         }}

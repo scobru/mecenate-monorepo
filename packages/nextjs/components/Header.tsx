@@ -25,9 +25,8 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       passHref
-      className={`${
-        isActive ? "bg-secondary shadow-md" : ""
-      } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm rounded-full gap-2`}
+      className={`${isActive ? "bg-secondary shadow-md" : ""
+        } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm rounded-full gap-2`}
     >
       {children}
     </Link>
@@ -66,7 +65,7 @@ export default function Header() {
         </NavLink>
       </li> */}
       <li className="font-base">
-        <NavLink href="/createID">
+        <NavLink href="/identity">
           <UserIcon className="h-4 w-4" />
           Identity
         </NavLink>

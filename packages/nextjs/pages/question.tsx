@@ -4,25 +4,27 @@ import { useProvider, useNetwork, useSigner, useContract, useAccount } from "wag
 import { notification } from "~~/utils/scaffold-eth";
 const crypto = require("asymmetric-crypto");
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { Contract, ContractInterface, ethers, utils } from "ethers";
-import { formatEther } from "ethers/lib/utils.js";
+import { ContractInterface, ethers, utils } from "ethers";
+import { formatEther, parseEther } from "ethers/lib/utils.js";
 
 const DEBUG = true;
 
 const Question: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
-  const account = useAccount();
   const provider = useProvider();
 
   const [questions, setQuestions] = React.useState<string[]>([]);
-  const [questionsOwned, setQuestionsOwned] = React.useState<string[]>([]);
-  const [showOwned, setShowOwned] = React.useState<boolean>(false);
+
   const [questionData, setQuestionData] = React.useState<any>([]);
+  const [creationFee, setCreationFee] = React.useState<string>("");
 
   const deployedContractQuestion = getDeployedContract(chain?.id.toString(), "MecenateQuestion");
-  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateQuestionFactory");
+  const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
+
+  let treasuryAddress = "";
+  let treasuryAbi: ContractInterface[] = [];
 
   let factoryAddress!: string;
   let factoryAbi: ContractInterface[] = [];
@@ -38,6 +40,16 @@ const Question: NextPage = () => {
     ({ address: questionAddress, abi: questionAbi } = deployedContractQuestion);
   }
 
+  if (deployedContractTreasury) {
+    ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
+  }
+
+  const treasuryCtx = useContract({
+    address: treasuryAddress,
+    abi: treasuryAbi,
+    signerOrProvider: signer || provider,
+  });
+
   const factoryCtx = useContract({
     address: factoryAddress,
     abi: factoryAbi,
@@ -51,7 +63,8 @@ const Question: NextPage = () => {
   });
 
   async function createQuestionContract() {
-    const _questionAddress = await factoryCtx?.createQuestion();
+    console.log(Number(creationFee));
+    const _questionAddress = await factoryCtx?.createQuestion({ value: String(creationFee) });
     if (DEBUG) console.log(_questionAddress);
   }
 
@@ -82,6 +95,7 @@ const Question: NextPage = () => {
         _data.push(_questionData);
       }
       setQuestionData(_data);
+      setCreationFee(await treasuryCtx?.fixedFee());
       console.log(questionData);
 
       if (DEBUG) console.log(_questions);
@@ -100,8 +114,8 @@ const Question: NextPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center pt-10 text-black">
-      <div className="max-w-3xl text-center my-20 text-base-content">
+    <div className="flex flex-col items-center pt-10 text-black p-2 m-2">
+      <div className="max-w-3xl text-center my-2 text-base-content">
         <h1 className="text-6xl font-bold mb-8">Ask any question</h1>
         <p className="text-xl  mb-8">
           Introducing MecenateQuestion: A Decentralized Prediction Market with Punishment Mechanism 🌐💡🔥
@@ -118,13 +132,13 @@ const Question: NextPage = () => {
       </div>
       <div className="flex items-center mb-20">
         <button
-          className="bg-primary  hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
+          className="bg-primary text-base-content  hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
           onClick={createQuestionContract}
         >
           Create Question
         </button>
         <button
-          className="bg-primary  hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
+          className="bg-primary text-base-content  hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
           onClick={getOwnedQuestions}
         >
           Owned Questions

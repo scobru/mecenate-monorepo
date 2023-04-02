@@ -72,9 +72,35 @@ const post = command({
       long: "rawdata",
       short: "r",
     }),
+    buyer: option({
+      type: string,
+      long: "buyer",
+      short: "b",
+    }),
+    payment: option({
+      type: string,
+      long: "payment",
+      short: "p",
+    }),
   },
-  handler: async ({ address, duration, type, stake, rawdata }) => {
-    await createPost(address, Number(duration), type, stake, rawdata);
+  handler: async ({
+    address,
+    duration,
+    type,
+    stake,
+    rawdata,
+    buyer,
+    payment,
+  }) => {
+    await createPost(
+      address,
+      Number(duration),
+      type,
+      stake,
+      rawdata,
+      buyer,
+      payment
+    );
   },
 });
 
@@ -278,6 +304,9 @@ const help = command({
     );
     console.log("  -s, --stake, stake of the post in Tokens or ETH");
     console.log("  -r, --rawdata, raw data of the post");
+    console.log("  -b, --buyer, Buyer of the post");
+    console.log("  -p, --payment payment of the feed in Tokens or ETH");
+
     console.log("Command: accept:");
     console.log("  -a, --address address of the feed");
     console.log("  -p, --payment payment of the feed in Tokens or ETH");

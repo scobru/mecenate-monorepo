@@ -9,26 +9,101 @@ import {
   MegaphoneIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
+import { useProvider, useNetwork, useSigner, useContract, useBalance, useContractRead } from "wagmi";
+import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
+import { Contract, ContractInterface, ethers, utils } from "ethers";
+import { formatEther } from "ethers/lib/utils.js";
+import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
+  const { chain } = useNetwork();
+  const { data: signer } = useSigner();
+  const provider = useProvider();
+  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
+  const deployedContractStats = getDeployedContract(chain?.id.toString(), "MecenateStats");
+
+  const [globalFee, setGlobalFee] = React.useState<string>("");
+  const [fixedFee, setFixedFee] = React.useState<string>("");
+
+  let identityAddress = "";
+  let identityAbi: ContractInterface[] = [];
+
+  let statsAddress = "";
+  let statsAbi: ContractInterface[] = [];
+
+  const [identityTotalSupply, setIdentityTotalSupply] = React.useState<string>("");
+  const [stats, setStats] = React.useState<any>([]);
+
+  if (deployedContractIdentity) {
+    ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
+  }
+
+  if (deployedContractStats) {
+    ({ address: statsAddress, abi: statsAbi } = deployedContractStats);
+  }
+
+  const statsCtx = useContract({
+    address: statsAddress,
+    abi: statsAbi,
+    signerOrProvider: signer || provider,
+  });
+
+  const identityCtx = useContract({
+    address: identityAddress,
+    abi: identityAbi,
+    signerOrProvider: signer || provider,
+  });
+
+  async function getStats() {
+    const stats = await statsCtx?.getStats();
+    setStats(stats);
+  }
+
+  useEffect(() => {
+    getStats();
+  }, [statsCtx]);
+
   return (
     <>
       <Head>
-        <title>Scaffold-eth App</title>
+        <title>M E C E N A T E</title>
         <meta name="description" content="Created with 🏗 scaffold-eth" />
       </Head>
 
-      <div className="flex items-center flex-col flex-grow pt-10 font-proxima">
+      <div className="flex items-center flex-col flex-grow rounded-sm pt-10 font-proxima">
         <div className="px-5">
           <h1 className="text-center mb-8">
             <span className="block text-2xl mb-2">Welcome to</span>
             <span className="block text-4xl font-bold">M E C E N A T E</span>
           </h1>
         </div>
-        <div className="flex-grow bg-base-300 w-auto mt-16 px-8 py-12">
-          <div className="flex gap-2 flex-col lg:flex-row ">
-            <div className="flex flex-col bg-base-100 px-20 py-5 text-center items-center max-w-xs rounded-3xl">
+        {stats ? (
+          <div className="card flex-col w-auto bg-base-200 px-10 py-10 text-4xl font-semibold shadow-xl shadow-black rounded-3xl text-left my-4 ">
+            <p className="my-5">TREASURY: {String(Number(Number(stats.treasuryBalance) / 1e18).toFixed(3))} ETH</p>
+            <p className="text-xl font-medium">
+              Protocol Fee %: {String(Number(stats.globalFee) / 10000)} %
+              <p className="text-lg font-thin">
+                The percentage of the protocol fee for TIERS , BOX and QUESTION sellers and buyers operations.
+              </p>
+            </p>
+            <p className="text-xl font-medium">
+              Protocol One Time Fee: {String(Number(stats.fixedFee) / 1e18)} ETH
+              <p className="text-lg font-thin">One time payment for the FEEDS, IDENTITY, QUESTION contract creation.</p>
+            </p>
+            <div className="flex flex-col items-center gap-10  lg:flex-row ">
+              <div className="text-3xl font-thin my-5 ">identities: {Number(stats.totalIdentities)}</div>
+              <div className="text-3xl font-thin my-5 ">requests: {Number(stats.totalBayRequests)}</div>
+              <div className="text-3xl font-thin my-5 ">tiers : {Number(stats.totalTiers)}</div>
+              <div className="text-3xl font-thin my-5 ">feeds : {Number(stats.totalFeeds)}</div>
+              <div className="text-3xl font-thin my-5 ">questions : {Number(stats.totalQuestions)}</div>
+              <div className="text-3xl font-thin my-5 ">box deposits : {Number(stats.totalBoxDeposits)}</div>
+            </div>
+          </div>
+        ) : null}
+        <div className="flex-grow bg-base-300  mt-16 px-8 py-12 shadow-sm">
+          <div className="flex gap-4 flex-col items-center lg:flex-row my-20 ">
+            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-3xl shadow-lg shadow-slate-300">
               <UserIcon className="h-8 w-8 fill-secondary" />
               <p>
                 <p className="font-base align-baseline text-justify-center">
@@ -40,7 +115,7 @@ const Home: NextPage = () => {
                 </p>
               </p>
             </div>
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center items-center max-w-xs rounded-3xl">
+            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-3xl shadow-lg shadow-slate-300">
               <MegaphoneIcon className="h-8 w-8 fill-secondary" />
               <p>
                 <p className="font-base align-baseline text-justify-center">
@@ -61,7 +136,7 @@ const Home: NextPage = () => {
               </p>
             </div>
 
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center items-center max-w-xs rounded-3xl">
+            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-3xl shadow-lg shadow-slate-300">
               <TicketIcon className="h-8 w-8 fill-secondary" />
               <p>
                 <p className="font-base align-baseline text-justify-center">
@@ -79,7 +154,7 @@ const Home: NextPage = () => {
                 </p>
               </p>
             </div>
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center items-center max-w-xs rounded-3xl">
+            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-3xl shadow-lg shadow-slate-300">
               <LockClosedIcon className="h-8 w-8 fill-secondary" />
               <p>
                 <p className="font-base align-baseline text-justify-center">
@@ -95,7 +170,7 @@ const Home: NextPage = () => {
                 </p>
               </p>
             </div>
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center items-center max-w-xs rounded-3xl">
+            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-3xl shadow-lg shadow-slate-300">
               <QuestionMarkCircleIcon className="h-8 w-8 fill-secondary" />
               <p>
                 <p className="font-base align-baseline text-justify-center">

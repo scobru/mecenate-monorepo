@@ -16,10 +16,13 @@ const Feeds: NextPage = () => {
 
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateFeedFactory");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateFeed");
+  const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
 
   const [pubKey, setPubKey] = React.useState<string>("");
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
+
+  const [fixedFee, setFixedFee] = React.useState<string>("");
 
   type Feed = {
     operator: string;
@@ -28,13 +31,16 @@ const Feeds: NextPage = () => {
     buyerStake: string;
     sellerStake: string;
     totalStaked: string;
-    totalCount: string;
+    postCount: string;
     buyerPayment: string;
     sellerPayment: string;
   };
 
   let factoryAddress!: string;
   let factoryAbi: ContractInterface[] = [];
+
+  let treasuryAddress: string = "";
+  let treasuryAbi: ContractInterface[] = [];
 
   type UserData = {
     mecenateID: Number;
@@ -45,6 +51,16 @@ const Feeds: NextPage = () => {
   if (deployedContractFactory) {
     ({ address: factoryAddress, abi: factoryAbi } = deployedContractFactory);
   }
+
+  if (deployedContractTreasury) {
+    ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
+  }
+
+  const treasuryCtx = useContract({
+    address: treasuryAddress,
+    abi: treasuryAbi,
+    signerOrProvider: signer || provider,
+  });
 
   const factoryCtx = useContract({
     address: factoryAddress,
@@ -57,6 +73,9 @@ const Feeds: NextPage = () => {
     const _feedsInfo = await factoryCtx?.getFeedsInfo();
     setFeeds(_feeds);
     setFeedsInfos(_feedsInfo);
+    const _fixedFee = await treasuryCtx?.fixedFee();
+    setFixedFee(_fixedFee);
+    console.log(_feedsInfo);
     if (DEBUG) console.log(feeds);
   }
 
@@ -70,7 +89,7 @@ const Feeds: NextPage = () => {
   }
 
   async function buildFeed() {
-    const tx = await factoryCtx?.buildFeed();
+    const tx = await factoryCtx?.buildFeed({ value: fixedFee });
     if (DEBUG) console.log(tx);
   }
 
@@ -92,8 +111,8 @@ const Feeds: NextPage = () => {
   });
 
   return (
-    <div className="flex flex-col items-center pt-10">
-      <div className="max-w-3xl text-center my-20 text-base-content">
+    <div className="flex items-center flex-col flex-grow pt-10 text-black p-4 m-4">
+      <div className="max-w-3xl text-center my-2 text-base-content">
         <h1 className="text-6xl font-bold mb-8">Data Privacy and Security Redefined.</h1>
         <p className="text-xl  mb-8">
           <strong>Mecenate Feeds </strong> allows me to securely and privately post my information and receive payments
@@ -105,15 +124,15 @@ const Feeds: NextPage = () => {
           Mecenate Bay is a marketplace where you can buy and sell data feeds.
         </p>
       </div>
-      <div className="flex items-center mb-5">
+      <div className="flex flex-col items-center mb-5">
         <button
-          className="btn-wide text-base-content bg-secondary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
+          className="btn-wide text-base-content bg-primary hover:bg-accent  font-bold py-2 px-4 rounded-md my-2"
           onClick={buildFeed}
         >
           Create
         </button>
         <button
-          className="btn-wide text-base-content bg-secondary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
+          className="btn-wide text-base-content bg-primary hover:bg-accent  font-bold py-2 px-4 rounded-md my-2"
           onClick={async () => {
             await getFeedsOwned();
           }}
@@ -121,7 +140,7 @@ const Feeds: NextPage = () => {
           <i className="fas fa-user-alt mr-2"></i> Your Feeds
         </button>
         <button
-          className="btn-wide text-base-content bg-secondary hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
+          className="btn-wide text-base-content bg-primary hover:bg-accent  font-bold py-2 px-4 rounded-md my-2"
           onClick={async () => {
             await getFeeds();
           }}
@@ -189,7 +208,7 @@ const Feeds: NextPage = () => {
                     <td className="px-2 py-1 border-r border-base-300">
                       <strong>Hash Count:</strong>
                     </td>
-                    <td className="px-2 py-1">{feedsInfos[i].totalCount}</td>
+                    <td className="px-2 py-1">{String(feedsInfos[i].postCount)}</td>
                   </tr>
                 </tbody>
               </table>

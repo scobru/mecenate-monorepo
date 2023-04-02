@@ -4,19 +4,15 @@ import type { AppProps } from "next/app";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiConfig } from "wagmi";
 import { Toaster } from "react-hot-toast";
-
 import "@rainbow-me/rainbowkit/styles.css";
 import { appChains } from "~~/services/web3/wagmiConnectors";
 import { wagmiClient } from "~~/services/web3/wagmiClient";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
-
 import Header from "~~/components/Header";
 import Footer from "~~/components/Footer";
-
 import { useEffect } from "react";
 import { useAppStore } from "~~/services/store/store";
 import { useEthPrice } from "~~/hooks/scaffold-eth";
-
 import NextNProgress from "nextjs-progressbar";
 
 const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
@@ -33,9 +29,9 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
     <WagmiConfig client={wagmiClient}>
       <NextNProgress />
       <RainbowKitProvider chains={appChains.chains} avatar={BlockieAvatar}>
-        <div className="flex flex-col min-h-screen  font-proxima">
+        <div className="flex flex-col min-h-screen min-w-fit  font-proxima">
           <Header />
-          <main className="relative flex flex-col flex-1">
+          <main className="relative flex flex-col flex-1 min-w-fit">
             <Component {...pageProps} />
           </main>
           <Footer />

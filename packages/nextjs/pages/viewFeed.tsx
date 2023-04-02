@@ -10,18 +10,35 @@ import { AbiCoder, formatEther, parseEther } from "ethers/lib/utils";
 import pinataSDK from "@pinata/sdk";
 import axios from "axios";
 import dotenv from "dotenv";
-import utils from "ethers";
+import Dropzone from "react-dropzone";
+import { create } from "ipfs-http-client";
 
 dotenv.config();
 const crypto = require("asymmetric-crypto");
 const ErasureHelper = require("@erasure/crypto-ipfs");
 const pinataApiSecret = process.env.PINATA_API_SECRET;
 const pinataApiKey = process.env.PINATA_API_KEY;
+const projectId = process.env.INFURA_PROJECT_ID;
+const projectSecret = process.env.INFURA_PROJECT_SECRET;
+const projectGateway = process.env.IPFS_GATEWAY;
+
+const auth = "Basic " + Buffer.from(projectId + ":" + projectSecret).toString("base64");
+
+const IPFS_HOST = "ipfs.infura.io";
+const IPFS_PORT = 5001;
+
+const client = create({
+  host: "ipfs.infura.io",
+  port: 5001,
+  protocol: "https",
+  headers: {
+    authorization: auth,
+  },
+});
 
 const ViewFeed: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
-  const account = useAccount();
   const provider = useProvider();
   const router = useRouter();
   const { addr } = router.query;
@@ -41,6 +58,8 @@ const ViewFeed: NextPage = () => {
   const [totalStaked, setTotalStaked] = useState<any>(0);
   const [stakeAmount, setStakeAmount] = useState<any>(0);
   const [buyer, setBuyer] = useState<any>("");
+  const [imageFile, setImageFile] = React.useState(null);
+  const [image, setImage] = React.useState("");
 
   let user = "";
   let owner = "";
@@ -77,6 +96,104 @@ const ViewFeed: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
+  async function decodeData() {
+    if (feedData[1][2].decryptedData != "0x30783030") {
+      const abiCoder = new AbiCoder();
+
+      const decryptedData = abiCoder.decode(["string", "string"], feedData[1][2].decryptedData);
+
+      const encryptedData = await ErasureHelper.multihash({
+        input: feedData[1][2].encryptedData,
+        inputType: "sha2-256",
+        outputType: "b58",
+      });
+
+      const encryptedKey = await ErasureHelper.multihash({
+        input: feedData[1][2].encryptedKey,
+        inputType: "sha2-256",
+        outputType: "b58",
+      });
+
+      notification.success(
+        <div>
+          {" "}
+          <p>
+            <a href={`https://gateway.pinata.cloud/ipfs/${decryptedData[0]}`} target="_blank">
+              <p>Decrypted Data[0]: {decryptedData[0]}</p>
+            </a>
+          </p>
+          <p>
+            <a href={`https://gateway.pinata.cloud/ipfs/${decryptedData[1]}`} target="_blank">
+              <p>Decrypted Data[1]: {decryptedData[1]}</p>
+            </a>
+          </p>
+          <p>
+            <a href={`https://gateway.pinata.cloud/ipfs/${encryptedData}`} target="_blank">
+              <p>Encrypted Data: {encryptedData}</p>
+            </a>
+          </p>
+          <p>
+            <a href={`https://gateway.pinata.cloud/ipfs/${encryptedKey}`} target="_blank">
+              <p>Encrypted Key: {encryptedKey}</p>
+            </a>
+          </p>{" "}
+        </div>,
+      );
+    } else {
+      const encryptedData = await ErasureHelper.multihash({
+        input: feedData[1][2].encryptedData,
+        inputType: "sha2-256",
+        outputType: "b58",
+      });
+
+      notification.info(
+        <div>
+          <p>
+            <a href={`https://gateway.pinata.cloud/ipfs/${encryptedData}`} target="_blank">
+              <p>Encrypted Data: {encryptedData}</p>
+            </a>
+          </p>
+        </div>,
+      );
+    }
+  }
+
+  const uploadImageToIpfs = async (file: Blob | null) => {
+    try {
+      if (!file) {
+        throw new Error("No file specified");
+      }
+      console.log(file);
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+          setPostRawData(reader.result);
+        };
+        reader.onerror = event => {
+          reject(event.error);
+        };
+        notification.success("File uploaded to IPFS");
+        setImage(reader.result);
+      });
+    } catch (error) {
+      notification.error(error.message);
+    }
+  };
+
+  const uploadJsonToIpfs = async (imageFile: null) => {
+    try {
+      await uploadImageToIpfs(imageFile);
+    } catch (error) {
+      notification.error(error.message);
+    }
+  };
+
+  const handleImageDrop = (acceptedFiles: React.SetStateAction<null>[]) => {
+    setImageFile(acceptedFiles[0]);
+    uploadJsonToIpfs(acceptedFiles[0]);
+  };
+
   const fetchData = async function fetchData() {
     if (feedCtx && signer) {
       const data = await feedCtx?.post();
@@ -84,7 +201,7 @@ const ViewFeed: NextPage = () => {
       const sellerDeposit = await feedCtx?.getStake(data.postdata.settings.seller);
       const buyerDeposit = await feedCtx?.getStake(data.postdata.settings.buyer);
       const totalStaked = await feedCtx?.getTotalStaked();
-      setSellerStake(formatEther(sellerDeposit));
+      setSellerStake(String(sellerDeposit));
       setBuyerStake(formatEther(buyerDeposit));
       setTotalStaked(formatEther(totalStaked));
       setUserData(user);
@@ -120,21 +237,21 @@ const ViewFeed: NextPage = () => {
             ></path>
           </svg>
           <span className="sr-only">Info</span>
-          <h3 className="text-lg font-medium">Save Your Key Pair!</h3>
+          <h3 className="text-lg font-medium">Save Symmetic Key!</h3>
         </div>
-        <div className="mt-2 mb-4 text-sm">
+        {/*  <div className="mt-2 mb-4 text-sm">
           <div>
             <p>
               RESULT : <br /> {JSON.stringify(dataSaved)}
             </p>
           </div>
-        </div>
+        </div> */}
         <div className="flex">
           <button
             type="button"
             className="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             onClick={async () => {
-              navigator.clipboard.writeText(JSON.stringify(dataSaved));
+              navigator.clipboard.writeText(JSON.stringify(dataSaved?.symmetricKey));
               notification.success("Symmetric key copied to clipboard");
             }}
           >
@@ -160,10 +277,15 @@ const ViewFeed: NextPage = () => {
     /*  notification.success("SYMMETIC KEY: " + dataSaved?.symmetricKey);
     notification.success("ENCRYPTED DATA: " + dataSaved?.encryptedData);
     notification.success("PROOF OF HASH: " + dataSaved?.proofhash); */
+
     notification.warning("Save this data");
 
-    /* const abicoder = new AbiCoder();
-    const proofOfHashEcnode = abicoder.encode(["string"], [dataSaved?.proofhash]); */
+    downloadFile({
+      data: dataSaved,
+      fileName: 'sellerData.json',
+      fileType: 'text/json',
+    })
+
 
     const proofOfHashEncode = await ErasureHelper.multihash({
       input: dataSaved?.proofhash,
@@ -185,18 +307,15 @@ const ViewFeed: NextPage = () => {
   };
 
   async function acceptPost() {
-    const tx = await feedCtx?.acceptPost(userData.publicKey, { value: parseEther(postPayment) });
+    const tx = await feedCtx?.acceptPost(userData.publicKey, signer?.getAddress(), { value: parseEther(postPayment) });
   }
 
   async function createPostData(RawData: any, seller: string, sellerPubKey: string) {
     try {
-      // SymKey Generate sym key
-      const symmetricKey = ErasureHelper.crypto.symmetric.generateKey(); // base64 string
+      const symmetricKey = ErasureHelper.crypto.symmetric.generateKey();
 
-      // encryptedData Encrypt Raw Data
       const encryptedFile = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
 
-      // keyhash Hash sym key
       const symmetricKeyHash = await ErasureHelper.multihash({
         input: symmetricKey,
         inputType: "raw",
@@ -386,11 +505,42 @@ const ViewFeed: NextPage = () => {
     const tx = await feedCtx?.submitHash(proofHash58Digest);
     await tx.wait();
 
+    await fetchData();
+
     return {
       proofJson: json_selldata_v120,
       proofHash58: proofHash58,
       proofHash58Decode: proofHash58Digest,
     };
+  }
+  const convertBase64ToFile = (base64String: string, fileName: string) => {
+    let arr = base64String.split(",");
+    let mime = arr[0].match(/:(.*?);/)[1];
+    let bstr = atob(arr[1]);
+    let n = bstr.length;
+    let uint8Array = new Uint8Array(n);
+    while (n--) {
+      uint8Array[n] = bstr.charCodeAt(n);
+    }
+    let file = new File([uint8Array], fileName, { type: mime });
+    return file;
+  };
+
+  const downloadFile = ({ data, fileName, fileType }) => {
+    // Create a blob with the data we want to download as a file
+    const blob = new Blob([data], { type: fileType })
+    // Create an anchor element and dispatch a click event on it
+    // to trigger a download
+    const a = document.createElement('a')
+    a.download = fileName
+    a.href = window.URL.createObjectURL(blob)
+    const clickEvt = new MouseEvent('click', {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+    })
+    a.dispatchEvent(clickEvt)
+    a.remove()
   }
 
   async function retrievePost() {
@@ -466,8 +616,8 @@ const ViewFeed: NextPage = () => {
       response_Encrypteddatahash_JSON.encryptedData,
     );
 
-    // wait 10 seconds
     if (decriptFile) {
+      // wait 10 seconds
       console.log("Decrypted Data: ", decriptFile);
       const dataHash = await ErasureHelper.multihash({
         input: decriptFile,
@@ -476,7 +626,28 @@ const ViewFeed: NextPage = () => {
       });
 
       const hashCheck = responseProofHashJSON.datahash === dataHash;
-      notification.success(decriptFile);
+
+      if (feedData[1][0].postType == 1 || 2 || 3 || 4) {
+
+        /*  const element = document.createElement("a");
+         const file = convertBase64ToFile(decriptFile, "file");
+         element.href = URL.createObjectURL(file);
+         element.download = "file";
+         document.body.appendChild(element); // Required for this to work in FireFox
+         element.click();
+         document.body.removeChild(element);
+        */
+
+        downloadFile({
+          data: decriptFile,
+          fileName: 'file',
+          fileType: 'mime/type',
+        });
+
+      }
+
+      await fetchData();
+
       return {
         rawData: decrypted,
         hashCheck: hashCheck,
@@ -573,9 +744,12 @@ const ViewFeed: NextPage = () => {
     <div className="container mx-auto px-20">
       {feedData[0] != null ? (
         <div className="flex flex-col px-5 py-5">
+          <div className="font-mono">
+            <br></br>S = Seller <br></br>B = Buyer
+          </div>
           <div className="flex flex-row gap-3 items-center justify-center w-full flex-1 px-20 text-center py-5">
-            <label htmlFor="modal-create" className="btn modal-button">
-              Create
+            <label htmlFor="modal-create" className="btn modal-button ">
+              Create (S)
             </label>
             <input type="checkbox" id="modal-create" className="modal-toggle" />
             <div className="modal">
@@ -632,15 +806,36 @@ const ViewFeed: NextPage = () => {
                     <option value="3">Audio</option>
                     <option value="4">File</option>
                   </select>
-                  <label className="block text-base-500">Message</label>
-                  <input
-                    type="text"
-                    className="input w-full"
-                    placeholder="Data"
-                    value={postRawData}
-                    onChange={e => setPostRawData(e.target.value)}
-                  />
-
+                  {postType == 0 ? (
+                    <div>
+                      <label className="block text-base-500">Message</label>
+                      <input
+                        type="text"
+                        className="input w-full"
+                        placeholder="Data"
+                        value={postRawData}
+                        onChange={e => setPostRawData(e.target.value)}
+                      />
+                    </div>
+                  ) : postType == 1 || 2 || 3 || 4 ? (
+                    <div>
+                      <Dropzone onDrop={handleImageDrop}>
+                        {({ getRootProps, getInputProps }) => (
+                          <div
+                            {...getRootProps()}
+                            className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
+                          >
+                            <input {...getInputProps()} />
+                            {imageFile ? (
+                              <p>{imageFile.name}</p>
+                            ) : (
+                              <p>Drag 'n' drop an image here, or click to select a file</p>
+                            )}
+                          </div>
+                        )}
+                      </Dropzone>
+                    </div>
+                  ) : null}
                   <button
                     className="btn btn-primary w-full mt-4"
                     onClick={async () => {
@@ -659,8 +854,8 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label for="modal-accept" className="btn  modal-button">
-              accept
+            <label htmlFor="modal-accept" className="btn  modal-button bg-neutral-600">
+              Accept (B)
             </label>
             <input type="checkbox" id="modal-accept" className="modal-toggle" />
             <div className="modal">
@@ -699,8 +894,8 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label for="modal-submit" className="btn  modal-button">
-              submit
+            <label htmlFor="modal-submit" className="btn  modal-button">
+              Submit (S)
             </label>
             <input type="checkbox" id="modal-submit" className="modal-toggle" />
             <div className="modal">
@@ -746,8 +941,8 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label for="modal-retrieve" className="btn  modal-button">
-              Retrieve
+            <label htmlFor="modal-retrieve" className="btn  modal-button bg-neutral-600">
+              Retrieve (B)
             </label>
             <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
             <div className="modal">
@@ -786,8 +981,8 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label for="modal-finalize" className="btn  modal-button">
-              Finalize
+            <label htmlFor="modal-finalize" className="btn  modal-button bg-neutral-600">
+              Finalize (B)
             </label>
             <input type="checkbox" id="modal-finalize" className="modal-toggle" />
             <div className="modal">
@@ -836,8 +1031,8 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label for="modal-reveal" className="btn  modal-button">
-              Reveal
+            <label htmlFor="modal-reveal" className="btn  modal-button">
+              Reveal (S)
             </label>
             <input type="checkbox" id="modal-reveal" className="modal-toggle" />
             <div className="modal">
@@ -886,8 +1081,8 @@ const ViewFeed: NextPage = () => {
             {signer?.getAddress() == feedData.postdata.settings.seller ||
               (feedData.postdata.settings.buyer && (
                 <div>
-                  <label for="modal-stake" className="btn  modal-button">
-                    Stake
+                  <label htmlFor="modal-stake" className="btn  modal-button bg-neutral-500">
+                    Stake (B+S)
                   </label>
                   <input type="checkbox" id="modal-stake" className="modal-toggle" />
                   <div className="modal">
@@ -940,6 +1135,14 @@ const ViewFeed: NextPage = () => {
           <div className="divider" />
           <div className="flex flex-col  p-5 w-full items-left justify-center">
             <div className="card w-fit">
+              <button
+                className="btn btn-info w-min"
+                onClick={() => {
+                  decodeData();
+                }}
+              >
+                Decode
+              </button>
               <div className="card-body">
                 <h2 className="text-xl font-bold">Creator Information</h2>
                 <div className="mt-5">
@@ -948,12 +1151,12 @@ const ViewFeed: NextPage = () => {
                     {feedData.postdata.settings.status === 4
                       ? "Finalized"
                       : feedData.postdata.settings.status === 3
-                      ? "Submitted"
-                      : feedData.postdata.settings.status === 2
-                      ? "Accepted"
-                      : feedData.postdata.settings.status === 1
-                      ? "Proposed"
-                      : "Waiting for Creator"}
+                        ? "Submitted"
+                        : feedData.postdata.settings.status === 2
+                          ? "Accepted"
+                          : feedData.postdata.settings.status === 1
+                            ? "Proposed"
+                            : "Waiting for Creator"}
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">

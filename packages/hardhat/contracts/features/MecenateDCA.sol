@@ -6,117 +6,144 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "../interfaces/IMecenateFactory.sol";
+import "../interfaces/IMecenateTreasury.sol";
 
 contract MecenateDCA is Ownable {
-  using SafeMath for uint256;
+    using SafeMath for uint256;
 
-  // Chainlink Price Feed contract address for the asset
-  AggregatorV3Interface internal priceFeed;
+    // Chainlink Price Feed contract address for the asset
+    AggregatorV3Interface internal priceFeed;
 
-  // token token contract address
-  IERC20 internal tokenFrom;
-  IERC20 internal tokenTo;
+    // token token contract address
+    IERC20 internal tokenFrom;
+    
+    IERC20 internal tokenTo;
 
-  // Uniswap V2 Router contract address
-  IUniswapV2Router02 internal uniswapRouter;
+    address public factoryContract;
 
-  // Upkeep contract address for executing the purchases
-  address public upkeep;
+    // Uniswap V2 Router contract address
+    IUniswapV2Router02 internal uniswapRouter;
 
-  // Amount of funds to use for each purchase
-  uint256 public amountToInvest;
+    // Upkeep contract address for executing the purchases
+    address public upkeep;
 
-  // Interval for executing the purchases (in seconds)
-  uint256 public purchaseInterval;
+    // Amount of funds to use for each purchase
+    uint256 public amountToInvest;
 
-  // Time of the last purchase
-  uint256 public lastPurchaseTime;
+    // Interval for executing the purchases (in seconds)
+    uint256 public purchaseInterval;
 
-  // Total amount of asset purchased
-  uint256 public totalAssetPurchased;
+    // Time of the last purchase
+    uint256 public lastPurchaseTime;
 
-  // Total amount of funds invested
-  uint256 public totalFundsInvested;
+    // Total amount of asset purchased
+    uint256 public totalAssetPurchased;
 
-  constructor(
-    address _tokenFrom,
-    address _tokenTo,
-    address _priceFeedAddress,
-    address _uniswapRouterAddress
-  ) {
-    priceFeed = AggregatorV3Interface(_priceFeedAddress);
-    tokenFrom = IERC20(_tokenFrom);
-    tokenTo = IERC20(_tokenTo);
-    uniswapRouter = IUniswapV2Router02(_uniswapRouterAddress);
-    lastPurchaseTime = block.timestamp;
-  }
+    // Total amount of funds invested
+    uint256 public totalFundsInvested;
 
-  function setAmountToInvest(uint256 _amountToInvest) public onlyOwner {
-    amountToInvest = _amountToInvest;
-  }
+    constructor(
+        address _owner,
+        address _tokenFrom,
+        address _tokenTo,
+        address _priceFeedAddress,
+        address _uniswapRouterAddress
+    ) {
+        priceFeed = AggregatorV3Interface(_priceFeedAddress);
+        tokenFrom = IERC20(_tokenFrom);
+        tokenTo = IERC20(_tokenTo);
+        uniswapRouter = IUniswapV2Router02(_uniswapRouterAddress);
+        lastPurchaseTime = block.timestamp;
+        factoryContract = msg.sender;
+        transferOwnership(_owner);
+    }
 
-  function setPurchaseInterval(uint256 _purchaseInterval) public onlyOwner {
-    purchaseInterval = _purchaseInterval;
-  }
+    function setAmountToInvest(uint256 _amountToInvest) public onlyOwner {
+        amountToInvest = _amountToInvest;
+    }
 
-  function setUpkeep(address _upkeep) public onlyOwner {
-    upkeep = _upkeep;
-  }
+    function setPurchaseInterval(uint256 _purchaseInterval) public onlyOwner {
+        purchaseInterval = _purchaseInterval;
+    }
 
-  function transferToken(uint256 _amount) public onlyOwner {
-    require(_amount > 0, "Amount must be greater than 0");
-    require(tokenFrom.allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
+    function setUpkeep(address _upkeep) public onlyOwner {
+        upkeep = _upkeep;
+    }
 
-    tokenFrom.transferFrom(msg.sender, address(this), amountToInvest);
-  }
+    function transferToken(uint256 _amount) public onlyOwner {
+        require(_amount > 0, "Amount must be greater than 0");
+        require(
+            tokenFrom.allowance(msg.sender, address(this)) >= _amount,
+            "Insufficient allowance"
+        );
 
-  function purchase() public {
-    require(amountToInvest > 0, "Amount to invest must be set");
-    require(purchaseInterval > 0, "Purchase interval must be set");
+        tokenFrom.transferFrom(msg.sender, address(this), amountToInvest);
+    }
 
-    // Calculate the current market price of the asset
-    // (, int256 price, , , ) = priceFeed.latestRoundData();
-    // uint256 currentPrice = uint256(price);
-    // uint256 assetToPurchase = amountToInvest.mul(1e18).div(currentPrice);
+    function purchase() public {
+        require(amountToInvest > 0, "Amount to invest must be set");
+        require(purchaseInterval > 0, "Purchase interval must be set");
 
-    // Swap token for the asset on Uniswap
-    address[] memory path = new address[](2);
-    path[0] = address(tokenFrom);
-    path[1] = address(tokenTo);
+        // Calculate the current market price of the asset
+        // (, int256 price, , , ) = priceFeed.latestRoundData();
+        // uint256 currentPrice = uint256(price);
+        // uint256 assetToPurchase = amountToInvest.mul(1e18).div(currentPrice);
 
-    // Approve the Uniswap Router to spend the tokenFrom
-    tokenFrom.approve(address(uniswapRouter), amountToInvest);
+        // Swap token for the asset on Uniswap
+        address[] memory path = new address[](2);
+        path[0] = address(tokenFrom);
+        path[1] = address(tokenTo);
 
-    uint256[] memory amounts = uniswapRouter.swapExactTokensForTokens(
-      amountToInvest,
-      1,
-      path,
-      address(this),
-      block.timestamp
-    );
+        // Approve the Uniswap Router to spend the tokenFrom
+        tokenFrom.approve(address(uniswapRouter), amountToInvest);
 
-    // Update purchase information
-    lastPurchaseTime = block.timestamp;
-    totalAssetPurchased = totalAssetPurchased.add(amounts[1]);
-    totalFundsInvested = totalFundsInvested.add(amountToInvest);
-  }
+        uint256[] memory amounts = uniswapRouter.swapExactTokensForTokens(
+            amountToInvest,
+            1,
+            path,
+            address(this),
+            block.timestamp
+        );
 
-  function executeUpkeep() public {
-    require(msg.sender == upkeep, "Only the upkeep contract can execute this function");
-    require(upkeep != address(0), "Upkeep address must be set");
+        address treasuryContract = IMecenateFactory(factoryContract)
+            .treasuryContract();
 
-    // Verify that the purchase interval has passed
-    require(block.timestamp >= lastPurchaseTime.add(purchaseInterval), "Purchase interval not reached");
+        uint256 globalFee = IMecenateTreasury(treasuryContract).globalFee();
+        uint256 fee = amounts[1].mul(globalFee).div(10000);
+        uint256 amountAfter = amounts[1].sub(fee);
 
-    // Execute the purchase function
-    purchase();
-  }
+        tokenTo.approve(treasuryContract, fee);
+        tokenTo.transfer(treasuryContract, fee);
 
-  function withdrawFunds() public onlyOwner {
-    // Transfer all tokenFrom and tokenTo balance to the owner
-    uint256 _amountFrom = tokenFrom.balanceOf(address(this));
-    uint256 _amountTo = tokenTo.balanceOf(address(this));
-    tokenFrom.transfer(msg.sender, _amountFrom);
-    tokenTo.transfer(msg.sender, _amountTo);
-  }
+        // Update purchase information
+        lastPurchaseTime = block.timestamp;
+        totalAssetPurchased = totalAssetPurchased.add(amountAfter);
+        totalFundsInvested = totalFundsInvested.add(amountToInvest);
+    }
+
+    function executeUpkeep() public {
+        require(
+            msg.sender == upkeep,
+            "Only the upkeep contract can execute this function"
+        );
+        require(upkeep != address(0), "Upkeep address must be set");
+
+        // Verify that the purchase interval has passed
+        require(
+            block.timestamp >= lastPurchaseTime.add(purchaseInterval),
+            "Purchase interval not reached"
+        );
+
+        // Execute the purchase function
+        purchase();
+    }
+
+    function withdrawFunds() public onlyOwner {
+        // Transfer all tokenFrom and tokenTo balance to the owner
+        uint256 _amountFrom = tokenFrom.balanceOf(address(this));
+        uint256 _amountTo = tokenTo.balanceOf(address(this));
+        tokenFrom.transfer(msg.sender, _amountFrom);
+        tokenTo.transfer(msg.sender, _amountTo);
+    }
 }

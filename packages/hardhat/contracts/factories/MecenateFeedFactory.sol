@@ -7,69 +7,120 @@ import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IMecenateUsers.sol";
 import "../modules/FeedViewer.sol";
+import "../interfaces/IMecenateTreasury.sol";
 
 contract MecenateFeedFactory is Ownable, FeedViewer {
-  uint256 numFeeds;
+    address public identityContract;
 
-  address[] public feeds;
+    address public treasuryContract;
 
-  mapping(address => bool) public createdContracts;
+    address public usersMouduleContract;
 
-  mapping(address => bool) public authorized;
+    uint256 numFeeds;
 
-  address public identityContract;
+    address[] public feeds;
 
-  address public usersMouduleContract;
+    uint256 public contractCounter;
 
-  event FeedCreated(address indexed addr);
+    mapping(address => bool) public createdContracts;
 
-  constructor(address _usersMouduleContract, address _identityContract) {
-    identityContract = _identityContract;
-    usersMouduleContract = _usersMouduleContract;
-    _transferOwnership(msg.sender);
-  }
+    mapping(address => bool) public authorized;
 
-  function setAuthorized(address _addr) public onlyOwner {
-    authorized[_addr] = true;
-  }
+    event FeedCreated(address indexed addr);
 
-  function buildFeed() public returns (address) {
-    require(MecenateIdentity(identityContract).balanceOf(msg.sender) > 0, "user does not have identity");
-    require(IMecenateUsers(usersMouduleContract).checkifUserExist(msg.sender), "user does not exist");
-    MecenateFeed feed = new MecenateFeed(msg.sender, usersMouduleContract, identityContract);
-    feeds.push(address(feed));
-    numFeeds++;
-    createdContracts[address(feed)] = true;
-    emit FeedCreated(address(feed));
-    return address(feed);
-  }
-
-  function getFeeds() public view returns (address[] memory) {
-    return feeds;
-  }
-
-  function getFeedsOwned(address owner) public view returns (address[] memory) {
-    address[] memory ownedFeeds = new address[](feeds.length);
-    for (uint256 i = 0; i < ownedFeeds.length; i++) {
-      if (payable(MecenateFeed(payable(feeds[i])).owner()) == owner) {
-        ownedFeeds[i] = feeds[i];
-      }
+    constructor(
+        address _usersMouduleContract,
+        address _identityContract,
+        address _treasuryContract
+    ) {
+        identityContract = _identityContract;
+        usersMouduleContract = _usersMouduleContract;
+        treasuryContract = _treasuryContract;
+        _transferOwnership(msg.sender);
     }
 
-    return ownedFeeds;
-  }
+    function setAuthorized(address _addr) public onlyOwner {
+        authorized[_addr] = true;
+    }
 
-  function getFeedInfo(address _feed) public view returns (Structures.Feed memory) {
-    return _getFeedInfo(_feed);
-  }
+    function removeAuthorized(address _addr) public onlyOwner {
+        authorized[_addr] = false;
+    }
 
-  function getFeedsInfo() public view returns (Structures.Feed[] memory) {
-    return _getFeedsInfo(feeds);
-  }
+    function changeTreasury(address _treasury) public onlyOwner {
+        treasuryContract = _treasury;
+    }
 
-  function isContractCreated(address contractAddress) public view returns (bool) {
-    return createdContracts[contractAddress];
-  }
+    function buildFeed() public payable returns (address) {
+        require(msg.value == getCreationFee(), "fee is not correct");
 
-  receive() external payable {}
+        payable(treasuryContract).transfer(msg.value);
+
+        require(
+            MecenateIdentity(identityContract).balanceOf(msg.sender) > 0,
+            "user does not have identity"
+        );
+
+        require(
+            IMecenateUsers(usersMouduleContract).checkifUserExist(msg.sender),
+            "user does not exist"
+        );
+
+        contractCounter++;
+
+        MecenateFeed feed = new MecenateFeed(
+            msg.sender,
+            usersMouduleContract,
+            identityContract
+        );
+
+        feeds.push(address(feed));
+
+        numFeeds++;
+
+        createdContracts[address(feed)] = true;
+
+        emit FeedCreated(address(feed));
+
+        return address(feed);
+    }
+
+    function getFeeds() public view returns (address[] memory) {
+        return feeds;
+    }
+
+    function getFeedsOwned(
+        address owner
+    ) public view returns (address[] memory) {
+        address[] memory ownedFeeds = new address[](feeds.length);
+        for (uint256 i = 0; i < ownedFeeds.length; i++) {
+            if (payable(MecenateFeed(payable(feeds[i])).owner()) == owner) {
+                ownedFeeds[i] = feeds[i];
+            }
+        }
+
+        return ownedFeeds;
+    }
+
+    function getFeedInfo(
+        address _feed
+    ) public view returns (Structures.Feed memory) {
+        return _getFeedInfo(_feed);
+    }
+
+    function getFeedsInfo() public view returns (Structures.Feed[] memory) {
+        return _getFeedsInfo(feeds);
+    }
+
+    function isContractCreated(
+        address contractAddress
+    ) public view returns (bool) {
+        return createdContracts[contractAddress];
+    }
+
+    function getCreationFee() internal view returns (uint256) {
+        return IMecenateTreasury(treasuryContract).fixedFee();
+    }
+
+    receive() external payable {}
 }

@@ -5,11 +5,9 @@ import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsCo
 import { MecenateSubscriptionFactoryInterface } from "../../hardhat/typechain-types/contracts/MecenateSubscriptionFactory";
 import { ContractInterface, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
-import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
 import { Buffer } from "buffer";
 import { formatEther, parseEther } from "ethers/lib/utils.js";
-import Image from "next/image";
 
 /* configure Infura auth settings */
 const projectId = process.env.INFURA_PROJECT_ID;
@@ -33,15 +31,10 @@ type ImageProps = {
 const Tiers: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
-  const account = useAccount();
   const provider = useProvider();
 
   const [fee, setFee] = React.useState(0);
   const [identityFee, setIdentityFee] = React.useState(0);
-  const [name, setName] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [imageFile, setImageFile] = React.useState(null);
-  const [image, setImage] = React.useState("");
   const [nftBalance, setNftBalance] = React.useState(0);
   const [nftMetadata, setNftMetadata] = React.useState<nftMetadata[]>([]);
 
@@ -53,19 +46,7 @@ const Tiers: NextPage = () => {
 
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateTierFactory");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
-
-  const IPFS_HOST = "ipfs.infura.io";
-  const IPFS_PORT = 5001;
-
-  /* Create an instance of the client */
-  const client = create({
-    host: "ipfs.infura.io",
-    port: 5001,
-    protocol: "https",
-    headers: {
-      authorization: auth,
-    },
-  });
+  const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
 
   let factoryAddress!: string;
   let factoryAbi: MecenateSubscriptionFactoryInterface[] = [];
@@ -73,12 +54,19 @@ const Tiers: NextPage = () => {
   let identityAddress!: string;
   let identityAbi: ContractInterface[] = [];
 
+  let treasuryAddress!: string;
+  let treasuryAbi: ContractInterface[] = [];
+
   if (deployedContractFactory) {
     ({ address: factoryAddress, abi: factoryAbi } = deployedContractFactory);
   }
 
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
+  }
+
+  if (deployedContractTreasury) {
+    ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
   }
 
   const factory = useContract({
@@ -90,6 +78,12 @@ const Tiers: NextPage = () => {
   const identity = useContract({
     address: identityAddress,
     abi: identityAbi,
+    signerOrProvider: signer || provider,
+  });
+
+  const treasury = useContract({
+    address: treasuryAddress,
+    abi: treasuryAbi,
     signerOrProvider: signer || provider,
   });
 
@@ -112,17 +106,20 @@ const Tiers: NextPage = () => {
       setNftBalance(balance);
     } catch (error) {
       console.error(error);
-      // handle error
     }
   };
 
   const getContractData = async function getContractData() {
     if (factory && identity && signer) {
       const subscriptions = await factory?.getSubscriptionsOwned(signer?.getAddress());
-      const fee = await factory?.creationFee();
+      const _sub = subscriptions.filter(
+        (feed: string) => subscriptions != "0x0000000000000000000000000000000000000000",
+      );
+
+      const fee = await treasury?.fixedFee();
       const _identityFee = await identity?.identityCreationFee();
       await fetchNFTBalance();
-      setSubscriptions(subscriptions);
+      setSubscriptions(_sub);
       setFee(fee);
       setIdentityFee(_identityFee);
     }
@@ -159,22 +156,27 @@ const Tiers: NextPage = () => {
   }, [signer]);
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10 text-base-content">
-      <div className="max-w-3xl text-center my-20">
+    <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4">
+      <div className="max-w-3xl text-center my-2">
         <h1 className="text-6xl font-bold mb-20">
           Monetize your products, DApps, or content with our Tier Subscription
         </h1>
-        <p className="text-xl  mb-8">
+        <p className="text-xl  mb-2">
           Increase user loyalty by offering premium content and exclusive rewards to subscribers, unlocking a new
           revenue stream for your business. Try our Patreon-like service now and enjoy guaranteed, recurring income for
           your app
         </p>
       </div>
-      <div className="w-max">
-        <div className="card w-96 bg-base-100 shadow-2xl px-5 py-5 mb-20 ">
-          <h1 className="card-title text-base-content text-4xl text-center">Create Tier</h1>
+
+      <div className="min-w-fit">
+        <div className="text-xl mb-8">
+          <div className="text-base-content font-bold mb-2">Protocol Fee</div>
+          <div className="text-base-content">{fee ? `${formatEther(String(fee))} ETH` : "-"}</div>
+        </div>
+        <div className="card min-w-fit mx-auto items-center bg-primary shadow-2xl px-5 py-5 mb-20">
+          <h1 className="card-title text-base-content text-4xl text-left">Create Tier</h1>
           <form onSubmit={createMecenateSubscription} className="text-secondary w-full my-2">
-            <label htmlFor="name" className="block font-medium text-neutral-400">
+            <label htmlFor="name" className="block font-medium text-base-content">
               Subscription Name{" "}
             </label>
             <input
@@ -184,7 +186,7 @@ const Tiers: NextPage = () => {
               className="text-neutral-500 input-lg text-xl block w-full px-3 py-3 my-5  border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionName(e.target.value)}
             />
-            <label htmlFor="name" className="block font-medium text-neutral-400">
+            <label htmlFor="name" className="block font-medium text-base-content">
               Subscription Description{" "}
             </label>
             <input
@@ -194,7 +196,7 @@ const Tiers: NextPage = () => {
               className="text-neutral-500 input-lg text-xl block w-full px-3 py-3 my-5  border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionDescription(e.target.value)}
             />
-            <label htmlFor="name" className="block font-medium text-neutral-400">
+            <label htmlFor="name" className="block font-medium text-base-content">
               Subscription Duration{" "}
             </label>
             <input
@@ -204,7 +206,7 @@ const Tiers: NextPage = () => {
               className="text-neutral-500 input-lg text-xl block w-full px-3 py-3 my-5  border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionDuration(Number(e.target.value))}
             />
-            <label htmlFor="name" className="block font-medium text-neutral-400">
+            <label htmlFor="name" className="block font-medium text-base-content">
               Subscription Fee{" "}
             </label>{" "}
             <input
@@ -214,18 +216,23 @@ const Tiers: NextPage = () => {
               className="text-neutral-500 input-lg text-xl block w-full px-3 py-3 my-5  border-2 bg-transparent border-gray-500 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               onChange={e => setSubscriptionFee(e.target.value)}
             />
-            <button
-              type="submit"
-              className="btn-wide text-center items-center justify-center text-base-content bg-secondary hover:bg-accent font-bold py-2 px-4 my-5 rounded-md"
-            >
-              Create Subscription
-            </button>
+            <div className="text-center">
+              <button
+                type="submit"
+                className="btn-wide text-center items-center justify-center text-base-content bg-secondary hover:bg-accent font-bold py-2 px-4 my-5 rounded-md"
+              >
+                Create Subscription
+              </button>
+            </div>
           </form>
-          <div className="flex flex-col items-center justify-center w-full max-w-md p-10 text-primary mt-6">
+          <div className="flex flex-col items-center justify-center w-full max-w-md p-10 px-20  text-primary mt-6">
             <h2 className="text-lg font-medium">Mecenate Tiers</h2>
             {subscriptions &&
               subscriptions.map((subscription, index) => (
-                <div key={index} className="mt-2">
+                <div
+                  key={index}
+                  className="card bg-secondary hover:bg-accent text-base-content py-2 px-2 mx-2 font-semibold"
+                >
                   <a href={`/viewTier?addr=${subscription}`} className="text-indigo-600 hover:text-indigo-900">
                     {subscription}
                   </a>

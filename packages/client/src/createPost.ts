@@ -41,7 +41,9 @@ async function createPost(
   _duration: number,
   _postType: number,
   _stake: string,
-  _RawData: string
+  _RawData: string,
+  _buyer: string,
+  _payment: string
 ) {
   // Create a new MecenateFeed contract instance
   await connectWallet();
@@ -109,9 +111,16 @@ async function createPost(
 
   // convert publicKey to Bytes32
 
-  const tx = await MecenateFeed.createPost(proofHash58, postType, duration, {
-    value: stake,
-  });
+  const tx = await MecenateFeed.createPost(
+    proofHash58,
+    postType,
+    duration,
+    _buyer,
+    parseEther(_payment),
+    {
+      value: stake,
+    }
+  );
 
   const post = await MecenateFeed.post();
   console.log("Post: ", post);

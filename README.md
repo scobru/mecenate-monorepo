@@ -1,130 +1,144 @@
-# Scaffold-Eth 2
+# MecenateIdentity 🎭
 
-⚠️ This project is currently under active development. Things might break. Feel free to check the open issues & create new ones.
+MecenateIdentity is a **decentralized identity management system** built on the Ethereum blockchain. It enables users to create and manage their unique **NFT-based identities**, providing a secure and verifiable way to interact with various applications and services in the decentralized ecosystem.
 
-*The best way to get started building decentralized applications on Ethereum!*
+## ✨ Features
 
-A new version of [scaffold-eth](https://github.com/scaffold-eth/scaffold-eth/tree/master) with its core functionality. Built using NextJS, RainbowKit, Wagmi and Typescript.
+- Unique NFT-based identities on the Ethereum blockchain
+- Secure and verifiable user identity management
+- Easily configurable and extendable
+- User-friendly platform for creating and managing identities
+- Interoperable with various applications and services in the decentralized ecosystem
 
-- ✅ Contract component to easily edit the smart contracts and view & test the contract on your frontend
-- 🔥 Burner wallet & local faucet
-- 🔐 Integration with the different wallet providers
+## 📜 Smart Contract
 
----
+The MecenateIdentity smart contract includes multiple modules for managing different aspects of the user identities, such as creation, ownership, and metadata management.
 
-## Quickstart
+- MecenateIdentity.sol
 
-1. Clone this repo & install dependencies
+### 🗝️ Key Functions
 
-```
-git clone https://github.com/scaffold-eth/se-2.git
-cd se-2
-yarn install
-```
+- **Create Identity**: Users can create their unique NFT-based identities on the Ethereum blockchain.
+- **Manage Metadata**: Users can manage the metadata associated with their identities, including updating and deleting information.
 
-2. Run a local network in the first terminal:
+---------------------------------------------------------------------------------
 
-```
-yarn chain
-```
+# MecenateFeed 📄
 
-3. On a second terminal, deploy the test contract:
+MecenateFeed is a decentralized protocol built on the Ethereum blockchain inspired by the Erasure Protocol. It allows users to create secure and reliable data feeds, where stakeholders can lock up a cryptocurrency reward and others can submit their responses. If the stakeholder is not satisfied with the response, they can destroy the responder's stake, creating a strong incentive for high-quality responses.
 
-```
-yarn deploy
-```
+## 🌟 Features
 
-4. On a third terminal, start your NextJS app:
+- Secure and reliable data feeds on the Ethereum blockchain
+- Stakeholders can lock up a cryptocurrency reward for others to respond
+- Responders can submit their response with a stake
+- Stakeholders can destroy responder's stake if they are not satisfied with the response
+- Incentivizes high-quality responses
+- Easily configurable and extendable smart contracts
+- User-friendly platform for creating, managing, and interacting with data feeds
 
-```
-yarn start
-```
+## 📜  Smart Contract
 
-Visit your app on: `http://localhost:3000`.
+The MecenateFeed smart contract includes multiple modules for managing different aspects of the data feeds, such as Creation, Acceptance, Submission, and Finalization.
 
-Run smart contract test with `yarn hardhat:test`
+- features/MecenateFeed.sol
+- factories/MecenateFeedFactory.sol
 
-- Edit your smart contract `YourContract.sol` in `packages/hardhat/contracts`
-- Edit your frontend in `packages/nextjs/pages`
-- Edit your deployment scripts in `packages/hardhat/deploy`
+### 🗝️ Key Functions and Phases
 
-## Deploying Smart Contracts
-Once you are ready to deploy your smart contracts, there are a few things you need to adjust.
+- **Creation phase:** The creator posts their encrypted data and shares it on their feed along with a stake.
+- **Acceptance phase:** The buyer accepts the creator's post, staking their payment for the post.
+- **Submission phase:** The creator posts the encrypted key that only the buyer can decrypt to the data feed.
+- **Finalization phase:** After the buyer retrieves their data, they can finalize the post and can punish or reward the creator.
 
-1. Select the network
+---------------------------------------------------------------------------------
 
-By default, ```yarn deploy``` will deploy the contract to the local network. You can change the defaultNetwork in `packages/hardhat/hardhat.config.js.` You could also simply run ```yarn deploy --network target_network``` to deploy to another network.
+# 🛍️ MecenateBay
 
-Check the `hardhat.config.js` for the networks that are pre-configured. You can also add other network settings to the `hardhat.config.js file`. Here are the [Alchemy docs](https://docs.alchemy.com/docs/how-to-add-alchemy-rpc-endpoints-to-metamask) for information on specific networks.
+MecenateBay is a decentralized marketplace built on top of MecenateFeed, a protocol inspired by the Erasure Protocol. It enables users to create, discover, and interact with secure and reliable data feeds on the Ethereum blockchain. Stakeholders can lock up a cryptocurrency reward and invite others to submit their responses. If the stakeholder is not satisfied with the response, they can destroy the responder's stake, creating a strong incentive for high-quality responses.
 
-2. Generate a new account or add one to deploy the contract(s) from. Additionally you will need to add your Alchemy API key. Rename `.env.example` to `.env` and fill the required keys.
+## 🌟 Features
 
-```
-ALCHEMY_API_KEY="",
-DEPLOYER_PRIVATE_KEY=""
-```
+- Decentralized marketplace built on top of MecenateFeed
+- Discover and interact with secure and reliable data feeds on the Ethereum blockchain
+- Stakeholders can lock up a cryptocurrency reward for others to respond
+- Responders can submit their response with a stake
+- Stakeholders can destroy responder's stake if they are not satisfied with the response
+- Incentivizes high-quality responses
+- Easily configurable and extendable smart contracts
+- User-friendly platform for creating, managing, and participating in data feed-based transactions
 
-The deployer account is the account that will deploy your contracts and execute calls you make in your deployment script.
+## 📜 MecenateFeed Integration
 
-You can generate a random account / private key with ```yarn generate``` or add the private key of your crypto wallet. ```yarn generate``` will create a random account and add the DEPLOYER_PRIVATE_KEY to the .env file. You can check the generated account with ```yarn account```.
+MecenateBay is built on top of MecenateFeed, utilizing its smart contracts and modules for Creation, Acceptance, Submission, and Finalization of data feeds. This allows MecenateBay to inherit the robust and secure functionality of the MecenateFeed protocol, while extending it with marketplace features for a seamless user experience.
 
-3. Deploy your smart contract(s)
+- layer/MecenateBay.sol
 
-Run the command below to deploy the smart contract to the target network. Make sure to have some funds in your deployer account to pay for the transaction.
+### 🔑 Key Functions and Phases
 
-```
-yarn deploy --network network_name
-```
+- **Creation phase:** Users can create data feeds by posting their encrypted data and sharing it on their feed, along with a stake.
+- **Discovery phase:** Users can browse and discover data feeds within the marketplace.
+- **Acceptance phase:** Buyers can accept the creator's post, staking their payment for the post.
+- **Submission phase:** The creator posts the encrypted key that only the buyer can decrypt to the data feed.
+- **Finalization phase:** After the buyer retrieves their data, they can finalize the post and can punish or reward the creator.
 
-4. Verify your smart contract
+---------------------------------------------------------------------------------
 
-You can verify your smart contract on Etherscan by running:
+# 🏛️ MecenateTier
 
-```
-yarn verify --network network_name
-```
+MecenateTier is a decentralized subscription platform built on top of the Ethereum blockchain, designed for creators and their supporters. It allows creators to monetize their content by setting their own subscription fees and durations, while fans can easily support their favorite creators by subscribing with just a few clicks. This creates a fair and transparent way for creators to earn from their content and for fans to access exclusive content from their favorite creators.
 
-## Deploying your NextJS App
+## 🌟 Features
 
-Run `yarn vercel` and follow the steps to deploy to Vercel. Once you log in (email, github, etc), the default options should work. It'll give you a public URL.
+- Decentralized subscription platform on the Ethereum blockchain
+- Creators can set their own subscription fees and durations
+- Fans can subscribe to their favorite creators with just a few clicks
+- Access to exclusive content for subscribed fans
+- Fair and transparent revenue sharing model
+- Easily configurable and extendable smart contracts
+- User-friendly platform for creating, managing, and interacting with creator tiers
 
-If you want to redeploy to the same production URL you can run `yarn vercel --prod`. If you omit the `--prod` flag it will deploy it to a preview/test URL.
+## 📜 Smart Contract
 
-**Make sure your `.env.production` file has the values you need.**
+The MecenateTier smart contract includes multiple modules for managing different aspects of the subscription platform, such as Tier Creation, Subscription Management, and Revenue Distribution.
 
-**Hint**: We recommend connecting the project GitHub repo to Vercel so you the gets automatically deployed when pushing to `main`
+### 🔑 Key Functions and Phases
 
----
-## ⚠️ Disabling type & linting error checks 
-> **Hint**
-> Typescript helps you catch errors at compile time, which can save time and improve code quality, but can be challenging for those who are new to the language or who are used to the more dynamic nature of JavaScript. Below are the steps to disable type & lint check at different levels  
-### Disabling commit checks
-We run `pre-commit` [git hook](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) which lints the staged files and don't let you commit if there is an linting error. 
+- **Tier Creation:** Creators can create their own unique subscription tiers, setting their desired subscription fees and durations.
+- **Subscription Management:** Fans can easily subscribe and unsubscribe from creator tiers, gaining access to exclusive content while supporting their favorite creators.
+- **Revenue Distribution:** A built-in revenue sharing model ensures fair compensation for creators based on their subscription earnings.
 
-To disable this, got to `.husky/pre-commit` file and comment out `yarn lint-staged --verbose`
+---------------------------------------------------------------------------------
 
-```diff
-- yarn lint-staged --verbose 
-+ # yarn lint-staged --verbose
-```
+# 🌐 MecenateQuestion
 
-### Deploying to Vercel without any checks 
-Vercel by default runs types and lint checks while developing `build` and deployment fails if there is an types or lint error. 
+MecenateQuestion is a decentralized prediction protocol built on the Ethereum blockchain, inspired by prediction markets. It features a unique punishment mechanism that aims to ensure the correctness of the predictions. Stakeholders can create questions and set rewards for others to answer. Users can stake their answers, and if their prediction turns out to be incorrect, they may face a penalty.
 
-To ignore types and lint error checks while deploying, use : 
-```shell
-yarn vercel:yolo
-```
+## Features
 
-### Disabling Github Workflow
-We have github workflow setup checkout `.github/workflows/lint.yaml` which runs types and lint error checks every time code is __pushed__ to `main` branch or __pull request__ is made to `main` branch 
+- Decentralized prediction protocol on the Ethereum blockchain
+- Stakeholders can create questions and set rewards for answers
+- Users can stake their answers with a potential penalty for incorrect predictions
+- Punishment mechanism ensures the correctness of predictions
+- Easily configurable and extendable smart contracts
+- User-friendly platform for creating, managing, and interacting with questions and predictions
 
-To disable it, **delete `.github` directory** 
+## Smart Contract
 
----
-## Contributing to Scaffold-Eth 2
+The MecenateQuestion smart contract includes multiple modules for managing different aspects of the questions and predictions, such as Creation, Voting, and Resolution.
 
-We welcome contributions to Scaffold-Eth 2!
+- features/MecenateQuestion.sol
+- factories/MecenateQuestionFactory.sol
 
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/se-2/blob/master/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-Eth 2.
+### Key Functions and Phases
 
+- **Creation phase:** The creator posts a question and sets a reward for correct predictions.
+- **Voting phase:** Users can submit their predictions by staking a certain amount.
+- **Resolution phase:** Once the voting period has ended, the correct answer is determined, and incorrect predictions may face a penalty.
+
+---------------------------------------------------------------------------------
+
+## COMING SOON
+
+    - MecenateDCA
+    - MecenateDrop

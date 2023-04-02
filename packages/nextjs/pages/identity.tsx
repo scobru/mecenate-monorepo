@@ -14,13 +14,10 @@ import { utils } from "ethers";
 import CopyToClipboard from "react-copy-to-clipboard";
 
 const crypto = require("asymmetric-crypto");
-
-/* configure Infura auth settings */
 const projectId = process.env.INFURA_PROJECT_ID;
 const projectSecret = process.env.INFURA_PROJECT_SECRET;
 const projectGateway = process.env.IPFS_GATEWAY;
 const auth = "Basic " + Buffer.from(projectId + ":" + projectSecret).toString("base64");
-
 const DEBUG = true;
 
 type nftMetadata = {
@@ -34,7 +31,7 @@ type ImageProps = {
   cid: string;
 };
 
-const CreateID: NextPage = () => {
+const Identity: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
   const account = useAccount();
@@ -59,6 +56,7 @@ const CreateID: NextPage = () => {
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateTierFactory");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
+  const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
 
   const IPFS_HOST = "ipfs.infura.io";
   const IPFS_PORT = 5001;
@@ -88,6 +86,9 @@ const CreateID: NextPage = () => {
   let identityAddress!: string;
   let identityAbi: ContractInterface[] = [];
 
+  let treasuryAddress!: string;
+  let treasuryAbi: ContractInterface[] = [];
+
   if (deployedContractFactory) {
     ({ address: factoryAddress, abi: factoryAbi } = deployedContractFactory);
   }
@@ -98,6 +99,10 @@ const CreateID: NextPage = () => {
 
   if (deployedContractUser) {
     ({ address: UsersAddress, abi: UsersAbi } = deployedContractUser);
+  }
+
+  if (deployedContractTreasury) {
+    ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
   }
 
   const usersCtx = useContract({
@@ -115,6 +120,12 @@ const CreateID: NextPage = () => {
   const identity = useContract({
     address: identityAddress,
     abi: identityAbi,
+    signerOrProvider: signer || provider,
+  });
+
+  const treasury = useContract({
+    address: treasuryAddress,
+    abi: treasuryAbi,
     signerOrProvider: signer || provider,
   });
 
@@ -182,6 +193,19 @@ const CreateID: NextPage = () => {
     }
   };
 
+  const convertBase64ToFile = (base64String: string, fileName: string) => {
+    let arr = base64String.split(",");
+    let mime = arr[0].match(/:(.*?);/)[1];
+    let bstr = atob(arr[1]);
+    let n = bstr.length;
+    let uint8Array = new Uint8Array(n);
+    while (n--) {
+      uint8Array[n] = bstr.charCodeAt(n);
+    }
+    let file = new File([uint8Array], fileName, { type: mime });
+    return file;
+  };
+
   const createIdentity = async (identityData: { name: any; description: any }, imageFile: null) => {
     const creator = await signer?.getAddress();
     const nftMetadataWrite = {
@@ -198,6 +222,7 @@ const CreateID: NextPage = () => {
     if (tx?.hash) {
       notification.success("Identity minted successfully!");
     }
+    fetchNFTBalance();
   };
 
   async function createPair() {
@@ -275,7 +300,35 @@ const CreateID: NextPage = () => {
         </div>
       </div>,
     );
+
+    let data = {
+      publicKey: await kp.publicKey.toString(),
+      secretKey: await kp.secretKey.toString(),
+    };
+
+    downloadFile({
+      data: JSON.stringify(data),
+      fileName: "keyPair.json",
+      fileType: "text/json",
+    });
   }
+
+  const downloadFile = ({ data, fileName, fileType }) => {
+    // Create a blob with the data we want to download as a file
+    const blob = new Blob([data], { type: fileType });
+    // Create an anchor element and dispatch a click event on it
+    // to trigger a download
+    const a = document.createElement("a");
+    a.download = fileName;
+    a.href = window.URL.createObjectURL(blob);
+    const clickEvt = new MouseEvent("click", {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+    });
+    a.dispatchEvent(clickEvt);
+    a.remove();
+  };
 
   async function signIn() {
     const abicoder = new utils.AbiCoder();
@@ -323,8 +376,8 @@ const CreateID: NextPage = () => {
   const getContractData = async function getContractData() {
     if (factory && identity && signer) {
       const subscriptions = await factory?.getSubscriptionsOwned(signer?.getAddress());
-      const fee = await factory?.creationFee();
-      const _identityFee = await identity?.identityCreationFee();
+      const fee = await treasury?.fixedFee();
+      const _identityFee = await treasury?.fixedFee();
       await fetchNFTBalance();
       setSubscriptions(subscriptions);
       setFee(fee);
@@ -363,150 +416,139 @@ const CreateID: NextPage = () => {
   }, [signer]);
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10 text-base-content">
-      <div className="flex flex-col items-center justify-center mb-20">
-        <div className="max-w-3xl text-center">
-          <h1 className="text-6xl font-bold mb-8">Identity NFT DApp</h1>
-          <p className="text-xl  mb-20">
-            Elevate your identity with Identity NFTs - the new way to express who you are. Our DApp lets you create your
-            own unique NFT-based identity, complete with customizable name, description, and image. Once created, your
-            identity is stored on the Ethereum blockchain, giving you complete control and ownership over your digital
-            identity.
-          </p>
-        </div>
-        <div className="max-w-lg">
-          <div className="card-bordered bg-primary rounded-3xl shadow-lg border-2 shadow-primary  px-2 py-2 text-base-content text-lg">
-            <h1 className="text-3xl font-bold p-6 ">
-              {nftBalance > 0 ? (
-                <div className="flex items-center justify-center">Your ID</div>
-              ) : (
-                <div className="text-primary-focus">Mint a Creator ID</div>
-              )}
-            </h1>
-            <div className="p-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div>
-                <div className="text-secondary-content font-bold mb-2">Identity Fee</div>
-                <div className="text-primary-content">
-                  {identityFee ? `${formatEther(String(identityFee))} ETH` : "-"}
+    <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4 ">
+      <div className="max-w-3xl text-center my-2 text-base-content">
+        <div className="flex flex-col min-w-fit mx-auto items-center mb-20">
+          <div className="max-w-3xl text-center">
+            <h1 className="text-6xl font-bold mb-8">Identity</h1>
+            <p className="text-xl  mb-20">Mint your NFT. Become a member of the community.</p>
+          </div>
+          <div className="max-w-lg">
+            <div className="card-body bg-secondary rounded-3xl shadow-lg border-2 shadow-primary  text-base-content text-lg">
+              <h1 className="text-3xl font-bold p-6 ">
+                {nftBalance > 0 ? (
+                  <div className="flex items-center justify-center text-3xl font-bold">Your ID</div>
+                ) : (
+                  <div className="text-primary-focus">Mint a Creator ID</div>
+                )}
+              </h1>
+              <div className="p-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div>
+                  <div className="text-secondary-content font-bold mb-2">Identity Fee</div>
+                  <div className="text-primary-content">
+                    {identityFee ? `${formatEther(String(identityFee))} ETH` : "-"}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-secondary-content font-bold mb-2">Subscription Fee</div>
-                <div className="text-primary-content">{fee ? `${formatEther(String(fee))} ETH` : "-"}</div>
-              </div>
-              {/*  <div className="border-b lg:border-b-0">
-              <div className="text-secondary-content font-bold mb-2">Balance</div>
-              <div className="text-primary-content">{nftBalance ? Number(nftBalance) : "-"}</div>
-            </div> */}
-              <div>
-                <div className="text-secondary-content font-bold mb-2">Name</div>
-                <div className="text-primary-content">{nftMetadata ? nftMetadata["name"] : "-"}</div>
-              </div>
-              <div>
-                <div className="text-secondary-content font-bold mb-2">Description</div>
-                <div className="text-primary-content">{nftMetadata ? nftMetadata["description"] : "-"}</div>
-              </div>
-              <div>
-                <div className="text-primary-content">
-                  {nftMetadata["image"] ? (
-                    <Image
-                      decoding="async"
-                      loading="lazy"
-                      width={80}
-                      height={80}
-                      alt="image"
-                      src={nftMetadata["image"]}
-                    />
-                  ) : (
-                    "-"
-                  )}
+                <div>
+                  <div className="text-secondary-content font-bold mb-2">Name</div>
+                  <div className="text-primary-content">{nftMetadata ? nftMetadata["name"] : "-"}</div>
+                </div>
+                <div>
+                  <div className="text-secondary-content font-bold mb-2">Description</div>
+                  <div className="text-primary-content">{nftMetadata ? nftMetadata["description"] : "-"}</div>
+                </div>
+                <div>
+                  <div className="text-primary-content">
+                    {nftMetadata["image"] ? (
+                      <Image
+                        decoding="async"
+                        loading="lazy"
+                        width={80}
+                        height={80}
+                        alt="image"
+                        src={nftMetadata["image"]}
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          {nftBalance == 0 ? (
-            <form onSubmit={handleFormSubmit}>
-              <div className="my-5">
-                <label htmlFor="name" className="block font-medium mb-5">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={name}
-                  onChange={handleNameChange}
-                  className="input w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="description" className="block font-medium mb-5">
-                  Description
-                </label>
-                <input
-                  type="text"
-                  id="description"
-                  name="description"
-                  value={description}
-                  onChange={handleDescriptionChange}
-                  className="input w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="image" className="block font-medium mb-2">
-                  Image
-                </label>
-                <Dropzone onDrop={handleImageDrop}>
-                  {({ getRootProps, getInputProps }) => (
-                    <div
-                      {...getRootProps()}
-                      className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
-                    >
-                      <input {...getInputProps()} />
-                      {imageFile ? (
-                        <p>{imageFile.name}</p>
-                      ) : (
-                        <p>Drag 'n' drop an image here, or click to select a file</p>
-                      )}
-                    </div>
-                  )}
-                </Dropzone>
-              </div>
+            {nftBalance == 0 ? (
+              <form onSubmit={handleFormSubmit}>
+                <div className="my-5">
+                  <label htmlFor="name" className="block font-medium mb-5">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={name}
+                    onChange={handleNameChange}
+                    className="input w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="description" className="block font-medium mb-5">
+                    Description
+                  </label>
+                  <input
+                    type="text"
+                    id="description"
+                    name="description"
+                    value={description}
+                    onChange={handleDescriptionChange}
+                    className="input w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="image" className="block font-medium mb-2">
+                    Image
+                  </label>
+                  <Dropzone onDrop={handleImageDrop}>
+                    {({ getRootProps, getInputProps }) => (
+                      <div
+                        {...getRootProps()}
+                        className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
+                      >
+                        <input {...getInputProps()} />
+                        {imageFile ? (
+                          <p>{imageFile.name}</p>
+                        ) : (
+                          <p>Drag 'n' drop an image here, or click to select a file</p>
+                        )}
+                      </div>
+                    )}
+                  </Dropzone>
+                </div>
+                <button
+                  type="submit"
+                  className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
+                >
+                  Mint
+                </button>
+              </form>
+            ) : (
+              <div></div>
+            )}
+            <div className="max-w-3xl text-center my-20  text-base-content">
+              <h1 className="text-6xl font-bold mb-8">Generate your KeyPair.</h1>
+              <p className="text-xl  mb-8">
+                Once you create your identity, you will be able to generate your own personal public and private key
+                that will allow you to interact with the protocol. You can encrypt and decrypt the information you want
+                to share with other users in a completely anonymous and decentralized manner.
+              </p>
+            </div>
+            <div className="my-5 ">
               <button
-                type="submit"
-                className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
+                className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-2"
+                onClick={createPair}
+                disabled={nftBalance == 0}
               >
-                Mint
+                Create Key Pair
               </button>
-            </form>
-          ) : (
-            <div></div>
-          )}
-          <div className="max-w-3xl text-center my-20 text-base-content">
-            <h1 className="text-6xl font-bold mb-8">Generate your KeyPair.</h1>
-            <p className="text-xl  mb-8">
-              Once you create your identity, you will be able to generate your own personal public and private key that
-              will allow you to interact with the protocol. You can encrypt and decrypt the information you want to
-              share with other users in a completely anonymous and decentralized manner.
-            </p>
-          </div>
-          <div className="my-5">
-            <button
-              className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
-              onClick={createPair}
-              disabled={nftBalance == 0}
-            >
-              Create Key Pair
-            </button>
-            <button
-              className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700"
-              onClick={async () => {
-                await signIn();
-              }}
-              disabled={nftBalance == 0 || pubKey == ""}
-            >
-              Sign In
-            </button>
+              <button
+                className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500  hover:bg-primary-700"
+                onClick={async () => {
+                  await signIn();
+                }}
+                disabled={nftBalance == 0 || pubKey == ""}
+              >
+                Sign In
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -514,4 +556,4 @@ const CreateID: NextPage = () => {
   );
 };
 
-export default CreateID;
+export default Identity;
