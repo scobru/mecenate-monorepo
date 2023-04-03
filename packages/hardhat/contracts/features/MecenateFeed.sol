@@ -7,6 +7,8 @@ import "../modules/Creation.sol";
 import "../modules/Acceptance.sol";
 import "../modules/Submission.sol";
 import "../modules/Finalization.sol";
+import "../modules/Refund.sol";
+
 import "../modules/Data.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -16,6 +18,7 @@ contract MecenateFeed is
     Data,
     Creation,
     Acceptance,
+    Refund,
     Submission,
     Finalization
 {

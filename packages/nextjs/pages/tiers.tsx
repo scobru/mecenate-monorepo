@@ -156,7 +156,7 @@ const Tiers: NextPage = () => {
   }, [signer]);
 
   return (
-    <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4">
+    <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content">
       <div className="max-w-3xl text-center my-2">
         <h1 className="text-6xl font-bold mb-20">
           Monetize your products, DApps, or content with our Tier Subscription
@@ -173,7 +173,7 @@ const Tiers: NextPage = () => {
           <div className="text-base-content font-bold mb-2">Protocol Fee</div>
           <div className="text-base-content">{fee ? `${formatEther(String(fee))} ETH` : "-"}</div>
         </div>
-        <div className="card min-w-fit mx-auto items-center bg-primary shadow-2xl px-5 py-5 mb-20">
+        <div className="card min-w-fit mx-auto text-base-content  items-center  shadow-2xl px-5 py-5 mb-20">
           <h1 className="card-title text-base-content text-4xl text-left">Create Tier</h1>
           <form onSubmit={createMecenateSubscription} className="text-secondary w-full my-2">
             <label htmlFor="name" className="block font-medium text-base-content">
@@ -219,19 +219,19 @@ const Tiers: NextPage = () => {
             <div className="text-center">
               <button
                 type="submit"
-                className="btn-wide text-center items-center justify-center text-base-content bg-secondary hover:bg-accent font-bold py-2 px-4 my-5 rounded-md"
+                className="btn-wide text-center items-center justify-center text-base-content bg-primary hover:bg-accent font-bold py-2 px-4 my-5 rounded-md"
               >
                 Create Subscription
               </button>
             </div>
           </form>
-          <div className="flex flex-col items-center justify-center w-full max-w-md p-10 px-20  text-primary mt-6">
+          <div className="flex flex-col items-center justify-center w-full max-w-md p-10 px-20   mt-6">
             <h2 className="text-lg font-medium">Mecenate Tiers</h2>
             {subscriptions &&
               subscriptions.map((subscription, index) => (
                 <div
                   key={index}
-                  className="card bg-secondary hover:bg-accent text-base-content py-2 px-2 mx-2 font-semibold"
+                  className="card bg-secondary hover:bg-accent text-xl text-base-content py-2 px-2 mx-2 font-semibold"
                 >
                   <a href={`/viewTier?addr=${subscription}`} className="text-indigo-600 hover:text-indigo-900">
                     {subscription}

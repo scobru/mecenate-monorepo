@@ -158,6 +158,12 @@ const ViewFeed: NextPage = () => {
     }
   }
 
+  async function reFund() {
+    const tx = await feedCtx?.refund();
+    await tx?.wait();
+    notification.success("Refund successful");
+  }
+
   const uploadImageToIpfs = async (file: Blob | null) => {
     try {
       if (!file) {
@@ -274,14 +280,15 @@ const ViewFeed: NextPage = () => {
         </div>
       </div>,
     );
+
     /*  notification.success("SYMMETIC KEY: " + dataSaved?.symmetricKey);
     notification.success("ENCRYPTED DATA: " + dataSaved?.encryptedData);
     notification.success("PROOF OF HASH: " + dataSaved?.proofhash); */
 
     notification.warning("Save this data");
 
-    downloadFile({
-      data: dataSaved,
+    await downloadFile({
+      data: JSON.stringify(dataSaved),
       fileName: "sellerData.json",
       fileType: "text/json",
     });
@@ -525,7 +532,7 @@ const ViewFeed: NextPage = () => {
     return file;
   };
 
-  const downloadFile = ({ data, fileName, fileType }) => {
+  const downloadFile = async ({ data, fileName, fileType }) => {
     // Create a blob with the data we want to download as a file
     const blob = new Blob([data], { type: fileType });
     // Create an anchor element and dispatch a click event on it
@@ -533,6 +540,7 @@ const ViewFeed: NextPage = () => {
     const a = document.createElement("a");
     a.download = fileName;
     a.href = window.URL.createObjectURL(blob);
+
     const clickEvt = new MouseEvent("click", {
       view: window,
       bubbles: true,
@@ -636,9 +644,9 @@ const ViewFeed: NextPage = () => {
          document.body.removeChild(element);
         */
 
-        downloadFile({
+        await downloadFile({
           data: decriptFile,
-          fileName: "file",
+          fileName: "decryptedFile",
           fileType: "mime/type",
         });
       }
@@ -738,17 +746,17 @@ const ViewFeed: NextPage = () => {
   }, [feedCtx, router.isReady]);
 
   return (
-    <div className="container mx-auto px-20">
+    <div className="flex flex-col items-center pt-2 p-2 m-2">
       {feedData[0] != null ? (
-        <div className="flex flex-col px-5 py-5">
-          <div className="font-mono">
+        <div className="flex flex-col py-5 justify-center  items-center">
+          <div className="font-mono my-4">
             <br></br>S = Seller <br></br>B = Buyer
           </div>
-          <div className="flex flex-row gap-3 items-center justify-center w-full flex-1 px-20 text-center py-5 text-base-content">
-            <label htmlFor="modal-create" className="btn modal-button ">
+          <div className="flex-shrink-1 text-center  items-center text-base-content">
+            <label htmlFor="modal-create" className="btn modal-button mx-2 my-2">
               Create (S)
             </label>
-            <input type="checkbox" id="modal-create" className="modal-toggle" />
+            <input type="checkbox" id="modal-create" className="modal-toggle " />
             <div className="modal">
               <div className="modal-box rounded-lg shadow-xl">
                 <div className="modal-header">
@@ -850,8 +858,7 @@ const ViewFeed: NextPage = () => {
                 </div>
               </div>
             </div>
-
-            <label htmlFor="modal-accept" className="btn  modal-button text-base-content bg-neutral-600">
+            <label htmlFor="modal-accept" className="btn  modal-button text-base-content bg-neutral-600  mx-2 my-2">
               Accept (B)
             </label>
             <input type="checkbox" id="modal-accept" className="modal-toggle" />
@@ -890,11 +897,10 @@ const ViewFeed: NextPage = () => {
                 </div>
               </div>
             </div>
-
-            <label htmlFor="modal-submit" className="btn  modal-button">
+            <label htmlFor="modal-submit" className="btn  modal-button mx-2 my-2">
               Submit (S)
             </label>
-            <input type="checkbox" id="modal-submit" className="modal-toggle" />
+            <input type="checkbox" id="modal-submit" className="modal-toggle " />
             <div className="modal">
               <div className="modal-box">
                 <div className="modal-header">
@@ -937,8 +943,7 @@ const ViewFeed: NextPage = () => {
                 </div>
               </div>
             </div>
-
-            <label htmlFor="modal-retrieve" className="btn text-base-content   modal-button bg-neutral-600">
+            <label htmlFor="modal-retrieve" className="btn text-base-content   modal-button bg-neutral-600 mx-2 my-2">
               Retrieve (B)
             </label>
             <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
@@ -978,7 +983,7 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label htmlFor="modal-finalize" className="btn text-base-content  modal-button bg-neutral-600">
+            <label htmlFor="modal-finalize" className="btn text-base-content  modal-button bg-neutral-600 mx-2 my-2">
               Finalize (B)
             </label>
             <input type="checkbox" id="modal-finalize" className="modal-toggle" />
@@ -1028,7 +1033,7 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label htmlFor="modal-reveal" className="btn  modal-button">
+            <label htmlFor="modal-reveal" className="btn  modal-button mx-2 my-2">
               Reveal (S)
             </label>
             <input type="checkbox" id="modal-reveal" className="modal-toggle" />
@@ -1074,11 +1079,10 @@ const ViewFeed: NextPage = () => {
                 </div>
               </div>
             </div>
-
             {signer?.getAddress() == feedData.postdata.settings.seller ||
               (feedData.postdata.settings.buyer && (
-                <div>
-                  <label htmlFor="modal-stake" className="btn text-base-content  modal-button bg-neutral-500">
+                <div className="fleẋ flex-row">
+                  <label htmlFor="modal-stake" className="btn bg-accent text-base-content  modal-button  mx-2 my-2">
                     Stake (B+S)
                   </label>
                   <input type="checkbox" id="modal-stake" className="modal-toggle" />
@@ -1129,8 +1133,15 @@ const ViewFeed: NextPage = () => {
                 </div>
               ))}
           </div>
-          <div className="divider" />
-          <div className="flex flex-col  p-5 w-full items-left justify-center">
+          <button
+            className="btn modal-button mx-2 my-2"
+            onClick={async () => {
+              await reFund();
+            }}
+          >
+            Refund (S)
+          </button>
+          <div className="flex flex-col  p-2 min-w-fit items-left justify-center">
             <div className="card w-fit">
               <button
                 className="btn btn-info w-min"
@@ -1157,7 +1168,7 @@ const ViewFeed: NextPage = () => {
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">
-                      <span className="font-bold">Seller Stake:</span> {sellerStake} ETH
+                      <span className="font-bold">Seller Stake:</span> {sellerStake / 1e18} ETH
                     </p>
                   </div>
                   <div className="w-1/2">

@@ -51,9 +51,9 @@ contract MecenateQuestion is Ownable {
 
     uint256 public questionCounter;
 
-    uint256 public votingPeriod = 2 minutes; // 3 days for mainnet
+    uint256 public votingPeriod = 3 days; // 3 days for mainnet
 
-    uint256 public claimingPeriod = 5 minutes; // 7 days for mainnet
+    uint256 public claimingPeriod = 7 days; // 7 days for mainnet
 
     uint256 public endTime;
 
@@ -126,6 +126,7 @@ contract MecenateQuestion is Ownable {
         payable(treasuryContract).transfer(creatorFeeAmount / 10);
 
         bool isStaker = false;
+
         for (uint256 i = 0; i < stakers.length; i++) {
             if (stakers[i] == msg.sender) {
                 isStaker = true;

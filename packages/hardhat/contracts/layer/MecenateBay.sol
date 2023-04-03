@@ -61,7 +61,7 @@ contract MecenateBay is Ownable, FeedViewer {
     function acceptRequest(uint256 index, address _feed) public {
         require(
             MecenateIdentity(identityContract).balanceOf(msg.sender) > 0,
-            "user does not have identity"
+            "User does not have identity"
         );
 
         Structures.Feed memory feed = _getFeedInfo(_feed);

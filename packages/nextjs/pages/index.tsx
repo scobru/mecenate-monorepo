@@ -13,8 +13,6 @@ import React, { useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract, useBalance, useContractRead } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { Contract, ContractInterface, ethers, utils } from "ethers";
-import { formatEther } from "ethers/lib/utils.js";
-import { useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
   const { chain } = useNetwork();
@@ -79,19 +77,33 @@ const Home: NextPage = () => {
           </h1>
         </div>
         {stats ? (
-          <div className="card flex-col w-auto bg-base-200 px-10 py-10 text-4xl font-semibold shadow-xl shadow-black rounded-3xl text-left my-4 ">
-            <p className="my-5">TREASURY: {String(Number(Number(stats.treasuryBalance) / 1e18).toFixed(3))} ETH</p>
-            <p className="text-xl font-medium">
-              Protocol Fee %: {String(Number(stats.globalFee) / 10000)} %
-              <p className="text-lg font-thin">
-                The percentage of the protocol fee for TIERS , BOX and QUESTION sellers and buyers operations.
-              </p>
-            </p>
-            <p className="text-xl font-medium">
-              Protocol One Time Fee: {String(Number(stats.fixedFee) / 1e18)} ETH
-              <p className="text-lg font-thin">One time payment for the FEEDS, IDENTITY, QUESTION contract creation.</p>
-            </p>
-            <div className="flex flex-col items-center gap-10  lg:flex-row ">
+          <div className="card flex-col w-auto bg-primary px-10 py-10 text-4xl font-semibold shadow-xl shadow-black rounded-3xl text-left my-4 ">
+            <div className="row row-1 items-center min-w-fit">
+              <div className="stats shadow  my-2 mx-2 min-w-fit">
+                <div className="stat ">
+                  <div className="stat-title font-bold">TREASURY</div>
+                  <div className="stat-value">
+                    {String(Number(Number(stats.treasuryBalance) / 1e18).toFixed(3))} ETH
+                  </div>
+                  <div className="stat-desc">earned across all fee's product.</div>
+                </div>
+              </div>
+              <div className="stats shadow  my-2 mx-2 min-w-fit">
+                <div className="stat">
+                  <div className="stat-title font-bold">FEE</div>
+                  <div className="stat-value">{String(Number(stats.globalFee) / 10000)} %</div>
+                  <div className="stat-desc"> Percent Protocol Fee</div>
+                </div>
+              </div>
+              <div className="stats shadow  my-2 mx-2 min-w-fit">
+                <div className="stat">
+                  <div className="stat-title font-bold">TAX</div>
+                  <div className="stat-value"> {String(Number(stats.fixedFee) / 1e18)} ETH</div>
+                  <div className="stat-desc"> Fixed Protocol Tax </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-10  lg:flex-row px-5 ">
               <div className="text-3xl font-thin my-5 ">identities: {Number(stats.totalIdentities)}</div>
               <div className="text-3xl font-thin my-5 ">requests: {Number(stats.totalBayRequests)}</div>
               <div className="text-3xl font-thin my-5 ">tiers : {Number(stats.totalTiers)}</div>

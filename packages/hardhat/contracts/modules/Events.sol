@@ -9,4 +9,5 @@ abstract contract Events {
     event Invalid(Structures.Post post);
     event Finalized(Structures.Post post);
     event MadePublic(Structures.Post post);
+    event Refunded(Structures.Post post);
 }

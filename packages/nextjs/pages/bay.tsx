@@ -126,7 +126,50 @@ const Bay: NextPage = () => {
     <div className="flex min-w-fit flex-col mx-auto flex-grow  text-base-content ">
       <div className="max-w-3xl text-center my-2 text-base-content">
         <div className="min-w-fit mx-auto text-center my-2 text-base-content">
-          <h1 className="text-6xl font-bold mb-8">Request any information</h1>
+          <h1 className="text-6xl font-bold">Request</h1>
+          <div className="content-slider">
+            <div className="slider">
+              <div className="mask">
+                <ul>
+                  <li className="anim1">
+                    <div className="quote">Nuclear Code</div>
+                    <div className="quote">Technical Assistance</div>
+                    <div className="quote">Clean Data</div>
+                    {/*                     <div className="source">- Person</div>
+                     */}{" "}
+                  </li>
+                  <li className="anim2">
+                    <div className="quote">Personalized Tutorials.</div>
+                    <div className="quote">Custom Artwork</div>
+                    <div className="quote">Video Proof</div>
+                    {/*                     <div className="source">- Another person</div>
+                     */}{" "}
+                  </li>
+                  <li className="anim3">
+                    <div className="quote">Private Keys</div>
+                    <div className="quote">Hiring Reccomandation</div>
+                    <div className="quote">Cryptopunks</div>
+                    {/*                     <div className="source">- Animal</div>
+                     */}{" "}
+                  </li>
+                  <li className="anim4">
+                    <div className="quote">Dank Memes</div>
+                    <div className="quote">Paywalled Content</div>
+                    <div className="quote">Homework Solutions</div>
+                    {/*                     <div className="source">- Plant</div>
+                     */}{" "}
+                  </li>
+                  <li className="anim5">
+                    <div className="quote">Unique Dataset</div>
+                    <div className="quote">State Secrets</div>
+                    <div className="quote">Sourdough Recipe</div>
+                    {/*                     <div className="source">- Cassidy</div>
+                     */}{" "}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
           <p className="text-xl  mb-8">
             Lock up a cryptocurrency reward. Anyone can respond. Destroy their stake if you don't get what you want.
           </p>
@@ -191,7 +234,7 @@ const Bay: NextPage = () => {
               <div className="my-2">✔️ Accepted : {String(request.accepted)}</div>
               <div className="flex flex-row space-x-4 my-4">
                 <input
-                  className="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none"
+                  className="border-2 border-gray-300 bg-white text-black  h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none"
                   type="text"
                   name="address"
                   placeholder="Enter Address"

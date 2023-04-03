@@ -12,10 +12,14 @@ abstract contract Submission is Data, Events {
             "User does not exist"
         );
         require(
-            post.postdata.settings.status == Structures.PostStatus.Accepted,
+            post.postdata.settings.status == Structures.PostStatus.Accepted ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Submitted,
             "Post is not Accepted"
         );
+
         require(post.creator.wallet == msg.sender, "You are not the creator");
+
         post.postdata.data.encryptedKey = encryptedKey;
         post.postdata.settings.status = Structures.PostStatus.Submitted;
         post.postdata.settings.endTimeStamp =

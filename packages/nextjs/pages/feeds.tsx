@@ -111,7 +111,7 @@ const Feeds: NextPage = () => {
   });
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10 text-black p-4 m-4">
+    <div className="flex items-center flex-col flex-grow pt-10 text-black ">
       <div className="max-w-3xl text-center my-2 text-base-content">
         <h1 className="text-6xl font-bold mb-8">Data Privacy and Security Redefined.</h1>
         <p className="text-xl  mb-8">
