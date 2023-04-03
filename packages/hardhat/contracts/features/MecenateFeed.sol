@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "../library/Structures.sol";
 import "../modules/Events.sol";
 import "../modules/Creation.sol";
@@ -9,6 +8,8 @@ import "../modules/Acceptance.sol";
 import "../modules/Submission.sol";
 import "../modules/Finalization.sol";
 import "../modules/Data.sol";
+
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MecenateFeed is
     Ownable,

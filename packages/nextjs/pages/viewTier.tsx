@@ -158,7 +158,7 @@ const ViewTier: NextPage = () => {
   async function subscribe() {
     event?.preventDefault();
     const tx = await ctx?.subscribe({
-      value: Number(fee),
+      value: String(fee),
     });
     await tx.wait();
   }
@@ -184,7 +184,7 @@ const ViewTier: NextPage = () => {
             <div className="flex flex-col">
               <div className="flex flex-col">
                 <span className="text-lg mb-2 font-base">
-                  Fee: <strong>{String(fee)} ETH</strong>
+                  Fee: <strong>{String(Number(fee) / 1e18)} ETH</strong>
                 </span>
                 <span className="text-lg mb-2 font-base">
                   Duration: <strong>{formatDate(Number(duration))}</strong>{" "}

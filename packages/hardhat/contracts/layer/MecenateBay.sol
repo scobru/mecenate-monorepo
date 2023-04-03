@@ -44,9 +44,14 @@ contract MecenateBay is Ownable, FeedViewer {
             "user does not have identity"
         );
         require(request.stake > 0, "stake is not enough");
+
         require(request.payment == msg.value, "payment is not enough");
+
         require(request.postAddress == address(0), "post address is not valid");
+
         require(request.seller == address(0), "seller is not valid");
+
+        contractCounter++;
 
         requests[msg.sender].push(request);
         allRequests.push(request);
@@ -69,8 +74,9 @@ contract MecenateBay is Ownable, FeedViewer {
             feed.buyerPayment == allRequests[index].payment,
             "payment is not the same of the feed"
         );
+
         require(
-            feed.sellerStake == allRequests[index].stake,
+            feed.sellerStake >= allRequests[index].stake,
             "stake is not the same of the feed"
         );
 

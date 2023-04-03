@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-/**
- * @title Finalization
- * @notice Contract for finalizing posts
- * @dev Contract for finalizing posts
- */
-
 import "../library/Structures.sol";
 import "./Data.sol";
 import "./Events.sol";

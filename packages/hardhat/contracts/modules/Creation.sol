@@ -105,8 +105,8 @@ abstract contract Creation is Data, Events, Staking {
             }),
             data: Structures.PostEncryptedData({
                 encryptedData: encryptedHash,
-                encryptedKey: "0x00",
-                decryptedData: "0x00"
+                encryptedKey: ZEROHASH,
+                decryptedData: ZEROHASH
             })
         });
 

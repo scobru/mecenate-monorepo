@@ -424,7 +424,7 @@ const Identity: NextPage = () => {
             <p className="text-xl  mb-20">Mint your NFT. Become a member of the community.</p>
           </div>
           <div className="max-w-lg">
-            <div className="card-body bg-secondary rounded-3xl shadow-lg border-2 shadow-primary  text-base-content text-lg">
+            <div className="card-body bg-secondary rounded-3xl shadow-lg border-2 shadow-primary text-base-content text-lg">
               <h1 className="text-3xl font-bold p-6 ">
                 {nftBalance > 0 ? (
                   <div className="flex items-center justify-center text-3xl font-bold">Your ID</div>
@@ -432,7 +432,7 @@ const Identity: NextPage = () => {
                   <div className="text-primary-focus">Mint a Creator ID</div>
                 )}
               </h1>
-              <div className="p-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="p-2 justify-center items-center grid grid-cols-1 gap-2 lg:grid-cols-2">
                 <div>
                   <div className="text-secondary-content font-bold mb-2">Identity Fee</div>
                   <div className="text-primary-content">
@@ -447,14 +447,14 @@ const Identity: NextPage = () => {
                   <div className="text-secondary-content font-bold mb-2">Description</div>
                   <div className="text-primary-content">{nftMetadata ? nftMetadata["description"] : "-"}</div>
                 </div>
-                <div>
+                <div className="items-center mx-auto text-center">
                   <div className="text-primary-content">
                     {nftMetadata["image"] ? (
                       <Image
                         decoding="async"
                         loading="lazy"
-                        width={80}
-                        height={80}
+                        width={100}
+                        height={100}
                         alt="image"
                         src={nftMetadata["image"]}
                       />
@@ -515,7 +515,7 @@ const Identity: NextPage = () => {
                 </div>
                 <button
                   type="submit"
-                  className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 text-white hover:bg-primary-700 my-2"
+                  className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-2"
                 >
                   Mint
                 </button>

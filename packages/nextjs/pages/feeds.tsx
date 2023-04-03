@@ -151,7 +151,7 @@ const Feeds: NextPage = () => {
 
       <div className="grid grid-cols-1 gap-4 my-10">
         {feeds.map((feed, i) => (
-          <div key={i} className="card bg-base-100 shadow-xl p-2">
+          <div key={i} className="card bg-base-100 shadow-xl p-2 text-base-content">
             <a href={`/viewFeed?addr=${feed}`}>
               <table className="w-full border border-base-300">
                 <tbody>

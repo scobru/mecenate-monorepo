@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import {MecenateDCA} from "../features/MecenateDCA.sol";
 import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 import {IMecenateTreasury} from "../interfaces/IMecenateTreasury.sol";
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 contract MecenateDCAFactory is Ownable {
+    uint256 public contractCounter;
+
     address[] public dcas;
 
     address public treasuryContract;
@@ -14,8 +17,6 @@ contract MecenateDCAFactory is Ownable {
     address public identityContract;
 
     mapping(address => bool) public createdContracts;
-
-    uint256 public contractCounter;
 
     event NewDCA(
         address indexed addr,

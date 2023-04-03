@@ -24,7 +24,7 @@ contract MecenateTier is Ownable {
     uint256 public totalFeeCreator;
 
     address public factoryContract;
-    
+
     bytes32 private tierCid;
 
     mapping(address => uint256) public lastPaymentTime;
@@ -79,24 +79,28 @@ contract MecenateTier is Ownable {
         payable(treasuryContract).transfer(feeAmount);
 
         uint256 amountAfter = msg.value - feeAmount;
+
         totalFeeCreator += amountAfter;
 
         payable(creator).transfer(amountAfter);
+
         lastPaymentTime[msg.sender] = block.timestamp;
 
         uint256 nextPaymentTime = block.timestamp + subscriptionDuration;
         emit SubscriptionRenewed(msg.sender, amountAfter, nextPaymentTime);
     }
 
-    function changeMonthlyFee(uint256 newFee) public onlyOwner {
+    function changeMonthlyFee(uint256 newFee) external onlyOwner {
         fee = newFee;
     }
 
-    function changeName(string memory newName) public onlyOwner {
+    function changeName(string memory newName) external onlyOwner {
         name = newName;
     }
 
-    function changeDescription(string memory newDescription) public onlyOwner {
+    function changeDescription(
+        string memory newDescription
+    ) external onlyOwner {
         description = newDescription;
     }
 
@@ -123,6 +127,4 @@ contract MecenateTier is Ownable {
 
         return tierCid;
     }
-
-    receive() external payable {}
 }

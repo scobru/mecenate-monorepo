@@ -176,7 +176,7 @@ const Bay: NextPage = () => {
         {requests.map((request, index) => {
           return (
             <div key={index} className="font flex flex-col   bg-primary shadow-md rounded-md text-left p-4 m-4">
-              <div className="text-lg font-medium px-2">{ethers.utils.parseBytes32String(request.request)}</div>
+              <div className="text-2xl font-medium px-2">{ethers.utils.parseBytes32String(request.request)}</div>
               <div className="my-2">👾 Buyer : {request.buyer}</div>
               <div className="my-2">🤖 Seller : {request.seller}</div>
               <div className="my-2">💸 Payment : {formatEther(request.payment)}</div>
@@ -213,8 +213,13 @@ const Bay: NextPage = () => {
                     await acceptBayRequest(index, requestAddress);
                   }}
                 >
-                  Accept
+                  🦄 Accept
                 </button>
+                <a className="link-hover" href={"/feeds"}>
+                  <button className="bg-secondary hover:bg-accent text-black font-bold py-2 px-4 rounded ">
+                    📣 Answer
+                  </button>
+                </a>
               </div>
             </div>
           );

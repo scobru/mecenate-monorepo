@@ -19,6 +19,8 @@ contract Data is Ownable {
     address public identityContract;
     address public factoryContract;
 
+    bytes public constant ZEROHASH = "0x00";
+
     constructor(address _usersModuleContract, address _identityContract) {
         usersModuleContract = _usersModuleContract;
         identityContract = _identityContract;

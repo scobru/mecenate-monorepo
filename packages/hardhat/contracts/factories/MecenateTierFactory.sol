@@ -8,6 +8,8 @@ import {IMecenateTreasury} from "../interfaces/IMecenateTreasury.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MecenateTierFactory is Ownable {
+    uint256 public contractCounter;
+
     address[] public tiers;
 
     mapping(address => bool) public createdContracts;
@@ -19,8 +21,6 @@ contract MecenateTierFactory is Ownable {
     address public treasuryContract;
 
     MecenateIdentity public identityContract;
-
-    uint256 public contractCounter;
 
     event MecenateSubscriptionCreated(address indexed subscriptionAddress);
 

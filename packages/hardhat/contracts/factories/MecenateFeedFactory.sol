@@ -3,24 +3,22 @@ pragma solidity 0.8.19;
 
 import {MecenateFeed} from "../features/MecenateFeed.sol";
 import {MecenateIdentity} from "../token/MecenateIdentity.sol";
+import "../interfaces/IMecenateUsers.sol";
+import "../interfaces/IMecenateTreasury.sol";
+import "../modules/FeedViewer.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IMecenateUsers.sol";
-import "../modules/FeedViewer.sol";
-import "../interfaces/IMecenateTreasury.sol";
 
 contract MecenateFeedFactory is Ownable, FeedViewer {
+    uint256 public contractCounter;
+
+    address[] public feeds;
+
     address public identityContract;
 
     address public treasuryContract;
 
     address public usersMouduleContract;
-
-    uint256 numFeeds;
-
-    address[] public feeds;
-
-    uint256 public contractCounter;
 
     mapping(address => bool) public createdContracts;
 
@@ -75,8 +73,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         );
 
         feeds.push(address(feed));
-
-        numFeeds++;
 
         createdContracts[address(feed)] = true;
 

@@ -105,6 +105,8 @@ abstract contract Staking is Data, Deposit {
         } else if (msg.sender == post.postdata.settings.seller) {
             stakerBalance = _addStake(msg.sender, msg.value);
             post.postdata.escrow.stake = stakerBalance;
+        } else {
+            revert("Not buyer or seller");
         }
 
         return stakerBalance;
@@ -126,14 +128,19 @@ abstract contract Staking is Data, Deposit {
         );
         uint256 currentDeposit = Deposit._getDeposit(msg.sender);
         uint256 stakerBalance;
+
         require(currentDeposit >= amountToTake, "Not enough deposit");
+
         if (msg.sender == post.postdata.settings.buyer) {
             stakerBalance = _takeStake(msg.sender, amountToTake);
             post.postdata.escrow.payment = stakerBalance;
         } else if (msg.sender == post.postdata.settings.seller) {
             stakerBalance = _takeStake(msg.sender, amountToTake);
             post.postdata.escrow.stake = stakerBalance;
+        } else {
+            revert("Not buyer or seller");
         }
+
         payable(msg.sender).transfer(amountToTake);
 
         return stakerBalance;

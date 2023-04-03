@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import {MecenateQuestion} from "../features/MecenateQuestion.sol";
 import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 import {IMecenateTreasury} from "../interfaces/IMecenateTreasury.sol";
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 contract MecenateQuestionFactory is Ownable {
+    uint256 public contractCounter;
+
     address[] public questions;
 
     address public identityContract;
@@ -14,8 +17,6 @@ contract MecenateQuestionFactory is Ownable {
     address public treasuryContract;
 
     mapping(address => bool) public createdContracts;
-
-    uint256 public contractCounter;
 
     event MecenateQuestionCreated(
         address indexed mecenateQuestionAddress,

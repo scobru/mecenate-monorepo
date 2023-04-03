@@ -81,10 +81,10 @@ contract MecenateQuestion is Ownable {
         uint256 _endTime,
         uint256 _punishPercentage
     ) external payable {
-        require(
-            msg.value > 0 || creatorStaked > 0,
-            "Amount should be greater than 0"
-        );
+        if (creatorStaked == 0) {
+            require(msg.value > 0, "Amount should be greater than 0");
+        }
+
         require(_endTime > block.timestamp, "End time should be in the future");
 
         address treasuryContract = IMecenateFactory(factoryContract)
@@ -160,8 +160,6 @@ contract MecenateQuestion is Ownable {
             "Only the creator can resolve the prediction"
         );
 
-        require(endTime <= block.timestamp, "Prediction time has not ended");
-
         require(
             _choice == Choice.Yes || _choice == Choice.No,
             "Answer should be Yes or No"
@@ -212,7 +210,7 @@ contract MecenateQuestion is Ownable {
     function resolve() public {
         require(status == Status.Submit, "Prediction is not Voted");
         require(
-            block.timestamp > submissionTimestamp + votingPeriod,
+            block.timestamp >= submissionTimestamp + votingPeriod,
             "Voting period has ended"
         );
 
@@ -256,9 +254,6 @@ contract MecenateQuestion is Ownable {
         uint256 creatorPenality = creatorStaked - punishment;
 
         uint256 stakerCount = stakers.length;
-        if (stakerCount == 0) {
-            return;
-        }
 
         for (uint256 i = 0; i < stakerCount; i++) {
             address staker = stakers[i];
@@ -289,7 +284,7 @@ contract MecenateQuestion is Ownable {
     function claim() public {
         require(status == Status.Close, "Prediction is not Resolved");
         require(
-            block.timestamp < resolveTimestamp + claimingPeriod,
+            block.timestamp <= resolveTimestamp + claimingPeriod,
             "Claim period has ended"
         );
 
@@ -305,11 +300,14 @@ contract MecenateQuestion is Ownable {
                 "No shares to claim or You lost the prediction"
             );
 
-            shares[Choice.Yes][msg.sender] = 0;
-
             reward = userShares.mul(amountToClaim).div(1e18);
 
-            //totalNoStaked = totalNoStaked - reward;
+            shares[Choice.Yes][msg.sender] = 0;
+
+            require(reward > 0, "Reward should be greater than 0");
+
+            (bool success, ) = msg.sender.call{value: reward}("");
+            require(success, "Transfer failed");
         } else if (communityAnswer == Choice.No) {
             userShares = shares[Choice.No][msg.sender];
 
@@ -318,19 +316,17 @@ contract MecenateQuestion is Ownable {
                 "No shares to claim or  You lost the prediction"
             );
 
-            shares[Choice.No][msg.sender] = 0;
-
             reward = userShares.mul(amountToClaim).div(1e18);
 
-            //totalYesStaked = totalYesStaked - reward;
+            shares[Choice.No][msg.sender] = 0;
+
+            require(reward > 0, "Reward should be greater than 0");
+
+            (bool success, ) = msg.sender.call{value: reward}("");
+            require(success, "Transfer failed");
         } else {
             revert("Prediction is not resolved yet");
         }
-
-        require(reward > 0, "Reward should be greater than 0");
-
-        (bool success, ) = msg.sender.call{value: reward}("");
-        require(success, "Transfer failed");
 
         emit UserAction(msg.sender, "claim", reward);
     }

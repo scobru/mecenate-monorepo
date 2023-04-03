@@ -282,10 +282,9 @@ const ViewFeed: NextPage = () => {
 
     downloadFile({
       data: dataSaved,
-      fileName: 'sellerData.json',
-      fileType: 'text/json',
-    })
-
+      fileName: "sellerData.json",
+      fileType: "text/json",
+    });
 
     const proofOfHashEncode = await ErasureHelper.multihash({
       input: dataSaved?.proofhash,
@@ -528,20 +527,20 @@ const ViewFeed: NextPage = () => {
 
   const downloadFile = ({ data, fileName, fileType }) => {
     // Create a blob with the data we want to download as a file
-    const blob = new Blob([data], { type: fileType })
+    const blob = new Blob([data], { type: fileType });
     // Create an anchor element and dispatch a click event on it
     // to trigger a download
-    const a = document.createElement('a')
-    a.download = fileName
-    a.href = window.URL.createObjectURL(blob)
-    const clickEvt = new MouseEvent('click', {
+    const a = document.createElement("a");
+    a.download = fileName;
+    a.href = window.URL.createObjectURL(blob);
+    const clickEvt = new MouseEvent("click", {
       view: window,
       bubbles: true,
       cancelable: true,
-    })
-    a.dispatchEvent(clickEvt)
-    a.remove()
-  }
+    });
+    a.dispatchEvent(clickEvt);
+    a.remove();
+  };
 
   async function retrievePost() {
     console.log("Retrieving Data...");
@@ -628,7 +627,6 @@ const ViewFeed: NextPage = () => {
       const hashCheck = responseProofHashJSON.datahash === dataHash;
 
       if (feedData[1][0].postType == 1 || 2 || 3 || 4) {
-
         /*  const element = document.createElement("a");
          const file = convertBase64ToFile(decriptFile, "file");
          element.href = URL.createObjectURL(file);
@@ -640,10 +638,9 @@ const ViewFeed: NextPage = () => {
 
         downloadFile({
           data: decriptFile,
-          fileName: 'file',
-          fileType: 'mime/type',
+          fileName: "file",
+          fileType: "mime/type",
         });
-
       }
 
       await fetchData();
@@ -747,7 +744,7 @@ const ViewFeed: NextPage = () => {
           <div className="font-mono">
             <br></br>S = Seller <br></br>B = Buyer
           </div>
-          <div className="flex flex-row gap-3 items-center justify-center w-full flex-1 px-20 text-center py-5">
+          <div className="flex flex-row gap-3 items-center justify-center w-full flex-1 px-20 text-center py-5 text-base-content">
             <label htmlFor="modal-create" className="btn modal-button ">
               Create (S)
             </label>
@@ -854,7 +851,7 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label htmlFor="modal-accept" className="btn  modal-button bg-neutral-600">
+            <label htmlFor="modal-accept" className="btn  modal-button text-base-content bg-neutral-600">
               Accept (B)
             </label>
             <input type="checkbox" id="modal-accept" className="modal-toggle" />
@@ -941,7 +938,7 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label htmlFor="modal-retrieve" className="btn  modal-button bg-neutral-600">
+            <label htmlFor="modal-retrieve" className="btn text-base-content   modal-button bg-neutral-600">
               Retrieve (B)
             </label>
             <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
@@ -981,7 +978,7 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            <label htmlFor="modal-finalize" className="btn  modal-button bg-neutral-600">
+            <label htmlFor="modal-finalize" className="btn text-base-content  modal-button bg-neutral-600">
               Finalize (B)
             </label>
             <input type="checkbox" id="modal-finalize" className="modal-toggle" />
@@ -1081,7 +1078,7 @@ const ViewFeed: NextPage = () => {
             {signer?.getAddress() == feedData.postdata.settings.seller ||
               (feedData.postdata.settings.buyer && (
                 <div>
-                  <label htmlFor="modal-stake" className="btn  modal-button bg-neutral-500">
+                  <label htmlFor="modal-stake" className="btn text-base-content  modal-button bg-neutral-500">
                     Stake (B+S)
                   </label>
                   <input type="checkbox" id="modal-stake" className="modal-toggle" />
@@ -1151,12 +1148,12 @@ const ViewFeed: NextPage = () => {
                     {feedData.postdata.settings.status === 4
                       ? "Finalized"
                       : feedData.postdata.settings.status === 3
-                        ? "Submitted"
-                        : feedData.postdata.settings.status === 2
-                          ? "Accepted"
-                          : feedData.postdata.settings.status === 1
-                            ? "Proposed"
-                            : "Waiting for Creator"}
+                      ? "Submitted"
+                      : feedData.postdata.settings.status === 2
+                      ? "Accepted"
+                      : feedData.postdata.settings.status === 1
+                      ? "Proposed"
+                      : "Waiting for Creator"}
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">
