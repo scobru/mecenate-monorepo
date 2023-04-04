@@ -1,15 +1,12 @@
 import type { NextPage } from "next";
 import React, { useEffect } from "react";
-import { useProvider, useNetwork, useSigner, useContract, useAccount } from "wagmi";
+import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { notification } from "~~/utils/scaffold-eth";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, providers } from "ethers";
+import { ContractInterface } from "ethers";
 import { parseEther } from "ethers/lib/utils.js";
 
-const DEBUG = true;
-
 const Box: NextPage = () => {
-  const network = useNetwork();
   const provider = useProvider();
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
@@ -17,20 +14,14 @@ const Box: NextPage = () => {
   const deployedContractBox = getDeployedContract(chain?.id.toString(), "MecenateBox");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
 
-  let boxAddress!: string;
+  let boxAddress: string;
   let boxAbi: ContractInterface[] = [];
 
-  let identityAddress: string = "";
+  let identityAddress: string;
   let identityAbi: ContractInterface[] = [];
 
   const [signature, setSignature] = React.useState<string>("");
-  const [balance, setBalance] = React.useState<string>("");
-  const [owner, setOwner] = React.useState<string>("");
-  const [receiver, setReceiver] = React.useState<string>("");
-  const [sender, setSender] = React.useState<string>("");
   const [amountToSend, setAmountToSend] = React.useState<string>("");
-  const [hash, setHash] = React.useState<string>("");
-  const recoveredAddress = React.useRef<string>();
   const [lockDuration, setLockDuration] = React.useState<string>("");
   const [haveID, setHaveID] = React.useState<boolean>(false);
 
@@ -43,13 +34,13 @@ const Box: NextPage = () => {
   }
 
   const boxCtx = useContract({
-    address: boxAddress,
+    address: boxAddress!,
     abi: boxAbi,
     signerOrProvider: signer || provider,
   });
 
   const identityCtx = useContract({
-    address: identityAddress,
+    address: identityAddress!,
     abi: identityAbi,
     signerOrProvider: signer || provider,
   });

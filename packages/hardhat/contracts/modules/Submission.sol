@@ -15,7 +15,7 @@ abstract contract Submission is Data, Events {
             post.postdata.settings.status == Structures.PostStatus.Accepted ||
                 post.postdata.settings.status ==
                 Structures.PostStatus.Submitted,
-            "Post is not Accepted"
+            "Post is not Accepted or Submitted"
         );
 
         require(post.creator.wallet == msg.sender, "You are not the creator");

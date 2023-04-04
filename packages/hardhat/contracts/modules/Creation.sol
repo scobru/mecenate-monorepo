@@ -19,10 +19,9 @@ abstract contract Creation is Data, Events, Staking {
             "User does not exist"
         );
 
-        require(
-            msg.value > 0 || post.postdata.escrow.stake > 0,
-            "Payment is required"
-        );
+        if (post.postdata.escrow.stake == 0) {
+            require(msg.value > 0, "Stake is required");
+        }
 
         require(
             usersModuleContract != address(0),

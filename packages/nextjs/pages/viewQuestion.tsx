@@ -36,7 +36,7 @@ const ViewQuestion: NextPage = () => {
   const deployedContract = getDeployedContract(chain?.id.toString(), "MecenateQuestion");
   const deployedTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
 
-  const [creatorAnswer, setCreatorAnswer] = useState<boolean>();
+  const [creatorAnswer, setCreatorAnswer] = useState<number>();
   const [yourAnswer, setYourAnswer] = useState<boolean>();
   const [communityAnswer, setCommunityAnswer] = useState<number>();
   const [creatorStaked, setTotalStaked] = useState<string>();
@@ -194,7 +194,7 @@ const ViewQuestion: NextPage = () => {
   }
 
   async function stakePrediction() {
-    let _creatorAnswer: number;
+    let _creatorAnswer;
     if (yourAnswer == true) {
       _creatorAnswer = 0;
     } else if (yourAnswer == false) {
@@ -270,13 +270,13 @@ const ViewQuestion: NextPage = () => {
             <br></br>
 
             <div className=" mb-2">
-              <strong>END TIME:</strong> {convertToDate(String(endTime))}
+              <strong>END TIME:</strong> {convertToDate(Number(endTime))}
             </div>
             <div className=" mb-2">
-              <strong>VOTING DURATION:</strong> {convertToMinute(String(votingPeriod))} minutes
+              <strong>VOTING DURATION:</strong> {convertToMinute(Number(votingPeriod))} minutes
             </div>
             <div className=" mb-2">
-              <strong>CLAIM DURATION:</strong> {convertToMinute(String(claimPeriod))} minutes
+              <strong>CLAIM DURATION:</strong> {convertToMinute(Number(claimPeriod))} minutes
             </div>
             <br></br>
 
@@ -296,7 +296,7 @@ const ViewQuestion: NextPage = () => {
             </div>
 
             <div className=" mb-2 ">
-              <strong>STATUS:</strong> {getStatus(status)}
+              <strong>STATUS:</strong> {getStatus(Number(status))}
             </div>
             <br></br>
 
@@ -369,7 +369,14 @@ const ViewQuestion: NextPage = () => {
               onChange={e => setYourAnswer(true)}
             />
             <label htmlFor="yes">Yes</label>
-            <input className="checkbox mx-2" type="radio" id="no" name="creatorAnswer" value="no" setYourAnswer />
+            <input
+              className="checkbox mx-2"
+              type="radio"
+              id="no"
+              name="creatorAnswer"
+              value="no"
+              onChange={e => setYourAnswer(false)}
+            />
             <label htmlFor="no">No</label>
           </div>
           <p className="text-justify mx-2">Vote the correct answer.</p>
@@ -424,7 +431,7 @@ const ViewQuestion: NextPage = () => {
           <p className="text-justify mx-2">Withdraw Fees.</p>
           <button
             className="btn w-1/2 p-2 border border-gray-300 rounded-md my-2 mx-2"
-            disabled={signer?.getAddress() == creator}
+            disabled={String(signer?.getAddress()) == creator}
             onClick={async () => {
               await withdrawFees();
             }}
@@ -434,7 +441,7 @@ const ViewQuestion: NextPage = () => {
           <p className="text-justify mx-2">Reset Question.</p>{" "}
           <button
             className="btn w-1/2 p-2 border border-gray-300 rounded-md my-2 mx-2"
-            disabled={signer?.getAddress() == creator}
+            disabled={String(signer?.getAddress()) == creator}
             onClick={async () => {
               await reset();
             }}

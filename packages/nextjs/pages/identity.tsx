@@ -2,8 +2,7 @@ import type { NextPage } from "next";
 import React, { useEffect } from "react";
 import { useContract, useProvider, useNetwork, useSigner, useAccount } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { MecenateSubscriptionFactoryInterface } from "../../hardhat/typechain-types/contracts/MecenateSubscriptionFactory";
-import { ContractInterface, ethers } from "ethers";
+import { ContractInterface } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
@@ -11,12 +10,12 @@ import { Buffer } from "buffer";
 import { formatEther } from "ethers/lib/utils.js";
 import Image from "next/image";
 import { utils } from "ethers";
-import CopyToClipboard from "react-copy-to-clipboard";
 
 const crypto = require("asymmetric-crypto");
+
 const projectId = process.env.INFURA_PROJECT_ID;
 const projectSecret = process.env.INFURA_PROJECT_SECRET;
-const projectGateway = process.env.IPFS_GATEWAY;
+// const projectGateway = process.env.IPFS_GATEWAY;
 const auth = "Basic " + Buffer.from(projectId + ":" + projectSecret).toString("base64");
 const DEBUG = true;
 
@@ -41,10 +40,10 @@ const Identity: NextPage = () => {
   const [identityFee, setIdentityFee] = React.useState(0);
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [imageFile, setImageFile] = React.useState(null);
+  const [imageFile, setImageFile] = React.useState<File>();
   const [image, setImage] = React.useState("");
   const [nftBalance, setNftBalance] = React.useState(0);
-  const [nftMetadata, setNftMetadata] = React.useState<nftMetadata[]>([]);
+  const [nftMetadata, setNftMetadata] = React.useState<{ [key: string]: any[] }>({});
   const [pubKey, setPubKey] = React.useState<string>("");
 
   const [subscriptions, setSubscriptions] = React.useState<Array<string>>([]);
@@ -57,9 +56,6 @@ const Identity: NextPage = () => {
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
-
-  const IPFS_HOST = "ipfs.infura.io";
-  const IPFS_PORT = 5001;
 
   /* Create an instance of the client */
   const client = create({
@@ -75,13 +71,13 @@ const Identity: NextPage = () => {
   let UsersAbi: ContractInterface[] = [];
 
   type UserData = {
-    mecenateID: Number;
-    wallet: String;
-    publicKey: String;
+    mecenateID: number;
+    wallet: string;
+    publicKey: string;
   };
 
   let factoryAddress!: string;
-  let factoryAbi: MecenateSubscriptionFactoryInterface[] = [];
+  let factoryAbi: ContractInterface[] = [];
 
   let identityAddress!: string;
   let identityAbi: ContractInterface[] = [];
@@ -150,7 +146,7 @@ const Identity: NextPage = () => {
           resolve(url);
         };
         reader.onerror = event => {
-          reject(event.error);
+          reject(event);
         };
         console.log(url);
         notification.info(String(url));
@@ -158,7 +154,7 @@ const Identity: NextPage = () => {
         setImage(url);
       });
     } catch (error) {
-      notification.error(error.message);
+      notification.error("Error uploading image to IPFS");
     }
   };
 
@@ -185,28 +181,15 @@ const Identity: NextPage = () => {
     }
   };
 
-  const uploadJsonToIpfs = async (identityData: { name: any; description: any }, imageFile: null) => {
+  const uploadJsonToIpfs = async (identityData: { name: any; description: any }, imageFile: any) => {
     try {
       await uploadImageToIpfs(imageFile);
     } catch (error) {
-      notification.error(error.message);
+      notification.error("Error uploading image to IPFS");
     }
   };
 
-  const convertBase64ToFile = (base64String: string, fileName: string) => {
-    let arr = base64String.split(",");
-    let mime = arr[0].match(/:(.*?);/)[1];
-    let bstr = atob(arr[1]);
-    let n = bstr.length;
-    let uint8Array = new Uint8Array(n);
-    while (n--) {
-      uint8Array[n] = bstr.charCodeAt(n);
-    }
-    let file = new File([uint8Array], fileName, { type: mime });
-    return file;
-  };
-
-  const createIdentity = async (identityData: { name: any; description: any }, imageFile: null) => {
+  const createIdentity = async (identityData: { name: any; description: any }, imageFile: any) => {
     const creator = await signer?.getAddress();
     const nftMetadataWrite = {
       name: identityData.name,
@@ -273,7 +256,7 @@ const Identity: NextPage = () => {
             type="button"
             className="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             onClick={async () => {
-              let data = {
+              const data = {
                 publicKey: await kp.publicKey.toString(),
                 secretKey: await kp.secretKey.toString(),
               };
@@ -301,7 +284,7 @@ const Identity: NextPage = () => {
       </div>,
     );
 
-    let data = {
+    const data = {
       publicKey: await kp.publicKey.toString(),
       secretKey: await kp.secretKey.toString(),
     };
@@ -313,19 +296,22 @@ const Identity: NextPage = () => {
     });
   }
 
-  const downloadFile = ({ data, fileName, fileType }) => {
-    // Create a blob with the data we want to download as a file
+  const downloadFile = ({ data, fileName, fileType }: { data: BlobPart; fileName: string; fileType: string }): void => {
+    if (!data || !fileName || !fileType) {
+      throw new Error("Invalid inputs");
+    }
+
     const blob = new Blob([data], { type: fileType });
-    // Create an anchor element and dispatch a click event on it
-    // to trigger a download
     const a = document.createElement("a");
     a.download = fileName;
     a.href = window.URL.createObjectURL(blob);
+
     const clickEvt = new MouseEvent("click", {
       view: window,
       bubbles: true,
       cancelable: true,
     });
+
     a.dispatchEvent(clickEvt);
     a.remove();
   };
@@ -361,9 +347,13 @@ const Identity: NextPage = () => {
     setDescription(event.target.value);
   };
 
-  const handleImageDrop = (acceptedFiles: React.SetStateAction<null>[]) => {
-    setImageFile(acceptedFiles[0]);
-    uploadJsonToIpfs({ name: name, description: description }, acceptedFiles[0]);
+  const handleImageDrop = (acceptedFiles: File[]) => {
+    if (acceptedFiles != null && acceptedFiles.length > 0) {
+      setImageFile(() => acceptedFiles[0]);
+      if (acceptedFiles[0]) {
+        uploadJsonToIpfs({ name: name, description: description }, acceptedFiles[0]);
+      }
+    }
   };
 
   const handleFormSubmit = async (event: { preventDefault: () => void }) => {
@@ -424,43 +414,43 @@ const Identity: NextPage = () => {
             <p className="text-xl  mb-20">Mint your NFT. Become a member of the community.</p>
           </div>
           <div className="max-w-lg">
-            <div className="card-body bg-secondary rounded-3xl shadow-lg border-2 shadow-primary text-base-content text-lg">
+            <div className="card-compact bg-base-300  shadow-sm shadow-secondary text-slate-500 text-lg">
               <h1 className="text-3xl font-bold p-6 ">
                 {nftBalance > 0 ? (
-                  <div className="flex items-center justify-center text-3xl font-bold">Your ID</div>
+                  <div className="flex items-center text-base-content justify-center text-3xl font-bold">Your ID</div>
                 ) : (
-                  <div className="text-primary-focus">Mint a Creator ID</div>
+                  <div className="text-base-content">Mint a Creator ID</div>
                 )}
               </h1>
-              <div className="p-2 justify-center items-center grid grid-cols-1 gap-2 lg:grid-cols-2">
+              <div className="p-2 justify-center text-base-content items-center grid grid-cols-1 gap-2 lg:grid-cols-2">
                 <div>
-                  <div className="text-secondary-content font-bold mb-2">Identity Fee</div>
-                  <div className="text-primary-content">
-                    {identityFee ? `${formatEther(String(identityFee))} ETH` : "-"}
-                  </div>
+                  <div className=" font-bold mb-2">Identity Fee</div>
+                  <div className="">{identityFee ? `${formatEther(String(identityFee))} ETH` : "-"}</div>
                 </div>
                 <div>
-                  <div className="text-secondary-content font-bold mb-2">Name</div>
-                  <div className="text-primary-content">{nftMetadata ? nftMetadata["name"] : "-"}</div>
+                  <div className=" font-bold mb-2">Name</div>
+                  <div className="">{nftMetadata ? nftMetadata["name"] : "-"}</div>
                 </div>
                 <div>
-                  <div className="text-secondary-content font-bold mb-2">Description</div>
-                  <div className="text-primary-content">{nftMetadata ? nftMetadata["description"] : "-"}</div>
+                  <div className=" font-bold mb-2">Description</div>
+                  <div className="">{nftMetadata ? nftMetadata["description"] : "-"}</div>
                 </div>
                 <div className="items-center mx-auto text-center">
-                  <div className="text-primary-content">
-                    {nftMetadata["image"] ? (
-                      <Image
-                        decoding="async"
-                        loading="lazy"
-                        width={100}
-                        height={100}
-                        alt="image"
-                        src={nftMetadata["image"]}
-                      />
-                    ) : (
-                      "-"
-                    )}
+                  <div className="avatar my-2">
+                    <div className="w-24 rounded-full">
+                      {nftMetadata["image"] ? (
+                        <Image
+                          decoding="async"
+                          loading="lazy"
+                          width={100}
+                          height={100}
+                          alt="image"
+                          src={String(nftMetadata["image"])}
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -507,7 +497,7 @@ const Identity: NextPage = () => {
                         {imageFile ? (
                           <p>{imageFile.name}</p>
                         ) : (
-                          <p>Drag 'n' drop an image here, or click to select a file</p>
+                          <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
                         )}
                       </div>
                     )}

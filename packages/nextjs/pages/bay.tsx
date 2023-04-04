@@ -15,7 +15,6 @@ const Bay: NextPage = () => {
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
 
   const [requests, setRequests] = React.useState<BayRequest[]>([]);
-  const [singleRequest, setSingleRequest] = React.useState<BayRequest>();
 
   const [requestString, setRequestString] = React.useState<string>("");
   const [requestPayment, setRequestPayment] = React.useState<string>("");
@@ -54,11 +53,11 @@ const Bay: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  const identityCtx = useContract({
-    address: identityAddress,
-    abi: identityAbi,
-    signerOrProvider: signer || provider,
-  });
+  // const identityCtx = useContract({
+  //   address: identityAddress,
+  //   abi: identityAbi,
+  //   signerOrProvider: signer || provider,
+  // });
 
   async function acceptBayRequest(index: number, address: string) {
     if (signer) {
@@ -110,10 +109,10 @@ const Bay: NextPage = () => {
     setRequests(_requests);
   }
 
-  async function getRequestByAddress() {
+  /* async function getRequestByAddress() {
     const _request = await bayCtx?.getRequestByAddress(identityCtx?.address);
     setRequests(_request);
-  }
+  } */
 
   useEffect(() => {
     if (bayCtx) {
@@ -123,11 +122,11 @@ const Bay: NextPage = () => {
   }, [bayCtx, signer]);
 
   return (
-    <div className="flex min-w-fit flex-col mx-auto flex-grow  text-base-content ">
-      <div className="max-w-3xl text-center my-2 text-base-content">
+    <div className="flex min-w-fit flex-col mx-auto  text-base-content ">
+      <div className="min-w-fit text-center my-2 text-base-content">
         <div className="min-w-fit mx-auto text-center my-2 text-base-content">
           <h1 className="text-6xl font-bold">Request</h1>
-          <div className="content-slider">
+          <div className="content-slider w-52 ">
             <div className="slider">
               <div className="mask">
                 <ul>
@@ -135,47 +134,43 @@ const Bay: NextPage = () => {
                     <div className="quote">Nuclear Code</div>
                     <div className="quote">Technical Assistance</div>
                     <div className="quote">Clean Data</div>
-                    {/*                     <div className="source">- Person</div>
-                     */}{" "}
+                    <div className="source">- Fair</div>
                   </li>
                   <li className="anim2">
                     <div className="quote">Personalized Tutorials.</div>
                     <div className="quote">Custom Artwork</div>
                     <div className="quote">Video Proof</div>
-                    {/*                     <div className="source">- Another person</div>
-                     */}{" "}
+                    <div className="source">- Unstoppable</div>
                   </li>
                   <li className="anim3">
                     <div className="quote">Private Keys</div>
                     <div className="quote">Hiring Reccomandation</div>
                     <div className="quote">Cryptopunks</div>
-                    {/*                     <div className="source">- Animal</div>
-                     */}{" "}
+                    <div className="source">- Censorship-Proof</div>
                   </li>
                   <li className="anim4">
                     <div className="quote">Dank Memes</div>
                     <div className="quote">Paywalled Content</div>
                     <div className="quote">Homework Solutions</div>
-                    {/*                     <div className="source">- Plant</div>
-                     */}{" "}
+                    <div className="source">- Decentralized</div>
                   </li>
                   <li className="anim5">
                     <div className="quote">Unique Dataset</div>
                     <div className="quote">State Secrets</div>
                     <div className="quote">Sourdough Recipe</div>
-                    {/*                     <div className="source">- Cassidy</div>
-                     */}{" "}
+                    <div className="source">- Anonymous</div>
                   </li>
                 </ul>
               </div>
             </div>
           </div>
-          <p className="text-xl  mb-8">
-            Lock up a cryptocurrency reward. Anyone can respond. Destroy their stake if you don't get what you want.
+          <p className="text-xl mb-8">
+            Lock up a cryptocurrency reward. Anyone can respond. Destroy their stake if you don&apos;t get what you
+            want.
           </p>
         </div>
-        <div className="flex flex-col min-w-fit mx-auto items-center mb-20 p-4 m-4">
-          <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary px-2 py-2 my-10 text-base-content p-4 m-4">
+        <div className="flex flex-col max-w-3xl mx-auto items-center mb-20 ">
+          <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary py-2  text-base-content p-4 m-4">
             <label className="text-black font-semibold text-sm" htmlFor="request">
               What do you want?
             </label>
@@ -218,23 +213,26 @@ const Bay: NextPage = () => {
         </div>
         {requests.map((request, index) => {
           return (
-            <div key={index} className="font flex flex-col   bg-primary shadow-md rounded-md text-left p-4 m-4">
-              <div className="text-2xl font-medium px-2">{ethers.utils.parseBytes32String(request.request)}</div>
-              <div className="my-2">👾 Buyer : {request.buyer}</div>
-              <div className="my-2">🤖 Seller : {request.seller}</div>
-              <div className="my-2">💸 Payment : {formatEther(request.payment)}</div>
-              <div className="my-2">💰 Stake : {formatEther(request.stake)}</div>
-              <div className="my-2">
+            <div
+              key={index}
+              className="flex flex-col text-slate-300 p-4 bg-primary shadow-md rounded-md text-left hover:shadow-lg hover:bg-accent transition duration-300 ease-in-out"
+            >
+              <div className="text-4xl my-2 font-medium px-2">{ethers.utils.parseBytes32String(request.request)}</div>
+              <div className="my-2 font-medium">👾 Buyer : {request.buyer}</div>
+              <div className="my-2 font-medium">🤖 Seller : {request.seller}</div>
+              <div className="my-2 font-medium">💸 Payment : {formatEther(request.payment)}</div>
+              <div className="my-2 font-medium">💰 Stake : {formatEther(request.stake)}</div>
+              <div className="my-2 font-medium">
                 📑 Post Address :
                 <a className="link-hover" href={`/viewFeed?addr=${request.postAddress}`}>
                   {" "}
                   {request.postAddress}
                 </a>
               </div>
-              <div className="my-2">✔️ Accepted : {String(request.accepted)}</div>
+              <div className="my-2 font-medium">✔️ Accepted : {String(request.accepted)}</div>
               <div className="flex flex-row space-x-4 my-4">
                 <input
-                  className="border-2 border-gray-300 bg-white text-black  h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none"
+                  className="input-primary  bg-white text-black  h-10 px-5 pr-16  text-sm focus:outline-none"
                   type="text"
                   name="address"
                   placeholder="Enter Address"
@@ -242,7 +240,7 @@ const Bay: NextPage = () => {
                 />
                 {request.buyer === signerAddress && (
                   <button
-                    className="bg-transparent hover:bg-accent text-black font-bold py-2 px-4 rounded "
+                    className="bg-transparent hover:bg-accent  font-bold py-2 px-4 rounded "
                     onClick={async () => {
                       await removeRequest(index);
                     }}
@@ -251,7 +249,7 @@ const Bay: NextPage = () => {
                   </button>
                 )}
                 <button
-                  className="bg-secondary hover:bg-accent text-black font-bold py-2 px-4 rounded "
+                  className="btn-primary bg-base-300 hover:bg-base text-base-content font-bold py-2 px-4 rounded  "
                   onClick={async () => {
                     await acceptBayRequest(index, requestAddress);
                   }}
@@ -259,7 +257,7 @@ const Bay: NextPage = () => {
                   🦄 Accept
                 </button>
                 <a className="link-hover" href={"/feeds"}>
-                  <button className="bg-secondary hover:bg-accent text-black font-bold py-2 px-4 rounded ">
+                  <button className="btn-primary bg-base-300 hover:bg-base text-base-content font-bold py-2 px-4 rounded  ">
                     📣 Answer
                   </button>
                 </a>
@@ -267,7 +265,7 @@ const Bay: NextPage = () => {
             </div>
           );
         })}
-        <div className="max-w-3xl text-center my-20 text-base-content">
+        <div className="max-w-3xl mx-auto text-base-content text-center my-20 ">
           <h1 className="text-6xl font-bold mb-8">Information finds you 🔮</h1>
           <p className="text-xl  mb-8">
             {" "}
@@ -282,9 +280,9 @@ const Bay: NextPage = () => {
           </p>
           <h2 className="text-2xl font-semibold mb-4">Make a request 📣</h2>
         </div>
-        <div className="flex-grow bg-base-300 max-w-3xl mt-16 px-8 py-12">
+        <div className="flex-grow mx-auto bg-base-300 max-w-3xl mt-16 py-12 p-4">
           <p className="text-xl  mb-8">
-            <strong>Question</strong> Enter a short explanation of what you're looking for. This can include links,
+            <strong>Question</strong> Enter a short explanation of what you&apos;re looking for. This can include links,
             Twitter handles and hastags. Make your descriptions as clear as possible.
           </p>
           <p className="text-xl  mb-8">
@@ -300,10 +298,10 @@ const Bay: NextPage = () => {
             spam or bad information. It usually makes sense to have this be roughly 10% - 50% of the reward.
           </p>
           <p className="text-xl  mb-8">
-            <strong> Punish ratio</strong> How many ETH it will cost you to destroy one dollar of the fulfiller's stake.
-            For example; if you set the ratio to 0.1 and punish a fulfiller who staked 100 ETH, it will cost you 10 ETH
-            to destroy their entire stake. This protects the fulfiller from reckless punishment. The default value is
-            good for most requests.
+            <strong> Punish ratio</strong> How many ETH it will cost you to destroy one dollar of the fulfiller&apos;s
+            stake. For example; if you set the ratio to 0.1 and punish a fulfiller who staked 100 ETH, it will cost you
+            10 ETH to destroy their entire stake. This protects the fulfiller from reckless punishment. The default
+            value is good for most requests.
           </p>
           <p className="text-xl  mb-8">
             <strong>Punish period</strong> How many days after your request is fulfilled you have to verify the quality

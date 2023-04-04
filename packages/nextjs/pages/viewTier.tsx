@@ -2,15 +2,14 @@ import type { NextPage } from "next";
 import React, { useEffect, useState } from "react";
 import { useContract, useProvider, useNetwork, useSigner, useAccount } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { MecenateInterface } from "../../hardhat/typechain-types/contracts/Mecenate";
 import { ContractInterface, ethers, utils } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
-import { useRouter } from "next/router";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import Image from "next/image";
 import Snippet from "../assets/snippet.png";
 import Snippet2 from "../assets/snippet2.png";
 import Snippet3 from "../assets/snippet3.png";
+import { useRouter } from "next/router";
 
 const ViewTier: NextPage = () => {
   const { chain } = useNetwork();
@@ -19,8 +18,8 @@ const ViewTier: NextPage = () => {
   const provider = useProvider();
   const router = useRouter();
   const { addr } = router.query;
-  let [user, setUser] = useState<any>(null);
-  let [owner, setOwner] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const [owner, setOwner] = useState<any>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -47,7 +46,7 @@ const ViewTier: NextPage = () => {
   let treasuryAddress!: string;
   let treasuryAbi: ContractInterface[] = [];
 
-  let ctxAbi: MecenateInterface[] = [];
+  let ctxAbi: ContractInterface[] = [];
 
   if (deployedContractTreasury) {
     ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
@@ -195,7 +194,7 @@ const ViewTier: NextPage = () => {
             </div>
           </label>
           <label className="mb-5 block">
-            Last Payment: <span className="font-base">{Date(Number(lastPayment), "it-eu")}</span>
+            Last Payment: <span className="font-base">{new Date(Number(lastPayment)).toLocaleString()}</span>
           </label>
           <button type="submit" className="btn btn-primary" disabled={!account || !signer || isSub}>
             Subscribe
@@ -246,7 +245,7 @@ const ViewTier: NextPage = () => {
             type="text"
             placeholder="Fee"
             value={newFee}
-            onChange={e => setNewFee(e.target.value)}
+            onChange={e => setNewFee(Number(e.target.value))}
           />
           <button className="btn btn-primary mx-2" onClick={changeFee}>
             Change
@@ -254,39 +253,29 @@ const ViewTier: NextPage = () => {
         </div>
       ) : null}
       <div className="divider"></div>
-      <div className=" flex flex-col text-3xl  my-5 font-bold justify-center text-justify">
+      <div className=" flex flex-col text-3xl  my-5 font-bold justify-center text-justify p-4">
         Import your subscription in your dapp.
       </div>
-      <div className="font-proxima text-base font-medium justify-start">1. ✔️ Import the contract in your dapp</div>
-      <Image
-        src={Snippet2}
-        alt="Picture of the author"
-        width={800}
-        height={800}
-        className="rounded-lg my-5 items-center mx-auto justify-center"
-      />
-      <div className="font-proxima text-base font-medium justify-start">2. ✒️ Check if the user is subscribed</div>
-      <Image
-        src={Snippet}
-        alt="Picture of the author"
-        width={500}
-        height={500}
-        className="rounded-lg my-5 items-center mx-auto justify-center"
-      />
-      <div className="font-proxima text-base font-medium justify-start">
-        3. 🔗 Link this page or use the subscribe function in your dapp.
+      <div className="mockup-code">
+        <pre data-prefix="">
+          <code>
+            <code className="text-warning">IMecenateTier</code>
+            ('YOUR_TIER_CONTRACT').<code className="text-warning">isValidSubscription</code>('SUBSCRIBER_ADDRESS')
+          </code>
+        </pre>
+        <pre data-prefix="">
+          <code>
+            <code className="text-warning">IMecenateTier</code>
+            ('YOUR_TIER_CONTRACT').<code className="text-warning">subscribe</code>()
+          </code>
+        </pre>
+        <pre data-prefix="">
+          <code>
+            <code className="text-warning">IMecenateTier</code>
+            ('YOUR_TIER_CONTRACT').<code className="text-warning">fee</code>()
+          </code>
+        </pre>
       </div>
-
-      <a href={router.pathname + `?addr=${ctx?.address}`} className="mt-5 mx-2">
-        {router.pathname + `?addr=${ctx?.address}`}
-      </a>
-      <Image
-        src={Snippet3}
-        alt="Picture of the author"
-        width={500}
-        height={500}
-        className="rounded-lg my-5 items-center mx-auto justify-center"
-      />
     </div>
   );
 };

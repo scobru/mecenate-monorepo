@@ -27,8 +27,9 @@ contract MecenateDCAFactory is Ownable {
         address upkeepAddress
     );
 
-    constructor(address _identityContract) {
+    constructor(address _identityContract, address _treasuryContract) {
         identityContract = _identityContract;
+        treasuryContract = _treasuryContract;
         _transferOwnership(msg.sender);
     }
 

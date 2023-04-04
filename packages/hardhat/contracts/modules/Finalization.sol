@@ -18,11 +18,13 @@ abstract contract Finalization is Data, Events, Staking {
 
         if (post.postdata.settings.endTimeStamp < block.timestamp) {
             post.postdata.settings.status = Structures.PostStatus.Finalized;
+
             address treasuryContract = IMecenateFactory(factoryContract)
                 .treasuryContract();
 
             uint256 buyerFee = (post.postdata.escrow.payment *
                 IMecenateTreasury(treasuryContract).globalFee()) / 10000;
+
             uint256 amountToAdd = post.postdata.escrow.payment - buyerFee;
 
             payable(treasuryContract).transfer(buyerFee);
@@ -69,6 +71,7 @@ abstract contract Finalization is Data, Events, Staking {
                 );
 
                 post.postdata.escrow.stake = sellerStake;
+
                 post.postdata.escrow.payment = buyerStake;
 
                 post.postdata.settings.status = Structures.PostStatus.Finalized;
@@ -82,14 +85,19 @@ abstract contract Finalization is Data, Events, Staking {
 
                 uint256 buyerPunishment = (punishment * punishmentRatio) / 1e18;
 
+                require(punishmentRatio < 1e18, "Punishment ratio is too high");
+
                 post.postdata.escrow.buyerPunishment = buyerPunishment;
+
                 post.postdata.settings.status = Structures.PostStatus.Finalized;
+
                 post.postdata.escrow.punishment = punishment;
 
                 address treasuryContract = IMecenateFactory(factoryContract)
                     .treasuryContract();
 
                 uint256 totalPunishmentFee = buyerPunishment + punishment;
+
                 payable(treasuryContract).transfer(totalPunishmentFee);
 
                 uint256 buyerStake = _burnStake(

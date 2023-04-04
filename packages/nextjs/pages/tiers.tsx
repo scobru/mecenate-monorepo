@@ -1,13 +1,12 @@
 import type { NextPage } from "next";
-import React, { useEffect } from "react";
-import { useContract, useProvider, useNetwork, useSigner, useAccount } from "wagmi";
+import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { MecenateSubscriptionFactoryInterface } from "../../hardhat/typechain-types/contracts/MecenateSubscriptionFactory";
-import { ContractInterface, ethers } from "ethers";
+import { MecenateTierFactoryInterface } from "../../hardhat/typechain-types/contracts/factories/MecenateTierFactory";
+import { ContractInterface } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
-import { create } from "ipfs-http-client";
 import { Buffer } from "buffer";
 import { formatEther, parseEther } from "ethers/lib/utils.js";
+import React from "react";
 
 /* configure Infura auth settings */
 const projectId = process.env.INFURA_PROJECT_ID;
@@ -49,7 +48,7 @@ const Tiers: NextPage = () => {
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
 
   let factoryAddress!: string;
-  let factoryAbi: MecenateSubscriptionFactoryInterface[] = [];
+  let factoryAbi: MecenateTierFactoryInterface[] = [];
 
   let identityAddress!: string;
   let identityAbi: ContractInterface[] = [];
@@ -170,8 +169,8 @@ const Tiers: NextPage = () => {
 
       <div className="min-w-fit">
         <div className="text-xl mb-8">
-          <div className="text-base-content font-bold mb-2">Protocol Fee</div>
-          <div className="text-base-content">{fee ? `${formatEther(String(fee))} ETH` : "-"}</div>
+          <div className="text-base-content font-bold mb-2 p-2">Protocol Fee</div>
+          <div className="text-base-content p-2">{fee ? `${formatEther(String(fee))} ETH` : "-"}</div>
         </div>
         <div className="card min-w-fit mx-auto text-base-content  items-center  shadow-2xl px-5 py-5 mb-20">
           <h1 className="card-title text-base-content text-4xl text-left">Create Tier</h1>

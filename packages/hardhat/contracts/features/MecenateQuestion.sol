@@ -332,7 +332,8 @@ contract MecenateQuestion is Ownable {
         emit UserAction(msg.sender, "claim", reward);
     }
 
-    function withdrawFees() public onlyOwner {
+    function withdrawFees() public {
+        require(msg.sender == creator);
         require(status == Status.Close, "Prediction is not Resolved");
         uint256 amount = fees + creatorStaked;
         fees = 0;

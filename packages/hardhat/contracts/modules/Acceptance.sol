@@ -16,38 +16,26 @@ abstract contract Acceptance is Data, Events, Staking {
             "User does not exist"
         );
 
-        require(
-            msg.value > 0 || post.postdata.escrow.payment > 0,
-            "Payment is required"
-        );
-
-        require(
-            post.postdata.settings.status == Structures.PostStatus.Proposed,
-            "Post is not Proposekad"
-        );
-
-        if (post.postdata.settings.buyer != address(0)) {
-            require(
-                _buyer == post.postdata.settings.buyer,
-                "Only Buyer can accept the post"
-            );
-        }
+        uint256 _payment = _addStake(_buyer, msg.value);
 
         if (post.postdata.escrow.payment > 0) {
             require(
-                msg.value == post.postdata.escrow.payment,
-                "Payment is not correct"
+                _payment >= post.postdata.escrow.payment,
+                "Not enough buyer payment"
             );
+        } else {
+            require(_payment > 0, "Payment is required");
         }
 
-        uint256 stake = _addStake(_buyer, msg.value);
+        require(
+            post.postdata.settings.status == Structures.PostStatus.Proposed,
+            "Post is not Proposed"
+        );
+        require(_buyer != address(0), "Buyer address cannot be zero");
 
         post.postdata.settings.buyer = _buyer;
-
         post.postdata.settings.buyerPubKey = publicKey;
-
-        post.postdata.escrow.payment = stake;
-
+        post.postdata.escrow.payment = _payment;
         post.postdata.settings.status = Structures.PostStatus.Accepted;
 
         emit Accepted(post);

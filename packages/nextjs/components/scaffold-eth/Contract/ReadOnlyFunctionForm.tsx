@@ -1,12 +1,9 @@
-import { useState } from "react";
 import { FunctionFragment } from "ethers/lib/utils";
+import { useState } from "react";
 import { useContractRead } from "wagmi";
-import {
-  ContractInput,
-  displayTxResult,
-  getFunctionInputKey,
-  getParsedContractFunctionArgs,
-} from "~~/components/scaffold-eth";
+import { displayTxResult } from "./utilsDisplay";
+import InputUI from "./InputUI";
+import { getFunctionInputKey, getParsedContractFunctionArgs } from "./utilsContract";
 import { getTargetNetwork, notification } from "~~/utils/scaffold-eth";
 
 const getInitialFormState = (functionFragment: FunctionFragment) => {
@@ -26,9 +23,10 @@ type TReadOnlyFunctionFormProps = {
 export const ReadOnlyFunctionForm = ({ functionFragment, contractAddress }: TReadOnlyFunctionFormProps) => {
   const [form, setForm] = useState<Record<string, any>>(() => getInitialFormState(functionFragment));
   const [result, setResult] = useState<unknown>();
+  const configuredChain = getTargetNetwork();
 
   const { isFetching, refetch } = useContractRead({
-    chainId: getTargetNetwork().id,
+    chainId: configuredChain.id,
     address: contractAddress,
     abi: [functionFragment],
     functionName: functionFragment.name,
@@ -42,7 +40,7 @@ export const ReadOnlyFunctionForm = ({ functionFragment, contractAddress }: TRea
   const inputs = functionFragment.inputs.map((input, inputIndex) => {
     const key = getFunctionInputKey(functionFragment, input, inputIndex);
     return (
-      <ContractInput
+      <InputUI
         key={key}
         setForm={updatedFormValue => {
           setResult(undefined);
@@ -51,12 +49,13 @@ export const ReadOnlyFunctionForm = ({ functionFragment, contractAddress }: TRea
         form={form}
         stateObjectKey={key}
         paramType={input}
+        functionFragment={functionFragment}
       />
     );
   });
 
   return (
-    <div className="flex flex-col gap-3 py-5 first:pt-0 last:pb-1">
+    <div className="flex flex-col gap-3">
       <p className="font-medium my-0 break-words">{functionFragment.name}</p>
       {inputs}
       <div className="flex justify-between gap-2">

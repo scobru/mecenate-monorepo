@@ -183,6 +183,31 @@ const getParsedEthersError = (e: any): string => {
   return message;
 };
 
+const getParsedContractFunctionArgs = (form: Record<string, any>) => {
+  const keys = Object.keys(form);
+  const parsedArguments = keys.map(key => {
+    try {
+      const keySplitArray = key.split("_");
+      const baseTypeOfArg = keySplitArray[keySplitArray.length - 1];
+      let valueOfArg = form[key];
+
+      if (["array", "tuple"].includes(baseTypeOfArg)) {
+        valueOfArg = JSON.parse(valueOfArg);
+      } else if (baseTypeOfArg === "bool") {
+        if (["true", "1", "0x1", "0x01", "0x0001"].includes(valueOfArg)) {
+          valueOfArg = 1;
+        } else {
+          valueOfArg = 0;
+        }
+      }
+      return valueOfArg;
+    } catch (error: any) {
+      // ignore error, it will be handled when sending/reading from a function
+    }
+  });
+  return parsedArguments;
+};
+
 export {
   getContractReadOnlyMethodsWithParams,
   getAllContractFunctions,
@@ -191,4 +216,5 @@ export {
   getFunctionInputKey,
   getParsedEthersError,
   getDeployedContract,
+  getParsedContractFunctionArgs,
 };

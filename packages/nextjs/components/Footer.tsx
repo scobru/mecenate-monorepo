@@ -45,7 +45,7 @@ export default function Footer() {
             </div>
             <span>·</span>
             <div>
-              Built with <HeartIcon className="inline-block h-4 w-4" /> at 🏰{" "}
+              Built with <HeartIcon className="inline-block h-4 w-4" /> from Scobru to BuidlGuidl Hackthon 🏰{" "}
               <a
                 href="https://buidlguidl.com/"
                 target="_blank"

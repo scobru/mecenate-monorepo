@@ -25,8 +25,9 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       passHref
-      className={`${isActive ? "bg-secondary shadow-md" : ""
-        } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm rounded-full gap-2`}
+      className={`${
+        isActive ? "bg-secondary shadow-md" : ""
+      } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm rounded-full gap-2`}
     >
       {children}
     </Link>
@@ -46,7 +47,7 @@ export default function Header() {
 
   const navLinks = (
     <>
-      <li className="font-base">
+      <li className="font-semibold">
         <NavLink href="/">
           {" "}
           <HomeIcon className="h-4 w-4" />
@@ -64,37 +65,37 @@ export default function Header() {
           Example UI
         </NavLink>
       </li> */}
-      <li className="font-base">
+      <li className="font-semibold">
         <NavLink href="/identity">
           <UserIcon className="h-4 w-4" />
           Identity
         </NavLink>
       </li>
-      <li className="font-base">
+      <li className="font-semibold">
         <NavLink href="/bay">
           <MegaphoneIcon className="h-4 w-4" />
           Bay
         </NavLink>
       </li>
-      <li className="font-base">
+      <li className="font-semibold">
         <NavLink href="/feeds">
           <Square3Stack3DIcon className="h-4 w-4" />
           Feeds
         </NavLink>
       </li>
-      <li className="font-base">
+      <li className="font-semibold">
         <NavLink href="/tiers">
           <TicketIcon className="h-4 w-4" />
           Tiers
         </NavLink>
       </li>
-      <li className="font-base">
+      <li className="font-semibold">
         <NavLink href="/box">
           <LockClosedIcon className="h-4 w-4" />
           Box
         </NavLink>
       </li>
-      <li className="font-base">
+      <li className="font-semibold">
         <NavLink href="/question">
           <QuestionMarkCircleIcon className="h-4 w-4" />
           Question

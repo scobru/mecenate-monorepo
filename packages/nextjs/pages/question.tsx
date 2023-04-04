@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import React, { useEffect } from "react";
-import { useProvider, useNetwork, useSigner, useContract, useAccount } from "wagmi";
+import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { notification } from "~~/utils/scaffold-eth";
 const crypto = require("asymmetric-crypto");
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
@@ -71,10 +71,10 @@ const Question: NextPage = () => {
   async function getOwnedQuestions() {
     const _questionsOwned = await factoryCtx?.getQuestionOwned(signer?.getAddress());
     setQuestions(_questionsOwned);
-    let _data = [];
+    const _data = [];
 
     for (let i = 0; i < _questionsOwned.length; i++) {
-      const contract = new ethers.Contract(_questionsOwned[i], questionAbi, provider);
+      const contract = new ethers.Contract(_questionsOwned[i], questionAbi[0], provider);
       const _questionData = await contract?.getPrediction();
       _data.push(_questionData);
     }
@@ -87,10 +87,10 @@ const Question: NextPage = () => {
     if (signer) {
       const _questions = await factoryCtx?.getQuestions();
       setQuestions(_questions);
-      let _data = [];
+      const _data = [];
 
       for (let i = 0; i < _questions.length; i++) {
-        const contract = new ethers.Contract(_questions[i], questionAbi, provider);
+        const contract = new ethers.Contract(_questions[i], questionAbi[0], provider);
         const _questionData = await contract?.getPrediction();
         _data.push(_questionData);
       }
@@ -125,9 +125,9 @@ const Question: NextPage = () => {
           Ethereum.
         </p>
         <p className="text-xl  mb-8">
-          Users can stake funds on various outcomes and vote on the correct answer. If the community's answer doesn't
-          match the creator's answer, a punishment mechanism gets triggered to disincentivize false information. Stake,
-          vote, and claim rewards in a fair, transparent, and unstoppable environment.
+          Users can stake funds on various outcomes and vote on the correct answer. If the community&apos;s answer
+          doesn&apos;t match the creator&apos;s answer, a punishment mechanism gets triggered to disincentivize false
+          information. Stake, vote, and claim rewards in a fair, transparent, and unstoppable environment.
         </p>
       </div>
       <div className="flex items-center mb-20">
