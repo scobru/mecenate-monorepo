@@ -81,11 +81,6 @@ contract MecenateBay is Ownable, FeedViewer {
             "stake is not the same of the feed"
         );
 
-        allRequests[index].accepted = true;
-        allRequests[index].seller = msg.sender;
-        allRequests[index].postAddress = _feed;
-        allRequests[index].postCount = feed.postCount;
-
         bytes memory publicKey = IMecenateUsers(usersMouduleContract)
             .getUserData(allRequests[index].buyer)
             .publicKey;
@@ -93,6 +88,11 @@ contract MecenateBay is Ownable, FeedViewer {
             publicKey,
             allRequests[index].buyer
         );
+
+        allRequests[index].accepted = true;
+        allRequests[index].seller = msg.sender;
+        allRequests[index].postAddress = _feed;
+        allRequests[index].postCount = feed.postCount;
 
         emit RequestAccepted(msg.sender, allRequests[index], index);
     }

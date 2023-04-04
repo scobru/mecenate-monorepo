@@ -170,7 +170,7 @@ const Feeds: NextPage = () => {
                 <div className="col-span-2 font-bold">Operator:</div>
                 <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].operator}</div>
                 <div className="col-span-2 font-bold">Total:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].totalStaked} ETH</div>
+                <div className="col-span-4 overflow-hidden text-truncate">{String(feedsInfos[i].totalStaked)} ETH</div>
                 <div className="col-span-2 font-bold">Payment:</div>
                 <div className="col-span-4 overflow-hidden text-truncate">{String(feedsInfos[i].buyerPayment)} ETH</div>
                 <div className="col-span-2 font-bold">Count:</div>

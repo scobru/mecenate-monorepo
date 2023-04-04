@@ -11,6 +11,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
+import { saveAs } from "file-saver";
 
 const crypto = require("asymmetric-crypto");
 
@@ -287,11 +288,14 @@ const ViewFeed: NextPage = () => {
     );
 
     notification.warning("Save this data");
-    downloadFile({
+
+    saveAs(JSON.stringify(dataSaved), String(postCount) + feedCtx?.address + "_sellData.json");
+
+    /* downloadFile({
       data: JSON.stringify(dataSaved),
-      fileName: feedCtx?.address + "_sellData.json",
+      fileName: String(postCount) + feedCtx?.address + "_sellData.json",
       fileType: "text/json",
-    });
+    }); */
 
     const proofOfHashEncode = await ErasureHelper.multihash({
       input: dataSaved?.proofhash,
@@ -616,16 +620,17 @@ const ViewFeed: NextPage = () => {
 
     const response_Encrypteddatahash_JSON = JSON.parse(JSON.stringify(response_Encrypteddatahash.data));
 
-    const decriptFile = ErasureHelper.crypto.symmetric.decryptMessage(
+    const decryptFile = ErasureHelper.crypto.symmetric.decryptMessage(
       decrypted,
       response_Encrypteddatahash_JSON.encryptedData,
     );
 
-    if (decriptFile) {
+    if (decryptFile) {
       // wait 10 seconds
-      console.log("Decrypted Data: ", decriptFile);
+      console.log("Decrypted Data: ", decryptFile);
+
       const dataHash = await ErasureHelper.multihash({
-        input: decriptFile,
+        input: decryptFile,
         inputType: "raw",
         outputType: "hex",
       });
@@ -633,14 +638,15 @@ const ViewFeed: NextPage = () => {
       const hashCheck = responseProofHashJSON.datahash === dataHash;
 
       if (feedData[1][0].postType == 1 || 2 || 3 || 4) {
-        const mimeType = base64Mime(decriptFile);
-        console.log(mimeType);
+        const mimeType = base64Mime(decryptFile);
 
-        downloadFile({
-          data: decriptFile,
-          fileName: feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1],
-          fileType: String(mimeType),
-        });
+        // Repair malformed base64 data
+        let file = convertBase64ToFile(
+          decryptFile,
+          String(postCount) + feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1],
+        );
+
+        saveAs(file, String(postCount) + feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1]);
       }
 
       await fetchData();
@@ -654,6 +660,19 @@ const ViewFeed: NextPage = () => {
       return null;
     }
   }
+
+  const convertBase64ToFile = (base64String, fileName) => {
+    let arr = base64String.split(",");
+    let mime = arr[0].match(/:(.*?);/)[1];
+    let bstr = atob(arr[1]);
+    let n = bstr.length;
+    let uint8Array = new Uint8Array(n);
+    while (n--) {
+      uint8Array[n] = bstr.charCodeAt(n);
+    }
+    let file = new File([uint8Array], fileName, { type: mime });
+    return file;
+  };
 
   async function revealPost() {
     const symKeyHash = await ErasureHelper.multihash({
