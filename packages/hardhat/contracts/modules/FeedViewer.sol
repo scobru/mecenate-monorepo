@@ -9,7 +9,6 @@ abstract contract FeedViewer {
         address feed
     ) internal view returns (Structures.Feed memory) {
         Structures.Feed memory f;
-        f.operator = IMecenateFeed(feed).owner();
         f.buyer = IMecenateFeed(feed).getBuyer();
         f.seller = IMecenateFeed(feed).getSeller();
         f.sellerStake = IMecenateFeed(feed).getStake(f.seller);

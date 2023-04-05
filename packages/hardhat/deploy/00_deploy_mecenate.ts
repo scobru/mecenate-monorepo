@@ -144,7 +144,7 @@ const deployYourContract: DeployFunction = async function (
   const dcaFactory = await deploy("MecenateDCAFactory", {
     from: deployer,
     // Contract constructor arguments
-    args: [identity.address],
+    args: [identity.address, treasury.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.

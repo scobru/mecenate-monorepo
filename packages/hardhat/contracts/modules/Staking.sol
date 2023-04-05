@@ -79,6 +79,7 @@ abstract contract Staking is Data, Deposit {
         uint256 amountSeller = Deposit._getDeposit(
             post.postdata.settings.seller
         );
+
         uint256 amountBuyer = Deposit._getDeposit(post.postdata.settings.buyer);
 
         return (amountSeller + amountBuyer);

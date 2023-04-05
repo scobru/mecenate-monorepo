@@ -661,8 +661,8 @@ const ViewFeed: NextPage = () => {
     }
   }
 
-  const convertBase64ToFile = (base64String, fileName) => {
-    let arr = base64String.split(",");
+  const convertBase64ToFile = (base64String: string, fileName: string) => {
+    let arr: any = base64String.split(",");
     let mime = arr[0].match(/:(.*?);/)[1];
     let bstr = atob(arr[1]);
     let n = bstr.length;
@@ -941,13 +941,48 @@ const ViewFeed: NextPage = () => {
                         onChange={e => setSymmetricKey(e.target.value)}
                       />
                       <br />
-                      <input
-                        type="text"
-                        className="input w-full"
-                        placeholder="RawData"
-                        value={postRawData}
-                        onChange={e => setPostRawData(e.target.value)}
-                      />
+                      <label className="block text-base-500">Type</label>
+                      <select
+                        className="form-select w-full"
+                        value={postType}
+                        onChange={e => setPostType(e.target.value)}
+                      >
+                        <option value="0">Text</option>
+                        <option value="1">Image</option>
+                        <option value="2">Video</option>
+                        <option value="3">Audio</option>
+                        <option value="4">File</option>
+                      </select>
+                      {postType == 0 ? (
+                        <div>
+                          <label className="block text-base-500">Message</label>
+                          <input
+                            type="text"
+                            className="input w-full"
+                            placeholder="Data"
+                            value={postRawData}
+                            onChange={e => setPostRawData(e.target.value)}
+                          />
+                        </div>
+                      ) : postType == 1 || 2 || 3 || 4 ? (
+                        <div>
+                          <Dropzone onDrop={handleImageDrop}>
+                            {({ getRootProps, getInputProps }) => (
+                              <div
+                                {...getRootProps()}
+                                className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
+                              >
+                                <input {...getInputProps()} />
+                                {imageFile ? (
+                                  <p>{imageFile?.name}</p>
+                                ) : (
+                                  <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
+                                )}
+                              </div>
+                            )}
+                          </Dropzone>
+                        </div>
+                      ) : null}
                       <button
                         className="btn  w-full"
                         onClick={async () => {
@@ -1180,15 +1215,18 @@ const ViewFeed: NextPage = () => {
                 <div className="mt-5">
                   <p className="text-lg">
                     <span className="font-bold">Post Status:</span>{" "}
-                    {feedData.postdata.settings.status === 4
-                      ? "Finalized"
-                      : feedData.postdata.settings.status === 3
-                      ? "Submitted"
-                      : feedData.postdata.settings.status === 2
-                      ? "Accepted"
-                      : feedData.postdata.settings.status === 1
-                      ? "Proposed"
-                      : "Waiting for Creator"}
+                    {feedData.postdata.settings.status === 6 ? "Revealed" :
+                      feedData.postdata.settings.status === 5
+                        ? "Punished" :
+                        feedData.postdata.settings.status === 4
+                          ? "Finalized"
+                          : feedData.postdata.settings.status === 3
+                            ? "Submitted"
+                            : feedData.postdata.settings.status === 2
+                              ? "Accepted"
+                              : feedData.postdata.settings.status === 1
+                                ? "Proposed"
+                                : "Waiting for Creator"}
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">

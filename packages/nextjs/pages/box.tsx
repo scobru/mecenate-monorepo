@@ -5,6 +5,7 @@ import { notification } from "~~/utils/scaffold-eth";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface } from "ethers";
 import { parseEther } from "ethers/lib/utils.js";
+import { saveAs } from "file-saver";
 
 const Box: NextPage = () => {
   const provider = useProvider();
@@ -46,17 +47,22 @@ const Box: NextPage = () => {
   });
 
   async function deposit() {
-    const tx = await boxCtx?.callStatic.deposit(Number(lockDuration), { value: parseEther(amountToSend) });
-    await boxCtx?.deposit(Number(lockDuration), { value: parseEther(amountToSend) });
+    const encryptedValue = await boxCtx?.encrypt();
+    saveAs(new Blob([encryptedValue]), "encryptedValue.txt");
 
-    if (tx) {
+    const tx = await boxCtx?.deposit(encryptedValue, Number(lockDuration), { value: parseEther(amountToSend) });
+    if (tx.hash) {
       notification.success("Deposit Done");
     }
-    setSignature(await tx);
+    setSignature(encryptedValue);
   }
 
   async function withdraw() {
     const tx = await boxCtx?.withdraw(signature);
+    if (tx.hash) {
+      notification.success("Withdraw Done");
+    }
+
   }
 
   useEffect(() => {

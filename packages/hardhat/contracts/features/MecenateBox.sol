@@ -22,36 +22,36 @@ contract MecenateBox is Ownable {
 
     uint256 public depositCount;
 
-    function encrypt(
-        address _address,
-        uint256 _amount
-    ) private view returns (uint256) {
+    function encrypt() external view returns (uint256) {
         return
             uint256(
                 keccak256(
                     abi.encodePacked(
                         block.prevrandao,
                         block.timestamp,
-                        _address,
-                        _amount
+                        msg.sender,
+                        "5"
                     )
                 )
             );
     }
 
-    function deposit(uint256 _lockDuration) public payable returns (uint256) {
+    function deposit(
+        uint256 _encryptValue,
+        uint256 _lockDuration
+    ) public payable returns (uint256) {
         require(msg.value > 0 && _lockDuration > 0, "invalid parameters");
         require(
             IMecenateIdentity(identityContract).balanceOf(msg.sender) > 0,
             "user does not have identity"
         );
-        uint256 encryptValue = encrypt(msg.sender, msg.value);
-        encryptedDeposits[encryptValue] = Deposit(
+
+        encryptedDeposits[_encryptValue] = Deposit(
             msg.value,
             block.timestamp + _lockDuration
         );
+
         depositCount++;
-        return encryptValue;
     }
 
     function withdraw(uint256 _encryptedValue) public {
