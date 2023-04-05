@@ -122,16 +122,16 @@ const Bay: NextPage = () => {
   }, [bayCtx, signer]);
 
   return (
-    <div className="flex min-w-fit flex-col mx-auto  text-base-content ">
+    <div className="flex items-center flex-col  pt-10 text-black">
       <div className="min-w-fit text-center my-2 text-base-content">
-        <div className="min-w-fit mx-auto text-center my-2 text-base-content">
+        {/*   <div className="min-w-fit mx-auto text-center my-2 text-base-content">
           <h1 className="text-6xl font-bold">Request</h1>
           <div className="content-slider w-52 ">
             <div className="slider">
               <div className="mask">
                 <ul>
                   <li className="anim1">
-                    <div className="quote">Nuclear Code</div>
+                    <div className="quote">Secrets Code</div>
                     <div className="quote">Technical Assistance</div>
                     <div className="quote">Clean Data</div>
                     <div className="source">- Fair</div>
@@ -168,8 +168,8 @@ const Bay: NextPage = () => {
             Lock up a cryptocurrency reward. Anyone can respond. Destroy their stake if you don&apos;t get what you
             want.
           </p>
-        </div>
-        <div className="flex flex-col max-w-3xl mx-auto items-center mb-20 ">
+        </div> */}
+        <div className="flex flex-col min-w-fit mx-auto items-center mb-20 ">
           <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary py-2  text-base-content p-4 m-4">
             <label className="text-black font-semibold text-sm" htmlFor="request">
               What do you want?
@@ -213,58 +213,65 @@ const Bay: NextPage = () => {
         </div>
         {requests.map((request, index) => {
           return (
-            <div
-              key={index}
-              className="flex flex-col text-slate-300 p-4 bg-primary shadow-md rounded-md text-left hover:shadow-lg hover:bg-accent transition duration-300 ease-in-out"
-            >
-              <div className="text-4xl my-2 font-medium px-2">{ethers.utils.parseBytes32String(request.request)}</div>
-              <div className="my-2 font-medium">👾 Buyer : {request.buyer}</div>
-              <div className="my-2 font-medium">🤖 Seller : {request.seller}</div>
-              <div className="my-2 font-medium">💸 Payment : {formatEther(request.payment)}</div>
-              <div className="my-2 font-medium">💰 Stake : {formatEther(request.stake)}</div>
-              <div className="my-2 font-medium">
-                📑 Post Address :
-                <a className="link-hover" href={`/viewFeed?addr=${request.postAddress}`}>
-                  {" "}
-                  {request.postAddress}
-                </a>
+            <div tabIndex={0} className="collapse">
+              <div className="text-left collapse-title w-auto h-auto font-medium hover:bg-primary">              <div className="text-xl my-2 font-medium px-2">⚡{index} {ethers.utils.parseBytes32String(request.request)}</div>
               </div>
-              <div className="my-2 font-medium">✔️ Accepted : {String(request.accepted)}</div>
-              <div className="flex flex-row space-x-4 my-4">
-                <input
-                  className="input-primary  bg-white text-black  h-10 px-5 pr-16  text-sm focus:outline-none"
-                  type="text"
-                  name="address"
-                  placeholder="Enter Address"
-                  onChange={e => setRequestAddress(e.target.value)}
-                />
-                {request.buyer === signerAddress && (
+              <div className="collapse-content text-left">
+
+                {/* <div
+                  key={index}
+                  className=" my-2 flex-wrap text-content-base p-4 bg-primary shadow-md rounded-md text-left hover:shadow-lg hover:bg-secondary transition duration-300 ease-in-out"
+                > */}
+                <div className="my-2 font-medium">👾 Buyer : {request.buyer}</div>
+                <div className="my-2 font-medium">🤖 Seller : {request.seller}</div>
+                <div className="my-2 font-medium">💸 Payment : {formatEther(request.payment)}</div>
+                <div className="my-2 font-medium">💰 Stake : {formatEther(request.stake)}</div>
+                <div className="my-2 font-medium">
+                  📑 Post Address :
+                  <a className="link-hover" href={`/viewFeed?addr=${request.postAddress}`}>
+                    {" "}
+                    {request.postAddress}
+                  </a>
+                </div>
+                <div className="my-2 font-medium">✔️ Accepted : {String(request.accepted)}</div>
+                <div className="flex flex-row space-x-4 my-4">
+                  <input
+                    className="input-primary  bg-white text-black  h-10 px-5 pr-16  text-sm focus:outline-none"
+                    type="text"
+                    name="address"
+                    placeholder="Enter Address"
+                    onChange={e => setRequestAddress(e.target.value)}
+                  />
+                  {request.buyer === signerAddress && (
+                    <button
+                      className="bg-transparent hover:bg-accent  font-bold py-2 px-4 rounded "
+                      onClick={async () => {
+                        await removeRequest(index);
+                      }}
+                    >
+                      ❌
+                    </button>
+                  )}
                   <button
-                    className="bg-transparent hover:bg-accent  font-bold py-2 px-4 rounded "
+                    className="btn-primary bg-base-300 hover:bg-base text-base-content font-bold py-2 px-4 rounded  "
                     onClick={async () => {
-                      await removeRequest(index);
+                      await acceptBayRequest(index, requestAddress);
                     }}
                   >
-                    ❌
+                    🦄 Accept
                   </button>
-                )}
-                <button
-                  className="btn-primary bg-base-300 hover:bg-base text-base-content font-bold py-2 px-4 rounded  "
-                  onClick={async () => {
-                    await acceptBayRequest(index, requestAddress);
-                  }}
-                >
-                  🦄 Accept
-                </button>
-                <a className="link-hover" href={"/feeds"}>
-                  <button className="btn-primary bg-base-300 hover:bg-base text-base-content font-bold py-2 px-4 rounded  ">
-                    📣 Answer
-                  </button>
-                </a>
+                  <a className="link-hover" href={"/feeds"}>
+                    <button className="btn-primary bg-base-300 hover:bg-base text-base-content font-bold py-2 px-4 rounded  ">
+                      📣 Answer
+                    </button>
+                  </a>
+                </div>
               </div>
             </div>
+
           );
         })}
+
         <div className="max-w-3xl mx-auto text-base-content text-center my-20 ">
           <h1 className="text-6xl font-bold mb-8">Information finds you 🔮</h1>
           <p className="text-xl  mb-8">
