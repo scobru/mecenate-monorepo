@@ -1,144 +1,93 @@
-# MecenateIdentity 🎭
+# **Mecente Protocol v1.0.0** for Buidlguidl Hackthon
 
-MecenateIdentity is a **decentralized identity management system** built on the Ethereum blockchain. It enables users to create and manage their unique **NFT-based identities**, providing a secure and verifiable way to interact with various applications and services in the decentralized ecosystem.
+- [**Mecente Protocol v1.0.0** for Buidlguidl Hackthon](#mecente-protocol-v100-for-buidlguidl-hackthon)
+  - [💡 CONCEPT](#-concept)
+    - [Introduction](#introduction)
+    - [Features](#features)
+  - [🚀 QUICK START](#-quick-start)
+    - [Development Notes](#development-notes)
+    - [Treasury \& DAO](#treasury--dao)
+    - [Todo](#todo)
+    - [Contribution](#contribution)
 
-## ✨ Features
+## 💡 CONCEPT
 
-- Unique NFT-based identities on the Ethereum blockchain
-- Secure and verifiable user identity management
-- Easily configurable and extendable
-- User-friendly platform for creating and managing identities
-- Interoperable with various applications and services in the decentralized ecosystem
+---
 
-## 📜 Smart Contract
+### Introduction
 
-The MecenateIdentity smart contract includes multiple modules for managing different aspects of the user identities, such as creation, ownership, and metadata management.
+I have created a protocol called Mecenate for the Buidlguidl hackathon. The protocol is inspired by the [Erasure Protocol](https://github.com/erasureprotocol/erasure-protocol), which is the backbone of the NMR token. Mecenate is a decentralized and anonymous data exchange protocol that is designed to improve upon the functions of the Erasure Protocol.
 
-- MecenateIdentity.sol
+As a solo developer, this project was ambitious to undertake, and there is a possibility that the current version 1 deployed on the Polygon Mumbai network may have some bugs. I invite other developers who share a passion for decentralized data exchange to join this project and help it reach its full potential. Additionally, we welcome users to report any errors or bugs they may encounter in the protocol's contracts or frontend.
 
-### 🗝️ Key Functions
+Mecenate Protocol allows for secure and private information sharing and is designed to improve upon the functions of the Erasure Protocol.
 
-- **Create Identity**: Users can create their unique NFT-based identities on the Ethereum blockchain.
-- **Manage Metadata**: Users can manage the metadata associated with their identities, including updating and deleting information.
+### Features
 
----------------------------------------------------------------------------------
+Mecenate consists of several applications, including:
 
-# MecenateFeed 📄
+- 📄Mecenate Feed: A smart contract protocol for sharing information privately and anonymously, similar to the Erasure Protocol clone.
+- 📣Mecenate Bay: A Dapp marketplace built on top of Mecenate Feed.
+- 🆔Mecenate Identity: A Dapp for creating a tokenized identity.
+- 🎫Mecenate Tier: A Dapp for creating subscriptions and memberships.
+- ❔Mecenate Question: A Dapp for prediction markets where users can act as both hosts and oracles.
 
-MecenateFeed is a decentralized protocol built on the Ethereum blockchain inspired by the Erasure Protocol. It allows users to create secure and reliable data feeds, where stakeholders can lock up a cryptocurrency reward and others can submit their responses. If the stakeholder is not satisfied with the response, they can destroy the responder's stake, creating a strong incentive for high-quality responses.
+## 🚀 QUICK START
 
-## 🌟 Features
+---
 
-- Secure and reliable data feeds on the Ethereum blockchain
-- Stakeholders can lock up a cryptocurrency reward for others to respond
-- Responders can submit their response with a stake
-- Stakeholders can destroy responder's stake if they are not satisfied with the response
-- Incentivizes high-quality responses
-- Easily configurable and extendable smart contracts
-- User-friendly platform for creating, managing, and interacting with data feeds
+To get started with Scaffold-Eth 2, follow the steps below:
 
-## 📜  Smart Contract
+1. Clone this repo & install dependencies
 
-The MecenateFeed smart contract includes multiple modules for managing different aspects of the data feeds, such as Creation, Acceptance, Submission, and Finalization.
+    ```bash
+    git clone https://github.com/scobru/mecenate-monorepo.git
+    cd mecenate-monorepo
+    yarn
+    ```
 
-- features/MecenateFeed.sol
-- factories/MecenateFeedFactory.sol
+2. Run a local network in the first terminal:
 
-### 🗝️ Key Functions and Phases
+    ```bash
+    yarn chain
+    ```
 
-- **Creation phase:** The creator posts their encrypted data and shares it on their feed along with a stake.
-- **Acceptance phase:** The buyer accepts the creator's post, staking their payment for the post.
-- **Submission phase:** The creator posts the encrypted key that only the buyer can decrypt to the data feed.
-- **Finalization phase:** After the buyer retrieves their data, they can finalize the post and can punish or reward the creator.
+3. This command deploys a test smart contract to the local network. The contract is located in packages/hardhat/contracts and can be modified to suit your needs. The yarn deploy command uses the deploy script located in packages/hardhat/deploy to deploy the contract to the network. You can also customize the deploy script.
 
----------------------------------------------------------------------------------
+4. On a third terminal, start your NextJS app:
 
-# 🛍️ MecenateBay
+    ```bash
+    yarn start
+    ```
 
-MecenateBay is a decentralized marketplace built on top of MecenateFeed, a protocol inspired by the Erasure Protocol. It enables users to create, discover, and interact with secure and reliable data feeds on the Ethereum blockchain. Stakeholders can lock up a cryptocurrency reward and invite others to submit their responses. If the stakeholder is not satisfied with the response, they can destroy the responder's stake, creating a strong incentive for high-quality responses.
+### Development Notes
 
-## 🌟 Features
+The folder structure:
 
-- Decentralized marketplace built on top of MecenateFeed
-- Discover and interact with secure and reliable data feeds on the Ethereum blockchain
-- Stakeholders can lock up a cryptocurrency reward for others to respond
-- Responders can submit their response with a stake
-- Stakeholders can destroy responder's stake if they are not satisfied with the response
-- Incentivizes high-quality responses
-- Easily configurable and extendable smart contracts
-- User-friendly platform for creating, managing, and participating in data feed-based transactions
+```bash
+client  ts-node cli
+nextjs  nextjs app     
+hardhat hardhat app        
+```
 
-## 📜 MecenateFeed Integration
+The Mecenate repository is composed of ScaffoldEth-2 and another application called "client", which allows interaction with the protocol through a command-line interface written in TypeScript.
 
-MecenateBay is built on top of MecenateFeed, utilizing its smart contracts and modules for Creation, Acceptance, Submission, and Finalization of data feeds. This allows MecenateBay to inherit the robust and secure functionality of the MecenateFeed protocol, while extending it with marketplace features for a seamless user experience.
+### Treasury & DAO
 
-- layer/MecenateBay.sol
+Mecenate possesses a treasury that collects the fees accumulated from the use of the protocol's contracts. The plan is to create a treasury controlled by a DAO, which is aimed at making the protocol completely decentralized.
 
-### 🔑 Key Functions and Phases
+### Todo
 
-- **Creation phase:** Users can create data feeds by posting their encrypted data and sharing it on their feed, along with a stake.
-- **Discovery phase:** Users can browse and discover data feeds within the marketplace.
-- **Acceptance phase:** Buyers can accept the creator's post, staking their payment for the post.
-- **Submission phase:** The creator posts the encrypted key that only the buyer can decrypt to the data feed.
-- **Finalization phase:** After the buyer retrieves their data, they can finalize the post and can punish or reward the creator.
+- Fix client minor bugs.
+- Test of MecenateDCA Feature.
+- MecenateDCAFactory frontend implementation.
+- Creation ERC20 Governance Token.
+- Edit MecenateFeed and MecenateBay to use ERC20 Governance Token.
+- Create MecenateDAO.
+- tests tests tests...
 
----------------------------------------------------------------------------------
+### Contribution
 
-# 🏛️ MecenateTier
+Other developers who share a passion for decentralized data exchange are invited to join this project and help it reach its full potential.
 
-MecenateTier is a decentralized subscription platform built on top of the Ethereum blockchain, designed for creators and their supporters. It allows creators to monetize their content by setting their own subscription fees and durations, while fans can easily support their favorite creators by subscribing with just a few clicks. This creates a fair and transparent way for creators to earn from their content and for fans to access exclusive content from their favorite creators.
-
-## 🌟 Features
-
-- Decentralized subscription platform on the Ethereum blockchain
-- Creators can set their own subscription fees and durations
-- Fans can subscribe to their favorite creators with just a few clicks
-- Access to exclusive content for subscribed fans
-- Fair and transparent revenue sharing model
-- Easily configurable and extendable smart contracts
-- User-friendly platform for creating, managing, and interacting with creator tiers
-
-## 📜 Smart Contract
-
-The MecenateTier smart contract includes multiple modules for managing different aspects of the subscription platform, such as Tier Creation, Subscription Management, and Revenue Distribution.
-
-### 🔑 Key Functions and Phases
-
-- **Tier Creation:** Creators can create their own unique subscription tiers, setting their desired subscription fees and durations.
-- **Subscription Management:** Fans can easily subscribe and unsubscribe from creator tiers, gaining access to exclusive content while supporting their favorite creators.
-- **Revenue Distribution:** A built-in revenue sharing model ensures fair compensation for creators based on their subscription earnings.
-
----------------------------------------------------------------------------------
-
-# 🌐 MecenateQuestion
-
-MecenateQuestion is a decentralized prediction protocol built on the Ethereum blockchain, inspired by prediction markets. It features a unique punishment mechanism that aims to ensure the correctness of the predictions. Stakeholders can create questions and set rewards for others to answer. Users can stake their answers, and if their prediction turns out to be incorrect, they may face a penalty.
-
-## Features
-
-- Decentralized prediction protocol on the Ethereum blockchain
-- Stakeholders can create questions and set rewards for answers
-- Users can stake their answers with a potential penalty for incorrect predictions
-- Punishment mechanism ensures the correctness of predictions
-- Easily configurable and extendable smart contracts
-- User-friendly platform for creating, managing, and interacting with questions and predictions
-
-## Smart Contract
-
-The MecenateQuestion smart contract includes multiple modules for managing different aspects of the questions and predictions, such as Creation, Voting, and Resolution.
-
-- features/MecenateQuestion.sol
-- factories/MecenateQuestionFactory.sol
-
-### Key Functions and Phases
-
-- **Creation phase:** The creator posts a question and sets a reward for correct predictions.
-- **Voting phase:** Users can submit their predictions by staking a certain amount.
-- **Resolution phase:** Once the voting period has ended, the correct answer is determined, and incorrect predictions may face a penalty.
-
----------------------------------------------------------------------------------
-
-## COMING SOON
-
-    - MecenateDCA
-    - MecenateDrop
+Thank you for taking the time to read about Mecenate, and we look forward to sharing more updates soon.

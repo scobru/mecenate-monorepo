@@ -62,7 +62,6 @@ const Box: NextPage = () => {
     if (tx.hash) {
       notification.success("Withdraw Done");
     }
-
   }
 
   useEffect(() => {

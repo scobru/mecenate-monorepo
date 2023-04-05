@@ -638,10 +638,10 @@ const ViewFeed: NextPage = () => {
       const hashCheck = responseProofHashJSON.datahash === dataHash;
 
       if (feedData[1][0].postType == 1 || 2 || 3 || 4) {
-        const mimeType = base64Mime(decryptFile);
+        const mimeType: any = base64Mime(decryptFile);
 
         // Repair malformed base64 data
-        let file = convertBase64ToFile(
+        const file = convertBase64ToFile(
           decryptFile,
           String(postCount) + feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1],
         );
@@ -662,15 +662,15 @@ const ViewFeed: NextPage = () => {
   }
 
   const convertBase64ToFile = (base64String: string, fileName: string) => {
-    let arr: any = base64String.split(",");
-    let mime = arr[0].match(/:(.*?);/)[1];
-    let bstr = atob(arr[1]);
+    const arr: any = base64String.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
     let n = bstr.length;
-    let uint8Array = new Uint8Array(n);
+    const uint8Array = new Uint8Array(n);
     while (n--) {
       uint8Array[n] = bstr.charCodeAt(n);
     }
-    let file = new File([uint8Array], fileName, { type: mime });
+    const file = new File([uint8Array], fileName, { type: mime });
     return file;
   };
 
@@ -1215,18 +1215,19 @@ const ViewFeed: NextPage = () => {
                 <div className="mt-5">
                   <p className="text-lg">
                     <span className="font-bold">Post Status:</span>{" "}
-                    {feedData.postdata.settings.status === 6 ? "Revealed" :
-                      feedData.postdata.settings.status === 5
-                        ? "Punished" :
-                        feedData.postdata.settings.status === 4
-                          ? "Finalized"
-                          : feedData.postdata.settings.status === 3
-                            ? "Submitted"
-                            : feedData.postdata.settings.status === 2
-                              ? "Accepted"
-                              : feedData.postdata.settings.status === 1
-                                ? "Proposed"
-                                : "Waiting for Creator"}
+                    {feedData.postdata.settings.status === 6
+                      ? "Revealed"
+                      : feedData.postdata.settings.status === 5
+                      ? "Punished"
+                      : feedData.postdata.settings.status === 4
+                      ? "Finalized"
+                      : feedData.postdata.settings.status === 3
+                      ? "Submitted"
+                      : feedData.postdata.settings.status === 2
+                      ? "Accepted"
+                      : feedData.postdata.settings.status === 1
+                      ? "Proposed"
+                      : "Waiting for Creator"}
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">
@@ -1335,13 +1336,13 @@ const ViewFeed: NextPage = () => {
 };
 
 function base64Mime(encoded: string) {
-  var result = null;
+  let result = null;
 
   if (typeof encoded !== "string") {
     return result;
   }
 
-  var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
+  const mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
 
   if (mime && mime.length) {
     result = mime[1];

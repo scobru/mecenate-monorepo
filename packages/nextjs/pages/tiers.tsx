@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { MecenateTierFactoryInterface } from "../../hardhat/typechain-types/contracts/factories/MecenateTierFactory";
 import { ContractInterface } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { Buffer } from "buffer";
@@ -48,7 +47,7 @@ const Tiers: NextPage = () => {
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
 
   let factoryAddress!: string;
-  let factoryAbi: MecenateTierFactoryInterface[] = [];
+  let factoryAbi: ContractInterface[] = [];
 
   let identityAddress!: string;
   let identityAbi: ContractInterface[] = [];

@@ -213,11 +213,14 @@ const Bay: NextPage = () => {
         </div>
         {requests.map((request, index) => {
           return (
-            <div tabIndex={0} className="collapse">
-              <div className="text-left collapse-title w-auto h-auto font-medium hover:bg-primary">              <div className="text-xl my-2 font-medium px-2">⚡{index} {ethers.utils.parseBytes32String(request.request)}</div>
+            <div key={index} tabIndex={0} className="collapse">
+              <div className="text-left collapse-title w-auto h-auto font-medium hover:bg-primary">
+                {" "}
+                <div className="text-xl my-2 font-medium px-2">
+                  ⚡{index} {ethers.utils.parseBytes32String(request.request)}
+                </div>
               </div>
               <div className="collapse-content text-left">
-
                 {/* <div
                   key={index}
                   className=" my-2 flex-wrap text-content-base p-4 bg-primary shadow-md rounded-md text-left hover:shadow-lg hover:bg-secondary transition duration-300 ease-in-out"
@@ -268,7 +271,6 @@ const Bay: NextPage = () => {
                 </div>
               </div>
             </div>
-
           );
         })}
 
@@ -299,7 +301,7 @@ const Bay: NextPage = () => {
             your request it is added to their stake and you will not get it back, you can only punish it.)
           </p>
           <p className="text-xl  mb-8">
-            <strong>Fulfiller</strong> stake This is what makes Erasure Bay powerful. This is how much DAI
+            <strong>Fulfiller</strong> stake This is what makes Mecenate Bay powerful. This is how much ETH
             cryptocurrency someone will need to deposit when fulfilling your request. You can destroy a fraction or all
             of their staked money if you are dissatisfied with what they provide. This will stop people responding with
             spam or bad information. It usually makes sense to have this be roughly 10% - 50% of the reward.

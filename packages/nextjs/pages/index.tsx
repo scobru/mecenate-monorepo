@@ -184,7 +184,6 @@ const Home: NextPage = () => {
                 </ol>
               </div>
             </div>
-
           </div>
 
           <div className="flex gap-4 flex-col items-center lg:flex-row my-20 ">

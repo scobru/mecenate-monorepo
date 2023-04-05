@@ -147,7 +147,7 @@ const Question: NextPage = () => {
       <div>
         {questions &&
           questions.map((question, index) => (
-            <div key={index} className="card w-full bg-base-100 shadow-xl px-2 py-2 text-base-content mb-20">
+            <div key={index} className="card w-full bg-neutral shadow-xl px-2 py-2 text-base-content mb-20">
               <a href={`/viewQuestion?addr=${question}`}>
                 <div className="grid grid-cols-1 p-5 text-lg">
                   <div className="col-span-1">

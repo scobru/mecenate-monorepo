@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Mecenate Client",
   "type": "commonjs",
-  "engines": {
-    "node": ">= 18.12 <19"
-  },
   "devDependencies": {
     "@typechain/ethers-v5": "^10.2.0",
     "@types/figlet": "^1",

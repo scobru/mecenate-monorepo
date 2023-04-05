@@ -99,8 +99,6 @@ module.exports = {
             "--tooltip-tail": "6px",
           },
         },
-
-
       },
       "light",
       "dark",
