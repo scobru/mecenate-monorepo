@@ -11,16 +11,18 @@ const nextConfig = {
   },
   swcMinify: false,
   env: {
-    INFURA_PROJECT_ID: "",
-    INFURA_PROJECT_SECRET: "",
-    PINATA_API_KEY: "",
-    PINATA_API_SECRET: "",
+    INFURA_PROJECT_ID: "2FMUdMfqb8YwcclqJQhPHYlUHx5",
+    INFURA_PROJECT_SECRET: "076b6e972ec77f21521ac05108a2c645",
+    PINATA_API_KEY: "dad6ed453a132d8b9f34",
+    PINATA_API_SECRET: "698a5222b379fb4a9be1347f2862998e5334d5b01985bcbc0d8fa3ddac951747",
+    NOTION_SECRET_INTEGRATION_TOKEN: "secret_TIdnZg9uKMdA5IkiOfcUrqXIOcj6wYnt6KlURqAP4wk",
+    NOTION_DATABASE_ID: "0996e29e4c794fda9fc0471698032b94",
   },
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "",
+        hostname: "scobru.infura-ipfs.io",
         port: "",
         pathname: "/ipfs/**",
       },

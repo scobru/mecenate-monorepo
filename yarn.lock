@@ -5087,6 +5087,7 @@ __metadata:
   resolution: "@mecenate/client@workspace:packages/client"
   dependencies:
     "@erasure/crypto-ipfs": ^1.3.2
+    "@notionhq/client": ^2.2.3
     "@pinata/sdk": ^2.1.0
     "@typechain/ethers-v5": ^10.2.0
     "@types/figlet": ^1
@@ -5188,6 +5189,7 @@ __metadata:
     "@ethersproject/web": ^5.7.1
     "@expo/webpack-config": ^18.0.1
     "@heroicons/react": ^2.0.11
+    "@notionhq/client": ^2.2.3
     "@pinata/sdk": ^2.1.0
     "@rainbow-me/rainbowkit": ^0.11.0
     "@types/file-saver": ^2
@@ -5968,6 +5970,16 @@ __metadata:
   peerDependencies:
     hardhat: ^2.0.0
   checksum: b38db32444857875832275de5cbbc99fd72221aa97473e5cebe59f064c731a089fc9791c30fb05b615e9b9b907a0bd0a5da4f163ffaa1c1c6e7cc389e0578db1
+  languageName: node
+  linkType: hard
+
+"@notionhq/client@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "@notionhq/client@npm:2.2.3"
+  dependencies:
+    "@types/node-fetch": ^2.5.10
+    node-fetch: ^2.6.1
+  checksum: 356e889012d36bf2045099d28c65fa2e41defa849f5bf34c6b82fbc7a028ce66a17aa2bd63b2451cfecc8378a49c2d179357896d211d3d92648c425157f628fe
   languageName: node
   linkType: hard
 
@@ -7608,7 +7620,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node-fetch@npm:^2.6.1":
+"@types/node-fetch@npm:^2.5.10, @types/node-fetch@npm:^2.6.1":
   version: 2.6.3
   resolution: "@types/node-fetch@npm:2.6.3"
   dependencies:

@@ -19,6 +19,7 @@
     "@ethersproject/web": "^5.7.1",
     "@expo/webpack-config": "^18.0.1",
     "@heroicons/react": "^2.0.11",
+    "@notionhq/client": "^2.2.3",
     "@pinata/sdk": "^2.1.0",
     "@rainbow-me/rainbowkit": "^0.11.0",
     "@uniswap/sdk": "^3.0.3",

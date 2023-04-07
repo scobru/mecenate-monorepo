@@ -45,6 +45,7 @@ const Identity: NextPage = () => {
   const [nftBalance, setNftBalance] = React.useState(0);
   const [nftMetadata, setNftMetadata] = React.useState<{ [key: string]: any[] }>({});
   const [pubKey, setPubKey] = React.useState<string>("");
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
 
   const [subscriptions, setSubscriptions] = React.useState<Array<string>>([]);
   const [subscriptionName, setSubscriptionName] = React.useState("");
@@ -189,8 +190,9 @@ const Identity: NextPage = () => {
     }
   };
 
-  const createIdentity = async (identityData: { name: any; description: any }, imageFile: any) => {
+  const createIdentity = async (identityData: { name: any; description: any }) => {
     const creator = await signer?.getAddress();
+
     const nftMetadataWrite = {
       name: identityData.name,
       image: image,
@@ -199,9 +201,65 @@ const Identity: NextPage = () => {
     };
     DEBUG && console.log(nftMetadataWrite);
 
+    try {
+      const payload = {
+        values: nftMetadataWrite,
+      };
+
+      const errors = {
+        name: "",
+        description: "",
+        image: "",
+      };
+
+      const urlRegex = /^(http|https):\/\/[^ "]+$/;
+
+      if (!nftMetadataWrite.name) errors.name = "Name is required";
+      if (!nftMetadataWrite.description) errors.description = "Message is required";
+      if (nftMetadataWrite.image && !urlRegex.test(nftMetadataWrite.image)) errors.image = "URL is invalid";
+
+      if (errors.name || errors.description || errors.image) {
+        return notification.error("Error creating identity");
+      }
+
+      const response = await fetch("/api/create_id", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Allow-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 200) {
+        notification.success(<span className="font-bold">Submission received! 🎉</span>);
+        setIsSubmitted(true);
+      } else {
+        notification.error(
+          <>
+            <span className="font-bold">Server Error.</span>
+            <br />
+            Something went wrong. Please try again
+          </>,
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      notification.error(
+        <>
+          <span className="font-bold">Server Error.</span>
+          <br />
+          Something went wrong. Please try again
+        </>,
+      );
+    }
+
+
     const tx = await identity?.mint(nftMetadataWrite, {
       value: identityFee,
     });
+
+
     if (tx?.hash) {
       notification.success("Identity minted successfully!");
     }
