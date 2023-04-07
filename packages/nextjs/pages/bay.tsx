@@ -80,6 +80,7 @@ const Bay: NextPage = () => {
   async function createBayContract() {
     const _request = ethers.utils.formatBytes32String(requestString);
     console.log(_request);
+    const counter = await bayCtx?.contractCounter();
 
     if (signer) {
       const request = {
@@ -94,6 +95,7 @@ const Bay: NextPage = () => {
       };
 
       const tx = await bayCtx?.createRequest(request, { value: parseEther(requestPayment) });
+
 
       if (tx) {
         notification.success("Request created successfully");
@@ -213,14 +215,13 @@ const Bay: NextPage = () => {
         </div>
         {requests.map((request, index) => {
           return (
-            <div key={index} tabIndex={0} className="collapse">
-              <div className="text-left collapse-title w-auto h-auto font-medium hover:bg-primary">
+            <div key={index} tabIndex={0} className="card-compact p-4 my-4 bg-secondary hover:bg-base-300">
+              <div className="text-left  w-auto h-auto font-medium ">
                 {" "}
                 <div className="text-xl my-2 font-medium px-2">
                   ⚡{index} {ethers.utils.parseBytes32String(request.request)}
                 </div>
-              </div>
-              <div className="collapse-content text-left">
+
                 {/* <div
                   key={index}
                   className=" my-2 flex-wrap text-content-base p-4 bg-primary shadow-md rounded-md text-left hover:shadow-lg hover:bg-secondary transition duration-300 ease-in-out"

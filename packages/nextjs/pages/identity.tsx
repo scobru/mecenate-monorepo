@@ -417,7 +417,7 @@ const Identity: NextPage = () => {
   const handleFormSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
     const identityData = { name, description };
-    await createIdentity(identityData, imageFile);
+    await createIdentity(identityData);
     alert("Identity minted successfully!");
   };
 

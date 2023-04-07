@@ -17,6 +17,7 @@ const nextConfig = {
     PINATA_API_SECRET: "698a5222b379fb4a9be1347f2862998e5334d5b01985bcbc0d8fa3ddac951747",
     NOTION_SECRET_INTEGRATION_TOKEN: "secret_TIdnZg9uKMdA5IkiOfcUrqXIOcj6wYnt6KlURqAP4wk",
     NOTION_DATABASE_ID: "0996e29e4c794fda9fc0471698032b94",
+
   },
   images: {
     remotePatterns: [
