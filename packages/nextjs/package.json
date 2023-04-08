@@ -31,7 +31,7 @@
     "file-saver": "^2.0.5",
     "ipfs-core": "^0.18.0",
     "ipfs-http-client": "^60.0.0",
-    "next": "^13.1.6",
+    "next": "13.1.6",
     "nextjs-progressbar": "^0.0.16",
     "prom-client": "^14.1.1",
     "react": "^18.2.0",
