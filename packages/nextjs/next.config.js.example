@@ -10,10 +10,13 @@ const nextConfig = {
     ignoreDuringBuilds: process.env.NEXT_PUBLIC_IGNORE_BUILD_ERROR === "true",
   },
   env: {
-    INFURA_PROJECT_ID: "",
-    INFURA_PROJECT_SECRET: "",
-    PINATA_API_KEY: "",
-    PINATA_API_SECRET: ""
+    INFURA_PROJECT_ID: "XXX",
+    INFURA_PROJECT_SECRET: "XXX",
+    PINATA_API_KEY: "XXX",
+    PINATA_API_SECRET: "XXX",
+    NOTION_SECRET_INTEGRATION_TOKEN: "XXX",
+    NOTION_DATABASE_ID: "XXX",
+    NOTION_DATABASE_ID_USERS: "XXX",
 
   },
   images: {
