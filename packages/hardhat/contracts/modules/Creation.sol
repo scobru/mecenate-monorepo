@@ -38,7 +38,10 @@ abstract contract Creation is Data, Events, Staking {
                 Structures.PostStatus.Revealed ||
                 post.postdata.settings.status ==
                 Structures.PostStatus.Punished ||
-                post.postdata.settings.status == Structures.PostStatus.Proposed,
+                post.postdata.settings.status ==
+                Structures.PostStatus.Proposed ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Renounced,
             "Not Wating or Finalized or Revealed or Proposed"
         );
 

@@ -84,6 +84,17 @@ const Feeds: NextPage = () => {
     _feeds = _feeds.filter((feed: string) => feed != "0x0000000000000000000000000000000000000000");
 
     setFeeds(_feeds);
+    const _feedsInfo = await factoryCtx?.getFeedsInfo();
+    const _tempFeedInfo: Feed[] = [];
+
+    for (let i = 0; i < _feedsInfo.length; i++) {
+      if (_feedsInfo[i].contractAddress == _feeds[i]) {
+        _tempFeedInfo.push(_feedsInfo[i]);
+      }
+    }
+
+    setFeedsInfos(_feedsInfo);
+
     if (DEBUG) console.log(feeds);
   }
 

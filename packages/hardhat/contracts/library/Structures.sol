@@ -8,7 +8,8 @@ library Structures {
         Submitted,
         Finalized,
         Punished,
-        Revealed
+        Revealed,
+        Renounced
     }
 
     enum PostType {
@@ -76,6 +77,7 @@ library Structures {
     }
 
     struct Feed {
+        address contractAddress;
         address operator;
         address buyer;
         address seller;

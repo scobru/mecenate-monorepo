@@ -106,6 +106,7 @@ const Home: NextPage = () => {
             </div>
             <div className="flex flex-wrap items-center gap-2  lg:flex-row px-5 ">
               <div className="text-xl font-thin my-2 ">identities: {Number(stats.totalIdentities)}</div>
+              <div className="text-xl font-thin my-2 ">users: {Number(stats.totalUsers)}</div>
               <div className="text-xl font-thin my-2 ">requests: {Number(stats.totalBayRequests)}</div>
               <div className="text-xl font-thin my-2 ">tiers : {Number(stats.totalTiers)}</div>
               <div className="text-xl font-thin my-2 ">feeds : {Number(stats.totalFeeds)}</div>

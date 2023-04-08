@@ -7,7 +7,7 @@ import "../modules/Creation.sol";
 import "../modules/Acceptance.sol";
 import "../modules/Submission.sol";
 import "../modules/Finalization.sol";
-import "../modules/Refund.sol";
+import "../modules/Renounce.sol";
 
 import "../modules/Data.sol";
 
@@ -18,7 +18,7 @@ contract MecenateFeed is
     Data,
     Creation,
     Acceptance,
-    Refund,
+    Renounce,
     Submission,
     Finalization
 {

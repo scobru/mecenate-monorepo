@@ -31,6 +31,7 @@ const Bay: NextPage = () => {
     stake: string;
     postAddress: string;
     accepted: boolean;
+    postCount: string;
   };
 
   let bayAddress!: string;
@@ -126,7 +127,7 @@ const Bay: NextPage = () => {
   return (
     <div className="flex items-center flex-col  pt-10 text-black">
       <div className="min-w-fit text-center my-2 text-base-content">
-        {/*   <div className="min-w-fit mx-auto text-center my-2 text-base-content">
+        <div className="min-w-fit mx-auto text-center my-2 text-base-content">
           <h1 className="text-6xl font-bold">Request</h1>
           <div className="content-slider w-52 ">
             <div className="slider">
@@ -170,7 +171,7 @@ const Bay: NextPage = () => {
             Lock up a cryptocurrency reward. Anyone can respond. Destroy their stake if you don&apos;t get what you
             want.
           </p>
-        </div> */}
+        </div>
         <div className="flex flex-col min-w-fit mx-auto items-center mb-20 ">
           <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary py-2  text-base-content p-4 m-4">
             <label className="text-black font-semibold text-sm" htmlFor="request">
@@ -237,6 +238,8 @@ const Bay: NextPage = () => {
                     {request.postAddress}
                   </a>
                 </div>
+                <div className="my-2 font-medium">🔢 Hash Count : {String(request.postCount)}</div>
+
                 <div className="my-2 font-medium">✔️ Accepted : {String(request.accepted)}</div>
                 <div className="flex flex-row space-x-4 my-4">
                   <input

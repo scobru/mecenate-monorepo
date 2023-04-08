@@ -94,8 +94,11 @@ abstract contract Staking is Data, Deposit {
                 Structures.PostStatus.Revealed ||
                 post.postdata.settings.status ==
                 Structures.PostStatus.Punished ||
-                post.postdata.settings.status == Structures.PostStatus.Proposed,
-            "Not Waiting or Finalized or Proposed"
+                post.postdata.settings.status ==
+                Structures.PostStatus.Proposed ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Renounced,
+            "Wrong Status"
         );
 
         uint256 stakerBalance;
@@ -124,9 +127,13 @@ abstract contract Staking is Data, Deposit {
                 Structures.PostStatus.Revealed ||
                 post.postdata.settings.status ==
                 Structures.PostStatus.Punished ||
-                post.postdata.settings.status == Structures.PostStatus.Proposed,
-            "Not Waiting or Finalized or Proposed"
+                post.postdata.settings.status ==
+                Structures.PostStatus.Proposed ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Renounced,
+            "Wrong Status"
         );
+
         uint256 currentDeposit = Deposit._getDeposit(msg.sender);
         uint256 stakerBalance;
 
@@ -151,8 +158,16 @@ abstract contract Staking is Data, Deposit {
         require(
             post.postdata.settings.status == Structures.PostStatus.Waiting ||
                 post.postdata.settings.status ==
-                Structures.PostStatus.Finalized,
-            "Not Waiting or Finalized"
+                Structures.PostStatus.Finalized ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Revealed ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Punished ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Proposed ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Renounced,
+            "Wrong Status"
         );
         uint256 currentDeposit = Deposit._getDeposit(msg.sender);
         uint256 stakerBalance = _takeFullStake(msg.sender);

@@ -53,6 +53,8 @@ const Identity: NextPage = () => {
   const [subscriptionFee, setSubscriptionFee] = React.useState(0);
   const [subscriptionDuration, setSubscriptionDuration] = React.useState(0);
 
+  const [alreadyUser, setAlreadyUser] = React.useState(false);
+
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateTierFactory");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
@@ -119,6 +121,15 @@ const Identity: NextPage = () => {
     abi: identityAbi,
     signerOrProvider: signer || provider,
   });
+
+  const checkIfUserIsRegistered = async () => {
+    const address = await signer?.getAddress();
+    const user = await usersCtx?.checkifUserExist(address);
+    if (user) {
+      setAlreadyUser(true);
+    }
+  };
+
 
   const treasury = useContract({
     address: treasuryAddress,
@@ -204,6 +215,7 @@ const Identity: NextPage = () => {
     try {
       const payload = {
         values: nftMetadataWrite,
+        chainId: chain?.id.toString(),
       };
 
       const errors = {
@@ -349,7 +361,7 @@ const Identity: NextPage = () => {
 
     downloadFile({
       data: JSON.stringify(data),
-      fileName: "keyPair.json",
+      fileName: await signer?.getAddress() + "_keyPair.json",
       fileType: "text/json",
     });
   }
@@ -379,16 +391,56 @@ const Identity: NextPage = () => {
     const publicKey = abicoder.encode(["string"], [pubKey]);
     const seller = await signer?.getAddress();
     const mecenateID = await identity?.identityByAddress(seller);
+
     console.log(publicKey);
     console.log(seller);
     console.log(mecenateID);
 
     if (seller) {
       const user: UserData = {
-        mecenateID: mecenateID,
+        mecenateID: Number(mecenateID),
         wallet: seller,
         publicKey: publicKey,
       };
+
+      try {
+        const payload = {
+          values: user,
+          chainId: chain?.id.toString(),
+        };
+
+        const response = await fetch("/api/create_user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Allow-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.status === 200) {
+          notification.success(<span className="font-bold">Submission received! 🎉</span>);
+          setIsSubmitted(true);
+        } else {
+          notification.error(
+            <>
+              <span className="font-bold">Server Error.</span>
+              <br />
+              Something went wrong. Please try again
+            </>,
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        notification.error(
+          <>
+            <span className="font-bold">Server Error.</span>
+            <br />
+            Something went wrong. Please try again
+          </>,
+        );
+      }
+
       const tx = await usersCtx?.registerUser(user);
 
       notification.success("User registered");
@@ -427,32 +479,12 @@ const Identity: NextPage = () => {
       const fee = await treasury?.fixedFee();
       const _identityFee = await treasury?.fixedFee();
       await fetchNFTBalance();
+      await checkIfUserIsRegistered();
       setSubscriptions(subscriptions);
       setFee(fee);
       setIdentityFee(_identityFee);
     }
   };
-
-  const createMecenateSubscription = async function createMecenateSubscription() {
-    event?.preventDefault();
-    if (factory) {
-      const tx = await factory.createMecenateSubscription(
-        signer?.getAddress(),
-        subscriptionName,
-        subscriptionDescription,
-        subscriptionFee,
-        subscriptionDuration,
-        {
-          value: fee,
-        },
-      );
-      if (tx.hash) {
-        notification.success("Mecenate Subscription Started");
-      }
-    }
-  };
-
-  // fetch smart contract event with wagmi
 
   React.useEffect(() => {
     if (factory) {
@@ -583,7 +615,7 @@ const Identity: NextPage = () => {
               <button
                 className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-2"
                 onClick={createPair}
-                disabled={nftBalance == 0}
+                disabled={nftBalance == 0 || alreadyUser == true}
               >
                 Create Key Pair
               </button>
@@ -592,7 +624,7 @@ const Identity: NextPage = () => {
                 onClick={async () => {
                   await signIn();
                 }}
-                disabled={nftBalance == 0 || pubKey == ""}
+                disabled={nftBalance == 0 || pubKey == "" || alreadyUser == true}
               >
                 Sign In
               </button>

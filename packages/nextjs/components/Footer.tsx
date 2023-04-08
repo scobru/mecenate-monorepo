@@ -63,6 +63,14 @@ export default function Footer() {
               >
                 BuidlGuidl
               </a>
+              <a
+                href="https://github.com/scobru/mecenate-monorepo"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2"
+              >
+                Source
+              </a>
             </div>
             <span>·</span>
             <div>

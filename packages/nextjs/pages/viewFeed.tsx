@@ -162,11 +162,13 @@ const ViewFeed: NextPage = () => {
     }
   }
 
-  async function reFund() {
-    const tx = await feedCtx?.refund();
+  async function renounce() {
+    const tx = await feedCtx?.renouncePost();
     await tx?.wait();
     notification.success("Refund successful");
   }
+
+
 
   const uploadImageToIpfs = async (file: Blob | any) => {
     try {
@@ -289,13 +291,13 @@ const ViewFeed: NextPage = () => {
 
     notification.warning("Save this data");
 
-    saveAs(JSON.stringify(dataSaved), String(postCount) + feedCtx?.address + "_sellData.json");
+    //saveAs(JSON.stringify(dataSaved), String(postCount) + feedCtx?.address + "_sellData.json");
 
-    /* downloadFile({
+    downloadFile({
       data: JSON.stringify(dataSaved),
-      fileName: String(postCount) + feedCtx?.address + "_sellData.json",
+      fileName: String(postCount) + "_" + feedCtx?.address + "_sellData.json",
       fileType: "text/json",
-    }); */
+    });
 
     const proofOfHashEncode = await ErasureHelper.multihash({
       input: dataSaved?.proofhash,
@@ -1000,14 +1002,11 @@ const ViewFeed: NextPage = () => {
                     </div>
                   </div>
                 </div>
-                <button
-                  className="btn   modal-button mx-2 my-2"
-                  onClick={async () => {
-                    await reFund();
-                  }}
-                >
-                  Refund (S)
-                </button>
+                <label className="btn  modal-button mx-2 my-2" onClick={async () => {
+                  await renounce();
+                }}>
+                  Renounce (S)
+                </label>
               </div>
             </div>
             <div tabIndex={0} className="collapse">
@@ -1218,16 +1217,16 @@ const ViewFeed: NextPage = () => {
                     {feedData.postdata.settings.status === 6
                       ? "Revealed"
                       : feedData.postdata.settings.status === 5
-                      ? "Punished"
-                      : feedData.postdata.settings.status === 4
-                      ? "Finalized"
-                      : feedData.postdata.settings.status === 3
-                      ? "Submitted"
-                      : feedData.postdata.settings.status === 2
-                      ? "Accepted"
-                      : feedData.postdata.settings.status === 1
-                      ? "Proposed"
-                      : "Waiting for Creator"}
+                        ? "Punished"
+                        : feedData.postdata.settings.status === 4
+                          ? "Finalized"
+                          : feedData.postdata.settings.status === 3
+                            ? "Submitted"
+                            : feedData.postdata.settings.status === 2
+                              ? "Accepted"
+                              : feedData.postdata.settings.status === 1
+                                ? "Proposed"
+                                : "Waiting for Creator"}
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">

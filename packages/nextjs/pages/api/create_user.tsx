@@ -7,7 +7,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 const notion = new Client({ auth: process.env.NOTION_SECRET_INTEGRATION_TOKEN });
 // Get your database ID from the notion page(database) and connect your integration to it
 // https://developers.notion.com/docs/create-a-notion-integration#step-3-save-the-database-id
-const databaseId = process.env.NOTION_DATABASE_ID ?? "";
+const databaseId = process.env.NOTION_DATABASE_ID_USERS ?? "";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -23,14 +23,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   await notion.pages.create({
     parent: { database_id: databaseId },
     properties: {
-      name: { title: [{ type: "text", text: { content: values.name || null } }] },
-      description: { rich_text: [{ type: "text", text: { content: values.description || null } }] },
-      image: { url: values.image || null },
-      signerAddress: { rich_text: [{ type: "text", text: { content: values.owner } }] },
+      mecenateID: { title: [{ type: "text", text: { content: values.mecenateID.toString() } }] },
+      wallet: { rich_text: [{ type: "text", text: { content: values.wallet } }] },
+      pubKey: { rich_text: [{ type: "text", text: { content: String(values.publicKey) } }] },
       date: { date: { start: new Date().toISOString() } },
       network: { rich_text: [{ type: "text", text: { content: chainId } }] },
     },
   });
 
-  res.status(200).json({ message: "Submission successfully saved" });
+  res.status(200).json({ message: "User successfully saved" });
 }
