@@ -1,100 +1,69 @@
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-import "./TokenManager.sol";
 import "./Deposit.sol";
 import "./Data.sol";
-
-import "../library/Structures.sol";
+import "./TokenManager.sol";
 
 abstract contract Staking is Data, Deposit, TokenManager {
     using SafeMath for uint256;
 
-    event StakeBurned(
-        Structures.Tokens tokenID,
-        address staker,
-        uint256 amount
-    );
+    event StakeBurned(TokenManager.Tokens tokenID, address staker, uint256 amount);
 
     function _addStake(
-        Structures.Tokens tokenID,
         address staker,
-        address funder,
         uint256 amountToAdd
     ) internal returns (uint256 newStake) {
         // update deposit
-        newStake = Deposit._increaseDeposit(tokenID, staker, amountToAdd);
-
-        // transfer the stake amount
-        TokenManager._transferFrom(tokenID, funder, address(this), amountToAdd);
-
+        newStake = Deposit._increaseDeposit(staker, amountToAdd);
         // explicit return
         return newStake;
     }
 
     function _takeStake(
-        Structures.Tokens tokenID,
         address staker,
-        address recipient,
         uint256 amountToTake
     ) internal returns (uint256 newStake) {
         // update deposit
-        newStake = Deposit._decreaseDeposit(tokenID, staker, amountToTake);
-
-        // transfer the stake amount
-        TokenManager._transfer(tokenID, recipient, amountToTake);
-
+        newStake = Deposit._decreaseDeposit(staker, amountToTake);
         // explicit return
         return newStake;
     }
 
     function _takeFullStake(
-        Structures.Tokens tokenID,
-        address staker,
-        address recipient
+        address staker
     ) internal returns (uint256 amountTaken) {
         // get deposit
-        uint256 currentDeposit = Deposit._getDeposit(tokenID, staker);
+        uint256 currentDeposit = Deposit._getDeposit(staker);
 
         // take full stake
-        _takeStake(tokenID, staker, recipient, currentDeposit);
+        _takeStake(staker, currentDeposit);
 
         // return
         return currentDeposit;
     }
 
     function _burnStake(
-        Structures.Tokens tokenID,
         address staker,
         uint256 amountToBurn
     ) internal returns (uint256 newStake) {
         // update deposit
-        uint256 newDeposit = Deposit._decreaseDeposit(
-            tokenID,
-            staker,
-            amountToBurn
-        );
-
-        // burn the stake amount
-        TokenManager._burn(tokenID, amountToBurn);
+        uint256 newDeposit = Deposit._decreaseDeposit(staker, amountToBurn);
 
         // emit event
-        emit StakeBurned(tokenID, staker, amountToBurn);
+        emit StakeBurned(staker, amountToBurn);
 
         // return
         return newDeposit;
     }
 
     function _burnFullStake(
-        Structures.Tokens tokenID,
         address staker
     ) internal returns (uint256 amountBurned) {
         // get deposit
-        uint256 currentDeposit = Deposit._getDeposit(tokenID, staker);
+        uint256 currentDeposit = Deposit._getDeposit(staker);
 
         // burn full stake
-        _burnStake(tokenID, staker, currentDeposit);
+        _burnStake(staker, currentDeposit);
 
         // return
         return currentDeposit;
@@ -102,21 +71,17 @@ abstract contract Staking is Data, Deposit, TokenManager {
 
     function getStake(address staker) public view returns (uint256 amount) {
         // get deposit
-        amount = Deposit._getDeposit(tokenERC20Contract, staker);
+        amount = Deposit._getDeposit(staker);
         // explicit return
         return amount;
     }
 
     function getTotalStaked() public view returns (uint256) {
         uint256 amountSeller = Deposit._getDeposit(
-            tokenERC20Contract,
             post.postdata.settings.seller
         );
 
-        uint256 amountBuyer = Deposit._getDeposit(
-            tokenERC20Contract,
-            post.postdata.settings.buyer
-        );
+        uint256 amountBuyer = Deposit._getDeposit(post.postdata.settings.buyer);
 
         return (amountSeller + amountBuyer);
     }
@@ -140,20 +105,10 @@ abstract contract Staking is Data, Deposit, TokenManager {
         uint256 stakerBalance;
 
         if (msg.sender == post.postdata.settings.buyer) {
-            stakerBalance = _addStake(
-                tokenERC20Contract,
-                msg.sender,
-                msg.sender,
-                msg.value
-            );
+            stakerBalance = _addStake(msg.sender, msg.value);
             post.postdata.escrow.payment = stakerBalance;
         } else if (msg.sender == post.postdata.settings.seller) {
-            stakerBalance = _addStake(
-                tokenERC20Contract,
-                msg.sender,
-                msg.sender,
-                msg.value
-            );
+            stakerBalance = _addStake(msg.sender, msg.value);
             post.postdata.escrow.stake = stakerBalance;
         } else {
             revert("Not buyer or seller");
@@ -180,29 +135,16 @@ abstract contract Staking is Data, Deposit, TokenManager {
             "Wrong Status"
         );
 
-        uint256 currentDeposit = Deposit._getDeposit(
-            tokenERC20Contract,
-            msg.sender
-        );
+        uint256 currentDeposit = Deposit._getDeposit(msg.sender);
         uint256 stakerBalance;
 
         require(currentDeposit >= amountToTake, "Not enough deposit");
 
         if (msg.sender == post.postdata.settings.buyer) {
-            stakerBalance = _takeStake(
-                tokenERC20Contract,
-                msg.sender,
-                msg.sender,
-                amountToTake
-            );
+            stakerBalance = _takeStake(msg.sender, amountToTake);
             post.postdata.escrow.payment = stakerBalance;
         } else if (msg.sender == post.postdata.settings.seller) {
-            stakerBalance = _takeStake(
-                tokenERC20Contract,
-                msg.sender,
-                msg.sender,
-                amountToTake
-            );
+            stakerBalance = _takeStake(msg.sender, amountToTake);
             post.postdata.escrow.stake = stakerBalance;
         } else {
             revert("Not buyer or seller");
@@ -228,15 +170,8 @@ abstract contract Staking is Data, Deposit, TokenManager {
                 Structures.PostStatus.Renounced,
             "Wrong Status"
         );
-        uint256 currentDeposit = Deposit._getDeposit(
-            tokenERC20Contract,
-            msg.sender
-        );
-        uint256 stakerBalance = _takeFullStake(
-            tokenERC20Contract,
-            msg.sender,
-            msg.sender
-        );
+        uint256 currentDeposit = Deposit._getDeposit(msg.sender);
+        uint256 stakerBalance = _takeFullStake(msg.sender);
         payable(msg.sender).transfer(stakerBalance);
         return stakerBalance;
     }

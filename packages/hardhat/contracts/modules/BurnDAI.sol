@@ -5,7 +5,7 @@ import "../interfaces/IPancakeRouter.sol";
 import "../interfaces/IMUSE.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract BurnDAI is BurnMUSE {
+abstract contract BurnDAI is BurnMUSE {
     using SafeMath for uint256;
     // address of the token
     address private constant _DAIToken =

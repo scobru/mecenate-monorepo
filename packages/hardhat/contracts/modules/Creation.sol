@@ -12,15 +12,17 @@ abstract contract Creation is Data, Events, Staking {
         Structures.PostType postType,
         Structures.PostDuration postDuration,
         address buyer,
-        uint256 payment
-    ) external payable returns (Structures.Post memory) {
+        uint256 payment,
+        uint256 stake,
+        Structures.Tokens _tokenERC20Contract
+    ) external returns (Structures.Post memory) {
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(msg.sender),
             "User does not exist"
         );
 
         if (post.postdata.escrow.stake == 0) {
-            require(msg.value > 0, "Stake is required");
+            require(stake > 0, "Stake is required");
         }
 
         require(
@@ -45,7 +47,14 @@ abstract contract Creation is Data, Events, Staking {
             "Not Wating or Finalized or Revealed or Proposed"
         );
 
-        uint256 stake = _addStake(msg.sender, msg.value);
+        tokenERC20Contract = _tokenERC20Contract;
+
+        uint256 stake = _addStake(
+            tokenERC20Contract,
+            msg.sender,
+            msg.sender,
+            stake
+        );
 
         uint256 duration;
 

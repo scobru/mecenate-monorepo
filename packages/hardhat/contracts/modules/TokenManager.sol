@@ -1,43 +1,43 @@
 pragma solidity 0.8.19;
 
 import "./BurnDAI.sol";
+import "../library/Structures.sol";
 
-contract TokenManager is BurnDAI {
-    enum Tokens {
-        NaN,
-        MUSE,
-        DAI
-    }
-
+abstract contract TokenManager is BurnDAI {
     function getTokenAddress(
-        Tokens tokenID
-    ) public pure returns (address tokenAddress) {
-        if (tokenID == Tokens.DAI) return BurnDAI.getTokenAddress();
-        if (tokenID == Tokens.MUSE) return BurnMUSE.getTokenAddress();
+        Structures.Tokens tokenID
+    ) public view returns (address tokenAddress) {
+        if (tokenID == Structures.Tokens.DAI) return BurnDAI.getTokenAddress();
+        if (tokenID == Structures.Tokens.MUSE)
+            return BurnMUSE.getTokenAddress();
         return address(0);
     }
 
     function getExchangeAddress(
-        Tokens tokenID
-    ) public pure returns (address exchangeAddress) {
-        if (tokenID == Tokens.DAI) return BurnDAI.getExchangeAddress();
-        if (tokenID == Tokens.MUSE) return BurnMUSE.getExchangeAddress();
+        Structures.Tokens tokenID
+    ) public view returns (address exchangeAddress) {
+        if (tokenID == Structures.Tokens.DAI)
+            return BurnDAI.getExchangeAddress();
+        if (tokenID == Structures.Tokens.MUSE)
+            return BurnMUSE.getExchangeAddress();
         return address(0);
     }
 
-    modifier onlyValidTokenID(Tokens tokenID) {
+    modifier onlyValidTokenID(Structures.Tokens tokenID) {
         require(isValidTokenID(tokenID), "invalid tokenID");
         _;
     }
 
     function isValidTokenID(
-        Tokens tokenID
+        Structures.Tokens tokenID
     ) internal pure returns (bool validity) {
-        return tokenID == Tokens.MUSE || tokenID == Tokens.DAI;
+        return
+            tokenID == Structures.Tokens.MUSE ||
+            tokenID == Structures.Tokens.DAI;
     }
 
     function _transfer(
-        Tokens tokenID,
+        Structures.Tokens tokenID,
         address to,
         uint256 value
     ) internal onlyValidTokenID(tokenID) {
@@ -48,7 +48,7 @@ contract TokenManager is BurnDAI {
     }
 
     function _transferFrom(
-        Tokens tokenID,
+        Structures.Tokens tokenID,
         address from,
         address to,
         uint256 value
@@ -60,39 +60,39 @@ contract TokenManager is BurnDAI {
     }
 
     function _burn(
-        Tokens tokenID,
+        Structures.Tokens tokenID,
         uint256 value
     ) internal onlyValidTokenID(tokenID) {
-        if (tokenID == Tokens.DAI) {
+        if (tokenID == Structures.Tokens.DAI) {
             BurnDAI._burn(value);
-        } else if (tokenID == Tokens.MUSE) {
+        } else if (tokenID == Structures.Tokens.MUSE) {
             BurnMUSE._burn(value);
         }
     }
 
     function _burnFrom(
-        Tokens tokenID,
+        Structures.Tokens tokenID,
         address from,
         uint256 value
     ) internal onlyValidTokenID(tokenID) {
-        if (tokenID == Tokens.DAI) {
+        if (tokenID == Structures.Tokens.DAI) {
             BurnDAI._burnFrom(from, value);
-        } else if (tokenID == Tokens.MUSE) {
+        } else if (tokenID == Structures.Tokens.MUSE) {
             BurnMUSE._burnFrom(from, value);
         }
     }
 
     function _approve(
-        Tokens tokenID,
+        Structures.Tokens tokenID,
         address spender,
         uint256 value
     ) internal onlyValidTokenID(tokenID) {
-        if (tokenID == Tokens.DAI) {
+        if (tokenID == Structures.Tokens.DAI) {
             require(
                 IERC20(BurnDAI.getTokenAddress()).approve(spender, value),
                 "token approval failed"
             );
-        } else if (tokenID == Tokens.MUSE) {
+        } else if (tokenID == Structures.Tokens.MUSE) {
             address MUSE = BurnMUSE.getTokenAddress();
             uint256 currentAllowance = IMUSE(MUSE).allowance(
                 msg.sender,
@@ -108,20 +108,20 @@ contract TokenManager is BurnDAI {
     }
 
     function totalSupply(
-        Tokens tokenID
+        Structures.Tokens tokenID
     ) internal view onlyValidTokenID(tokenID) returns (uint256 value) {
         return IERC20(getTokenAddress(tokenID)).totalSupply();
     }
 
     function balanceOf(
-        Tokens tokenID,
+        Structures.Tokens tokenID,
         address who
     ) internal view onlyValidTokenID(tokenID) returns (uint256 value) {
         return IERC20(getTokenAddress(tokenID)).balanceOf(who);
     }
 
     function allowance(
-        Tokens tokenID,
+        Structures.Tokens tokenID,
         address owner,
         address spender
     ) internal view onlyValidTokenID(tokenID) returns (uint256 value) {

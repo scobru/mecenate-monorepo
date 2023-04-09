@@ -21,7 +21,9 @@ abstract contract Submission is Data, Events {
         require(post.creator.wallet == msg.sender, "You are not the creator");
 
         post.postdata.data.encryptedKey = encryptedKey;
+
         post.postdata.settings.status = Structures.PostStatus.Submitted;
+
         post.postdata.settings.endTimeStamp =
             block.timestamp +
             post.postdata.settings.duration;

@@ -8,4 +8,8 @@ interface IMecenateFactory {
     function identityContract() external view returns (address);
 
     function contractCounter() external view returns (uint256);
+
+    function museToken() external view returns (address);
+
+    function router() external view returns (address);
 }

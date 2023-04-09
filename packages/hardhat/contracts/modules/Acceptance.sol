@@ -9,14 +9,20 @@ import "./Staking.sol";
 abstract contract Acceptance is Data, Events, Staking {
     function acceptPost(
         bytes memory publicKey,
-        address _buyer
-    ) public payable virtual {
+        address _buyer,
+        uint256 payment
+    ) public virtual {
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(_buyer),
             "User does not exist"
         );
 
-        uint256 _payment = _addStake(_buyer, msg.value);
+        uint256 _payment = _addStake(
+            tokenERC20Contract,
+            _buyer,
+            _buyer,
+            payment
+        );
 
         if (post.postdata.escrow.payment > 0) {
             require(
@@ -34,8 +40,11 @@ abstract contract Acceptance is Data, Events, Staking {
         require(_buyer != address(0), "Buyer address cannot be zero");
 
         post.postdata.settings.buyer = _buyer;
+
         post.postdata.settings.buyerPubKey = publicKey;
+
         post.postdata.escrow.payment = _payment;
+
         post.postdata.settings.status = Structures.PostStatus.Accepted;
 
         emit Accepted(post);

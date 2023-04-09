@@ -24,7 +24,12 @@ abstract contract Renounce is Data, Events, Staking {
 
         uint256 stake = post.postdata.escrow.stake;
 
-        _takeStake(post.postdata.settings.seller, stake);
+        _takeStake(
+            tokenERC20Contract,
+            post.postdata.settings.seller,
+            post.postdata.settings.seller,
+            stake
+        );
 
         payable(post.postdata.settings.seller).transfer(stake);
 
@@ -65,9 +70,12 @@ abstract contract Renounce is Data, Events, Staking {
 
         require(payment > 0, "Payment is not correct");
 
-        _takeStake(post.postdata.settings.buyer, payment);
-
-        payable(post.postdata.settings.buyer).transfer(payment);
+        _takeStake(
+            tokenERC20Contract,
+            post.postdata.settings.buyer,
+            post.postdata.settings.buyer,
+            payment
+        );
 
         post.postdata.settings.buyer = address(0);
 

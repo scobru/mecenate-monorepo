@@ -17,7 +17,7 @@ contract MecenateDCA is Ownable {
 
     // token token contract address
     IERC20 internal tokenFrom;
-    
+
     IERC20 internal tokenTo;
 
     address public factoryContract;
@@ -57,6 +57,28 @@ contract MecenateDCA is Ownable {
         lastPurchaseTime = block.timestamp;
         factoryContract = msg.sender;
         transferOwnership(_owner);
+    }
+
+    function initialize(
+        address _owner,
+        address _tokenFrom,
+        address _tokenTo,
+        address _priceFeedAddress,
+        address _uniswapRouterAddress,
+        address _upkeepAddress
+    ) public {
+        require(
+            priceFeed == AggregatorV3Interface(address(0)),
+            "Already initialized"
+        );
+        priceFeed = AggregatorV3Interface(_priceFeedAddress);
+        tokenFrom = IERC20(_tokenFrom);
+        tokenTo = IERC20(_tokenTo);
+        uniswapRouter = IUniswapV2Router02(_uniswapRouterAddress);
+        lastPurchaseTime = block.timestamp;
+        factoryContract = msg.sender;
+        transferOwnership(_owner);
+        upkeep = _upkeepAddress;
     }
 
     function setAmountToInvest(uint256 _amountToInvest) public onlyOwner {

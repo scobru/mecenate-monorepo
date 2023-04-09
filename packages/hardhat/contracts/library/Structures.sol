@@ -28,6 +28,12 @@ library Structures {
         OneMonth
     }
 
+    enum Tokens {
+        NaN,
+        MUSE,
+        DAI
+    }
+
     struct Post {
         User creator;
         PostData postdata;

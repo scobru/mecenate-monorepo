@@ -19,24 +19,18 @@ abstract contract Finalization is Data, Events, Staking {
         if (post.postdata.settings.endTimeStamp < block.timestamp) {
             post.postdata.settings.status = Structures.PostStatus.Finalized;
 
-            address treasuryContract = IMecenateFactory(factoryContract)
-                .treasuryContract();
-
-            uint256 buyerFee = (post.postdata.escrow.payment *
-                IMecenateTreasury(treasuryContract).globalFee()) / 10000;
-
-            uint256 amountToAdd = post.postdata.escrow.payment - buyerFee;
-
-            payable(treasuryContract).transfer(buyerFee);
-
             uint256 buyerStake = _takeStake(
+                tokenERC20Contract,
+                post.postdata.settings.buyer,
                 post.postdata.settings.buyer,
                 post.postdata.escrow.payment
             );
 
             uint256 sellerStake = _addStake(
+                tokenERC20Contract,
                 post.postdata.settings.seller,
-                amountToAdd
+                post.postdata.settings.seller,
+                post.postdata.escrow.payment
             );
 
             post.postdata.escrow.stake = sellerStake;
@@ -50,24 +44,18 @@ abstract contract Finalization is Data, Events, Staking {
                 "You are not the buyer"
             );
             if (valid == true) {
-                address treasuryContract = IMecenateFactory(factoryContract)
-                    .treasuryContract();
-
-                uint256 buyerFee = (post.postdata.escrow.payment *
-                    IMecenateTreasury(treasuryContract).globalFee()) / 10000;
-
-                uint256 amountToAdd = post.postdata.escrow.payment - buyerFee;
-
-                payable(treasuryContract).transfer(buyerFee);
-
                 uint256 buyerStake = _takeStake(
+                    tokenERC20Contract,
+                    post.postdata.settings.buyer,
                     post.postdata.settings.buyer,
                     post.postdata.escrow.payment
                 );
 
                 uint256 sellerStake = _addStake(
+                    tokenERC20Contract,
                     post.postdata.settings.seller,
-                    amountToAdd
+                    post.postdata.settings.seller,
+                    post.postdata.escrow.payment
                 );
 
                 post.postdata.escrow.stake = sellerStake;
@@ -93,18 +81,13 @@ abstract contract Finalization is Data, Events, Staking {
 
                 post.postdata.escrow.punishment = punishment;
 
-                address treasuryContract = IMecenateFactory(factoryContract)
-                    .treasuryContract();
-
-                uint256 totalPunishmentFee = buyerPunishment + punishment;
-
-                payable(treasuryContract).transfer(totalPunishmentFee);
-
                 uint256 buyerStake = _burnStake(
+                    tokenERC20Contract,
                     post.postdata.settings.buyer,
                     buyerPunishment
                 );
                 uint256 sellerStake = _burnStake(
+                    tokenERC20Contract,
                     post.postdata.settings.seller,
                     punishment
                 );

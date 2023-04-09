@@ -57,6 +57,30 @@ contract MecenateTier is Ownable {
         transferOwnership(_creator);
     }
 
+    function initialize(
+        address _creator,
+        string memory _name,
+        string memory _description,
+        uint256 _fee,
+        uint256 _subscriptionDuration
+    ) public {
+        require(creator != address(0), "Contract already initialized");
+
+        creator = _creator;
+
+        name = _name;
+
+        description = _description;
+
+        fee = _fee;
+
+        subscriptionDuration = _subscriptionDuration;
+
+        factoryContract = msg.sender;
+
+        transferOwnership(_creator);
+    }
+
     function subscribe() public payable {
         require(msg.value == fee, "Incorrect payment amount");
 

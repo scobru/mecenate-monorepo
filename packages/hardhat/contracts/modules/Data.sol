@@ -13,11 +13,17 @@ contract Data is Ownable {
 
     Structures.Post public post;
 
+    Structures.Tokens public tokens;
+
     uint256 public postCount;
 
     address public usersModuleContract;
+
     address public identityContract;
+
     address public factoryContract;
+
+    Structures.Tokens public tokenERC20Contract;
 
     bytes public constant ZEROHASH = "0x00";
 
