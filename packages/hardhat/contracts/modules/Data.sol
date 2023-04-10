@@ -23,14 +23,27 @@ contract Data is Ownable {
 
     address public factoryContract;
 
+    address public museToken;
+
+    address public daiToken;
+
+    address public router;
+
     Structures.Tokens public tokenERC20Contract;
 
     bytes public constant ZEROHASH = "0x00";
 
-    constructor(address _usersModuleContract, address _identityContract) {
+    constructor(
+        address _usersModuleContract,
+        address _identityContract,
+        address _factoryContract
+    ) {
         usersModuleContract = _usersModuleContract;
         identityContract = _identityContract;
         post.postdata.settings.status = Structures.PostStatus.Waiting;
-        factoryContract = msg.sender;
+        factoryContract = _factoryContract;
+        museToken = IMecenateFactory(factoryContract).museToken();
+        daiToken = IMecenateFactory(factoryContract).daiToken();
+        router = IMecenateFactory(factoryContract).router();
     }
 }

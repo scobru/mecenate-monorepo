@@ -21,8 +21,12 @@ contract MecenateFeedFactory is Factory, FeedViewer {
         address _identityContract,
         address _treasuryContract,
         address _museToken,
+        address _daiToken,
         address _router
     ) Factory(_identityContract, _treasuryContract) {
+        router = _router;
+        museToken = museToken;
+        daiToken = _daiToken;
         usersMouduleContract = _usersMouduleContract;
         _transferOwnership(msg.sender);
     }
@@ -32,11 +36,10 @@ contract MecenateFeedFactory is Factory, FeedViewer {
     ) internal virtual override returns (address) {
         MecenateFeed feed = new MecenateFeed(
             creator,
+            usersMouduleContract,
             identityContract,
-            msg.sender
+            address(this)
         );
-
-        return address(feed);
     }
 
     function chengeMuseToken(address _museToken) public onlyOwner {

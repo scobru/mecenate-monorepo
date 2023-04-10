@@ -8,12 +8,18 @@ import "../library/Structures.sol";
 import "../modules/FeedViewer.sol";
 import "../interfaces/IMecenateUsers.sol";
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 contract MecenateBay is Ownable, FeedViewer {
     Structures.BayRequest[] public allRequests;
 
     address public identityContract;
 
     address public usersMouduleContract;
+
+    address public museToken;
+
+    address public daiToken;
 
     mapping(address => Structures.BayRequest[]) public requests;
 
@@ -31,25 +37,57 @@ contract MecenateBay is Ownable, FeedViewer {
         uint256 indexed index
     );
 
-    constructor(address _identityContract, address _usersMouduleContract) {
+    constructor(
+        address _identityContract,
+        address _usersMouduleContract,
+        address _museToken,
+        address _daiToken
+    ) {
         identityContract = _identityContract;
         usersMouduleContract = _usersMouduleContract;
+        museToken = _museToken;
+        daiToken = _daiToken;
     }
 
     function createRequest(
         Structures.BayRequest memory request
-    ) public payable returns (Structures.BayRequest memory) {
+    ) public returns (Structures.BayRequest memory) {
         require(
             MecenateIdentity(identityContract).balanceOf(msg.sender) > 0,
             "user does not have identity"
         );
         require(request.stake > 0, "stake is not enough");
 
-        require(request.payment == msg.value, "Payment is not enough");
+        require(request.payment > 0, "Payment is not enough");
 
         require(request.postAddress == address(0), "post address is not valid");
 
         require(request.seller == address(0), "Seller is not valid");
+
+        if (request.tokenERC20Contract == Structures.Tokens.MUSE) {
+            //check allowance
+            require(
+                IERC20(museToken).allowance(msg.sender, address(this)) >=
+                    request.payment,
+                "Muse token allowance is not enough"
+            );
+            IERC20(museToken).transferFrom(
+                msg.sender,
+                address(this),
+                request.payment
+            );
+        } else if (request.tokenERC20Contract == Structures.Tokens.DAI) {
+            require(
+                IERC20(daiToken).allowance(msg.sender, address(this)) >=
+                    request.payment,
+                "Dai token allowance is not enough"
+            );
+            IERC20(daiToken).transferFrom(
+                msg.sender,
+                address(this),
+                request.payment
+            );
+        }
 
         contractCounter++;
 
@@ -65,6 +103,11 @@ contract MecenateBay is Ownable, FeedViewer {
         );
 
         Structures.Feed memory feed = _getFeedInfo(_feed);
+
+        require(
+            feed.tokenERC20Contract == allRequests[index].tokenERC20Contract,
+            "token is not the same of the feed"
+        );
 
         require(
             feed.seller == msg.sender,
@@ -84,9 +127,11 @@ contract MecenateBay is Ownable, FeedViewer {
         bytes memory publicKey = IMecenateUsers(usersMouduleContract)
             .getUserData(allRequests[index].buyer)
             .publicKey;
-        IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
+
+        IMecenateFeed(_feed).acceptPost(
             publicKey,
-            allRequests[index].buyer
+            allRequests[index].buyer,
+            allRequests[index].payment
         );
 
         allRequests[index].accepted = true;

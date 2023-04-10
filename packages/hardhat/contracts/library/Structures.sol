@@ -92,6 +92,7 @@ library Structures {
         uint256 totalStake;
         uint256 postCount;
         uint256 buyerPayment;
+        Tokens tokenERC20Contract;
     }
 
     struct BayRequest {
@@ -103,5 +104,6 @@ library Structures {
         address postAddress;
         bool accepted;
         uint256 postCount;
+        Tokens tokenERC20Contract;
     }
 }

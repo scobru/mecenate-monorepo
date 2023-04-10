@@ -11,5 +11,7 @@ interface IMecenateFactory {
 
     function museToken() external view returns (address);
 
+    function daiToken() external view returns (address);
+
     function router() external view returns (address);
 }

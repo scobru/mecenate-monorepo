@@ -25,6 +25,18 @@ const deployYourContract: DeployFunction = async function (
 
   console.log(deployer);
 
+  const router = "0x0000000000000000000000000000000000000000"; // Uniswap V2 Router Mumbai
+
+  const museToken = await deploy("MUSE", {
+    from: deployer,
+    args: [],
+    log: true,
+    autoMine: true,
+  });
+
+  museToken.receipt &&
+    console.log("MUSE deployed at:", museToken.receipt.contractAddress);
+
   const treasury = await deploy("MecenateTreasury", {
     from: deployer,
     args: [],
@@ -84,10 +96,30 @@ const deployYourContract: DeployFunction = async function (
   users.receipt &&
     console.log("Users deployed at:", users.receipt.contractAddress);
 
+  const MockDAI = await deploy("MockDAI", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  MockDAI.receipt &&
+    console.log("MockDAI deployed at:", MockDAI.receipt.contractAddress);
+
   const feedFactory = await deploy("MecenateFeedFactory", {
     from: deployer,
     // Contract constructor arguments
-    args: [users.address, identity.address, treasury.address],
+    args: [
+      users.address,
+      identity.address,
+      treasury.address,
+      museToken.address,
+      MockDAI.address,
+      router,
+    ],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -103,7 +135,7 @@ const deployYourContract: DeployFunction = async function (
   const feed = await deploy("MecenateFeed", {
     from: deployer,
     // Contract constructor arguments
-    args: [deployer, users.address, identity.address],
+    args: [deployer, users.address, identity.address, feedFactory.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -116,7 +148,7 @@ const deployYourContract: DeployFunction = async function (
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
     // Contract constructor arguments
-    args: [identity.address, users.address],
+    args: [identity.address, users.address, museToken.address, MockDAI.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.

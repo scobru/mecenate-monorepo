@@ -3,31 +3,26 @@ pragma solidity 0.8.19;
 import "./BurnMUSE.sol";
 import "../interfaces/IPancakeRouter.sol";
 import "../interfaces/IMUSE.sol";
+
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 abstract contract BurnDAI is BurnMUSE {
     using SafeMath for uint256;
-    // address of the token
-    address private constant _DAIToken =
-        address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-    // uniswap exchange of the token
-    address private constant _DAIExchange =
-        address(0x2a1530C4C41db0B0b2bB646CB5Eb1A67b7158667);
 
     function _burnFrom(address from, uint256 value) internal override {
-        IERC20(_DAIToken).transferFrom(from, address(this), value);
+        IERC20(daiToken).transferFrom(from, address(this), value);
 
         _burn(value);
     }
 
     function _burn(uint256 value) internal override {
         // approve uniswap for token transfer
-        IERC20(_DAIToken).approve(_DAIExchange, value);
+        IERC20(daiToken).approve(router, value);
 
         // swap dai for MUSE
         uint256 tokens_sold = value;
         uint256 tokens_bought = _swapTokensforToken(
-            _DAIToken,
+            daiToken,
             BurnMUSE.getTokenAddress(),
             tokens_sold
         );
@@ -38,21 +33,21 @@ abstract contract BurnDAI is BurnMUSE {
 
     function getTokenAddress()
         internal
-        pure
+        view
         virtual
         override
         returns (address token)
     {
-        token = _DAIToken;
+        token = daiToken;
     }
 
     function getExchangeAddress()
         internal
-        pure
+        view
         override
         returns (address exchange)
     {
-        exchange = _DAIExchange;
+        exchange = router;
     }
 
     function _swapTokensforToken(
@@ -64,7 +59,7 @@ abstract contract BurnDAI is BurnMUSE {
         path[0] = token1;
         path[1] = token2;
 
-        uint256[] memory amounts = IPancakeRouter(_DAIExchange).getAmountsOut(
+        uint256[] memory amounts = IPancakeRouter(router).getAmountsOut(
             amount,
             path
         );
@@ -72,15 +67,12 @@ abstract contract BurnDAI is BurnMUSE {
         uint256 amountOut = amounts[amounts.length.sub(1)];
 
         // check allowance
-        uint256 allowance = IERC20(token1).allowance(
-            address(this),
-            _DAIExchange
-        );
+        uint256 allowance = IERC20(token1).allowance(address(this), router);
         if (allowance < amount) {
-            IERC20(token1).approve(_DAIExchange, uint256(2 ** 256 - 1));
+            IERC20(token1).approve(router, uint256(2 ** 256 - 1));
         }
 
-        IPancakeRouter(_DAIExchange)
+        IPancakeRouter(router)
             .swapExactTokensForTokensSupportingFeeOnTransferTokens(
                 amountOut.sub(amountOut.mul(10).div(10000)),
                 0,

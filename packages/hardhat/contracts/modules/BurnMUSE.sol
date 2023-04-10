@@ -6,21 +6,17 @@ import "../interfaces/IMecenateFactory.sol";
 import "./Data.sol";
 
 abstract contract BurnMUSE is Data {
-    address public _MUSEToken = IMecenateFactory(factoryContract).museToken();
-
-    address public _MUSEExchange = IMecenateFactory(factoryContract).router();
-
     function _burn(uint256 value) internal virtual {
-        require(IMUSE(_MUSEToken).burn(value), "nmr burn failed");
+        require(IMUSE(museToken).burn(value), "nmr burn failed");
     }
 
     function _burnFrom(address from, uint256 value) internal virtual {
-        IMUSE(_MUSEToken).transferFrom(from, address(this), value);
+        IMUSE(museToken).transferFrom(from, address(this), value);
         _burn(value);
     }
 
     function getTokenAddress() internal view virtual returns (address token) {
-        token = _MUSEToken;
+        token = museToken;
     }
 
     function getExchangeAddress()
@@ -29,6 +25,6 @@ abstract contract BurnMUSE is Data {
         virtual
         returns (address exchange)
     {
-        exchange = _MUSEExchange;
+        exchange = router;
     }
 }

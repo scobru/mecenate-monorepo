@@ -18,6 +18,7 @@ abstract contract FeedViewer {
         f.totalStake = IMecenateFeed(feed).getTotalStaked();
         f.postCount = IMecenateFeed(feed).postCount();
         f.buyerPayment = IMecenateFeed(feed).getBuyerPayment();
+        f.tokenERC20Contract = IMecenateFeed(feed).tokenERC20Contract();
         return f;
     }
 
