@@ -12,7 +12,6 @@ import dotenv from "dotenv";
 import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
 import { saveAs } from "file-saver";
-import approveERC20 from "../helpers/approveERC20"
 
 
 const crypto = require("asymmetric-crypto");
@@ -76,6 +75,34 @@ const ViewFeed: NextPage = () => {
 
   const [userData, setUserData] = useState<any>([]);
   const deployedContractUsers = getDeployedContract(chain?.id.toString(), "MecenateUsers");
+  const deployedContractMuse = getDeployedContract(chain?.id.toString(), "MUSE");
+  const deployedContractDai = getDeployedContract(chain?.id.toString(), "MockDAI");
+
+  let museAddress = "";
+  let museAbi: ContractInterface[] = [];
+
+  let daiAddress = "";
+  let daiAbi: ContractInterface[] = [];
+
+  if (deployedContractMuse) {
+    ({ address: museAddress, abi: museAbi } = deployedContractMuse);
+  }
+
+  if (deployedContractDai) {
+    ({ address: daiAddress, abi: daiAbi } = deployedContractDai);
+  }
+
+  const museCtx = useContract({
+    address: museAddress,
+    abi: museAbi,
+    signerOrProvider: signer || provider,
+  });
+
+  const daiCtx = useContract({
+    address: daiAddress,
+    abi: daiAbi,
+    signerOrProvider: signer || provider,
+  });
 
   let feedAddress!: string;
   let feedAbi: ContractInterface[] = [];
@@ -293,8 +320,6 @@ const ViewFeed: NextPage = () => {
     );
 
     notification.warning("Save this data");
-
-    //saveAs(JSON.stringify(dataSaved), String(postCount) + feedCtx?.address + "_sellData.json");
 
     downloadFile({
       data: JSON.stringify(dataSaved),
@@ -751,6 +776,22 @@ const ViewFeed: NextPage = () => {
     await fetchData();
   }
 
+  async function approveERC20() {
+    if (tokenERC20Contract === "1") {
+      const approve = await museCtx?.approve(feedCtx?.address, stakeAmount);
+      if (approve) {
+        notification.success("Approved");
+      }
+      return approve;
+    } else if (tokenERC20Contract === "2") {
+      const approve = await daiCtx?.approve(feedCtx?.address, stakeAmount);
+      if (approve) {
+        notification.success("Approved");
+      }
+      return approve;
+    }
+  }
+
   useEffect(() => {
     try {
       fetchData();
@@ -758,6 +799,8 @@ const ViewFeed: NextPage = () => {
       console.error(e);
     }
   }, [feedCtx, router.isReady]);
+
+  // export chain id 
 
   return (
     <div className="flex flex-col items-center pt-2 p-2 m-2">
@@ -814,13 +857,12 @@ const ViewFeed: NextPage = () => {
                       <button
                         className="btn btn-primary w-full"
                         onClick={() => {
-                          approveERC20.approve(tokenERC20Contract, postStake, String(feedCtx?.address));
+                          approveERC20();
                         }}
                       >
                         Approve
                       </button>
                       <label className="block text-base-500 mt-8">Buyer Payment </label>
-
                       <input
                         type="text"
                         className="input w-full"
@@ -1352,8 +1394,9 @@ const ViewFeed: NextPage = () => {
             </div>
           </div>
         </div>
-      ) : null}
-    </div>
+      ) : null
+      }
+    </div >
   );
 };
 
@@ -1372,5 +1415,10 @@ function base64Mime(encoded: string) {
 
   return result;
 }
+
+
+// export props
+
+
 
 export default ViewFeed;

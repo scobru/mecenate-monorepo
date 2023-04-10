@@ -53,6 +53,18 @@ abstract contract TokenManager is BurnDAI {
         address to,
         uint256 value
     ) internal onlyValidTokenID(tokenID) {
+        //check allowance
+        if (tokenID == Structures.Tokens.MUSE) {
+            require(
+                IMUSE(getTokenAddress(tokenID)).allowance(from, to) >= value,
+                "insufficient allowance"
+            );
+        } else if (tokenID == Structures.Tokens.DAI) {
+            require(
+                IERC20(getTokenAddress(tokenID)).allowance(from, to) >= value,
+                "insufficient allowance"
+            );
+        }
         require(
             IERC20(getTokenAddress(tokenID)).transferFrom(from, to, value),
             "token transfer failed"

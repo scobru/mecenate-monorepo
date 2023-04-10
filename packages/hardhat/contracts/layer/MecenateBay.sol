@@ -130,6 +130,16 @@ contract MecenateBay is Ownable, FeedViewer {
             .getUserData(allRequests[index].buyer)
             .publicKey;
 
+        if (feed.tokenERC20Contract == Structures.Tokens.MUSE) {
+            // approve muse token to the feed
+            IERC20(museToken).approve(_feed, allRequests[index].payment);
+        } else if (feed.tokenERC20Contract == Structures.Tokens.DAI) {
+            // approve dai token to the feed
+            IERC20(daiToken).approve(_feed, allRequests[index].payment);
+        } else {
+            revert("Token is not valid");
+        }
+
         IMecenateFeed(_feed).acceptPost(
             publicKey,
             allRequests[index].buyer,
