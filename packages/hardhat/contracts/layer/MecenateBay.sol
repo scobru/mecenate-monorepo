@@ -87,6 +87,8 @@ contract MecenateBay is Ownable, FeedViewer {
                 address(this),
                 request.payment
             );
+        } else {
+            revert("Token is not valid");
         }
 
         contractCounter++;

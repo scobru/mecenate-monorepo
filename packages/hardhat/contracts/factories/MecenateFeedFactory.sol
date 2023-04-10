@@ -40,6 +40,7 @@ contract MecenateFeedFactory is Factory, FeedViewer {
             identityContract,
             address(this)
         );
+        return address(feed);
     }
 
     function chengeMuseToken(address _museToken) public onlyOwner {
@@ -55,9 +56,9 @@ contract MecenateFeedFactory is Factory, FeedViewer {
     }
 
     function getFeedInfo(
-        address _contract
+        address _feed
     ) public view returns (Structures.Feed memory) {
-        return _getFeedInfo(_contract);
+        return _getFeedInfo(_feed);
     }
 
     function getFeedsInfo() public view returns (Structures.Feed[] memory) {

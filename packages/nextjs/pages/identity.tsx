@@ -47,12 +47,6 @@ const Identity: NextPage = () => {
   const [pubKey, setPubKey] = React.useState<string>("");
   const [isSubmitted, setIsSubmitted] = React.useState(false);
 
-  const [subscriptions, setSubscriptions] = React.useState<Array<string>>([]);
-  const [subscriptionName, setSubscriptionName] = React.useState("");
-  const [subscriptionDescription, setSubscriptionDescription] = React.useState("");
-  const [subscriptionFee, setSubscriptionFee] = React.useState(0);
-  const [subscriptionDuration, setSubscriptionDuration] = React.useState(0);
-
   const [alreadyUser, setAlreadyUser] = React.useState(false);
 
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateTierFactory");
@@ -475,12 +469,10 @@ const Identity: NextPage = () => {
 
   const getContractData = async function getContractData() {
     if (factory && identity && signer) {
-      const subscriptions = await factory?.getSubscriptionsOwned(signer?.getAddress());
       const fee = await treasury?.fixedFee();
       const _identityFee = await treasury?.fixedFee();
       await fetchNFTBalance();
       await checkIfUserIsRegistered();
-      setSubscriptions(subscriptions);
       setFee(fee);
       setIdentityFee(_identityFee);
     }

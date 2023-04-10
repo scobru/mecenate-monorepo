@@ -20,6 +20,8 @@ const Home: NextPage = () => {
   const provider = useProvider();
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractStats = getDeployedContract(chain?.id.toString(), "MecenateStats");
+  const deployedContractMuse = getDeployedContract(chain?.id.toString(), "MUSE");
+  const deployedContractDai = getDeployedContract(chain?.id.toString(), "MockDAI");
 
   const [globalFee, setGlobalFee] = React.useState<string>("");
   const [fixedFee, setFixedFee] = React.useState<string>("");
@@ -29,6 +31,12 @@ const Home: NextPage = () => {
 
   let statsAddress = "";
   let statsAbi: ContractInterface[] = [];
+
+  let museAddress = "";
+  let museAbi: ContractInterface[] = [];
+
+  let daiAddress = "";
+  let daiAbi: ContractInterface[] = [];
 
   const [identityTotalSupply, setIdentityTotalSupply] = React.useState<string>("");
   const [stats, setStats] = React.useState<any>([]);
@@ -40,6 +48,26 @@ const Home: NextPage = () => {
   if (deployedContractStats) {
     ({ address: statsAddress, abi: statsAbi } = deployedContractStats);
   }
+
+  if (deployedContractMuse) {
+    ({ address: museAddress, abi: museAbi } = deployedContractMuse);
+  }
+
+  if (deployedContractDai) {
+    ({ address: daiAddress, abi: daiAbi } = deployedContractDai);
+  }
+
+  const museCtx = useContract({
+    address: museAddress,
+    abi: museAbi,
+    signerOrProvider: signer || provider,
+  });
+
+  const daiCtx = useContract({
+    address: daiAddress,
+    abi: daiAbi,
+    signerOrProvider: signer || provider,
+  });
 
   const statsCtx = useContract({
     address: statsAddress,
@@ -56,6 +84,16 @@ const Home: NextPage = () => {
   async function getStats() {
     const stats = await statsCtx?.getStats();
     setStats(stats);
+  }
+
+  async function mintMUSE() {
+    const tx = await museCtx?.mint(signer?.getAddress(), utils.parseEther("100"));
+    await tx?.wait();
+  }
+
+  async function mintDAI() {
+    const tx = await daiCtx?.mint(utils.parseEther("100"));
+    await tx?.wait();
   }
 
   useEffect(() => {
@@ -115,6 +153,24 @@ const Home: NextPage = () => {
             </div>
           </div>
         ) : null}
+        <div className="flex flex-row items-center justify-center w-full flex-1 px-20 text-center">
+          <button
+            className="btn btn-primary btn-lg mx-2"
+            onClick={() => {
+              mintMUSE();
+            }}
+          >
+            Mint MUSE
+          </button>
+          <button
+            className="btn btn-primary btn-lg"
+            onClick={() => {
+              mintDAI();
+            }}
+          >
+            Mint DAI
+          </button>
+        </div>
         <div className="flex-wrap bg-base-300  mt-2 px-8 py-12 shadow-sm">
           <div className="container p-10 mx-auto">
             <h1 className="text-3xl text-center mb-10">

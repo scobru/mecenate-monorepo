@@ -29,6 +29,7 @@ contract MecenateFeed is
         address _identityContract,
         address _factoryContract
     ) Data(_usersModuleContract, _identityContract, _factoryContract) {
+        tokenERC20Contract = Structures.Tokens.NaN;
         _transferOwnership(owner);
     }
 

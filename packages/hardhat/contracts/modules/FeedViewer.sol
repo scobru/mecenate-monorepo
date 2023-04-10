@@ -23,11 +23,11 @@ abstract contract FeedViewer {
     }
 
     function _getFeedsInfo(
-        address[] memory feeds
+        address[] memory contracts
     ) internal view returns (Structures.Feed[] memory) {
-        Structures.Feed[] memory f = new Structures.Feed[](feeds.length);
-        for (uint256 i = 0; i < feeds.length; i++) {
-            f[i] = _getFeedInfo(feeds[i]);
+        Structures.Feed[] memory f = new Structures.Feed[](contracts.length);
+        for (uint256 i = 0; i < contracts.length; i++) {
+            f[i] = _getFeedInfo(contracts[i]);
         }
         return f;
     }

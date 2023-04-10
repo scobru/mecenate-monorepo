@@ -68,18 +68,20 @@ const Feeds: NextPage = () => {
   });
 
   async function getFeeds() {
-    const _feeds = await factoryCtx?.getFeeds();
+    const _feeds = await factoryCtx?.getContracts();
     const _feedsInfo = await factoryCtx?.getFeedsInfo();
-    setFeeds(_feeds);
+    const _fixedFee = await factoryCtx?.getCreationFee();
     setFeedsInfos(_feedsInfo);
-    const _fixedFee = await treasuryCtx?.fixedFee();
+    setFeeds(_feeds);
+
     setFixedFee(_fixedFee);
+    console.log(_fixedFee)
     console.log(_feedsInfo);
     if (DEBUG) console.log(feeds);
   }
 
   async function getFeedsOwned() {
-    let _feeds = await factoryCtx?.getFeedsOwned(signer?.getAddress());
+    let _feeds = await factoryCtx?.getContractsOwnedBy(signer?.getAddress());
     // remove 0x0000000000000000000000000000000000000000 from _feeds
     _feeds = _feeds.filter((feed: string) => feed != "0x0000000000000000000000000000000000000000");
 
@@ -99,7 +101,7 @@ const Feeds: NextPage = () => {
   }
 
   async function buildFeed() {
-    const tx = await factoryCtx?.buildFeed({ value: fixedFee });
+    const tx = await factoryCtx?.createContract({ value: fixedFee });
     if (DEBUG) console.log(tx);
   }
 
@@ -112,8 +114,8 @@ const Feeds: NextPage = () => {
   // listen for events FeedCreated
   useEffect(() => {
     if (factoryCtx) {
-      factoryCtx.on("FeedCreated", (feedAddress: string, owner: string, event: any) => {
-        if (DEBUG) console.log("FeedCreated", feedAddress, owner, event);
+      factoryCtx.on("ContractCreated", (feedAddress: string, owner: string, event: any) => {
+        if (DEBUG) console.log("ContractCreated", feedAddress, owner, event);
         notification.success("New Feed Created");
         getFeeds();
       });

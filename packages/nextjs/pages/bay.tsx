@@ -13,6 +13,8 @@ const Bay: NextPage = () => {
 
   const deployedContractBay = getDeployedContract(chain?.id.toString(), "MecenateBay");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
+  const deployedContractMuse = getDeployedContract(chain?.id.toString(), "MUSE");
+  const deployedContractDai = getDeployedContract(chain?.id.toString(), "MockDAI");
 
   const [requests, setRequests] = React.useState<BayRequest[]>([]);
 
@@ -20,6 +22,7 @@ const Bay: NextPage = () => {
   const [requestPayment, setRequestPayment] = React.useState<string>("");
   const [requestStake, setRequestStake] = React.useState<string>("");
   const [requestAddress, setRequestAddress] = React.useState<string>("");
+  const [requestERC20Token, setRequestERC20Token] = React.useState<string>("");
 
   const [signerAddress, setSignerAddress] = React.useState<string>("");
 
@@ -32,6 +35,7 @@ const Bay: NextPage = () => {
     postAddress: string;
     accepted: boolean;
     postCount: string;
+    tokenERC20Contract: string;
   };
 
   let bayAddress!: string;
@@ -40,6 +44,12 @@ const Bay: NextPage = () => {
   let identityAddress!: string;
   let identityAbi: ContractInterface[] = [];
 
+  let museAddress = "";
+  let museAbi: ContractInterface[] = [];
+
+  let daiAddress = "";
+  let daiAbi: ContractInterface[] = [];
+
   if (deployedContractBay) {
     ({ address: bayAddress, abi: bayAbi } = deployedContractBay);
   }
@@ -47,6 +57,26 @@ const Bay: NextPage = () => {
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
   }
+
+  if (deployedContractMuse) {
+    ({ address: museAddress, abi: museAbi } = deployedContractMuse);
+  }
+
+  if (deployedContractDai) {
+    ({ address: daiAddress, abi: daiAbi } = deployedContractDai);
+  }
+
+  const museCtx = useContract({
+    address: museAddress,
+    abi: museAbi,
+    signerOrProvider: signer || provider,
+  });
+
+  const daiCtx = useContract({
+    address: daiAddress,
+    abi: daiAbi,
+    signerOrProvider: signer || provider,
+  });
 
   const bayCtx = useContract({
     address: bayAddress,
@@ -59,6 +89,23 @@ const Bay: NextPage = () => {
   //   abi: identityAbi,
   //   signerOrProvider: signer || provider,
   // });
+
+
+  async function approveERC20Token() {
+    if (signer) {
+      if (requestERC20Token == "1") {
+        const tx = await museCtx?.approve(bayAddress, parseEther(requestPayment));
+        if (tx) {
+          notification.success("Muse approved successfully");
+        }
+      } else {
+        const tx = await daiCtx?.approve(bayAddress, parseEther(requestPayment));
+        if (tx) {
+          notification.success("Dai approved successfully");
+        }
+      }
+    }
+  }
 
   async function acceptBayRequest(index: number, address: string) {
     if (signer) {
@@ -80,8 +127,9 @@ const Bay: NextPage = () => {
 
   async function createBayContract() {
     const _request = ethers.utils.formatBytes32String(requestString);
-    console.log(_request);
     const counter = await bayCtx?.contractCounter();
+
+    console.log("request", requestERC20Token)
 
     if (signer) {
       const request = {
@@ -93,9 +141,10 @@ const Bay: NextPage = () => {
         postAddress: "0x0000000000000000000000000000000000000000",
         accepted: false,
         postCount: 0,
+        tokenERC20Contract: Number(requestERC20Token)
       };
 
-      const tx = await bayCtx?.createRequest(request, { value: parseEther(requestPayment) });
+      const tx = await bayCtx?.createRequest(request);
 
 
       if (tx) {
@@ -185,6 +234,24 @@ const Bay: NextPage = () => {
               onChange={e => setRequestString(e.target.value)}
             />
             <label className="text-black font-semibold text-sm" htmlFor="request">
+              Token Type
+            </label>
+            <select
+              className="border-2 border-gray-300  h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none my-2"
+              name="token"
+              onChange={e => setRequestERC20Token(e.target.value)}
+            >
+              <option value="1">MUSE</option>
+              <option value="2">DAI</option>
+            </select>
+            <button
+              className="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-4 rounded my-2"
+              onClick={approveERC20Token}
+            >
+              Approve
+            </button>
+
+            <label className="text-black font-semibold text-sm" htmlFor="request">
               Reward
             </label>
             <input
@@ -241,6 +308,10 @@ const Bay: NextPage = () => {
                 <div className="my-2 font-medium">🔢 Hash Count : {String(request.postCount)}</div>
 
                 <div className="my-2 font-medium">✔️ Accepted : {String(request.accepted)}</div>
+                <div className="my-2 font-medium">🪙 ERC20 : {
+                  Number(request.tokenERC20Contract) === 1 ? "MUSE" : "DAI"
+                }</div>
+
                 <div className="flex flex-row space-x-4 my-4">
                   <input
                     className="input-primary  bg-white text-black  h-10 px-5 pr-16  text-sm focus:outline-none"

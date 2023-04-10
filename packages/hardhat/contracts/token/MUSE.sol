@@ -37,7 +37,7 @@ contract MUSE is
         _unpause();
     }
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to, uint256 amount) public /*  onlyOwner */ {
         _mint(to, amount);
     }
 

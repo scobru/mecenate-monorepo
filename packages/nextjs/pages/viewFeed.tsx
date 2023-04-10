@@ -12,6 +12,8 @@ import dotenv from "dotenv";
 import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
 import { saveAs } from "file-saver";
+import approveERC20 from "../helpers/approveERC20"
+
 
 const crypto = require("asymmetric-crypto");
 
@@ -64,6 +66,7 @@ const ViewFeed: NextPage = () => {
   const [imageFile, setImageFile] = React.useState<any>("");
   const [image, setImage] = React.useState("");
   const [postCount, setPostCount] = useState<any>("");
+  const [tokenERC20Contract, setTokenERC20Contract] = useState<any>([]);
 
   const user = "";
   const owner = "";
@@ -311,10 +314,8 @@ const ViewFeed: NextPage = () => {
       Number(postDuration),
       buyer,
       parseEther(buyerPayment),
-
-      {
-        value: parseEther(postStake),
-      },
+      parseEther(postStake),
+      Number(tokenERC20Contract)
     );
   };
 
@@ -779,6 +780,18 @@ const ViewFeed: NextPage = () => {
                       </label>
                     </div>
                     <div className="modal-body w-auto space-y-6 text-left">
+                      <label className="block text-base-500">ERC20</label>
+                      <select
+                        className="form-select w-full mb-8"
+                        value={tokenERC20Contract}
+                        onChange={e => setTokenERC20Contract(e.target.value)}
+                      >
+                        <option value="1">MUSE</option>
+                        <option value="2">DAI</option>
+
+                      </select>
+
+
                       <label className="block text-base-500">Duration</label>
                       <select
                         className="form-select w-full mb-8"
@@ -798,6 +811,14 @@ const ViewFeed: NextPage = () => {
                         value={postStake}
                         onChange={e => setPostStake(e.target.value)}
                       />
+                      <button
+                        className="btn btn-primary w-full"
+                        onClick={() => {
+                          approveERC20.approve(tokenERC20Contract, postStake, String(feedCtx?.address));
+                        }}
+                      >
+                        Approve
+                      </button>
                       <label className="block text-base-500 mt-8">Buyer Payment </label>
 
                       <input
@@ -828,36 +849,38 @@ const ViewFeed: NextPage = () => {
                         <option value="3">Audio</option>
                         <option value="4">File</option>
                       </select>
-                      {postType == 0 ? (
-                        <div>
-                          <label className="block text-base-500">Message</label>
-                          <input
-                            type="text"
-                            className="input w-full"
-                            placeholder="Data"
-                            value={postRawData}
-                            onChange={e => setPostRawData(e.target.value)}
-                          />
-                        </div>
-                      ) : postType == 1 || 2 || 3 || 4 ? (
-                        <div>
-                          <Dropzone onDrop={handleImageDrop}>
-                            {({ getRootProps, getInputProps }) => (
-                              <div
-                                {...getRootProps()}
-                                className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
-                              >
-                                <input {...getInputProps()} />
-                                {imageFile ? (
-                                  <p>{imageFile?.name}</p>
-                                ) : (
-                                  <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
-                                )}
-                              </div>
-                            )}
-                          </Dropzone>
-                        </div>
-                      ) : null}
+                      {
+                        postType == 0 ? (
+                          <div>
+                            <label className="block text-base-500">Message</label>
+                            <input
+                              type="text"
+                              className="input w-full"
+                              placeholder="Data"
+                              value={postRawData}
+                              onChange={e => setPostRawData(e.target.value)}
+                            />
+                          </div>
+                        ) : postType == 1 || 2 || 3 || 4 ? (
+                          <div>
+                            <Dropzone onDrop={handleImageDrop}>
+                              {({ getRootProps, getInputProps }) => (
+                                <div
+                                  {...getRootProps()}
+                                  className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
+                                >
+                                  <input {...getInputProps()} />
+                                  {imageFile ? (
+                                    <p>{imageFile?.name}</p>
+                                  ) : (
+                                    <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
+                                  )}
+                                </div>
+                              )}
+                            </Dropzone>
+                          </div>
+                        ) : null
+                      }
                       <button
                         className="btn btn-primary w-full mt-4"
                         onClick={async () => {
