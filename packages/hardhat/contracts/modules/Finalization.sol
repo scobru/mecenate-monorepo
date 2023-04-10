@@ -19,16 +19,14 @@ abstract contract Finalization is Data, Events, Staking {
         if (post.postdata.settings.endTimeStamp < block.timestamp) {
             post.postdata.settings.status = Structures.PostStatus.Finalized;
 
-            uint256 buyerStake = _takeStake(
+            uint256 buyerStake = Deposit._decreaseDeposit(
                 tokenERC20Contract,
-                post.postdata.settings.buyer,
                 post.postdata.settings.buyer,
                 post.postdata.escrow.payment
             );
 
-            uint256 sellerStake = _addStake(
+            uint256 sellerStake = Deposit._increaseDeposit(
                 tokenERC20Contract,
-                post.postdata.settings.seller,
                 post.postdata.settings.seller,
                 post.postdata.escrow.payment
             );
@@ -44,16 +42,14 @@ abstract contract Finalization is Data, Events, Staking {
                 "You are not the buyer"
             );
             if (valid == true) {
-                uint256 buyerStake = _takeStake(
+                uint256 buyerStake = Deposit._decreaseDeposit(
                     tokenERC20Contract,
-                    post.postdata.settings.buyer,
                     post.postdata.settings.buyer,
                     post.postdata.escrow.payment
                 );
 
-                uint256 sellerStake = _addStake(
+                uint256 sellerStake = Deposit._increaseDeposit(
                     tokenERC20Contract,
-                    post.postdata.settings.seller,
                     post.postdata.settings.seller,
                     post.postdata.escrow.payment
                 );

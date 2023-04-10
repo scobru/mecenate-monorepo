@@ -20,7 +20,7 @@ abstract contract Acceptance is Data, Events, Staking {
         uint256 _payment = _addStake(
             tokenERC20Contract,
             _buyer,
-            _buyer,
+            msg.sender,
             payment
         );
 

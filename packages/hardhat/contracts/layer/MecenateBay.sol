@@ -113,12 +113,12 @@ contract MecenateBay is Ownable, FeedViewer {
 
         require(
             feed.seller == msg.sender,
-            "seller is not the same of the feed"
+            "Seller is not the same of the feed"
         );
 
         require(
             feed.buyerPayment >= allRequests[index].payment,
-            "payment is not the same of the feed"
+            "Payment is not the same of the feed"
         );
 
         require(

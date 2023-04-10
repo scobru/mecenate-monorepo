@@ -10,19 +10,19 @@ abstract contract BurnDAI is BurnMUSE {
     using SafeMath for uint256;
 
     function _burnFrom(address from, uint256 value) internal override {
-        IERC20(daiToken).transferFrom(from, address(this), value);
+        IERC20(getDaiToken()).transferFrom(from, address(this), value);
 
         _burn(value);
     }
 
     function _burn(uint256 value) internal override {
         // approve uniswap for token transfer
-        IERC20(daiToken).approve(router, value);
+        IERC20(getDaiToken()).approve(router, value);
 
         // swap dai for MUSE
         uint256 tokens_sold = value;
         uint256 tokens_bought = _swapTokensforToken(
-            daiToken,
+            getDaiToken(),
             BurnMUSE.getTokenAddress(),
             tokens_sold
         );
@@ -38,7 +38,7 @@ abstract contract BurnDAI is BurnMUSE {
         override
         returns (address token)
     {
-        token = daiToken;
+        token = IMecenateFactory(factoryContract).daiToken();
     }
 
     function getExchangeAddress()

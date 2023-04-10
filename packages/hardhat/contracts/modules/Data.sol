@@ -23,10 +23,6 @@ contract Data is Ownable {
 
     address public factoryContract;
 
-    address public museToken;
-
-    address public daiToken;
-
     address public router;
 
     Structures.Tokens public tokenERC20Contract;
@@ -42,8 +38,14 @@ contract Data is Ownable {
         identityContract = _identityContract;
         post.postdata.settings.status = Structures.PostStatus.Waiting;
         factoryContract = _factoryContract;
-        museToken = IMecenateFactory(factoryContract).museToken();
-        daiToken = IMecenateFactory(factoryContract).daiToken();
         router = IMecenateFactory(factoryContract).router();
+    }
+
+    function getMuseToken() public view returns (address _museToken) {
+        return IMecenateFactory(factoryContract).museToken();
+    }
+
+    function getDaiToken() public view returns (address _daiToken) {
+        return IMecenateFactory(factoryContract).daiToken();
     }
 }

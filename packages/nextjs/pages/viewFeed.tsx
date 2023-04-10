@@ -665,7 +665,7 @@ const ViewFeed: NextPage = () => {
 
       const hashCheck = responseProofHashJSON.datahash === dataHash;
 
-      if (feedData[1][0].postType == 1 || 2 || 3 || 4) {
+      if (feedData[1][0].postType == 1 || feedData[1][0].postType == 2 || feedData[1][0].postType == 3 || feedData[1][0].postType == 4) {
         const mimeType: any = base64Mime(decryptFile);
 
         // Repair malformed base64 data
@@ -675,12 +675,14 @@ const ViewFeed: NextPage = () => {
         );
 
         saveAs(file, String(postCount) + feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1]);
+      } else {
+        notification.success(decryptFile);
       }
 
       await fetchData();
 
       return {
-        rawData: decrypted,
+        rawData: decryptFile,
         hashCheck: hashCheck,
       };
     } else {
@@ -778,13 +780,13 @@ const ViewFeed: NextPage = () => {
 
   async function approveERC20() {
     if (tokenERC20Contract === "1") {
-      const approve = await museCtx?.approve(feedCtx?.address, stakeAmount);
+      const approve = await museCtx?.approve(feedCtx?.address, parseEther(postStake));
       if (approve) {
         notification.success("Approved");
       }
       return approve;
     } else if (tokenERC20Contract === "2") {
-      const approve = await daiCtx?.approve(feedCtx?.address, stakeAmount);
+      const approve = await daiCtx?.approve(feedCtx?.address, parseEther(postStake));
       if (approve) {
         notification.success("Approved");
       }

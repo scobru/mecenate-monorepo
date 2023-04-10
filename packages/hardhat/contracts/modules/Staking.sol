@@ -76,8 +76,18 @@ abstract contract Staking is Data, Deposit, TokenManager {
             amountToBurn
         );
 
+        if (router == address(0)) {
+            // burn the stake amount
+            TokenManager._transfer(
+                tokenID,
+                IMecenateFactory(factoryContract).treasuryContract(),
+                amountToBurn
+            );
+        } else {
+            // burn the stake amount
+            TokenManager._burn(tokenID, amountToBurn);
+        }
         // burn the stake amount
-        TokenManager._burn(tokenID, amountToBurn);
 
         // emit event
         emit StakeBurned(tokenID, staker, amountToBurn);
