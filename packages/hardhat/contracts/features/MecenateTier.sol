@@ -64,8 +64,10 @@ contract MecenateTier is Ownable {
         uint256 _fee,
         uint256 _subscriptionDuration
     ) public {
-        require(creator != address(0), "Contract already initialized");
-
+        require(
+            msg.sender == address(factoryContract),
+            "Only Factory contract can call this"
+        );
         creator = _creator;
 
         name = _name;

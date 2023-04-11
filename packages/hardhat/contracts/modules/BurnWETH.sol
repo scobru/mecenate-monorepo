@@ -6,36 +6,30 @@ import "../interfaces/IMUSE.sol";
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-abstract contract BurnDAI is BurnMUSE {
+abstract contract BurnWETH is BurnMUSE {
     using SafeMath for uint256;
 
     function _burnFrom(address from, uint256 value) internal override {
-        IERC20(getDaiToken()).transferFrom(from, address(this), value);
+        IERC20(getWethToken()).transferFrom(from, address(this), value);
 
         _burn(value);
     }
 
     function _burn(uint256 value) internal override {
         // approve uniswap for token transfer
-        IERC20(getDaiToken()).approve(router, value);
+        IERC20(getWethToken()).approve(router, value);
 
         // swap dai for MUSE
         uint256 tokens_sold = value;
 
         uint256 tokens_bought = _swapTokensforToken(
-            getDaiToken(),
             getWethToken(),
+            BurnMUSE.getTokenAddress(),
             tokens_sold
         );
 
-        uint256 tokens_sold_to_muse = _swapTokensforToken(
-            getWethToken(),
-            BurnMUSE.getTokenAddress(),
-            tokens_bought
-        );
-
         // burn MUSE
-        BurnMUSE._burn(tokens_sold_to_muse);
+        BurnMUSE._burn(tokens_bought);
     }
 
     function getTokenAddress()
@@ -45,7 +39,7 @@ abstract contract BurnDAI is BurnMUSE {
         override
         returns (address token)
     {
-        token = IMecenateFeedFactory(factoryContract).daiToken();
+        token = IMecenateFeedFactory(factoryContract).wethToken();
     }
 
     function getExchangeAddress()

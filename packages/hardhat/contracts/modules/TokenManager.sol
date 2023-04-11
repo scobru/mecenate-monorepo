@@ -65,6 +65,7 @@ abstract contract TokenManager is BurnDAI {
                 "insufficient allowance"
             );
         }
+
         require(
             IERC20(getTokenAddress(tokenID)).transferFrom(from, to, value),
             "token transfer failed"

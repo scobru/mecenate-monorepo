@@ -2,7 +2,7 @@ pragma solidity 0.8.19;
 
 // import IERC20
 import "../interfaces/IMUSE.sol";
-import "../interfaces/IMecenateFactory.sol";
+import "../interfaces/IMecenateFeedFactory.sol";
 import "./Data.sol";
 
 abstract contract BurnMUSE is Data {
@@ -16,7 +16,7 @@ abstract contract BurnMUSE is Data {
     }
 
     function getTokenAddress() internal view virtual returns (address token) {
-        token = IMecenateFactory(factoryContract).museToken();
+        token = IMecenateFeedFactory(factoryContract).museToken();
     }
 
     function getExchangeAddress()

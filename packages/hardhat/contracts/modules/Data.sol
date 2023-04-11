@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateIdentity.sol";
 import "../interfaces/IMecenateTreasury.sol";
-import "../interfaces/IMecenateFactory.sol";
+import "../interfaces/IMecenateFeedFactory.sol";
 
 contract Data is Ownable {
     uint256 public constant punishmentRatio = 100000000000000000;
@@ -38,14 +38,18 @@ contract Data is Ownable {
         identityContract = _identityContract;
         post.postdata.settings.status = Structures.PostStatus.Waiting;
         factoryContract = _factoryContract;
-        router = IMecenateFactory(factoryContract).router();
+        router = IMecenateFeedFactory(factoryContract).router();
     }
 
     function getMuseToken() public view returns (address _museToken) {
-        return IMecenateFactory(factoryContract).museToken();
+        return IMecenateFeedFactory(factoryContract).museToken();
     }
 
     function getDaiToken() public view returns (address _daiToken) {
-        return IMecenateFactory(factoryContract).daiToken();
+        return IMecenateFeedFactory(factoryContract).daiToken();
+    }
+
+    function getWethToken() public view returns (address _wethToken) {
+        return IMecenateFeedFactory(factoryContract).wethToken();
     }
 }

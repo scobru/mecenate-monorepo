@@ -28,7 +28,7 @@ contract MecenateTierFactory is Factory {
         address newContract = createContract();
         MecenateTier tier = MecenateTier(newContract);
         tier.initialize(
-            msg.sender,
+            address(this),
             name,
             description,
             fee,

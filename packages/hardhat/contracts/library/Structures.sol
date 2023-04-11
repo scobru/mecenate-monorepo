@@ -31,7 +31,8 @@ library Structures {
     enum Tokens {
         NaN,
         MUSE,
-        DAI
+        DAI,
+        WETH
     }
 
     struct Post {

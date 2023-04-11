@@ -12,6 +12,8 @@ contract MecenateFeedFactory is Factory, FeedViewer {
 
     address public daiToken;
 
+    address public wethToken;
+
     address public router;
 
     address public usersMouduleContract;
@@ -22,11 +24,13 @@ contract MecenateFeedFactory is Factory, FeedViewer {
         address _treasuryContract,
         address _museToken,
         address _daiToken,
+        address _wethToken,
         address _router
     ) Factory(_identityContract, _treasuryContract) {
         router = _router;
         museToken = museToken;
         daiToken = _daiToken;
+        wethToken = _wethToken;
         usersMouduleContract = _usersMouduleContract;
         _transferOwnership(address(0x3db5E84e0eBBEa945a0a82E879DcB7E1D1a587B4));
     }
@@ -43,7 +47,7 @@ contract MecenateFeedFactory is Factory, FeedViewer {
         return address(feed);
     }
 
-    function chengeMuseToken(address _museToken) public onlyOwner {
+    function changeMuseToken(address _museToken) public onlyOwner {
         museToken = _museToken;
     }
 

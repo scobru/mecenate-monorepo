@@ -109,7 +109,7 @@ const Tiers: NextPage = () => {
 
   const getContractData = async function getContractData() {
     if (factory && identity && signer) {
-      const subscriptions = await factory?.getSubscriptionsOwned(signer?.getAddress());
+      const subscriptions = await factory?.getContractsOwnedBy(signer?.getAddress());
       const _sub = subscriptions.filter(
         (feed: string) => subscriptions != "0x0000000000000000000000000000000000000000",
       );
@@ -127,7 +127,6 @@ const Tiers: NextPage = () => {
     event?.preventDefault();
     if (factory) {
       const tx = await factory.createMecenateSubscription(
-        signer?.getAddress(),
         subscriptionName,
         subscriptionDescription,
         parseEther(subscriptionFee),

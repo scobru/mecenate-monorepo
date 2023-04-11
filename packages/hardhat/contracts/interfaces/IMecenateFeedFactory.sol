@@ -1,13 +1,12 @@
 pragma solidity 0.8.19;
+import "./IMecenateFactory.sol";
 
-interface IMecenateFeedFactory {
-    function owner() external view returns (address payable);
+interface IMecenateFeedFactory is IMecenateFactory {
+    function museToken() external view returns (address);
 
-    function treasuryContract() external view returns (address payable);
+    function wethToken() external view returns (address);
 
-    function identityContract() external view returns (address);
+    function daiToken() external view returns (address);
 
-    function feeds() external view returns (address[] memory);
-
-    function contractCounter() external view returns (uint256);
+    function router() external view returns (address);
 }

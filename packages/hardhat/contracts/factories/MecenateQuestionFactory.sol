@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
-
 import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 import {IMecenateTreasury} from "../interfaces/IMecenateTreasury.sol";
 import {Factory} from "../modules/Factory.sol";
