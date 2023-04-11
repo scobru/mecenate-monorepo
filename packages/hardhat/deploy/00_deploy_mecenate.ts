@@ -96,6 +96,19 @@ const deployYourContract: DeployFunction = async function (
   users.receipt &&
     console.log("Users deployed at:", users.receipt.contractAddress);
 
+  const MockWETH = await deploy("MockWETH", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  MockWETH.receipt &&
+    console.log("MockWETH deployed at:", MockWETH.receipt.contractAddress);
+
   const MockDAI = await deploy("MockDAI", {
     from: deployer,
     // Contract constructor arguments
@@ -118,6 +131,7 @@ const deployYourContract: DeployFunction = async function (
       treasury.address,
       museToken.address,
       MockDAI.address,
+      MockWETH.address,
       router,
     ],
     log: true,
