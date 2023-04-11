@@ -131,7 +131,11 @@ abstract contract Staking is Data, Deposit, TokenManager {
         return (amountSeller + amountBuyer);
     }
 
-    function addStake() external payable returns (uint256) {
+    function addStake(
+        address staker,
+        address funder,
+        uint256 amountToAdd
+    ) external returns (uint256) {
         require(
             post.postdata.settings.status == Structures.PostStatus.Waiting ||
                 post.postdata.settings.status ==
@@ -152,17 +156,17 @@ abstract contract Staking is Data, Deposit, TokenManager {
         if (msg.sender == post.postdata.settings.buyer) {
             stakerBalance = _addStake(
                 tokenERC20Contract,
-                msg.sender,
-                msg.sender,
-                msg.value
+                staker,
+                funder,
+                amountToAdd
             );
             post.postdata.escrow.payment = stakerBalance;
         } else if (msg.sender == post.postdata.settings.seller) {
             stakerBalance = _addStake(
                 tokenERC20Contract,
-                msg.sender,
-                msg.sender,
-                msg.value
+                staker,
+                funder,
+                amountToAdd
             );
             post.postdata.escrow.stake = stakerBalance;
         } else {
@@ -173,8 +177,10 @@ abstract contract Staking is Data, Deposit, TokenManager {
     }
 
     function takeStake(
+        address staker,
+        address funder,
         uint256 amountToTake
-    ) external payable returns (uint256) {
+    ) external returns (uint256) {
         require(
             post.postdata.settings.status == Structures.PostStatus.Waiting ||
                 post.postdata.settings.status ==
@@ -201,24 +207,22 @@ abstract contract Staking is Data, Deposit, TokenManager {
         if (msg.sender == post.postdata.settings.buyer) {
             stakerBalance = _takeStake(
                 tokenERC20Contract,
-                msg.sender,
-                msg.sender,
+                staker,
+                funder,
                 amountToTake
             );
             post.postdata.escrow.payment = stakerBalance;
         } else if (msg.sender == post.postdata.settings.seller) {
             stakerBalance = _takeStake(
                 tokenERC20Contract,
-                msg.sender,
-                msg.sender,
+                staker,
+                funder,
                 amountToTake
             );
             post.postdata.escrow.stake = stakerBalance;
         } else {
             revert("Not buyer or seller");
         }
-
-        payable(msg.sender).transfer(amountToTake);
 
         return stakerBalance;
     }
