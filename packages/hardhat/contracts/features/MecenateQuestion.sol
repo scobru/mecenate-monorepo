@@ -2,9 +2,12 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "../interfaces/IMecenateFactory.sol";
 import "../interfaces/IMecenateTreasury.sol";
+
+import "../library/Structures.sol";
 
 contract MecenateQuestion is Ownable {
     using SafeMath for uint256;
@@ -71,28 +74,52 @@ contract MecenateQuestion is Ownable {
 
     uint256 public resolveTimestamp;
 
-    constructor(address _factoryContract, address _creator) {
+    address public tokenERC20Contract;
+
+    constructor(
+        address _factoryContract,
+        address _creator,
+        address _tokenERC20Contract
+    ) {
         factoryContract = _factoryContract;
-        _transferOwnership(_creator);
+        creator = _creator;
+        tokenERC20Contract = _tokenERC20Contract;
+        _transferOwnership(creator);
     }
 
     function create(
         string memory _question,
         uint256 _endTime,
-        uint256 _punishPercentage
+        uint256 _punishPercentage,
+        uint256 _stakeAmount
     ) external payable {
         if (creatorStaked == 0) {
-            require(msg.value > 0, "Amount should be greater than 0");
+            require(_stakeAmount > 0, "Amount should be greater than 0");
         }
 
         require(_endTime > block.timestamp, "End time should be in the future");
 
+        //check allowance
+        require(
+            IERC20(tokenERC20Contract).allowance(msg.sender, address(this)) >=
+                _stakeAmount,
+            "Allowance is not enough"
+        );
+
+        //transfer token
+        IERC20(tokenERC20Contract).transferFrom(
+            msg.sender,
+            address(this),
+            _stakeAmount
+        );
+
         address treasuryContract = IMecenateFactory(factoryContract)
             .treasuryContract();
         uint256 globalFee = IMecenateTreasury(treasuryContract).globalFee();
-        uint256 fee = (msg.value).mul(globalFee).div(10000);
-        payable(treasuryContract).transfer(fee);
-        uint256 amountAfter = msg.value.sub(fee);
+        uint256 fee = (_stakeAmount).mul(globalFee).div(10000);
+        uint256 amountAfter = _stakeAmount.sub(fee);
+
+        IERC20(tokenERC20Contract).transfer(treasuryContract, fee / 10);
 
         punishPercentage = _punishPercentage;
         question = _question;
@@ -100,30 +127,47 @@ contract MecenateQuestion is Ownable {
         creator = msg.sender;
         status = Status.Open;
 
-        if (msg.value > 0) {
+        if (_stakeAmount > 0) {
             creatorStaked += amountAfter;
         }
 
         questionCounter++;
     }
 
-    function stake(Choice _choice) external payable {
-        require(msg.value > 0, "Amount should be greater than 0");
+    function stake(Choice _choice, uint256 _stakeAmount) external {
+        require(_stakeAmount > 0, "Amount should be greater than 0");
         require(endTime > block.timestamp, "Prediction has ended");
         require(status == Status.Open, "Prediction is not Open");
+
+        //check allowance
+        require(
+            IERC20(tokenERC20Contract).allowance(msg.sender, address(this)) >=
+                _stakeAmount,
+            "Allowance is not enough"
+        );
+
+        //transfer token
+        IERC20(tokenERC20Contract).transferFrom(
+            msg.sender,
+            address(this),
+            _stakeAmount
+        );
 
         address treasuryContract = IMecenateFactory(factoryContract)
             .treasuryContract();
 
         uint256 globalFee = IMecenateTreasury(treasuryContract).globalFee();
 
-        uint256 creatorFeeAmount = (msg.value).mul(globalFee).div(10000);
+        uint256 creatorFeeAmount = (_stakeAmount).mul(globalFee).div(10000);
 
-        uint256 amountAfter = (msg.value).sub(creatorFeeAmount);
+        uint256 amountAfter = (_stakeAmount).sub(creatorFeeAmount);
 
         fees += creatorFeeAmount - (creatorFeeAmount / 10);
 
-        payable(treasuryContract).transfer(creatorFeeAmount / 10);
+        IERC20(tokenERC20Contract).transfer(
+            treasuryContract,
+            creatorFeeAmount / 10
+        );
 
         bool isStaker = false;
 
@@ -307,7 +351,11 @@ contract MecenateQuestion is Ownable {
 
             require(reward > 0, "Reward should be greater than 0");
 
-            (bool success, ) = msg.sender.call{value: reward}("");
+            bool success = IERC20(tokenERC20Contract).transfer(
+                msg.sender,
+                reward
+            );
+
             require(success, "Transfer failed");
         } else if (communityAnswer == Choice.No) {
             userShares = shares[Choice.No][msg.sender];
@@ -323,7 +371,11 @@ contract MecenateQuestion is Ownable {
 
             require(reward > 0, "Reward should be greater than 0");
 
-            (bool success, ) = msg.sender.call{value: reward}("");
+            bool success = IERC20(tokenERC20Contract).transfer(
+                msg.sender,
+                reward
+            );
+
             require(success, "Transfer failed");
         } else {
             revert("Prediction is not resolved yet");
@@ -333,12 +385,12 @@ contract MecenateQuestion is Ownable {
     }
 
     function withdrawFees() public {
-        require(msg.sender == creator);
+        require(msg.sender == creator, "Only creator can withdraw fees");
         require(status == Status.Close, "Prediction is not Resolved");
         uint256 amount = fees + creatorStaked;
         fees = 0;
         creatorStaked = 0;
-        (bool success, ) = msg.sender.call{value: amount}("");
+        bool success = IERC20(tokenERC20Contract).transfer(msg.sender, amount);
         require(success, "Transfer failed");
     }
 
@@ -356,9 +408,11 @@ contract MecenateQuestion is Ownable {
             .treasuryContract();
 
         if (predictionBalance > 0) {
-            (bool success, ) = treasuryContract.call{value: predictionBalance}(
-                ""
+            bool success = IERC20(tokenERC20Contract).transfer(
+                msg.sender,
+                predictionBalance
             );
+
             require(success, "Transfer failed");
         }
 

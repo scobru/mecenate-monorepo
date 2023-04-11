@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+
 import {MecenateFeed} from "../features/MecenateFeed.sol";
 import "../interfaces/IMecenateUsers.sol";
 import "../modules/FeedViewer.sol";

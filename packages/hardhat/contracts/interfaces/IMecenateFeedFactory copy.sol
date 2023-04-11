@@ -1,7 +1,7 @@
 pragma solidity 0.8.19;
 import "./IMecenateFactory.sol";
 
-interface IMecenateQuestionFactory is IMecenateFactory {
+interface IMecenateFeedFactory is IMecenateFactory {
     function museToken() external view returns (address);
 
     function wethToken() external view returns (address);

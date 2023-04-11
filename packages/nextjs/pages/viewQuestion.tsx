@@ -33,8 +33,12 @@ const ViewQuestion: NextPage = () => {
   const [yourQuestion, setYourQuestion] = useState<string>();
   const [endTime, setEndTime] = useState<string>();
   const [stake, setStake] = useState<string>();
+
   const deployedContract = getDeployedContract(chain?.id.toString(), "MecenateQuestion");
   const deployedTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
+  const deployedFactory = getDeployedContract(chain?.id.toString(), "MecenateQuestionFactory");
+  const deployedERC20 = getDeployedContract(chain?.id.toString(), "MockDAI");
+
 
   const [creatorAnswer, setCreatorAnswer] = useState<number>();
   const [yourAnswer, setYourAnswer] = useState<boolean>();
@@ -53,11 +57,23 @@ const ViewQuestion: NextPage = () => {
   const [punishmentPercentage, setPunishmentPercentage] = useState<string>();
   const [isFetch, setIsFetch] = useState<boolean>(false);
   const [creationFee, setCreationFee] = useState<string>();
+  const [tokenERC20Contract, setTokenERC20Contract] = useState<string>();
+  const [tokenERC20Address, setTokenERC20Address] = useState<string>();
 
   let ctxAbi: ContractInterface[] = [];
 
   let treasuryAddress;
   let treasuryAbi: ContractInterface[] = [];
+
+  let factoryAddress;
+  let factoryAbi: ContractInterface[] = [];
+
+  let erc20Address;
+  let erc20Abi: ContractInterface[] = [];
+
+  if (deployedFactory) {
+    ({ abi: factoryAbi, address: factoryAddress } = deployedFactory);
+  }
 
   if (deployedContract) {
     ({ abi: ctxAbi } = deployedContract);
@@ -66,6 +82,16 @@ const ViewQuestion: NextPage = () => {
   if (deployedTreasury) {
     ({ abi: treasuryAbi, address: treasuryAddress } = deployedTreasury);
   }
+
+  if (deployedERC20) {
+    ({ abi: erc20Abi, address: erc20Address } = deployedERC20);
+  }
+
+  const factoryCtx = useContract({
+    address: factoryAddress,
+    abi: factoryAbi,
+    signerOrProvider: signer || provider,
+  });
 
   const ctx = useContract({
     address: String(addr),
@@ -78,6 +104,19 @@ const ViewQuestion: NextPage = () => {
     abi: treasuryAbi,
     signerOrProvider: signer || provider,
   });
+
+
+  async function approve() {
+    console.log(tokenERC20Contract)
+    const tokenAddress = await ctx?.tokenERC20Contract();
+    console.log(tokenAddress)
+    const contract = new ethers.Contract(tokenAddress, erc20Abi, signer);
+    const tx = await contract.approve(ctx?.address, parseEther(stake));
+    await tx.wait();
+    if (tx) {
+      notification.success("Approve success");
+    }
+  }
 
   // convert second to date
   function convertToDate(seconds: number) {
@@ -188,9 +227,9 @@ const ViewQuestion: NextPage = () => {
   }
 
   async function createPrediction() {
-    const tx = await ctx?.create(yourQuestion, endTime, Number(punishmentPercentage) * 100, {
-      value: parseEther(String(stake)),
-    });
+    const tx = await ctx?.create(yourQuestion, endTime, Number(punishmentPercentage) * 100,
+      parseEther(String(stake))
+    );
   }
 
   async function stakePrediction() {
@@ -203,7 +242,7 @@ const ViewQuestion: NextPage = () => {
 
     console.log(stake);
 
-    const tx = await ctx?.stake(_creatorAnswer, { value: parseEther(String(stake)) });
+    const tx = await ctx?.stake(_creatorAnswer, parseEther(String(stake)));
   }
 
   async function withdrawFees() {
@@ -234,13 +273,22 @@ const ViewQuestion: NextPage = () => {
           placeholder="End Time"
           onChange={e => setEndTime(e.target.value)}
         />
+
+
         <input
           type="text"
           className="input-lg lg:w-full p-2 border rounded-md my-2 bg-transparent "
           placeholder="Stake"
           onChange={e => setStake(e.target.value)}
         />
-
+        <button
+          className="btn w-1/2 p-2 border border-gray-300 rounded-md my-2 mx-2"
+          onClick={() => {
+            approve();
+          }}
+        >
+          Approve
+        </button>
         <input
           type="text"
           className="input-lg lg:w-full p-2 border rounded-md my-2 bg-transparent "
@@ -321,7 +369,16 @@ const ViewQuestion: NextPage = () => {
               value={stake}
               onChange={e => setStake(e.target.value)}
             />
+            <button
+              className="btn w-1/2 p-2 border border-gray-300 rounded-md my-2 mx-2"
+              onClick={() => {
+                approve();
+              }}
+            >
+              Approve
+            </button>
             <br />
+
             <button
               className="btn w-1/2 p-2 border border-gray-300 rounded-md my-2 mx-2"
               onClick={() => {

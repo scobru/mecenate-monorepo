@@ -23,6 +23,8 @@ const Question: NextPage = () => {
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateQuestionFactory");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
 
+  const [tokenERC20Contract, setTokenERC20Contract] = React.useState<any>(null);
+
   let treasuryAddress = "";
   let treasuryAbi: ContractInterface[] = [];
 
@@ -64,12 +66,12 @@ const Question: NextPage = () => {
 
   async function createQuestionContract() {
     console.log(Number(creationFee));
-    const _questionAddress = await factoryCtx?.createQuestion({ value: String(creationFee) });
+    const _questionAddress = await factoryCtx?.createQuestion(Number(tokenERC20Contract), { value: String(creationFee) });
     if (DEBUG) console.log(_questionAddress);
   }
 
   async function getOwnedQuestions() {
-    const _questionsOwned = await factoryCtx?.getQuestionOwned(signer?.getAddress());
+    const _questionsOwned = await factoryCtx?.getContractsOwnedBy(signer?.getAddress());
     setQuestions(_questionsOwned);
     const _data = [];
 
@@ -85,7 +87,7 @@ const Question: NextPage = () => {
 
   async function getQuestion() {
     if (signer) {
-      const _questions = await factoryCtx?.getQuestions();
+      const _questions = await factoryCtx?.getContracts();
       setQuestions(_questions);
       const _data = [];
 
@@ -131,6 +133,22 @@ const Question: NextPage = () => {
         </p>
       </div>
       <div className="flex items-center mb-20">
+        <select
+          className="bg-primary text-base-content  hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
+          onChange={(e) => {
+            setTokenERC20Contract(e.target.value);
+          }}
+        >
+          <option
+            value="0"
+            selected
+          >
+            Select Token
+          </option>
+          <option value="1">MUSE</option>
+          <option value="2">DAI</option>
+          <option value="3">WETH</option>
+        </select>
         <button
           className="bg-primary text-base-content  hover:bg-accent  font-bold py-2 px-4 rounded-md mr-2"
           onClick={createQuestionContract}
@@ -180,7 +198,7 @@ const Question: NextPage = () => {
             </div>
           ))}
       </div>
-    </div>
+    </div >
   );
 };
 
