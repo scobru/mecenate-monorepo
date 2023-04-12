@@ -3,26 +3,19 @@
 [feed video demo](https://www.youtube.com/watch?v=ZCfASOjT04Y&list=PLTenf2t5YuIp68AlFJWjFiJtf4svPuQiX)
 
 - [**Mecente Protocol v1.0.0** for Buidlguidl Hackthon](#mecente-protocol-v100-for-buidlguidl-hackthon)
-  - [💡 CONCEPT](#-concept)
-    - [Introduction](#introduction)
+  - [V1.1.0](#v110)
     - [Features](#features)
   - [🚀 QUICK START](#-quick-start)
     - [Development Notes](#development-notes)
     - [Treasury \& DAO](#treasury--dao)
-    - [Todo](#todo)
     - [Contribution](#contribution)
-
-## 💡 CONCEPT
 
 ---
 
-### Introduction
+## V1.1.0
 
-I have created a protocol called Mecenate for the Buidlguidl hackathon. The protocol is inspired by the [Erasure Protocol](https://github.com/erasureprotocol/erasure-protocol), which is the backbone of the NMR token. Mecenate is a decentralized and anonymous data exchange protocol that is designed to improve upon the functions of the Erasure Protocol.
-
-As a solo developer, this project was ambitious to undertake, and there is a possibility that the current version 1 deployed on the Polygon Mumbai network may have some bugs. I invite other developers who share a passion for decentralized data exchange to join this project and help it reach its full potential. Additionally, we welcome users to report any errors or bugs they may encounter in the protocol's contracts or frontend.
-
-Mecenate Protocol allows for secure and private information sharing and is designed to improve upon the functions of the Erasure Protocol.
+- [x] Now the user can use only MUSE,DAI or WETH as collateral for Mecenate Feeds and Mecenate Bay.
+- [x] DAO created for the Mecenate protocol that will be used to manage the treasury.
 
 ### Features
 
@@ -77,16 +70,6 @@ The Mecenate repository is composed of ScaffoldEth-2 and another application cal
 ### Treasury & DAO
 
 Mecenate possesses a treasury that collects the fees accumulated from the use of the protocol's contracts. The plan is to create a treasury controlled by a DAO, which is aimed at making the protocol completely decentralized.
-
-### Todo
-
-- Fix client minor bugs.
-- Test of MecenateDCA Feature.
-- MecenateDCAFactory frontend implementation.
-- Creation ERC20 Governance Token.
-- Edit MecenateFeed and MecenateBay to use ERC20 Governance Token.
-- Create MecenateDAO.
-- tests tests tests...
 
 ### Contribution
 
