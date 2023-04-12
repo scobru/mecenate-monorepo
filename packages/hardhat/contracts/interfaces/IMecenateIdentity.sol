@@ -6,4 +6,6 @@ interface IMecenateIdentity {
     function balanceOf(address user) external view returns (uint256);
 
     function getTotalIdentities() external view returns (uint256);
+
+    function getOwnerById(uint256 tokenId) external view returns (address);
 }
