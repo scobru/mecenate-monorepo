@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "../interfaces/IMecenateFactory.sol";
+import "../interfaces/IMecenateQuestionFactory.sol";
 import "../interfaces/IMecenateTreasury.sol";
 
 import "../library/Structures.sol";
@@ -300,6 +300,11 @@ contract MecenateQuestion is Ownable {
 
         uint256 stakerCount = stakers.length;
 
+        uint256 totalPenality;
+
+        address treasuryContract = IMecenateQuestionFactory(factoryContract)
+            .treasuryContract();
+
         for (uint256 i = 0; i < stakerCount; i++) {
             address staker = stakers[i];
 
@@ -310,6 +315,7 @@ contract MecenateQuestion is Ownable {
                     shares[Choice.Yes][staker] -
                     yesPenalty;
                 totalYesStaked = totalYesStaked - yesPenalty;
+                totalPenality += yesPenalty;
             }
 
             if (shares[Choice.No][staker] > 0) {
@@ -319,8 +325,14 @@ contract MecenateQuestion is Ownable {
                     shares[Choice.No][staker] -
                     noPenalty;
                 totalNoStaked = totalNoStaked - noPenalty;
+                totalPenality += noPenalty;
             }
         }
+
+        IERC20(tokenERC20Contract).transfer(
+            treasuryContract,
+            totalPenality + punishment
+        );
 
         // Transfer the penalty to the creator
         creatorStaked = creatorPenality;
@@ -404,7 +416,7 @@ contract MecenateQuestion is Ownable {
 
         uint256 predictionBalance = address(this).balance -
             (creatorStaked + fees);
-        address treasuryContract = IMecenateFactory(factoryContract)
+        address treasuryContract = IMecenateQuestionFactory(factoryContract)
             .treasuryContract();
 
         if (predictionBalance > 0) {

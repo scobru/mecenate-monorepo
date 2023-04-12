@@ -5,6 +5,7 @@ import "../library/Structures.sol";
 import "./Data.sol";
 import "./Events.sol";
 import "./Staking.sol";
+import "./TokenManager.sol";
 
 abstract contract Finalization is Data, Events, Staking {
     function finalizePost(
@@ -77,16 +78,36 @@ abstract contract Finalization is Data, Events, Staking {
 
                 post.postdata.escrow.punishment = punishment;
 
-                uint256 buyerStake = _burnStake(
-                    tokenERC20Contract,
-                    post.postdata.settings.buyer,
-                    buyerPunishment
-                );
-                uint256 sellerStake = _burnStake(
-                    tokenERC20Contract,
-                    post.postdata.settings.seller,
-                    punishment
-                );
+                if (router != address(0)) {
+                    uint256 buyerStake = _burnStake(
+                        tokenERC20Contract,
+                        post.postdata.settings.buyer,
+                        buyerPunishment
+                    );
+                    uint256 sellerStake = _burnStake(
+                        tokenERC20Contract,
+                        post.postdata.settings.seller,
+                        punishment
+                    );
+                } else {
+                    uint256 buyerStake = Deposit._decreaseDeposit(
+                        tokenERC20Contract,
+                        post.postdata.settings.buyer,
+                        buyerPunishment
+                    );
+                    uint256 sellerStake = Deposit._decreaseDeposit(
+                        tokenERC20Contract,
+                        post.postdata.settings.seller,
+                        punishment
+                    );
+
+                    TokenManager._transfer(
+                        tokenERC20Contract,
+                        IMecenateFeedFactory(factoryContract)
+                            .treasuryContract(),
+                        buyerPunishment + punishment
+                    );
+                }
 
                 emit Invalid(post);
             }
