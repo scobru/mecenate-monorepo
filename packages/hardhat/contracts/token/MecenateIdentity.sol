@@ -20,6 +20,8 @@ contract MecenateIdentity is ERC721URIStorage, Ownable {
 
     uint256 public identityCreationFee;
 
+    uint256 public lastFee;
+
     constructor(address _treasury) ERC721("Mecenate Creator Identity", "MCI") {
         treasuryContract = _treasury;
         identityCreationFee = IMecenateTreasury(treasuryContract).fixedFee();
@@ -39,7 +41,20 @@ contract MecenateIdentity is ERC721URIStorage, Ownable {
     mapping(address => uint256) public identityByAddress;
 
     function mint(IdentityData memory id) public payable {
-        require(msg.value == identityCreationFee, "Incorrect payment amount");
+        if (_tokenIds.current() == 0) {
+            require(
+                msg.value == identityCreationFee,
+                "Incorrect payment amount"
+            );
+            lastFee = identityCreationFee;
+        } else {
+            require(
+                msg.value == lastFee + identityCreationFee,
+                "Incorrect payment amount #2"
+            );
+            lastFee = lastFee + identityCreationFee;
+        }
+
         require(balanceOf(msg.sender) == 0, "You already have an identity");
 
         payable(treasuryContract).transfer(msg.value);

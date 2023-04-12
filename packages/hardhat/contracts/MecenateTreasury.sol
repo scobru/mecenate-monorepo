@@ -43,34 +43,46 @@ contract MecenateTreasury is Ownable, Swapper {
     }
 
     function distribute(
-        uint256 amount,
-        address identityContract,
-        address usersContract
+        uint256 _amount,
+        address _identityContract,
+        address _usersContract
     ) external {
+        uint256 gasUsed = gasleft();
         require(
-            block.timestamp - (lastDistributed) >= 7 days,
-            "You can only distribute once a day"
+            block.timestamp - lastDistributed >= 1 days,
+            "Can only distribute once a day"
         );
 
         uint256 balance = address(this).balance;
-        uint256 fee = (balance * (globalFee)) / (10000);
-        uint256 total = balance - (fee);
+        uint256 fee = (balance * globalFee) / 10000;
+        uint256 total = balance - fee;
         uint256 perIdentity = total /
-            (IMecenateIdentity(identityContract).getTotalIdentities());
+            IMecenateIdentity(_identityContract).getTotalIdentities();
+
         for (
             uint256 i = 0;
-            i < IMecenateIdentity(identityContract).getTotalIdentities();
+            i < IMecenateIdentity(_identityContract).getTotalIdentities();
             i++
         ) {
-            address payable owner = payable(
-                IMecenateIdentity(identityContract).getOwnerById(i)
+            address payable _owner = payable(
+                IMecenateIdentity(_identityContract).getOwnerById(i)
             );
-            if (IMecenateUsers(usersContract).checkifUserExist(owner)) {
-                owner.transfer(perIdentity);
+            if (IMecenateUsers(_usersContract).checkifUserExist(_owner)) {
+                _owner.transfer(perIdentity);
             }
         }
 
+        address payable owner = payable(owner());
+        owner.transfer(fee);
+
         lastDistributed = block.timestamp;
+
+        uint256 gasPrice = tx.gasprice;
+        gasUsed = gasUsed - gasleft() + 21000 + (16 * msg.data.length);
+        uint256 refundAmount = gasUsed * gasPrice;
+        if (refundAmount > 0) {
+            payable(msg.sender).transfer(refundAmount);
+        }
     }
 
     receive() external payable {}
