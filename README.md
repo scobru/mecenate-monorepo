@@ -9,7 +9,6 @@
   - [🚀 QUICK START](#-quick-start)
     - [Development Notes](#development-notes)
     - [Treasury \& DAO](#treasury--dao)
-    - [Todo](#todo)
     - [Contribution](#contribution)
 
 ## 💡 CONCEPT
@@ -77,16 +76,6 @@ The Mecenate repository is composed of ScaffoldEth-2 and another application cal
 ### Treasury & DAO
 
 Mecenate possesses a treasury that collects the fees accumulated from the use of the protocol's contracts. The plan is to create a treasury controlled by a DAO, which is aimed at making the protocol completely decentralized.
-
-### Todo
-
-- Fix client minor bugs.
-- Test of MecenateDCA Feature.
-- MecenateDCAFactory frontend implementation.
-- Creation ERC20 Governance Token.
-- Edit MecenateFeed and MecenateBay to use ERC20 Governance Token.
-- Create MecenateDAO.
-- tests tests tests...
 
 ### Contribution
 

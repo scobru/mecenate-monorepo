@@ -11,7 +11,6 @@ contract MecenateUsers {
 
     EnumerableSet.AddressSet private _users;
     mapping(address => Structures.User) private _metadata;
-
     event UserRegistered(address indexed user, Structures.User data);
 
     address public identityContract;
