@@ -7,7 +7,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./modules/Swapper.sol";
-import "../interfaces/IMecenateIdentity.sol";
+import "./interfaces/IMecenateIdentity.sol";
+import "./interfaces/IMecenateUsers.sol";
 
 contract MecenateTreasury is Ownable, Swapper {
     using SafeERC20 for IERC20;
@@ -15,6 +16,8 @@ contract MecenateTreasury is Ownable, Swapper {
     uint256 public globalFee = 100;
 
     uint256 public fixedFee = 0.01 * 1e18;
+
+    uint256 public lastDistributed;
 
     function setGlobalFee(uint256 _globalFee) external onlyOwner {
         globalFee = _globalFee;
@@ -39,13 +42,21 @@ contract MecenateTreasury is Ownable, Swapper {
         _to.transfer(_amount);
     }
 
-    function distribute(uint256 amount) {
-        uint256 balance = address(this).balance;
-        uint256 fee = balance.mul(globalFee).div(10000);
-        uint256 total = balance.sub(fee);
-        uint256 perIdentity = total.div(
-            IMecenateIdentity(identityContract).getTotalIdentities()
+    function distribute(
+        uint256 amount,
+        address identityContract,
+        address usersContract
+    ) external {
+        require(
+            block.timestamp - (lastDistributed) >= 7 days,
+            "You can only distribute once a day"
         );
+
+        uint256 balance = address(this).balance;
+        uint256 fee = (balance * (globalFee)) / (10000);
+        uint256 total = balance - (fee);
+        uint256 perIdentity = total /
+            (IMecenateIdentity(identityContract).getTotalIdentities());
         for (
             uint256 i = 0;
             i < IMecenateIdentity(identityContract).getTotalIdentities();
@@ -54,8 +65,12 @@ contract MecenateTreasury is Ownable, Swapper {
             address payable owner = payable(
                 IMecenateIdentity(identityContract).getOwnerById(i)
             );
-            owner.transfer(perIdentity);
+            if (IMecenateUsers(usersContract).checkifUserExist(owner)) {
+                owner.transfer(perIdentity);
+            }
         }
+
+        lastDistributed = block.timestamp;
     }
 
     receive() external payable {}
