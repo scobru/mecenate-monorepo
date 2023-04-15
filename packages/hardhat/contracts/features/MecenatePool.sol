@@ -6,11 +6,11 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MecenatePool is Ownable {
-    address private oracleA;
-    address private oracleB;
+    address public oracleA;
+    address public oracleB;
 
-    IERC20 private tokenA;
-    IERC20 private tokenB;
+    IERC20 public tokenA;
+    IERC20 public tokenB;
     LiquidityToken private liquidityToken;
 
     uint256 private constant PRICE_SCALE = 10 ** 8;
@@ -112,7 +112,9 @@ contract MecenatePool is Ownable {
 }
 
 contract LiquidityToken is ERC20, Ownable {
-    constructor() ERC20("Liquidity Token", "LIQT") {}
+    constructor()
+        ERC20("Mecenate Universal Support Economy Liquidity Token", "MUSELP")
+    {}
 
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
