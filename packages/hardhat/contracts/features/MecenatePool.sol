@@ -75,7 +75,7 @@ contract MecenatePool is Ownable {
         tokenB.transfer(msg.sender, shareB);
     }
 
-    function swapLinkToDai(uint256 amount) external {
+    function swapAtoB(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");
 
         uint256 amountB = calculateDaiAmount(amount);
@@ -83,6 +83,16 @@ contract MecenatePool is Ownable {
 
         tokenA.transferFrom(msg.sender, address(this), amount);
         tokenB.transfer(msg.sender, amountB - fee);
+    }
+
+    function swapBtoA(uint256 amount) external {
+        require(amount > 0, "Amount must be greater than 0");
+
+        uint256 amountA = calculateDaiAmount(amount);
+        uint256 fee = (amountA * feeRate) / 10000;
+
+        tokenB.transferFrom(msg.sender, address(this), amount);
+        tokenA.transfer(msg.sender, amountA - fee);
     }
 
     function calculateDaiAmount(uint256 amount) public view returns (uint256) {
