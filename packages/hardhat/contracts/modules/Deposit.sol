@@ -9,6 +9,7 @@ contract Deposit {
     mapping(address => uint256) private _deposit;
 
     event DepositIncreased(address user, uint256 amount, uint256 newDeposit);
+
     event DepositDecreased(address user, uint256 amount, uint256 newDeposit);
 
     function _increaseDeposit(

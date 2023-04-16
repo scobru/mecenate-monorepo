@@ -8,6 +8,25 @@ abstract contract Staking is Data, Deposit {
 
     event StakeBurned(address staker, uint256 amount);
 
+    // create modifier
+    modifier checkStatus() {
+        require(
+            post.postdata.settings.status == Structures.PostStatus.Waiting ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Finalized ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Revealed ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Punished ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Proposed ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Renounced,
+            "Wrong Status"
+        );
+        _;
+    }
+
     function _addStake(
         address staker,
         uint256 amountToAdd
@@ -85,22 +104,7 @@ abstract contract Staking is Data, Deposit {
         return (amountSeller + amountBuyer);
     }
 
-    function addStake() external payable returns (uint256) {
-        require(
-            post.postdata.settings.status == Structures.PostStatus.Waiting ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Finalized ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Revealed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Punished ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Proposed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Renounced,
-            "Wrong Status"
-        );
-
+    function addStake() external payable checkStatus returns (uint256) {
         uint256 stakerBalance;
 
         if (msg.sender == post.postdata.settings.buyer) {
@@ -118,22 +122,7 @@ abstract contract Staking is Data, Deposit {
 
     function takeStake(
         uint256 amountToTake
-    ) external payable returns (uint256) {
-        require(
-            post.postdata.settings.status == Structures.PostStatus.Waiting ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Finalized ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Revealed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Punished ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Proposed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Renounced,
-            "Wrong Status"
-        );
-
+    ) external payable checkStatus returns (uint256) {
         uint256 currentDeposit = Deposit._getDeposit(msg.sender);
         uint256 stakerBalance;
 
@@ -154,21 +143,7 @@ abstract contract Staking is Data, Deposit {
         return stakerBalance;
     }
 
-    function takeFullStake() external payable returns (uint256) {
-        require(
-            post.postdata.settings.status == Structures.PostStatus.Waiting ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Finalized ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Revealed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Punished ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Proposed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Renounced,
-            "Wrong Status"
-        );
+    function takeFullStake() external payable checkStatus returns (uint256) {
         uint256 currentDeposit = Deposit._getDeposit(msg.sender);
         uint256 stakerBalance = _takeFullStake(msg.sender);
         payable(msg.sender).transfer(stakerBalance);

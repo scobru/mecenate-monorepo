@@ -30,46 +30,30 @@ contract MecenateQuestion is Ownable {
     mapping(address => Choice) public vote;
 
     uint256 public totalYesStaked;
-
     uint256 public totalNoStaked;
-
     uint256 public creatorStaked;
-
     uint256 public fees;
+    uint256 public votingPeriod = 3 days; // 3 days for mainnet
+    uint256 public claimingPeriod = 7 days; // 7 days for mainnet
+    uint256 public endTime;
+    uint256 public penalityRatio = 100000000000000000;
+    uint256 public punishPercentage;
+    uint256 public yesVoteWeight;
+    uint256 public noVoteWeight;
+    uint256 public questionCounter;
+    uint256 public amountToClaim;
+    uint256 public submissionTimestamp;
+    uint256 public resolveTimestamp;
 
     string public question;
 
     address public creator;
-
     address public factoryContract;
 
     address[] public stakers;
 
-    uint256 public yesVoteWeight;
-
-    uint256 public noVoteWeight;
-
-    uint256 public questionCounter;
-
-    uint256 public votingPeriod = 3 days; // 3 days for mainnet
-
-    uint256 public claimingPeriod = 7 days; // 7 days for mainnet
-
-    uint256 public endTime;
-
-    uint256 public penalityRatio = 100000000000000000;
-
-    uint256 public punishPercentage;
-
-    uint256 public amountToClaim;
-
     Choice public creatorAnswer = Choice.None;
-
     Choice public communityAnswer = Choice.None;
-
-    uint256 public submissionTimestamp;
-
-    uint256 public resolveTimestamp;
 
     constructor(address _factoryContract, address _creator) {
         factoryContract = _factoryContract;
@@ -89,15 +73,23 @@ contract MecenateQuestion is Ownable {
 
         address treasuryContract = IMecenateFactory(factoryContract)
             .treasuryContract();
+
         uint256 globalFee = IMecenateTreasury(treasuryContract).globalFee();
+
         uint256 fee = (msg.value).mul(globalFee).div(10000);
+
         payable(treasuryContract).transfer(fee);
+
         uint256 amountAfter = msg.value.sub(fee);
 
         punishPercentage = _punishPercentage;
+
         question = _question;
+
         endTime = _endTime;
+
         creator = msg.sender;
+
         status = Status.Open;
 
         if (msg.value > 0) {

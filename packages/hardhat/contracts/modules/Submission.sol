@@ -8,14 +8,15 @@ import "./Events.sol";
 abstract contract Submission is Data, Events {
     function submitHash(bytes memory encryptedKey) public virtual {
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(msg.sender),
-            "User does not exist"
-        );
-        require(
             post.postdata.settings.status == Structures.PostStatus.Accepted ||
                 post.postdata.settings.status ==
                 Structures.PostStatus.Submitted,
             "Post is not Accepted or Submitted"
+        );
+
+        require(
+            IMecenateUsers(usersModuleContract).checkifUserExist(msg.sender),
+            "User does not exist"
         );
 
         require(post.creator.wallet == msg.sender, "You are not the creator");
