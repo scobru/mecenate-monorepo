@@ -122,9 +122,7 @@ contract MecenatePool is Ownable {
 }
 
 contract LiquidityToken is ERC20, Ownable {
-    constructor()
-        ERC20("Mecenate Universal Support Economy Liquidity Token", "MUSELP")
-    {}
+    constructor() ERC20("Mecenate Liquidity Token", "MLP") {}
 
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);

@@ -8,9 +8,9 @@
         "ignoreConstructors": true
       }
     ],
-    "no-empty-blocks": ["off"],
-    "reason-string": ["off"],
-    "not-rely-on-time": ["off"],
-    "var-name-mixedcase": ["off"]
+    "no-empty-blocks": ["on"],
+    "reason-string": ["on"],
+    "not-rely-on-time": ["on"],
+    "var-name-mixedcase": ["on"]
   }
 }
