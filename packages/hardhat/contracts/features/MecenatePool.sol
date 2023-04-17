@@ -109,7 +109,7 @@ contract MecenatePool is Ownable {
         (, int256 answer, , , ) = priceFeed.latestRoundData();
         require(answer > 0, "Invalid price");
 
-        return uint256(answer);
+        return uint256(answer * 1e10);
     }
 
     function setFeeRate(uint256 newFeeRate) external onlyOwner {

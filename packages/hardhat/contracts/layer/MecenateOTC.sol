@@ -65,7 +65,7 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
         dustLimit = _dustLimit;
         priceOracle = _priceOracle;
 
-        _setMinSell(ERC20(dustToken), dustLimit);
+        _setMinSell(ERC20b(dustToken), dustLimit);
     }
 
     // If owner, can cancel an offer
@@ -84,8 +84,8 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     // ---- Public entrypoints ---- //
 
     function make(
-        ERC20 pay_gem,
-        ERC20 buy_gem,
+        ERC20b pay_gem,
+        ERC20b buy_gem,
         uint128 pay_amt,
         uint128 buy_amt
     ) public override returns (bytes32) {
@@ -110,9 +110,9 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     //
     function offer(
         uint pay_amt, //maker (ask) sell how much
-        ERC20 pay_gem, //maker (ask) sell which token
+        ERC20b pay_gem, //maker (ask) sell which token
         uint buy_amt, //taker (ask) buy how much
-        ERC20 buy_gem //taker (ask) buy which token
+        ERC20b buy_gem //taker (ask) buy which token
     ) public override returns (uint) {
         require(!locked, "Reentrancy attempt");
         return _offeru(pay_amt, pay_gem, buy_amt, buy_gem);
@@ -121,9 +121,9 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     // Make a new offer. Takes funds from the caller into market escrow.
     function offer(
         uint pay_amt, //maker (ask) sell how much
-        ERC20 pay_gem, //maker (ask) sell which token
+        ERC20b pay_gem, //maker (ask) sell which token
         uint buy_amt, //maker (ask) buy how much
-        ERC20 buy_gem, //maker (ask) buy which token
+        ERC20b buy_gem, //maker (ask) buy which token
         uint pos //position to insert offer, 0 should be used if unknown
     ) public can_offer returns (uint) {
         return offer(pay_amt, pay_gem, buy_amt, buy_gem, pos, true);
@@ -131,9 +131,9 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
 
     function offer(
         uint pay_amt, //maker (ask) sell how much
-        ERC20 pay_gem, //maker (ask) sell which token
+        ERC20b pay_gem, //maker (ask) sell which token
         uint buy_amt, //maker (ask) buy how much
-        ERC20 buy_gem, //maker (ask) buy which token
+        ERC20b buy_gem, //maker (ask) buy which token
         uint pos, //position to insert offer, 0 should be used if unknown
         bool rounding //match "close enough" orders?
     ) public can_offer returns (uint) {
@@ -201,7 +201,7 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     //    cost more gas to accept the offer, than the value
     //    of tokens received.
     function setMinSell(
-        ERC20 pay_gem //token to assign minimum sell amount to
+        ERC20b pay_gem //token to assign minimum sell amount to
     ) public {
         require(msg.sender == tx.origin, "No indirect calls please");
         require(
@@ -220,7 +220,7 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
 
     //returns the minimum sell amount for an offer
     function getMinSell(
-        ERC20 pay_gem //token for which minimum sell amount is queried
+        ERC20b pay_gem //token for which minimum sell amount is queried
     ) public view returns (uint) {
         return _dust[address(pay_gem)];
     }
@@ -229,8 +229,8 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     //      the best offer is the lowest one if it's an ask,
     //      and highest one if it's a bid offer
     function getBestOffer(
-        ERC20 sell_gem,
-        ERC20 buy_gem
+        ERC20b sell_gem,
+        ERC20b buy_gem
     ) public view returns (uint) {
         return _best[address(sell_gem)][address(buy_gem)];
     }
@@ -253,8 +253,8 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
 
     //return the amount of better offers for a token pair
     function getOfferCount(
-        ERC20 sell_gem,
-        ERC20 buy_gem
+        ERC20b sell_gem,
+        ERC20b buy_gem
     ) public view returns (uint) {
         return _span[address(sell_gem)][address(buy_gem)];
     }
@@ -283,9 +283,9 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     }
 
     function sellAllAmount(
-        ERC20 pay_gem,
+        ERC20b pay_gem,
         uint pay_amt,
-        ERC20 buy_gem,
+        ERC20b buy_gem,
         uint min_fill_amount
     ) public returns (uint fill_amt) {
         require(!locked, "Reentrancy attempt");
@@ -322,9 +322,9 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     }
 
     function buyAllAmount(
-        ERC20 buy_gem,
+        ERC20b buy_gem,
         uint buy_amt,
-        ERC20 pay_gem,
+        ERC20b pay_gem,
         uint max_fill_amount
     ) public returns (uint fill_amt) {
         require(!locked, "Reentrancy attempt");
@@ -363,8 +363,8 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     }
 
     function getBuyAmount(
-        ERC20 buy_gem,
-        ERC20 pay_gem,
+        ERC20b buy_gem,
+        ERC20b pay_gem,
         uint pay_amt
     ) public view returns (uint fill_amt) {
         uint256 offerId = getBestOffer(buy_gem, pay_gem); //Get best offer for the token pair
@@ -387,8 +387,8 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     }
 
     function getPayAmount(
-        ERC20 pay_gem,
-        ERC20 buy_gem,
+        ERC20b pay_gem,
+        ERC20b buy_gem,
         uint buy_amt
     ) public view returns (uint fill_amt) {
         uint256 offerId = getBestOffer(buy_gem, pay_gem); //Get best offer for the token pair
@@ -413,7 +413,7 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     // ---- Internal Functions ---- //
 
     function _setMinSell(
-        ERC20 pay_gem, //token to assign minimum sell amount to
+        ERC20b pay_gem, //token to assign minimum sell amount to
         uint256 dust
     ) internal {
         _dust[address(pay_gem)] = dust;
@@ -508,9 +508,9 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     //match offers with taker offer, and execute token transactions
     function _matcho(
         uint t_pay_amt, //taker sell how much
-        ERC20 t_pay_gem, //taker sell which token
+        ERC20b t_pay_gem, //taker sell which token
         uint t_buy_amt, //taker buy how much
-        ERC20 t_buy_gem, //taker buy which token
+        ERC20b t_buy_gem, //taker buy which token
         uint pos, //position id
         bool rounding //match "close enough" orders?
     ) internal returns (uint id) {
@@ -572,9 +572,9 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     // Keepers should call insert(id,pos) to put offer in the sorted list.
     function _offeru(
         uint pay_amt, //maker (ask) sell how much
-        ERC20 pay_gem, //maker (ask) sell which token
+        ERC20b pay_gem, //maker (ask) sell which token
         uint buy_amt, //maker (ask) buy how much
-        ERC20 buy_gem //maker (ask) buy which token
+        ERC20b buy_gem //maker (ask) buy which token
     ) internal returns (uint id) {
         require(_dust[address(pay_gem)] <= pay_amt);
         id = super.offer(pay_amt, pay_gem, buy_amt, buy_gem);
@@ -590,8 +590,8 @@ contract MecenateOTC is MatchingEvents, MecenateMarket {
     ) internal {
         require(isActive(id));
 
-        ERC20 buy_gem = offers[id].buy_gem;
-        ERC20 pay_gem = offers[id].pay_gem;
+        ERC20b buy_gem = offers[id].buy_gem;
+        ERC20b pay_gem = offers[id].pay_gem;
         uint prev_id; //maker (ask) id
 
         pos = pos == 0 ||

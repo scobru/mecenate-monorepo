@@ -13,7 +13,7 @@ contract ERC20Events {
     event Transfer(address indexed src, address indexed dst, uint wad);
 }
 
-abstract contract ERC20 is ERC20Events {
+abstract contract ERC20b is ERC20Events {
     function totalSupply() public view virtual returns (uint);
 
     function balanceOf(address guy) public view virtual returns (uint);

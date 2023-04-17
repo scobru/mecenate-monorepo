@@ -20,9 +20,9 @@
 
 pragma solidity 0.8.19;
 
-// ERC20 import
+// ERC20b import
 import "../library/DSMath.sol";
-import "../library/ERC20.sol";
+import "../library/ERC20b.sol";
 
 contract EventfulMarket {
     event LogItemUpdate(uint id);
@@ -37,8 +37,8 @@ contract EventfulMarket {
         bytes32 indexed id,
         bytes32 indexed pair,
         address indexed maker,
-        ERC20 pay_gem,
-        ERC20 buy_gem,
+        ERC20b pay_gem,
+        ERC20b buy_gem,
         uint128 pay_amt,
         uint128 buy_amt,
         uint64 timestamp
@@ -48,8 +48,8 @@ contract EventfulMarket {
         bytes32 indexed id,
         bytes32 indexed pair,
         address indexed maker,
-        ERC20 pay_gem,
-        ERC20 buy_gem,
+        ERC20b pay_gem,
+        ERC20b buy_gem,
         uint128 pay_amt,
         uint128 buy_amt,
         uint64 timestamp
@@ -59,8 +59,8 @@ contract EventfulMarket {
         bytes32 id,
         bytes32 indexed pair,
         address indexed maker,
-        ERC20 pay_gem,
-        ERC20 buy_gem,
+        ERC20b pay_gem,
+        ERC20b buy_gem,
         address indexed taker,
         uint128 take_amt,
         uint128 give_amt,
@@ -71,8 +71,8 @@ contract EventfulMarket {
         bytes32 indexed id,
         bytes32 indexed pair,
         address indexed maker,
-        ERC20 pay_gem,
-        ERC20 buy_gem,
+        ERC20b pay_gem,
+        ERC20b buy_gem,
         uint128 pay_amt,
         uint128 buy_amt,
         uint64 timestamp
@@ -88,9 +88,9 @@ contract MecenateMarket is EventfulMarket, DSMath {
 
     struct OfferInfo {
         uint pay_amt;
-        ERC20 pay_gem;
+        ERC20b pay_gem;
         uint buy_amt;
-        ERC20 buy_gem;
+        ERC20b buy_gem;
         address owner;
         uint64 timestamp;
     }
@@ -125,7 +125,9 @@ contract MecenateMarket is EventfulMarket, DSMath {
         return offers[id].owner;
     }
 
-    function getOffer(uint id) public view returns (uint, ERC20, uint, ERC20) {
+    function getOffer(
+        uint id
+    ) public view returns (uint, ERC20b, uint, ERC20b) {
         OfferInfo memory offer = offers[id];
         return (offer.pay_amt, offer.pay_gem, offer.buy_amt, offer.buy_gem);
     }
@@ -229,8 +231,8 @@ contract MecenateMarket is EventfulMarket, DSMath {
     }
 
     function make(
-        ERC20 pay_gem,
-        ERC20 buy_gem,
+        ERC20b pay_gem,
+        ERC20b buy_gem,
         uint128 pay_amt,
         uint128 buy_amt
     ) public virtual returns (bytes32 id) {
@@ -240,16 +242,16 @@ contract MecenateMarket is EventfulMarket, DSMath {
     // Make a new offer. Takes funds from the caller into market escrow.
     function offer(
         uint pay_amt,
-        ERC20 pay_gem,
+        ERC20b pay_gem,
         uint buy_amt,
-        ERC20 buy_gem
+        ERC20b buy_gem
     ) public virtual can_offer synchronized returns (uint id) {
         require(uint128(pay_amt) == pay_amt);
         require(uint128(buy_amt) == buy_amt);
         require(pay_amt > 0);
-        require(pay_gem != ERC20(address(0)));
+        require(pay_gem != ERC20b(address(0)));
         require(buy_amt > 0);
-        require(buy_gem != ERC20(address(0)));
+        require(buy_gem != ERC20b(address(0)));
         require(pay_gem != buy_gem);
 
         OfferInfo memory info;
@@ -286,7 +288,7 @@ contract MecenateMarket is EventfulMarket, DSMath {
         return last_offer_id;
     }
 
-    function safeTransfer(ERC20 token, address to, uint256 value) internal {
+    function safeTransfer(ERC20b token, address to, uint256 value) internal {
         _callOptionalReturn(
             token,
             abi.encodeWithSelector(token.transfer.selector, to, value)
@@ -294,7 +296,7 @@ contract MecenateMarket is EventfulMarket, DSMath {
     }
 
     function safeTransferFrom(
-        ERC20 token,
+        ERC20b token,
         address from,
         address to,
         uint256 value
@@ -305,7 +307,7 @@ contract MecenateMarket is EventfulMarket, DSMath {
         );
     }
 
-    function _callOptionalReturn(ERC20 token, bytes memory data) private {
+    function _callOptionalReturn(ERC20b token, bytes memory data) private {
         uint256 size;
         assembly {
             size := extcodesize(token)
@@ -318,7 +320,7 @@ contract MecenateMarket is EventfulMarket, DSMath {
             // Return data is optional
             require(
                 abi.decode(returndata, (bool)),
-                "SafeERC20: ERC20 operation did not succeed"
+                "SafeERC20b: ERC20b operation did not succeed"
             );
         }
     }
