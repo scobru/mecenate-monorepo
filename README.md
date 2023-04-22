@@ -30,8 +30,6 @@ Mecenate consists of several applications, including:
 - 📄Mecenate Feed: A smart contract protocol for sharing information privately and anonymously, similar to the Erasure Protocol clone.
 - 📣Mecenate Bay: A Dapp marketplace built on top of Mecenate Feed.
 - 🆔Mecenate Identity: A Dapp for creating a tokenized identity.
-- 🎫Mecenate Tier: A Dapp for creating subscriptions and memberships.
-- ❔Mecenate Question: A Dapp for prediction markets where users can act as both hosts and oracles.
 
 ## 🚀 QUICK START
 
