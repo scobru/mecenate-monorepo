@@ -44,7 +44,7 @@ contract MecenateFeed is
         return post.postdata.escrow.payment;
     }
 
-    function getSellerPayment() public view returns (uint256) {
+    function getSellerStake() public view returns (uint256) {
         return post.postdata.escrow.stake;
     }
 
@@ -54,5 +54,17 @@ contract MecenateFeed is
 
     function getPostCount() public view returns (uint256) {
         return postCount;
+    }
+
+    function changeUsersModuleContract(
+        address _usersModuleContract
+    ) external onlyOwner {
+        usersModuleContract = _usersModuleContract;
+    }
+
+    function changeIdentityContract(
+        address _identityContract
+    ) external onlyOwner {
+        identityContract = _identityContract;
     }
 }

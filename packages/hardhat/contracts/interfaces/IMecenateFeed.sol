@@ -11,7 +11,7 @@ interface IMecenateFeed {
 
     function getBuyerPayment() external view returns (uint256);
 
-    function getSellerPayment() external view returns (uint256);
+    function getSellerStake() external view returns (uint256);
 
     function postCount() external view returns (uint256);
 

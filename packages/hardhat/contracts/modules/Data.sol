@@ -16,7 +16,9 @@ contract Data is Ownable {
     uint256 public postCount;
 
     address public usersModuleContract;
+
     address public identityContract;
+
     address public factoryContract;
 
     bytes public constant ZEROHASH = "0x00";

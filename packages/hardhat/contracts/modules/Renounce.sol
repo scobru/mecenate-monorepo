@@ -20,7 +20,7 @@ abstract contract Renounce is Data, Events, Staking {
             "Post is not Accepted or Submitted"
         );
 
-        refundPost();
+        _refundPost();
 
         uint256 stake = post.postdata.escrow.stake;
 
@@ -50,7 +50,7 @@ abstract contract Renounce is Data, Events, Staking {
         emit Renounced(post);
     }
 
-    function refundPost() public virtual {
+    function _refundPost() internal virtual {
         require(
             post.postdata.settings.status == Structures.PostStatus.Accepted,
             "Post is not accepted"

@@ -45,32 +45,6 @@ const deployYourContract: DeployFunction = async function (
   identity.receipt &&
     console.log("Identity deployed at:", identity.receipt.contractAddress);
 
-  const factoryTier = await deploy("MecenateTierFactory", {
-    from: deployer,
-    // Contract constructor arguments
-    args: [identity.address, treasury.address],
-    log: true,
-    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-    // automatically mining the contract deployment transaction. There is no effect on live networks.
-    autoMine: true,
-  });
-
-  factoryTier.receipt &&
-    console.log("Factory deployed at:", factoryTier.receipt.contractAddress);
-
-  const tier = await deploy("MecenateTier", {
-    from: deployer,
-    // Contract constructor arguments
-    args: [deployer, "Test", "Test Tier", parseEther("0.001"), 3600],
-    log: true,
-    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-    // automatically mining the contract deployment transaction. There is no effect on live networks.
-    autoMine: true,
-  });
-
-  tier.receipt &&
-    console.log("Mecenate TIer deployed at:", tier.receipt.contractAddress);
-
   const users = await deploy("MecenateUsers", {
     from: deployer,
     // Contract constructor arguments
@@ -129,74 +103,13 @@ const deployYourContract: DeployFunction = async function (
       mecenateBay.receipt.contractAddress
     );
 
-  const box = await deploy("MecenateBox", {
-    from: deployer,
-    // Contract constructor arguments
-    args: [identity.address, treasury.address],
-    log: true,
-    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-    // automatically mining the contract deployment transaction. There is no effect on live networks.
-    autoMine: true,
-  });
-
-  box.receipt && console.log("Box deployed at:", box.receipt.contractAddress);
-
-  const dcaFactory = await deploy("MecenateDCAFactory", {
-    from: deployer,
-    // Contract constructor arguments
-    args: [identity.address, treasury.address],
-    log: true,
-    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-    // automatically mining the contract deployment transaction. There is no effect on live networks.
-    autoMine: true,
-  });
-
-  dcaFactory.receipt &&
-    console.log("DCA Factory deployed at:", dcaFactory.receipt.contractAddress);
-
-  const questionFactory = await deploy("MecenateQuestionFactory", {
-    from: deployer,
-    // Contract constructor arguments
-    args: [identity.address, treasury.address],
-    log: true,
-    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-    // automatically mining the contract deployment transaction. There is no effect on live networks.
-    autoMine: true,
-  });
-
-  questionFactory.receipt &&
-    console.log(
-      "Question Factory deployed at:",
-      questionFactory.receipt.contractAddress
-    );
-
-  const question = await deploy("MecenateQuestion", {
-    from: deployer,
-    // Contract constructor arguments
-    args: [deployer, deployer],
-    log: true,
-    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-    // automatically mining the contract deployment transaction. There is no effect on live networks.
-    autoMine: true,
-  });
-
-  question.receipt &&
-    console.log(
-      "Question Factory deployed at:",
-      question.receipt.contractAddress
-    );
-
   const mecenateStats = await deploy("MecenateStats", {
     from: deployer,
     // Contract constructor arguments
     args: [
       users.address,
-      factoryTier.address,
       feedFactory.address,
-      questionFactory.address,
-      dcaFactory.address,
       mecenateBay.address,
-      box.address,
       identity.address,
       treasury.address,
     ],

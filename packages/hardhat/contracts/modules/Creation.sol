@@ -125,16 +125,4 @@ abstract contract Creation is Data, Events, Staking {
 
         return Structures.Post({creator: creator, postdata: postdata});
     }
-
-    function changeUsersModuleContract(
-        address _usersModuleContract
-    ) external onlyOwner {
-        usersModuleContract = _usersModuleContract;
-    }
-
-    function changeIdentityContract(
-        address _identityContract
-    ) external onlyOwner {
-        identityContract = _identityContract;
-    }
 }
