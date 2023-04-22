@@ -1,19 +1,23 @@
-# **Mecente Protocol v1.0.0** for Buidlguidl Hackthon
+---
+description: Decentralized Anonymous Data Marketplace
+---
 
-[feed video demo](https://www.youtube.com/watch?v=ZCfASOjT04Y&list=PLTenf2t5YuIp68AlFJWjFiJtf4svPuQiX)
+# Mecente Protocol  ℳ
 
-- [**Mecente Protocol v1.0.0** for Buidlguidl Hackthon](#mecente-protocol-v100-for-buidlguidl-hackthon)
-  - [💡 CONCEPT](#-concept)
-    - [Introduction](#introduction)
-    - [Features](#features)
-  - [🚀 QUICK START](#-quick-start)
-    - [Development Notes](#development-notes)
-    - [Treasury \& DAO](#treasury--dao)
-    - [Contribution](#contribution)
+[feed video demo](https://www.youtube.com/watch?v=ZCfASOjT04Y\&list=PLTenf2t5YuIp68AlFJWjFiJtf4svPuQiX)
+
+* [**Mecente Protocol v1.0.0** for Buidlguidl Hackthon](./#mecente-protocol-v100-for-buidlguidl-hackthon)
+  * [💡 CONCEPT](./#-concept)
+    * [Introduction](./#introduction)
+    * [Features](./#features)
+  * [🚀 QUICK START](./#-quick-start)
+    * [Development Notes](./#development-notes)
+    * [Treasury & DAO](./#treasury--dao)
+    * [Contribution](./#contribution)
 
 ## 💡 CONCEPT
 
----
+***
 
 ### Introduction
 
@@ -27,33 +31,30 @@ Mecenate Protocol allows for secure and private information sharing and is desig
 
 Mecenate consists of several applications, including:
 
-- 📄Mecenate Feed: A smart contract protocol for sharing information privately and anonymously, similar to the Erasure Protocol clone.
-- 📣Mecenate Bay: A Dapp marketplace built on top of Mecenate Feed.
-- 🆔Mecenate Identity: A Dapp for creating a tokenized identity.
+* 📄Mecenate Feed: A smart contract protocol for sharing information privately and anonymously, similar to the Erasure Protocol clone.
+* 📣Mecenate Bay: A Dapp marketplace built on top of Mecenate Feed.
+* 🆔Mecenate Identity: A Dapp for creating a tokenized identity.
 
 ## 🚀 QUICK START
 
----
+***
 
 To get started with Scaffold-Eth 2, follow the steps below:
 
-1. Clone this repo & install dependencies
+1.  Clone this repo & install dependencies
 
     ```bash
     git clone https://github.com/scobru/mecenate-monorepo.git
     cd mecenate-monorepo
     yarn
     ```
-
-2. Run a local network in the first terminal:
+2.  Run a local network in the first terminal:
 
     ```bash
     yarn chain
     ```
-
 3. This command deploys a test smart contract to the local network. The contract is located in packages/hardhat/contracts and can be modified to suit your needs. The yarn deploy command uses the deploy script located in packages/hardhat/deploy to deploy the contract to the network. You can also customize the deploy script.
-
-4. On a third terminal, start your NextJS app:
+4.  On a third terminal, start your NextJS app:
 
     ```bash
     yarn start
