@@ -25,8 +25,9 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       passHref
-      className={`${isActive ? "bg-secondary shadow-md" : ""
-        } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm rounded-full gap-2`}
+      className={`${
+        isActive ? "bg-secondary shadow-md" : ""
+      } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm rounded-full gap-2`}
     >
       {children}
     </Link>
@@ -80,24 +81,6 @@ export default function Header() {
         <NavLink href="/feeds">
           <Square3Stack3DIcon className="h-4 w-4" />
           Feeds
-        </NavLink>
-      </li>
-      <li className="font-semibold">
-        <NavLink href="/tiers">
-          <TicketIcon className="h-4 w-4" />
-          Tiers
-        </NavLink>
-      </li>
-      <li className="font-semibold">
-        <NavLink href="/box">
-          <LockClosedIcon className="h-4 w-4" />
-          Box
-        </NavLink>
-      </li>
-      <li className="font-semibold">
-        <NavLink href="/question">
-          <QuestionMarkCircleIcon className="h-4 w-4" />
-          Question
         </NavLink>
       </li>
     </>

@@ -107,88 +107,15 @@ const Home: NextPage = () => {
             <div className="flex flex-wrap items-center gap-2  lg:flex-row px-5 ">
               <div className="text-xl font-thin my-2 ">identities: {Number(stats.totalIdentities)}</div>
               <div className="text-xl font-thin my-2 ">users: {Number(stats.totalUsers)}</div>
-              <div className="text-xl font-thin my-2 ">requests: {Number(stats.totalBayRequests)}</div>
-              <div className="text-xl font-thin my-2 ">tiers : {Number(stats.totalTiers)}</div>
-              <div className="text-xl font-thin my-2 ">feeds : {Number(stats.totalFeeds)}</div>
-              <div className="text-xl font-thin my-2 ">questions : {Number(stats.totalQuestions)}</div>
-              <div className="text-xl font-thin my-2 ">box deposits : {Number(stats.totalBoxDeposits)}</div>
+              <div className="text-xl font-thin my-2 ">requests: {Number(stats.totalBayRequests)}</div>{" "}
+              <div className="text-xl font-thin my-2 ">feeds : {Number(stats.totalFeeds)}</div>{" "}
             </div>
           </div>
         ) : null}
-        <div className="flex-wrap bg-base-300  mt-2 px-8 py-12 shadow-sm">
-          <div className="container p-10 mx-auto">
-            <h1 className="text-3xl text-center mb-10">
-              Getting Started with Identity NFT and KeyPair for Mecenate Feed
-            </h1>
-            <div className="flex flex-col md:flex-row justify-between">
-              <div className="md:w-1/2 p-6 rounded-lg shadow-md mb-6 md:mb-0">
-                <h2 className="text-xl mb-4">Create an Identity NFT</h2>
-                <p className="mb-4">To create an Identity NFT, follow these steps:</p>
-                <ol className="list-decimal ml-4 mb-4">
-                  <li>Visit the "Identity" page</li>
-                  <li>Fill in your NFT data with your information</li>
-                  <li>Mint your Mecenate ID</li>
-                </ol>
-              </div>
-              <div className="md:w-1/2 p-6 rounded-lg shadow-md">
-                <h2 className="text-xl mb-4">Create a KeyPair </h2>
-                <p className="mb-4">To create a KeyPair to interact with the Mecenate Feed, follow these steps:</p>
-                <ol className="list-decimal ml-4 mb-4">
-                  <li>Visit the "Identity" page.</li>
-                  <li>Generate a new KeyPair by clicking on the "Generate KeyPair" button.</li>
-                  <li>Save your KeyPair securely.</li>
-                  <li>Click "Sign In".</li>
-                </ol>
-                <p>
-                  Once you have your KeyPair, you can use it to interact with the Mecenate Feed and participate in the
-                  Mecenate economy.
-                </p>
-              </div>
-              <div className="md:w-1/2 p-6 rounded-lg shadow-md mb-6 md:mb-0">
-                <h2 className="text-xl mb-4">Create a Tier</h2>
-                <p className="mb-4">To create a Tier Subscription, follow these steps:</p>
-                <ol className="list-decimal ml-4 mb-4">
-                  <li>Visit the "Tier" page</li>
-                  <li>Fill in the form with your preferences</li>
-                  <li>Click "Create Subscription" and refresh the page</li>
-                </ol>
-                <p>
-                  Once you have your tier contract deployed, you can send the link to your subscribers or use the code
-                  to integrate the subscription into your dapp.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col md:flex-row justify-between">
-              <div className="md:w-2/3 p-6 rounded-lg shadow-md mb-6 md:mb-0">
-                <h2 className="text-xl mb-4">Create a Question</h2>
-                <p className="mb-4">To become a host of a question, follow these steps:</p>
-                <ol className="list-decimal ml-4 mb-4">
-                  <li>Visit the "Question" page</li>
-                  <li>Click "Create Question"</li>
-                  <li>When your question contract is deployed, follow the link to your Question Page </li>
-                  <li>Fill in the form with your preferences and click "Ask"</li>
-                  <li>Wait until the end of the question period</li>
-                  <li>Resolve your question as an oracle with the correct answer</li>
-                  <li>Reset the question and create a new one</li>
-                </ol>
-              </div>
-              <div className="md:w-1/3 p-6 rounded-lg shadow-md mb-6 md:mb-0">
-                <h2 className="text-xl mb-4">Deposit into the Box</h2>
-                <p className="mb-4">Folloẇ this steps:</p>
-                <ol className="list-decimal ml-4 mb-4">
-                  <li>Go to "Box" Page</li>
-                  <li>Select an amount to lock</li>
-                  <li>fill the endtime of your lock duration</li>
-                  <li>Save the signature in a save Place</li>
-                  <li>Wait until the lock end and return on Box Page</li>
-                  <li>Past your secret signature and click "Withdraw"</li>
-                </ol>
-              </div>
-            </div>
-          </div>
 
-          <div className="flex gap-4 flex-col items-center lg:flex-row my-20 ">
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-xl shadow-lg shadow-secondary hover:bg-primary">
+        <div className="flex-wrap bg-base-300  mt-2 px-8 py-12 shadow-sm">
+          <div className="flex gap-4 flex-col-1 items-center text-center lg:flex-row ">
+            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-xl shadow-lg shadow-secondary  mx-auto hover:bg-primary">
               <UserIcon className="h-8 w-8 fill-secondary" />
               <div className="p">
                 <div className="font-base align-baseline text-justify-center">
@@ -200,7 +127,7 @@ const Home: NextPage = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-xl shadow-lg shadow-secondary hover:bg-primary">
+            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-xl shadow-lg shadow-secondary mx-auto hover:bg-primary">
               <MegaphoneIcon className="h-8 w-8 fill-secondary" />
               <div className="p">
                 <div className="font-base align-baseline text-justify-center">
@@ -220,55 +147,34 @@ const Home: NextPage = () => {
                 </div>
               </div>
             </div>
-
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-xl shadow-lg shadow-secondary hover:bg-primary">
-              <TicketIcon className="h-8 w-8 fill-secondary" />
-              <div className="p">
-                <div className="font-base align-baseline text-justify-center">
-                  <ul>
-                    <strong>TIERS</strong>
-                  </ul>
-                  <br />
-                  <ul>
-                    Mecenate is the perfect solution for creators seeking to monetize their content and fans looking to
-                    support their favorite creators. With our smart contract platform, creators can set their own
-                    subscription fee and duration, while fans can subscribe with just a few clicks to gain access to
-                    exclusive content.
-                  </ul>
-                  <br />
-                </div>
+          </div>
+          <div className="container p-10 mx-auto">
+            <h1 className="text-6xl font-bold text-center mb-10">First Steps</h1>
+            <div className="flex flex-col md:flex-row justify-between">
+              <div className="md:w-1/2 p-6 rounded-lg shadow-md mb-6 md:mb-0">
+                <h2 className="text-4xl font-bold mb-4">Create an Identity NFT</h2>
+                <p className="mb-4 text-2xl font-semibold">To create an Identity NFT, follow these steps:</p>
+                <ol className="list-decimal ml-4 mb-4 px-8  text-xl font-light ">
+                  <li>Visit the "Identity" page</li>
+                  <li>Fill in your NFT data with your information</li>
+                  <li>Mint your Mecenate ID</li>
+                </ol>
               </div>
-            </div>
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-xl shadow-lg shadow-secondary hover:bg-primary">
-              <LockClosedIcon className="h-8 w-8 fill-secondary" />
-              <div className="p">
-                <div className="font-base align-baseline text-justify-center">
-                  <ul>
-                    <strong>BOX</strong>
-                  </ul>
-                  <br />
-                  <ul>
-                    Lock up a cryptocurrency for a selected period of time. Withdraw your stake at any time, with a
-                    secret signature.
-                  </ul>
-                  <br />
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-xl shadow-lg shadow-secondary hover:bg-primary">
-              <QuestionMarkCircleIcon className="h-8 w-8 fill-secondary" />
-              <div className="p">
-                <div className="font-base align-baseline text-justify-center">
-                  <ul>
-                    <strong>QUESTION</strong>
-                  </ul>
-                  <br />
-                  <ul>
-                    Host a question and become a trusted oracle. Any one can ask to your question. Collect Fees from the
-                    answers.
-                  </ul>
-                  <br />
-                </div>
+              <div className="md:w-1/2 p-6 rounded-lg shadow-md">
+                <h2 className="text-4xl font-bold mb-4">Create a KeyPair </h2>
+                <p className="mb-4 text-2xl font-semibold">
+                  To create a KeyPair to interact with the Mecenate Feed, follow these steps:
+                </p>
+                <ol className="list-decimal ml-4 mb-4 text-xl font-light">
+                  <li>Visit the "Identity" page.</li>
+                  <li>Generate a new KeyPair by clicking on the "Generate KeyPair" button.</li>
+                  <li>Save your KeyPair securely.</li>
+                  <li>Click "Sign In".</li>
+                </ol>
+                <p className="text-lg font-base">
+                  Once you have your KeyPair, you can use it to interact with the Mecenate Feed and participate in the
+                  Mecenate economy.
+                </p>
               </div>
             </div>
           </div>
