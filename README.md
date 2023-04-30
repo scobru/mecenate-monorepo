@@ -6,7 +6,7 @@ description: Decentralized Anonymous Data Marketplace
 
 [feed video demo](https://www.youtube.com/watch?v=ZCfASOjT04Y\&list=PLTenf2t5YuIp68AlFJWjFiJtf4svPuQiX)
 
-* [**Mecente Protocol v1.0.0** for Buidlguidl Hackthon](./#mecente-protocol-v100-for-buidlguidl-hackthon)
+* [**Mecente Protocol v1.0.0**](./#mecente-protocol-v100-for-buidlguidl-hackthon)
   * [💡 CONCEPT](./#-concept)
     * [Introduction](./#introduction)
     * [Features](./#features)
@@ -21,7 +21,7 @@ description: Decentralized Anonymous Data Marketplace
 
 ### Introduction
 
-I have created a protocol called Mecenate for the Buidlguidl hackathon. The protocol is inspired by the [Erasure Protocol](https://github.com/erasureprotocol/erasure-protocol), which is the backbone of the NMR token. Mecenate is a decentralized and anonymous data exchange protocol that is designed to improve upon the functions of the Erasure Protocol.
+I have created a protocol called Mecenate. The protocol is inspired by the [Erasure Protocol](https://github.com/erasureprotocol/erasure-protocol), which is the backbone of the NMR token. Mecenate is a decentralized and anonymous data exchange protocol that is designed to improve upon the functions of the Erasure Protocol.
 
 As a solo developer, this project was ambitious to undertake, and there is a possibility that the current version 1 deployed on the Polygon Mumbai network may have some bugs. I invite other developers who share a passion for decentralized data exchange to join this project and help it reach its full potential. Additionally, we welcome users to report any errors or bugs they may encounter in the protocol's contracts or frontend.
 
