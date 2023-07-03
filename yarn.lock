@@ -5139,7 +5139,7 @@ __metadata:
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13"
     "@nomiclabs/hardhat-etherscan": ^3.1.0
     "@nomiclabs/hardhat-solhint": ^2.0.0
-    "@openzeppelin/contracts": ^4.8.2
+    "@openzeppelin/contracts": ^4.9.2
     "@pinata/sdk": ^2.1.0
     "@polkadot/util": ^11.0.2
     "@typechain/ethers-v5": ^10.1.0
@@ -6050,10 +6050,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts@npm:^4.8.2":
-  version: 4.8.2
-  resolution: "@openzeppelin/contracts@npm:4.8.2"
-  checksum: 1d362f0b9c880549cb82544e23fb70270fbbbe24a69e10bd5aa07649fd82347686173998ae484defafdc473d04004d519f839e3cd3d3e7733d0895b950622243
+"@openzeppelin/contracts@npm:^4.9.2":
+  version: 4.9.2
+  resolution: "@openzeppelin/contracts@npm:4.9.2"
+  checksum: 0538b18fe222e5414a5a539c240b155e0bef2a23c5182fb8e137d71a0c390fe899160f2d55701f75b127f54cc61aee4375370acc832475f19829368ac65c1fc6
   languageName: node
   linkType: hard
 
