@@ -97,7 +97,6 @@ const Bay: NextPage = () => {
 
       const tx = await bayCtx?.createRequest(request, { value: parseEther(requestPayment) });
 
-
       if (tx) {
         notification.success("Request created successfully");
       }
@@ -222,7 +221,6 @@ const Bay: NextPage = () => {
                 <div className="text-xl my-2 font-medium px-2">
                   ⚡{index} {ethers.utils.parseBytes32String(request.request)}
                 </div>
-
                 {/* <div
                   key={index}
                   className=" my-2 flex-wrap text-content-base p-4 bg-primary shadow-md rounded-md text-left hover:shadow-lg hover:bg-secondary transition duration-300 ease-in-out"
@@ -239,7 +237,6 @@ const Bay: NextPage = () => {
                   </a>
                 </div>
                 <div className="my-2 font-medium">🔢 Hash Count : {String(request.postCount)}</div>
-
                 <div className="my-2 font-medium">✔️ Accepted : {String(request.accepted)}</div>
                 <div className="flex flex-row space-x-4 my-4">
                   <input

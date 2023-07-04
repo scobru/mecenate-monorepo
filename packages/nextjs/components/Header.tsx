@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaucetButton } from "~~/components/scaffold-eth";
 import RainbowKitCustomConnectButton from "~~/components/scaffold-eth/RainbowKitCustomConnectButton";
-import { Bars3Icon, BugAntIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, BugAntIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 
@@ -83,6 +83,12 @@ export default function Header() {
           Feeds
         </NavLink>
       </li>
+      <li className="font-semibold">
+        <NavLink href="https://scobru.gitbook.io/mecenate/">
+          <DocumentIcon className="h-4 w-4" />
+          Docs
+        </NavLink>
+      </li>
     </>
   );
 
@@ -114,10 +120,9 @@ export default function Header() {
           {/* <Link href="/" passHref className="flex relative w-10 h-10">
             <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
           </Link> */}
-          <div className="flex flex-col">
-            <span className="font-extrabold font-proxima text-2xl">MECENATE</span>
-            {/*             <span className="text-base font-proxima">Decentralized Encrypted Data Sharing Protocol</span>
-             */}{" "}
+          <div className="flex flex-col py-2">
+            <span className="font-bold font-proxima text-2xl"> ℳ E C E N A T E</span>
+            <span className="text-base font-proxima">Decentralized Data Marketplace</span>{" "}
           </div>
         </div>
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>

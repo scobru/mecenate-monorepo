@@ -67,13 +67,18 @@ const Home: NextPage = () => {
       <Head>
         <title>M E C E N A T E</title>
         <meta name="description" content="Created with 🏗 scaffold-eth" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
       </Head>
 
       <div className="flex items-center flex-col flex-grow rounded-sm pt-10 font-proxima">
         <div className="px-5">
           <h1 className="text-center mb-8">
             <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-6xl font-bold">M E C E N A T E</span>
+            <span className="block text-6xl font-bold">ℳ E C E N A T E</span>
           </h1>
         </div>
 
@@ -112,10 +117,38 @@ const Home: NextPage = () => {
             </div>
           </div>
         ) : null}
-
-        <div className="flex-wrap bg-base-300  mt-2 px-8 py-12 shadow-sm">
-          <div className="flex gap-4 flex-col-1 items-center text-center lg:flex-row ">
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-xl shadow-lg shadow-secondary  mx-auto hover:bg-primary">
+        <div className="container p-10 mx-auto">
+          <div className="flex flex-col md:flex-row justify-between">
+            <div className="md:w-1/2 p-6 ì mb-6 md:mb-0">
+              <h2 className="text-4xl font-bold mb-4">Create an Identity NFT</h2>
+              <p className="mb-4 text-2xl font-semibold">To create an Identity NFT, follow these steps:</p>
+              <ol className="list-decimal ml-4 mb-4 px-8  text-xl font-light ">
+                <li>Visit the "Identity" page</li>
+                <li>Fill in your NFT data with your information</li>
+                <li>Mint your Mecenate ID</li>
+              </ol>
+            </div>
+            <div className="md:w-1/2 p-6  ">
+              <h2 className="text-4xl font-bold mb-4">Create a KeyPair </h2>
+              <p className="mb-4 text-2xl font-semibold">
+                To create a KeyPair to interact with the Mecenate Feed, follow these steps:
+              </p>
+              <ol className="list-decimal ml-4 mb-4 text-xl font-light">
+                <li>Visit the "Identity" page.</li>
+                <li>Generate a new KeyPair by clicking on the "Generate KeyPair" button.</li>
+                <li>Save your KeyPair securely.</li>
+                <li>Click "Sign In".</li>
+              </ol>
+              <p className="text-lg font-base">
+                Once you have your KeyPair, you can use it to interact with the Mecenate Feed and participate in the
+                Mecenate economy.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex-wrap bg-base-300 w-full  mt-2 px-8 py-12 shadow-sm">
+          <div className="flex gap-2 flex-col items-center text-center lg:flex-row ">
+            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-md rounded-xl shadow-lg shadow-secondary  mx-auto hover:bg-primary">
               <UserIcon className="h-8 w-8 fill-secondary" />
               <div className="p">
                 <div className="font-base align-baseline text-justify-center">
@@ -127,7 +160,7 @@ const Home: NextPage = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-xs rounded-xl shadow-lg shadow-secondary mx-auto hover:bg-primary">
+            <div className="flex flex-col bg-base-100 px-5 py-5 text-center items-center max-w-md rounded-xl shadow-lg shadow-secondary mx-auto hover:bg-primary">
               <MegaphoneIcon className="h-8 w-8 fill-secondary" />
               <div className="p">
                 <div className="font-base align-baseline text-justify-center">
@@ -145,36 +178,6 @@ const Home: NextPage = () => {
                   </ul>
                   <br />
                 </div>
-              </div>
-            </div>
-          </div>
-          <div className="container p-10 mx-auto">
-            <h1 className="text-6xl font-bold text-center mb-10">First Steps</h1>
-            <div className="flex flex-col md:flex-row justify-between">
-              <div className="md:w-1/2 p-6 rounded-lg shadow-md mb-6 md:mb-0">
-                <h2 className="text-4xl font-bold mb-4">Create an Identity NFT</h2>
-                <p className="mb-4 text-2xl font-semibold">To create an Identity NFT, follow these steps:</p>
-                <ol className="list-decimal ml-4 mb-4 px-8  text-xl font-light ">
-                  <li>Visit the "Identity" page</li>
-                  <li>Fill in your NFT data with your information</li>
-                  <li>Mint your Mecenate ID</li>
-                </ol>
-              </div>
-              <div className="md:w-1/2 p-6 rounded-lg shadow-md">
-                <h2 className="text-4xl font-bold mb-4">Create a KeyPair </h2>
-                <p className="mb-4 text-2xl font-semibold">
-                  To create a KeyPair to interact with the Mecenate Feed, follow these steps:
-                </p>
-                <ol className="list-decimal ml-4 mb-4 text-xl font-light">
-                  <li>Visit the "Identity" page.</li>
-                  <li>Generate a new KeyPair by clicking on the "Generate KeyPair" button.</li>
-                  <li>Save your KeyPair securely.</li>
-                  <li>Click "Sign In".</li>
-                </ol>
-                <p className="text-lg font-base">
-                  Once you have your KeyPair, you can use it to interact with the Mecenate Feed and participate in the
-                  Mecenate economy.
-                </p>
               </div>
             </div>
           </div>

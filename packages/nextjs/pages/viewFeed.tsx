@@ -168,8 +168,6 @@ const ViewFeed: NextPage = () => {
     notification.success("Refund successful");
   }
 
-
-
   const uploadImageToIpfs = async (file: Blob | any) => {
     try {
       if (!file) {
@@ -1002,9 +1000,12 @@ const ViewFeed: NextPage = () => {
                     </div>
                   </div>
                 </div>
-                <label className="btn  modal-button mx-2 my-2" onClick={async () => {
-                  await renounce();
-                }}>
+                <label
+                  className="btn  modal-button mx-2 my-2"
+                  onClick={async () => {
+                    await renounce();
+                  }}
+                >
                   Renounce (S)
                 </label>
               </div>
@@ -1217,16 +1218,16 @@ const ViewFeed: NextPage = () => {
                     {feedData.postdata.settings.status === 6
                       ? "Revealed"
                       : feedData.postdata.settings.status === 5
-                        ? "Punished"
-                        : feedData.postdata.settings.status === 4
-                          ? "Finalized"
-                          : feedData.postdata.settings.status === 3
-                            ? "Submitted"
-                            : feedData.postdata.settings.status === 2
-                              ? "Accepted"
-                              : feedData.postdata.settings.status === 1
-                                ? "Proposed"
-                                : "Waiting for Creator"}
+                      ? "Punished"
+                      : feedData.postdata.settings.status === 4
+                      ? "Finalized"
+                      : feedData.postdata.settings.status === 3
+                      ? "Submitted"
+                      : feedData.postdata.settings.status === 2
+                      ? "Accepted"
+                      : feedData.postdata.settings.status === 1
+                      ? "Proposed"
+                      : "Waiting for Creator"}
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">

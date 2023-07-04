@@ -33,7 +33,6 @@ type ImageProps = {
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
-  const account = useAccount();
   const provider = useProvider();
 
   const [fee, setFee] = React.useState(0);
@@ -45,17 +44,8 @@ const Identity: NextPage = () => {
   const [nftBalance, setNftBalance] = React.useState(0);
   const [nftMetadata, setNftMetadata] = React.useState<{ [key: string]: any[] }>({});
   const [pubKey, setPubKey] = React.useState<string>("");
-  const [isSubmitted, setIsSubmitted] = React.useState(false);
-
-  const [subscriptions, setSubscriptions] = React.useState<Array<string>>([]);
-  const [subscriptionName, setSubscriptionName] = React.useState("");
-  const [subscriptionDescription, setSubscriptionDescription] = React.useState("");
-  const [subscriptionFee, setSubscriptionFee] = React.useState(0);
-  const [subscriptionDuration, setSubscriptionDuration] = React.useState(0);
-
   const [alreadyUser, setAlreadyUser] = React.useState(false);
 
-  const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateTierFactory");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
@@ -79,18 +69,11 @@ const Identity: NextPage = () => {
     publicKey: string;
   };
 
-  let factoryAddress!: string;
-  let factoryAbi: ContractInterface[] = [];
-
   let identityAddress!: string;
   let identityAbi: ContractInterface[] = [];
 
   let treasuryAddress!: string;
   let treasuryAbi: ContractInterface[] = [];
-
-  if (deployedContractFactory) {
-    ({ address: factoryAddress, abi: factoryAbi } = deployedContractFactory);
-  }
 
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
@@ -110,12 +93,6 @@ const Identity: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  const factory = useContract({
-    address: factoryAddress,
-    abi: factoryAbi,
-    signerOrProvider: signer || provider,
-  });
-
   const identity = useContract({
     address: identityAddress,
     abi: identityAbi,
@@ -129,7 +106,6 @@ const Identity: NextPage = () => {
       setAlreadyUser(true);
     }
   };
-
 
   const treasury = useContract({
     address: treasuryAddress,
@@ -245,7 +221,6 @@ const Identity: NextPage = () => {
 
       if (response.status === 200) {
         notification.success(<span className="font-bold">Submission received! 🎉</span>);
-        setIsSubmitted(true);
       } else {
         notification.error(
           <>
@@ -266,11 +241,9 @@ const Identity: NextPage = () => {
       );
     }
 
-
     const tx = await identity?.mint(nftMetadataWrite, {
       value: identityFee,
     });
-
 
     if (tx?.hash) {
       notification.success("Identity minted successfully!");
@@ -361,7 +334,7 @@ const Identity: NextPage = () => {
 
     downloadFile({
       data: JSON.stringify(data),
-      fileName: await signer?.getAddress() + "_keyPair.json",
+      fileName: (await signer?.getAddress()) + "_keyPair.json",
       fileType: "text/json",
     });
   }
@@ -420,7 +393,6 @@ const Identity: NextPage = () => {
 
         if (response.status === 200) {
           notification.success(<span className="font-bold">Submission received! 🎉</span>);
-          setIsSubmitted(true);
         } else {
           notification.error(
             <>
@@ -474,25 +446,19 @@ const Identity: NextPage = () => {
   };
 
   const getContractData = async function getContractData() {
-    if (factory && identity && signer) {
-      const subscriptions = await factory?.getSubscriptionsOwned(signer?.getAddress());
+    if (identity && signer) {
       const fee = await treasury?.fixedFee();
       const _identityFee = await treasury?.fixedFee();
+      console.log(_identityFee);
       await fetchNFTBalance();
       await checkIfUserIsRegistered();
-      setSubscriptions(subscriptions);
       setFee(fee);
       setIdentityFee(_identityFee);
     }
   };
 
-  React.useEffect(() => {
-    if (factory) {
-      factory.on("MecenateSubscriptionCreated", (owner: string, subscription: string, event: any) => {
-        notification.success("Mecenate Subscription Created");
-      });
-      getContractData();
-    }
+  useEffect(() => {
+    getContractData();
   }, [signer]);
 
   return (
