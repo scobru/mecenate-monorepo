@@ -6037,9 +6037,9 @@ __metadata:
   linkType: hard
 
 "@openzeppelin/contracts-upgradeable@npm:^4.7.3":
-  version: 4.8.2
-  resolution: "@openzeppelin/contracts-upgradeable@npm:4.8.2"
-  checksum: b1ad40e5d0c4d3bcfea7c74b772fb2c830562f2863ea8f816a603113146e0614dc806b32d9b1649f8c88ceb93dbf8b394abf8dbeb9022fc09e546858c4fe71e9
+  version: 4.9.3
+  resolution: "@openzeppelin/contracts-upgradeable@npm:4.9.3"
+  checksum: bda0240b1d44c913ec5a4e109c622f216c2bbd7b468d210822f75782a5f7fe0609d08bf03b78b253333625e99e507cf2f75212f1de3b274bd9fc64ae967aeec3
   languageName: node
   linkType: hard
 
