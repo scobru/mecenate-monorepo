@@ -81,11 +81,11 @@ contract MecenateBay is Ownable, FeedViewer {
             "stake is not the same of the feed"
         );
 
-        bytes memory publicKey = IMecenateUsers(usersMouduleContract)
+        bytes memory vaultId = IMecenateUsers(usersMouduleContract)
             .getUserData(allRequests[index].buyer)
-            .publicKey;
+            .vaultId;
         IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
-            publicKey,
+            vaultId,
             allRequests[index].buyer
         );
 

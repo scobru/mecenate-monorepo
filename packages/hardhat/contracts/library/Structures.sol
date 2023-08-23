@@ -65,6 +65,7 @@ library Structures {
 
     struct User {
         bytes vaultId;
+        address wallet;
     }
 
     struct Feed {

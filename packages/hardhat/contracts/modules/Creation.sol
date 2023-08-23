@@ -15,36 +15,30 @@ abstract contract Creation is Data, Events, Staking {
         uint256 payment,
         bytes memory sismoConnectResponse
     ) external payable returns (Structures.Post memory) {
+        AuthRequest[] memory auths = new AuthRequest[](2);
+        auths[0] = buildAuth(AuthType.VAULT);
+        auths[1] = buildAuth(AuthType.EVM_ACCOUNT);
+
         SismoConnectVerifiedResult memory result = verify({
             responseBytes: sismoConnectResponse,
-            // we want users to prove that they own a Sismo Vault
-            // and that they are members of the group with the id 0x42c768bb8ae79e4c5c05d3b51a4ec74a
-            // we are recreating the auth and claim requests made in the frontend to be sure that
-            // the proofs provided in the response are valid with respect to this auth request
-            auth: [
-                buildAuth({authType: AuthType.VAULT}),
-                buildAuth({authType: AuthType.EVM_ACCOUNT})
-            ],
-            //claim: buildClaim({groupId: 0x42c768bb8ae79e4c5c05d3b51a4ec74a},
-            // we also want to check if the signed message provided in the response is the signature of the user's address
+            auths: auths,
             signature: buildSignature({message: "I love Sismo!"})
         });
 
-        // if the proofs and signed message are valid, we can take the userId from the verified result
-        // in this case the userId is the vaultId (since we used AuthType.VAULT in the auth request)
-        // it is the anonymous identifier of a user's vault for a specific app
         // --> vaultId = hash(userVaultSecret, appId)
         uint256 vaultId = SismoConnectHelper.getUserId(result, AuthType.VAULT);
+        bytes memory vaultIdBytes = abi.encodePacked(vaultId);
 
         uint256 userAddress = SismoConnectHelper.getUserId(
             result,
             AuthType.EVM_ACCOUNT
         );
-
         address userAddressConverted = address(uint160(userAddress));
 
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(vaultId),
+            IMecenateUsers(usersModuleContract).checkifUserExist(
+                userAddressConverted
+            ),
             "User does not exist"
         );
 
@@ -74,7 +68,7 @@ abstract contract Creation is Data, Events, Staking {
             "Not Wating or Finalized or Revealed or Proposed"
         );
 
-        uint256 stake = _addStake(userAddress, msg.value);
+        uint256 stake = _addStake(userAddressConverted, msg.value);
 
         uint256 duration;
 
@@ -105,7 +99,10 @@ abstract contract Creation is Data, Events, Staking {
             duration = 30 days;
         }
 
-        Structures.User memory creator = Structures.User({vaultId: vaultId});
+        Structures.User memory creator = Structures.User({
+            vaultId: vaultIdBytes,
+            wallet: userAddressConverted
+        });
 
         Structures.PostData memory postdata = Structures.PostData({
             settings: Structures.PostSettings({
@@ -113,7 +110,7 @@ abstract contract Creation is Data, Events, Staking {
                 status: Structures.PostStatus.Proposed,
                 buyer: buyer,
                 buyerPubKey: "0x00",
-                seller: userAddress,
+                seller: userAddressConverted,
                 creationTimeStamp: block.timestamp,
                 endTimeStamp: 0,
                 duration: duration

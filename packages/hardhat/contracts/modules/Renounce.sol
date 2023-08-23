@@ -29,7 +29,7 @@ abstract contract Renounce is Data, Events, Staking {
         payable(post.postdata.settings.seller).transfer(stake);
 
         // Reset the post struct
-        post.creator = Structures.User(0, address(0), "");
+        post.creator = Structures.User("0x00", address(0));
         post.postdata = Structures.PostData(
             Structures.PostSettings(
                 Structures.PostStatus.Waiting,
