@@ -9,8 +9,16 @@ import "./Staking.sol";
 abstract contract Finalization is Data, Events, Staking {
     function finalizePost(
         bool valid,
-        uint256 punishment
+        uint256 punishment,
+        bytes memory sismoConnectResponse
     ) public virtual returns (bool) {
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
+
         require(
             post.postdata.settings.status == Structures.PostStatus.Submitted,
             "Post is not Submitted"
@@ -46,7 +54,7 @@ abstract contract Finalization is Data, Events, Staking {
             emit Valid(post);
         } else if (post.postdata.settings.endTimeStamp > block.timestamp) {
             require(
-                post.postdata.settings.buyer == msg.sender,
+                post.postdata.settings.buyer == userAddressConverted,
                 "You are not the buyer"
             );
             if (valid == true) {

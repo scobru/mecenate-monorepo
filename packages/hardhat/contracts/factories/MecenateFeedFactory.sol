@@ -8,8 +8,11 @@ import "../interfaces/IMecenateTreasury.sol";
 import "../modules/FeedViewer.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "../helpers/SismoConnectLib.sol";
 
-contract MecenateFeedFactory is Ownable, FeedViewer {
+contract MecenateFeedFactory is Ownable, FeedViewer, SismoConnect {
+    bytes16 public appId = 0x6c434d2de6efa3e7169bc58843b74d74;
+
     uint256 public contractCounter;
 
     address[] public feeds;
@@ -30,7 +33,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         address _usersMouduleContract,
         address _identityContract,
         address _treasuryContract
-    ) {
+    ) SismoConnect(buildConfig(appId)) {
         identityContract = _identityContract;
         usersMouduleContract = _usersMouduleContract;
         treasuryContract = _treasuryContract;
@@ -49,25 +52,32 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         treasuryContract = _treasury;
     }
 
-    function buildFeed() public payable returns (address) {
+    function buildFeed(
+        bytes memory sismoConnectResponse
+    ) public payable returns (address) {
+        (uint256 vaultId, , , address userAddressConverted) = _sismoVerify(
+            sismoConnectResponse
+        );
+
         require(msg.value == getCreationFee(), "fee is not correct");
 
         payable(treasuryContract).transfer(msg.value);
 
         require(
-            MecenateIdentity(identityContract).balanceOf(msg.sender) > 0,
+            MecenateIdentity(identityContract).balanceOf(userAddressConverted) >
+                0,
             "user does not have identity"
         );
 
         require(
-            IMecenateUsers(usersMouduleContract).checkifUserExist(msg.sender),
+            IMecenateUsers(usersMouduleContract).checkifUserExist(vaultId),
             "user does not exist"
         );
 
         contractCounter++;
 
         MecenateFeed feed = new MecenateFeed(
-            msg.sender,
+            userAddressConverted,
             usersMouduleContract,
             identityContract
         );
@@ -116,6 +126,33 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     function getCreationFee() internal view returns (uint256) {
         return IMecenateTreasury(treasuryContract).fixedFee();
+    }
+
+    function _sismoVerify(
+        bytes memory sismoConnectResponse
+    ) internal view returns (uint256, bytes memory, uint256, address) {
+        AuthRequest[] memory auths = new AuthRequest[](2);
+        auths[0] = buildAuth(AuthType.VAULT);
+        auths[1] = buildAuth(AuthType.EVM_ACCOUNT);
+
+        SismoConnectVerifiedResult memory result = verify({
+            responseBytes: sismoConnectResponse,
+            auths: auths,
+            signature: buildSignature({message: "I love Sismo!"})
+        });
+
+        // --> vaultId = hash(userVaultSecret, appId)
+        uint256 vaultId = SismoConnectHelper.getUserId(result, AuthType.VAULT);
+        bytes memory vaultIdBytes = abi.encodePacked(vaultId);
+
+        uint256 userAddress = SismoConnectHelper.getUserId(
+            result,
+            AuthType.EVM_ACCOUNT
+        );
+
+        address userAddressConverted = address(uint160(userAddress));
+
+        return (vaultId, vaultIdBytes, userAddress, userAddressConverted);
     }
 
     receive() external payable {}

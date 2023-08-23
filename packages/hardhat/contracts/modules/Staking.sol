@@ -104,14 +104,20 @@ abstract contract Staking is Data, Deposit {
         return (amountSeller + amountBuyer);
     }
 
-    function addStake() external payable checkStatus returns (uint256) {
+    function addStake(
+        bytes memory sismoConnectResponse
+    ) external payable checkStatus returns (uint256) {
+        (, , , address userAddressConverted) = sismoVerify(
+            sismoConnectResponse
+        );
+
         uint256 stakerBalance;
 
-        if (msg.sender == post.postdata.settings.buyer) {
-            stakerBalance = _addStake(msg.sender, msg.value);
+        if (userAddressConverted == post.postdata.settings.buyer) {
+            stakerBalance = _addStake(userAddressConverted, msg.value);
             post.postdata.escrow.payment = stakerBalance;
-        } else if (msg.sender == post.postdata.settings.seller) {
-            stakerBalance = _addStake(msg.sender, msg.value);
+        } else if (userAddressConverted == post.postdata.settings.seller) {
+            stakerBalance = _addStake(userAddressConverted, msg.value);
             post.postdata.escrow.stake = stakerBalance;
         } else {
             revert("Not buyer or seller");
@@ -121,32 +127,42 @@ abstract contract Staking is Data, Deposit {
     }
 
     function takeStake(
-        uint256 amountToTake
+        uint256 amountToTake,
+        bytes memory sismoConnectResponse
     ) external payable checkStatus returns (uint256) {
-        uint256 currentDeposit = Deposit._getDeposit(msg.sender);
+        (, , , address userAddressConverted) = sismoVerify(
+            sismoConnectResponse
+        );
+
+        uint256 currentDeposit = Deposit._getDeposit(userAddressConverted);
         uint256 stakerBalance;
 
         require(currentDeposit >= amountToTake, "Not enough deposit");
 
-        if (msg.sender == post.postdata.settings.buyer) {
-            stakerBalance = _takeStake(msg.sender, amountToTake);
+        if (userAddressConverted == post.postdata.settings.buyer) {
+            stakerBalance = _takeStake(userAddressConverted, amountToTake);
             post.postdata.escrow.payment = stakerBalance;
-        } else if (msg.sender == post.postdata.settings.seller) {
-            stakerBalance = _takeStake(msg.sender, amountToTake);
+        } else if (userAddressConverted == post.postdata.settings.seller) {
+            stakerBalance = _takeStake(userAddressConverted, amountToTake);
             post.postdata.escrow.stake = stakerBalance;
         } else {
             revert("Not buyer or seller");
         }
 
-        payable(msg.sender).transfer(amountToTake);
+        payable(userAddressConverted).transfer(amountToTake);
 
         return stakerBalance;
     }
 
-    function takeFullStake() external payable checkStatus returns (uint256) {
-        uint256 currentDeposit = Deposit._getDeposit(msg.sender);
-        uint256 stakerBalance = _takeFullStake(msg.sender);
-        payable(msg.sender).transfer(stakerBalance);
+    function takeFullStake(
+        bytes memory sismoConnectResponse
+    ) external payable checkStatus returns (uint256) {
+        (, , , address userAddressConverted) = sismoVerify(
+            sismoConnectResponse
+        );
+        uint256 currentDeposit = Deposit._getDeposit(userAddressConverted);
+        uint256 stakerBalance = _takeFullStake(userAddressConverted);
+        payable(userAddressConverted).transfer(stakerBalance);
         return stakerBalance;
     }
 }

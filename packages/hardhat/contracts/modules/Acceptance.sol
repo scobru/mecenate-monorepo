@@ -8,15 +8,21 @@ import "./Staking.sol";
 
 abstract contract Acceptance is Data, Events, Staking {
     function acceptPost(
-        bytes memory publicKey,
-        address _buyer
+        bytes memory sismoConnectResponse
     ) public payable virtual {
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
+
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(_buyer),
+            IMecenateUsers(usersModuleContract).checkifUserExist(vaultId),
             "User does not exist"
         );
 
-        uint256 _payment = _addStake(_buyer, msg.value);
+        uint256 _payment = _addStake(userAddressConverted, msg.value);
 
         if (post.postdata.escrow.payment > 0) {
             require(
@@ -31,10 +37,13 @@ abstract contract Acceptance is Data, Events, Staking {
             post.postdata.settings.status == Structures.PostStatus.Proposed,
             "Post is not Proposed"
         );
-        require(_buyer != address(0), "Buyer address cannot be zero");
+        require(
+            userAddressConverted != address(0),
+            "Buyer address cannot be zero"
+        );
 
-        post.postdata.settings.buyer = _buyer;
-        post.postdata.settings.buyerPubKey = publicKey;
+        post.postdata.settings.buyer = userAddressConverted;
+        post.postdata.settings.buyerPubKey = vaultIdBytes;
         post.postdata.escrow.payment = _payment;
         post.postdata.settings.status = Structures.PostStatus.Accepted;
 

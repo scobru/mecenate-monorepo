@@ -67,9 +67,8 @@ contract MecenateTreasury is Ownable, Swapper {
             address payable _owner = payable(
                 IMecenateIdentity(_identityContract).getOwnerById(i)
             );
-            if (IMecenateUsers(_usersContract).checkifUserExist(_owner)) {
-                _owner.transfer(perIdentity);
-            }
+
+            _owner.transfer(perIdentity);
         }
 
         address payable owner = payable(owner());

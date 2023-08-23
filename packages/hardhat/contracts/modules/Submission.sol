@@ -6,7 +6,17 @@ import "./Data.sol";
 import "./Events.sol";
 
 abstract contract Submission is Data, Events {
-    function submitHash(bytes memory encryptedKey) public virtual {
+    function submitHash(
+        bytes memory encryptedKey,
+        bytes memory sismoConnectResponse
+    ) public virtual {
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
+
         require(
             post.postdata.settings.status == Structures.PostStatus.Accepted ||
                 post.postdata.settings.status ==
@@ -15,11 +25,14 @@ abstract contract Submission is Data, Events {
         );
 
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(msg.sender),
+            IMecenateUsers(usersModuleContract).checkifUserExist(vaultId),
             "User does not exist"
         );
 
-        require(post.creator.wallet == msg.sender, "You are not the creator");
+        require(
+            post.creator.wallet == userAddressConverted,
+            "You are not the creator"
+        );
 
         post.postdata.data.encryptedKey = encryptedKey;
         post.postdata.settings.status = Structures.PostStatus.Submitted;
@@ -31,14 +44,22 @@ abstract contract Submission is Data, Events {
     }
 
     function revealData(
-        bytes memory decryptedData
+        bytes memory decryptedData,
+        bytes memory sismoConnectResponse
     ) public virtual returns (bytes memory) {
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
+
         require(
             post.postdata.settings.status == Structures.PostStatus.Finalized,
             "Post is not Finalized"
         );
         require(
-            post.postdata.settings.seller == msg.sender,
+            post.postdata.settings.seller == userAddressConverted,
             "You are not the buyer"
         );
         post.postdata.data.decryptedData = decryptedData;

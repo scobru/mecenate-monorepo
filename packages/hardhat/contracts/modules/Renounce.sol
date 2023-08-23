@@ -7,9 +7,16 @@ import "./Events.sol";
 import "./Staking.sol";
 
 abstract contract Renounce is Data, Events, Staking {
-    function renouncePost() public virtual {
+    function renouncePost(bytes memory sismoConnectResponse) public virtual {
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
+
         require(
-            msg.sender == post.postdata.settings.seller,
+            userAddressConverted == post.postdata.settings.seller,
             "You are not the seller"
         );
 
@@ -20,7 +27,7 @@ abstract contract Renounce is Data, Events, Staking {
             "Post is not Accepted or Submitted"
         );
 
-        _refundPost();
+        _refundPost(userAddressConverted);
 
         uint256 stake = post.postdata.escrow.stake;
 
@@ -50,14 +57,14 @@ abstract contract Renounce is Data, Events, Staking {
         emit Renounced(post);
     }
 
-    function _refundPost() internal virtual {
+    function _refundPost(address to) internal virtual {
         require(
             post.postdata.settings.status == Structures.PostStatus.Accepted,
             "Post is not accepted"
         );
 
         require(
-            post.postdata.settings.seller == msg.sender,
+            post.postdata.settings.seller == to,
             "Only  Seller can refund the post"
         );
 

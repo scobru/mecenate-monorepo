@@ -10,9 +10,9 @@ import "../helpers/SismoConnectLib.sol";
 contract MecenateUsers is SismoConnect {
     bytes16 public appId = 0x6c434d2de6efa3e7169bc58843b74d74;
 
-    using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.UintSet;
 
-    EnumerableSet.AddressSet private _users;
+    EnumerableSet.UintSet private _users;
     mapping(address => Structures.User) private _metadata;
 
     event UserRegistered(bytes vaultID);
@@ -36,6 +36,7 @@ contract MecenateUsers is SismoConnect {
 
         // --> vaultId = hash(userVaultSecret, appId)
         uint256 vaultId = SismoConnectHelper.getUserId(result, AuthType.VAULT);
+
         bytes memory vaultIdBytes = abi.encodePacked(vaultId);
 
         uint256 userAddress = SismoConnectHelper.getUserId(
@@ -45,10 +46,10 @@ contract MecenateUsers is SismoConnect {
         address userAddressConverted = address(uint160(userAddress));
 
         // check if user exists
-        require(!_users.contains(userAddressConverted), "user already exists");
+        require(!_users.contains(vaultId), "user already exists");
 
         // add user
-        _users.add(userAddressConverted);
+        _users.add(vaultId);
 
         // set user metadata
         _metadata[userAddressConverted] = Structures.User({
@@ -60,7 +61,7 @@ contract MecenateUsers is SismoConnect {
         emit UserRegistered(abi.encodePacked(bytes32(vaultId)));
     }
 
-    function getUsers() public view returns (address[] memory users) {
+    function getUsers() public view returns (uint[] memory users) {
         return _users.values();
     }
 
@@ -68,7 +69,7 @@ contract MecenateUsers is SismoConnect {
         count = _users.length();
     }
 
-    function checkifUserExist(address user) public view returns (bool) {
+    function checkifUserExist(uint user) public view returns (bool) {
         return _users.contains(user);
     }
 
@@ -76,12 +77,12 @@ contract MecenateUsers is SismoConnect {
     function getPaginatedUsers(
         uint256 startIndex,
         uint256 endIndex
-    ) public view returns (address[] memory users) {
+    ) public view returns (uint[] memory users) {
         require(startIndex < endIndex, "startIndex must be less than endIndex");
         require(endIndex <= _users.length(), "end index out of range");
 
         // initialize fixed size memory array
-        address[] memory range = new address[](endIndex - startIndex);
+        uint[] memory range = new uint[](endIndex - startIndex);
 
         // Populate array with addresses in range
         for (uint256 i = startIndex; i < endIndex; i++) {
