@@ -64,16 +64,7 @@ library Structures {
     }
 
     struct User {
-        uint256 mecenateID;
-        address wallet;
-        bytes publicKey;
-    }
-
-    struct UserCentral {
-        uint256 mecenateID;
-        address wallet;
-        bytes publicKey;
-        bytes secretKey;
+        bytes vaultId;
     }
 
     struct Feed {

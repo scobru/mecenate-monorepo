@@ -10,6 +10,8 @@ import { Buffer } from "buffer";
 import { formatEther } from "ethers/lib/utils.js";
 import Image from "next/image";
 import { utils } from "ethers";
+import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
+import { CONFIG, AUTHS, CLAIMS, SIGNATURE_REQUEST, AuthType, ClaimType } from "./../sismo.config";
 
 const crypto = require("asymmetric-crypto");
 
@@ -30,11 +32,54 @@ type ImageProps = {
   cid: string;
 };
 
+function readibleHex(userId: string, startLength = 6, endLength = 4, separator = "...") {
+  if (!userId?.startsWith("0x")) {
+    return userId; // Return the original string if it doesn't start with "0x"
+  }
+  return userId.substring(0, startLength) + separator + userId.substring(userId.length - endLength);
+}
+
+function getProofDataForAuth(sismoConnectResponse: SismoConnectResponse, authType: AuthType): string | null {
+  for (const proof of sismoConnectResponse.proofs) {
+    if (proof.auths) {
+      for (const auth of proof.auths) {
+        if (auth.authType === authType) {
+          return proof.proofData;
+        }
+      }
+    }
+  }
+
+  return null; // returns null if no matching authType is found
+}
+
+function getProofDataForClaim(
+  sismoConnectResponse: SismoConnectResponse,
+  claimType: number,
+  groupId: string,
+  value: number,
+): string | null {
+  for (const proof of sismoConnectResponse.proofs) {
+    if (proof.claims) {
+      for (const claim of proof.claims) {
+        if (claim.claimType === claimType && claim.groupId === groupId && claim.value === value) {
+          return proof.proofData;
+        }
+      }
+    }
+  }
+
+  return null; // returns null if no matching claimType, groupId and value are found
+}
+
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
   const provider = useProvider();
-
+  const [sismoConnectVerifiedResult, setSismoConnectVerifiedResult] = React.useState<SismoConnectVerifiedResult>();
+  const [sismoConnectResponse, setSismoConnectResponse] = React.useState<SismoConnectResponse>();
+  const [pageState, setPageState] = React.useState<string>("init");
+  const [error, setError] = React.useState<string>();
   const [fee, setFee] = React.useState(0);
   const [identityFee, setIdentityFee] = React.useState(0);
   const [name, setName] = React.useState("");
@@ -360,28 +405,13 @@ const Identity: NextPage = () => {
   };
 
   async function signIn() {
-    const abicoder = new utils.AbiCoder();
-    const publicKey = abicoder.encode(["string"], [pubKey]);
     const seller = await signer?.getAddress();
-    const mecenateID = await identity?.identityByAddress(seller);
-
-    console.log(publicKey);
-    console.log(seller);
-    console.log(mecenateID);
-
     if (seller) {
-      const user: UserData = {
-        mecenateID: Number(mecenateID),
-        wallet: seller,
-        publicKey: publicKey,
-      };
-
       try {
         const payload = {
-          values: user,
+          values: sismoConnectResponse.vaultId,
           chainId: chain?.id.toString(),
         };
-
         const response = await fetch("/api/create_user", {
           method: "POST",
           headers: {
@@ -390,7 +420,6 @@ const Identity: NextPage = () => {
           },
           body: JSON.stringify(payload),
         });
-
         if (response.status === 200) {
           notification.success(<span className="font-bold">Submission received! 🎉</span>);
         } else {
@@ -413,10 +442,9 @@ const Identity: NextPage = () => {
         );
       }
 
-      const tx = await usersCtx?.registerUser(user);
+      const tx = await usersCtx?.registerUser(sismoConnectResponse.vaultId);
 
       notification.success("User registered");
-
       notification.info("Transaction hash: " + tx.hash);
     }
   }
@@ -468,6 +496,230 @@ const Identity: NextPage = () => {
           <div className="max-w-3xl text-center">
             <h1 className="text-6xl font-bold mb-8">Identity</h1>
             <p className="text-xl  mb-20">Mint your NFT. Become a member of the community.</p>
+          </div>
+          <div className="p-4 bg-white dark:bg-gray-800">
+            {pageState == "init" ? (
+              <>
+                <div className="text-center">
+                  <SismoConnectButton
+                    config={CONFIG}
+                    // Auths = Data Source Ownership Requests. (e.g Wallets, Github, Twitter, Github)
+                    auths={AUTHS}
+                    // Claims = prove group membership of a Data Source in a specific Data Group.
+                    // (e.g ENS DAO Voter, Minter of specific NFT, etc.)
+                    // Data Groups = [{[dataSource1]: value1}, {[dataSource1]: value1}, .. {[dataSource]: value}]
+                    // Existing Data Groups and how to create one: https://factory.sismo.io/groups-explorer
+                    // claims={CLAIMS}
+                    // Signature = user can sign a message embedded in their zk proof
+                    signature={SIGNATURE_REQUEST}
+                    text="Prove With Sismo"
+                    // Triggered when received Sismo Connect response from user data vault
+                    onResponse={async (response: SismoConnectResponse) => {
+                      setSismoConnectResponse(await response);
+                      console.log(response);
+                      setPageState("verifying");
+                      const verifiedResult = await fetch("/api/verify", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json", // Add this line
+                        },
+                        body: JSON.stringify(response),
+                      });
+
+                      const data = await verifiedResult.json();
+                      console.log(await data);
+                      if (verifiedResult.ok) {
+                        setSismoConnectVerifiedResult(data);
+                        setPageState("verified");
+                      } else {
+                        setPageState("error");
+                        setError(data);
+                      }
+                    }}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-center">
+                  <button
+                    onClick={() => {
+                      window.location.href = "/";
+                    }}
+                  >
+                    {" "}
+                    RESET{" "}
+                  </button>
+                </div>
+                <br></br>
+                <div className="status-wrapper">
+                  {pageState == "verifying" ? (
+                    <span className="text-blue-500">Verifying ZK Proofs...</span>
+                  ) : (
+                    <>
+                      {Boolean(error) ? (
+                        <span className="text-red-500">Error verifying ZK Proofs: {error.message}</span>
+                      ) : (
+                        <span className="text-green-500">ZK Proofs verified!</span>
+                      )}
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Table of the Sismo Connect requests and verified result */}
+            <div className="card bordered">
+              <div className="card-body">
+                {" "}
+                {/* Table for Verified Auths */}
+                {sismoConnectVerifiedResult && (
+                  <>
+                    <h3>Verified Auths</h3>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>AuthType</th>
+                          <th>Verified UserId</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sismoConnectVerifiedResult.auths.map((auth, index) => (
+                          <tr key={index}>
+                            <td>{AuthType[auth.authType]}</td>
+                            <td>{auth.userId}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
+                )}
+                <br />
+                {/* Table for Verified Claims */}
+                {sismoConnectVerifiedResult && (
+                  <>
+                    <h3>Verified Claims</h3>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>groupId</th>
+                          <th>ClaimType</th>
+                          <th>Verified Value</th>
+                        </tr>
+                      </thead>
+                      {/*   <tbody>
+                    {sismoConnectVerifiedResult.claims.map((claim, index) => (
+                      <tr key={index}>
+                        <td>
+                          <a target="_blank" href={"https://factory.sismo.io/groups-explorer?search=" + claim.groupId}>
+                            {claim.groupId}
+                          </a>
+                        </td>
+                        <td>{ClaimType[claim.claimType!]}</td>
+                        <td>{claim.value}</td>
+                      </tr>
+                    ))}
+                  </tbody> */}
+                    </table>
+                  </>
+                )}
+              </div>
+              {/* Table of the Auths requests*/}
+              <h3>Auths requested</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>AuthType</th>
+                    <th>Requested UserId</th>
+                    <th>Optional?</th>
+                    <th>ZK proof</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {AUTHS.map((auth, index) => (
+                    <tr key={index}>
+                      {console.log(auth)}
+                      <td>{AuthType[auth.authType]}</td>
+                      <td>{readibleHex(auth.vaultId || "No userId requested")}</td>
+                      <td>{auth.isOptional ? "optional" : "required"}</td>
+                      {sismoConnectResponse ? (
+                        <td>{readibleHex(getProofDataForAuth(sismoConnectResponse, auth.authType)!)}</td>
+                      ) : (
+                        <td> ZK proof not generated yet </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <br />
+
+              {/* Table of the Claims requests*/}
+              <h3>Claims requested</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>GroupId</th>
+                    <th>ClaimType</th>
+                    <th>Requested Value</th>
+                    <th>Can User Select Value?</th>
+                    <th>Optional?</th>
+                    <th>ZK proof</th>
+                  </tr>
+                </thead>
+                {/* <tbody>
+                {CLAIMS.map((claim, index) => (
+                  <tr key={index}>
+                    <td>
+                      <a target="_blank" href={"https://factory.sismo.io/groups-explorer?search=" + claim.groupId}>
+                        {claim.groupId}
+                      </a>
+                    </td>
+                    <td>{ClaimType[claim.claimType || 0]}</td>
+                    <td>{claim.value ? claim.value : "1"}</td>
+                    <td>{claim.isSelectableByUser ? "yes" : "no"}</td>
+                    <td>{claim.isOptional ? "optional" : "required"}</td>
+                    {sismoConnectResponse ? (
+                      <td>
+                        {readibleHex(
+                          getProofDataForClaim(
+                            sismoConnectResponse,
+                            claim.claimType || 0,
+                            claim.groupId!,
+                            claim.value || 1,
+                          )!,
+                        )}
+                      </td>
+                    ) : (
+                      <td> ZK proof not generated yet </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody> */}
+              </table>
+
+              {/* Table of the Signature request and its result */}
+              <h3>Signature requested and verified</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Message Requested</th>
+                    <th>Can User Modify message?</th>
+                    <th>Verified Signed Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{SIGNATURE_REQUEST.message}</td>
+                    <td>{SIGNATURE_REQUEST.isSelectableByUser ? "yes" : "no"}</td>
+                    <td>
+                      {sismoConnectVerifiedResult
+                        ? sismoConnectVerifiedResult.signedMessage
+                        : "ZK proof not verified yet"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div className="max-w-lg">
             <div className="card-compact bg-base-300  shadow-sm shadow-secondary text-slate-500 text-lg">

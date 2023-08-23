@@ -1,8 +1,19 @@
-# **Mecente Protocol v1.0.0** for Buidlguidl Hackthon
+# **Mecente Protocol v1.0.1** for 100Builders Hackthon
+
+## MILESTONES v1.0.1:
+
+This new version of Mecenate wants to integrate the following milestones:
+
+- Sismo Integration for zk-proof
+- Lit Protocol Integration
+
+## Current State v1.0.0:
+
+Currently, the protocol allows the anonymous purchase and sale of data of any kind. However, in the old version, the user is required to generate keys and store them locally in order to encrypt and decrypt the data sold or purchased. In this new version, I would like to optimize this process by making it as anonymous as possible by integrating Sismo and Lit Protocol. This integration will also lead to a significant modification of the backend, consisting of the Solidity contracts of the protocol. Therefore, the first phase is to rewrite the contracts, interfacing them with zk-proof instead of keys generated offline, and then move on to implementation in the backend.
 
 [feed video demo](https://www.youtube.com/watch?v=ZCfASOjT04Y&list=PLTenf2t5YuIp68AlFJWjFiJtf4svPuQiX)
 
-- [**Mecente Protocol v1.0.0** for Buidlguidl Hackthon](#mecente-protocol-v100-for-buidlguidl-hackthon)
+- [**Mecente Protocol v1.0.0** ](#mecente-protocol-v100)
   - [💡 CONCEPT](#-concept)
     - [Introduction](#introduction)
     - [Features](#features)
@@ -39,25 +50,25 @@ To get started with Scaffold-Eth 2, follow the steps below:
 
 1. Clone this repo & install dependencies
 
-    ```bash
-    git clone https://github.com/scobru/mecenate-monorepo.git
-    cd mecenate-monorepo
-    yarn
-    ```
+   ```bash
+   git clone https://github.com/scobru/mecenate-monorepo.git
+   cd mecenate-monorepo
+   yarn
+   ```
 
 2. Run a local network in the first terminal:
 
-    ```bash
-    yarn chain
-    ```
+   ```bash
+   yarn chain
+   ```
 
 3. This command deploys a test smart contract to the local network. The contract is located in packages/hardhat/contracts and can be modified to suit your needs. The yarn deploy command uses the deploy script located in packages/hardhat/deploy to deploy the contract to the network. You can also customize the deploy script.
 
 4. On a third terminal, start your NextJS app:
 
-    ```bash
-    yarn start
-    ```
+   ```bash
+   yarn start
+   ```
 
 ### Development Notes
 
@@ -65,8 +76,8 @@ The folder structure:
 
 ```bash
 client  ts-node cli
-nextjs  nextjs app     
-hardhat hardhat app        
+nextjs  nextjs app
+hardhat hardhat app
 ```
 
 The Mecenate repository is composed of ScaffoldEth-2 and another application called "client", which allows interaction with the protocol through a command-line interface written in TypeScript.

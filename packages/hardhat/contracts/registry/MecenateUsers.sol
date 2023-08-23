@@ -7,11 +7,10 @@ import "../library/Structures.sol";
 import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 
 contract MecenateUsers {
-    using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    EnumerableSet.AddressSet private _users;
-    mapping(address => Structures.User) private _metadata;
-    event UserRegistered(address indexed user, Structures.User data);
+    EnumerableSet.Bytes32Set private _users;
+    event UserRegistered(bytes vaultID);
 
     address public identityContract;
 
@@ -19,29 +18,18 @@ contract MecenateUsers {
         identityContract = _identityContract;
     }
 
-    function registerUser(Structures.User memory data) public {
-        require(!_users.contains(msg.sender), "user already exists");
-        require(
-            MecenateIdentity(identityContract).balanceOf(msg.sender) > 0,
-            "user does not have identity"
-        );
-        // add user
-        _users.add(msg.sender);
+    function registerUser(bytes memory vaultId) public {
+        // check if user exists
+        require(!_users.contains(keccak256(vaultId)), "user already exists");
 
-        // set metadata
-        _metadata[msg.sender] = data;
+        // add user
+        _users.add(keccak256(vaultId));
 
         // emit event
-        emit UserRegistered(msg.sender, data);
+        emit UserRegistered(vaultId);
     }
 
-    function getUserData(
-        address user
-    ) public view returns (Structures.User memory data) {
-        data = _metadata[user];
-    }
-
-    function getUsers() public view returns (address[] memory users) {
+    function getUsers() public view returns (bytes32[] memory users) {
         return _users.values();
     }
 
@@ -49,20 +37,22 @@ contract MecenateUsers {
         count = _users.length();
     }
 
-    function checkifUserExist(address user) public view returns (bool) {
-        return _users.contains(user);
+    function checkifUserExist(
+        bytes32 encryptedVauldId
+    ) public view returns (bool) {
+        return _users.contains(encryptedVauldId);
     }
 
     // Note: startIndex is inclusive, endIndex exclusive
     function getPaginatedUsers(
         uint256 startIndex,
         uint256 endIndex
-    ) public view returns (address[] memory users) {
+    ) public view returns (bytes32[] memory users) {
         require(startIndex < endIndex, "startIndex must be less than endIndex");
         require(endIndex <= _users.length(), "end index out of range");
 
         // initialize fixed size memory array
-        address[] memory range = new address[](endIndex - startIndex);
+        bytes32[] memory range = new address[](endIndex - startIndex);
 
         // Populate array with addresses in range
         for (uint256 i = startIndex; i < endIndex; i++) {
