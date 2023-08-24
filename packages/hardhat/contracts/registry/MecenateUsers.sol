@@ -4,12 +4,9 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../library/Structures.sol";
-import {MecenateIdentity} from "../token/MecenateIdentity.sol";
-import "../helpers/SismoConnectLib.sol";
+import "../interfaces/IMecenateVerifier.sol";
 
-contract MecenateUsers is SismoConnect {
-    bytes16 public appId = 0x6c434d2de6efa3e7169bc58843b74d74;
-
+contract MecenateUsers is Ownable {
     using EnumerableSet for EnumerableSet.UintSet;
 
     EnumerableSet.UintSet private _users;
@@ -17,33 +14,19 @@ contract MecenateUsers is SismoConnect {
 
     event UserRegistered(bytes vaultID);
 
-    address public identityContract;
+    address public verifierContract;
 
-    constructor(address _identityContract) SismoConnect(buildConfig(appId)) {
-        identityContract = _identityContract;
-    }
+    constructor(address _verifierContract) {}
 
     function registerUser(bytes memory sismoConnectResponse) public {
-        AuthRequest[] memory auths = new AuthRequest[](2);
-        auths[0] = buildAuth(AuthType.VAULT);
-        auths[1] = buildAuth(AuthType.EVM_ACCOUNT);
-
-        SismoConnectVerifiedResult memory result = verify({
-            responseBytes: sismoConnectResponse,
-            auths: auths,
-            signature: buildSignature({message: "I love Sismo!"})
-        });
-
-        // --> vaultId = hash(userVaultSecret, appId)
-        uint256 vaultId = SismoConnectHelper.getUserId(result, AuthType.VAULT);
-
-        bytes memory vaultIdBytes = abi.encodePacked(vaultId);
-
-        uint256 userAddress = SismoConnectHelper.getUserId(
-            result,
-            AuthType.EVM_ACCOUNT
-        );
-        address userAddressConverted = address(uint160(userAddress));
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            ,
+            address userAddressConverted
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse
+            );
 
         // check if user exists
         require(!_users.contains(vaultId), "user already exists");

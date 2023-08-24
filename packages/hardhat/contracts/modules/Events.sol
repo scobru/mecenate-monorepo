@@ -1,8 +1,8 @@
 pragma solidity 0.8.19;
 
-import "../library/Structures.sol";
+import "./Data.sol";
 
-abstract contract Events {
+abstract contract Events is Data {
     event Created(Structures.Post post);
     event Accepted(Structures.Post post);
     event Valid(Structures.Post post);

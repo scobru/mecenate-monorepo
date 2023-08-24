@@ -3,15 +3,12 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 import "../library/Structures.sol";
 import "../modules/FeedViewer.sol";
 import "../interfaces/IMecenateUsers.sol";
 
 contract MecenateBay is Ownable, FeedViewer {
     Structures.BayRequest[] public allRequests;
-
-    address public identityContract;
 
     address public usersMouduleContract;
 
@@ -31,18 +28,13 @@ contract MecenateBay is Ownable, FeedViewer {
         uint256 indexed index
     );
 
-    constructor(address _identityContract, address _usersMouduleContract) {
-        identityContract = _identityContract;
+    constructor(address _usersMouduleContract) {
         usersMouduleContract = _usersMouduleContract;
     }
 
     function createRequest(
         Structures.BayRequest memory request
     ) public payable returns (Structures.BayRequest memory) {
-        require(
-            MecenateIdentity(identityContract).balanceOf(msg.sender) > 0,
-            "user does not have identity"
-        );
         require(request.stake > 0, "stake is not enough");
 
         require(request.payment == msg.value, "Payment is not enough");
@@ -59,11 +51,6 @@ contract MecenateBay is Ownable, FeedViewer {
     }
 
     function acceptRequest(uint256 index, address _feed) public {
-        require(
-            MecenateIdentity(identityContract).balanceOf(msg.sender) > 0,
-            "User does not have identity"
-        );
-
         Structures.Feed memory feed = _getFeedInfo(_feed);
 
         require(

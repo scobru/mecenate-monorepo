@@ -2,26 +2,22 @@
 pragma solidity 0.8.19;
 
 import {MecenateFeed} from "../features/MecenateFeed.sol";
-import {MecenateIdentity} from "../token/MecenateIdentity.sol";
 import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
+import "../interfaces/IMecenateVerifier.sol";
 import "../modules/FeedViewer.sol";
-
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../helpers/SismoConnectLib.sol";
 
-contract MecenateFeedFactory is Ownable, FeedViewer, SismoConnect {
-    bytes16 public appId = 0x6c434d2de6efa3e7169bc58843b74d74;
-
+contract MecenateFeedFactory is Ownable, FeedViewer {
     uint256 public contractCounter;
 
     address[] public feeds;
 
-    address public identityContract;
-
     address public treasuryContract;
 
-    address public usersMouduleContract;
+    address private usersMouduleContract;
+
+    address private verifierContract;
 
     mapping(address => bool) public createdContracts;
 
@@ -31,43 +27,36 @@ contract MecenateFeedFactory is Ownable, FeedViewer, SismoConnect {
 
     constructor(
         address _usersMouduleContract,
-        address _identityContract,
-        address _treasuryContract
-    ) SismoConnect(buildConfig(appId)) {
-        identityContract = _identityContract;
+        address _treasuryContract,
+        address _verifierContract
+    ) {
         usersMouduleContract = _usersMouduleContract;
         treasuryContract = _treasuryContract;
-        _transferOwnership(msg.sender);
+        verifierContract = _verifierContract;
     }
 
-    function setAuthorized(address _addr) public onlyOwner {
+    function setAuthorized(address _addr) external onlyOwner {
         authorized[_addr] = true;
     }
 
-    function removeAuthorized(address _addr) public onlyOwner {
+    function removeAuthorized(address _addr) external onlyOwner {
         authorized[_addr] = false;
     }
 
-    function changeTreasury(address _treasury) public onlyOwner {
+    function changeTreasury(address _treasury) external onlyOwner {
         treasuryContract = _treasury;
     }
 
     function buildFeed(
         bytes memory sismoConnectResponse
-    ) public payable returns (address) {
-        (uint256 vaultId, , , address userAddressConverted) = _sismoVerify(
-            sismoConnectResponse
-        );
+    ) external payable returns (address) {
+        (uint256 vaultId, , , address userAddressConverted) = IMecenateVerifier(
+            verifierContract
+        ).sismoVerify(sismoConnectResponse);
 
         require(msg.value == getCreationFee(), "fee is not correct");
 
         payable(treasuryContract).transfer(msg.value);
-
-        require(
-            MecenateIdentity(identityContract).balanceOf(userAddressConverted) >
-                0,
-            "user does not have identity"
-        );
 
         require(
             IMecenateUsers(usersMouduleContract).checkifUserExist(vaultId),
@@ -79,7 +68,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer, SismoConnect {
         MecenateFeed feed = new MecenateFeed(
             userAddressConverted,
             usersMouduleContract,
-            identityContract
+            verifierContract
         );
 
         feeds.push(address(feed));
@@ -91,13 +80,13 @@ contract MecenateFeedFactory is Ownable, FeedViewer, SismoConnect {
         return address(feed);
     }
 
-    function getFeeds() public view returns (address[] memory) {
+    function getFeeds() external view returns (address[] memory) {
         return feeds;
     }
 
     function getFeedsOwned(
         address owner
-    ) public view returns (address[] memory) {
+    ) external view returns (address[] memory) {
         address[] memory ownedFeeds = new address[](feeds.length);
         for (uint256 i = 0; i < ownedFeeds.length; i++) {
             if (payable(MecenateFeed(payable(feeds[i])).owner()) == owner) {
@@ -110,49 +99,22 @@ contract MecenateFeedFactory is Ownable, FeedViewer, SismoConnect {
 
     function getFeedInfo(
         address _feed
-    ) public view returns (Structures.Feed memory) {
+    ) external view returns (Structures.Feed memory) {
         return _getFeedInfo(_feed);
     }
 
-    function getFeedsInfo() public view returns (Structures.Feed[] memory) {
+    function getFeedsInfo() external view returns (Structures.Feed[] memory) {
         return _getFeedsInfo(feeds);
     }
 
     function isContractCreated(
         address contractAddress
-    ) public view returns (bool) {
+    ) external view returns (bool) {
         return createdContracts[contractAddress];
     }
 
     function getCreationFee() internal view returns (uint256) {
         return IMecenateTreasury(treasuryContract).fixedFee();
-    }
-
-    function _sismoVerify(
-        bytes memory sismoConnectResponse
-    ) internal view returns (uint256, bytes memory, uint256, address) {
-        AuthRequest[] memory auths = new AuthRequest[](2);
-        auths[0] = buildAuth(AuthType.VAULT);
-        auths[1] = buildAuth(AuthType.EVM_ACCOUNT);
-
-        SismoConnectVerifiedResult memory result = verify({
-            responseBytes: sismoConnectResponse,
-            auths: auths,
-            signature: buildSignature({message: "I love Sismo!"})
-        });
-
-        // --> vaultId = hash(userVaultSecret, appId)
-        uint256 vaultId = SismoConnectHelper.getUserId(result, AuthType.VAULT);
-        bytes memory vaultIdBytes = abi.encodePacked(vaultId);
-
-        uint256 userAddress = SismoConnectHelper.getUserId(
-            result,
-            AuthType.EVM_ACCOUNT
-        );
-
-        address userAddressConverted = address(uint160(userAddress));
-
-        return (vaultId, vaultIdBytes, userAddress, userAddressConverted);
     }
 
     receive() external payable {}

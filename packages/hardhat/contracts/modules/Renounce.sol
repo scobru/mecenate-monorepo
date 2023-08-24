@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "../library/Structures.sol";
-import "./Data.sol";
-import "./Events.sol";
 import "./Staking.sol";
 
-abstract contract Renounce is Data, Events, Staking {
-    function renouncePost(bytes memory sismoConnectResponse) public virtual {
+abstract contract Renounce is Staking {
+    function renouncePost(bytes memory sismoConnectResponse) external virtual {
         (
             uint256 vaultId,
             bytes memory vaultIdBytes,

@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "../library/Structures.sol";
-import "./Data.sol";
 import "./Events.sol";
 
-abstract contract Submission is Data, Events {
+abstract contract Submission is Events {
     function submitHash(
         bytes memory encryptedKey,
         bytes memory sismoConnectResponse
-    ) public virtual {
+    ) external virtual {
         (
             uint256 vaultId,
             bytes memory vaultIdBytes,
@@ -46,7 +44,7 @@ abstract contract Submission is Data, Events {
     function revealData(
         bytes memory decryptedData,
         bytes memory sismoConnectResponse
-    ) public virtual returns (bytes memory) {
+    ) external virtual returns (bytes memory) {
         (
             uint256 vaultId,
             bytes memory vaultIdBytes,

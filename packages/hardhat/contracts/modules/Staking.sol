@@ -1,9 +1,9 @@
 pragma solidity 0.8.19;
 
 import "./Deposit.sol";
-import "./Data.sol";
+import "./Events.sol";
 
-abstract contract Staking is Data, Deposit {
+abstract contract Staking is Events, Deposit {
     using SafeMath for uint256;
 
     event StakeBurned(address staker, uint256 amount);
@@ -87,14 +87,14 @@ abstract contract Staking is Data, Deposit {
         return currentDeposit;
     }
 
-    function getStake(address staker) public view returns (uint256 amount) {
+    function getStake(address staker) external view returns (uint256 amount) {
         // get deposit
         amount = Deposit._getDeposit(staker);
         // explicit return
         return amount;
     }
 
-    function getTotalStaked() public view returns (uint256) {
+    function getTotalStaked() external view returns (uint256) {
         uint256 amountSeller = Deposit._getDeposit(
             post.postdata.settings.seller
         );

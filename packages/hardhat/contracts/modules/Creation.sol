@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "../library/Structures.sol";
-import "./Data.sol";
-import "./Events.sol";
 import "./Staking.sol";
 
-abstract contract Creation is Data, Events, Staking {
+abstract contract Creation is Staking {
     function createPost(
         bytes memory encryptedHash,
         Structures.PostType postType,
@@ -35,8 +32,6 @@ abstract contract Creation is Data, Events, Staking {
             usersModuleContract != address(0),
             "Users module contract not set"
         );
-
-        require(identityContract != address(0), "Identity contract not set");
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Waiting ||

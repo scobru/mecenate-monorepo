@@ -5,6 +5,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
 import "hardhat-deploy";
 import "ipfs-http-client";
+import "hardhat-contract-sizer";
 
 // If not set, it uses ours Alchemy's default API key.
 // You can get your own at https://dashboard.alchemyapi.io
@@ -85,11 +86,21 @@ const config: HardhatUserConfig = {
       url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
       accounts: [deployerPrivateKey],
     },
+    sepolia: {
+      url: `https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`,
+      accounts: [deployerPrivateKey],
+    },
   },
   verify: {
     etherscan: {
       apiKey: `${etherscanApiKey}`,
     },
+  },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
   },
 };
 

@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "../library/Structures.sol";
-import "./Data.sol";
-import "./Events.sol";
 import "./Staking.sol";
 
-abstract contract Finalization is Data, Events, Staking {
+abstract contract Finalization is Staking {
     function finalizePost(
         bool valid,
         uint256 punishment,
         bytes memory sismoConnectResponse
-    ) public virtual returns (bool) {
+    ) external virtual returns (bool) {
         (
             uint256 vaultId,
             bytes memory vaultIdBytes,

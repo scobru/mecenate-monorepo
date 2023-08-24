@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "../library/Structures.sol";
-import "./Data.sol";
 import "./Events.sol";
 import "./Staking.sol";
 
-abstract contract Acceptance is Data, Events, Staking {
+abstract contract Acceptance is Events, Staking {
     function acceptPost(
         bytes memory sismoConnectResponse
-    ) public payable virtual {
+    ) external payable virtual {
         (
             uint256 vaultId,
             bytes memory vaultIdBytes,

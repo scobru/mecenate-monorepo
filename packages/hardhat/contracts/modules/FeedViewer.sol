@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 import "../library/Structures.sol";
 import "../interfaces/IMecenateFeed.sol";
 
-abstract contract FeedViewer {
+contract FeedViewer {
     function _getFeedInfo(
         address feed
     ) internal view returns (Structures.Feed memory) {

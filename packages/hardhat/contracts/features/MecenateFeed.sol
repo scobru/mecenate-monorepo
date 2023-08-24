@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "../library/Structures.sol";
 import "../modules/Events.sol";
 import "../modules/Creation.sol";
 import "../modules/Acceptance.sol";
@@ -9,13 +8,8 @@ import "../modules/Submission.sol";
 import "../modules/Finalization.sol";
 import "../modules/Renounce.sol";
 
-import "../modules/Data.sol";
-
-import "@openzeppelin/contracts/access/Ownable.sol";
-
 contract MecenateFeed is
-    Ownable,
-    Data,
+    Events,
     Creation,
     Acceptance,
     Renounce,
@@ -27,32 +21,32 @@ contract MecenateFeed is
     constructor(
         address owner,
         address _usersModuleContract,
-        address _identityContract
-    ) Data(_usersModuleContract, _identityContract) {
+        address _verifierContract
+    ) Data(_usersModuleContract, _verifierContract) {
         _transferOwnership(owner);
     }
 
-    function getSeller() public view returns (address) {
+    function getSeller() external view returns (address) {
         return post.postdata.settings.seller;
     }
 
-    function getBuyer() public view returns (address) {
+    function getBuyer() external view returns (address) {
         return post.postdata.settings.buyer;
     }
 
-    function getBuyerPayment() public view returns (uint256) {
+    function getBuyerPayment() external view returns (uint256) {
         return post.postdata.escrow.payment;
     }
 
-    function getSellerStake() public view returns (uint256) {
+    function getSellerStake() external view returns (uint256) {
         return post.postdata.escrow.stake;
     }
 
-    function getPostStatus() public view returns (Structures.PostStatus) {
+    function getPostStatus() external view returns (Structures.PostStatus) {
         return post.postdata.settings.status;
     }
 
-    function getPostCount() public view returns (uint256) {
+    function getPostCount() external view returns (uint256) {
         return postCount;
     }
 
@@ -60,11 +54,5 @@ contract MecenateFeed is
         address _usersModuleContract
     ) external onlyOwner {
         usersModuleContract = _usersModuleContract;
-    }
-
-    function changeIdentityContract(
-        address _identityContract
-    ) external onlyOwner {
-        identityContract = _identityContract;
     }
 }
