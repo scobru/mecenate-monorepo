@@ -23,6 +23,10 @@ contract Data is Ownable {
 
     bytes public constant ZEROHASH = "0x00";
 
+    bytes internal vaultIdSeller;
+
+    bytes internal vaultIdBuyer;
+
     constructor(address _usersModuleContract, address _verifierContract) {
         usersModuleContract = _usersModuleContract;
         verifierContract = _verifierContract;
@@ -42,5 +46,9 @@ contract Data is Ownable {
                 sismoConnectResponse
             );
         return (vaultId, vaultIdBytes, userAddress, userAddressConverted);
+    }
+
+    function getStatus() external view returns (Structures.PostStatus) {
+        return post.postdata.settings.status;
     }
 }

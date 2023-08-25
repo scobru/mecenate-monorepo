@@ -49,7 +49,6 @@ library Structures {
         PostStatus status;
         PostType postType;
         address buyer;
-        bytes buyerPubKey;
         address seller;
         uint256 creationTimeStamp;
         uint256 endTimeStamp;
@@ -64,7 +63,6 @@ library Structures {
     }
 
     struct User {
-        bytes vaultId;
         address wallet;
     }
 

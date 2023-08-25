@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../library/Structures.sol";
 import "../interfaces/IMecenateVerifier.sol";
+import "../library/SismoStructs.sol";
 
 contract MecenateUsers is Ownable {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -12,31 +13,33 @@ contract MecenateUsers is Ownable {
     EnumerableSet.UintSet private _users;
     mapping(address => Structures.User) private _metadata;
 
-    event UserRegistered(bytes vaultID);
+    event UserRegistered(bytes pubKey);
 
     address public verifierContract;
 
-    constructor(address _verifierContract) {}
+    constructor(address _verifierContract) {
+        verifierContract = _verifierContract;
+    }
 
     function registerUser(bytes memory sismoConnectResponse) public {
         (
             uint256 vaultId,
             bytes memory vaultIdBytes,
-            ,
+            uint256 userAddress,
             address userAddressConverted
         ) = IMecenateVerifier(verifierContract).sismoVerify(
                 sismoConnectResponse
             );
 
+        require(userAddressConverted != address(0), "user address cannot be 0");
         // check if user exists
-        require(!_users.contains(vaultId), "user already exists");
+        require(!_users.contains(userAddress), "user already exists");
 
         // add user
-        _users.add(vaultId);
+        _users.add(userAddress);
 
         // set user metadata
         _metadata[userAddressConverted] = Structures.User({
-            vaultId: vaultIdBytes,
             wallet: userAddressConverted
         });
 
@@ -74,5 +77,11 @@ contract MecenateUsers is Ownable {
 
         // return array of addresses
         users = range;
+    }
+
+    function getUserData(
+        address user
+    ) public view returns (Structures.User memory) {
+        return _metadata[user];
     }
 }

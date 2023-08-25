@@ -23,7 +23,7 @@ abstract contract Submission is Events {
         );
 
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(vaultId),
+            IMecenateUsers(usersModuleContract).checkifUserExist(userAddress),
             "User does not exist"
         );
 
@@ -38,7 +38,34 @@ abstract contract Submission is Events {
             block.timestamp +
             post.postdata.settings.duration;
 
+        vaultIdSeller = vaultIdBytes;
+
         emit Valid(post);
+    }
+
+    function getVaultIdSecret(
+        bytes memory sismoConnectResponse
+    ) external view returns (bytes memory) {
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
+
+        require(
+            keccak256(vaultIdBytes) == keccak256(vaultIdBuyer),
+            "VaultId does not match"
+        );
+
+        require(
+            post.postdata.settings.status == Structures.PostStatus.Accepted ||
+                post.postdata.settings.status ==
+                Structures.PostStatus.Submitted,
+            "Post is not Accepted or Submitted"
+        );
+
+        return vaultIdSeller;
     }
 
     function revealData(

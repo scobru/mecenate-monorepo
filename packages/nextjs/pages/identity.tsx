@@ -2,16 +2,17 @@ import type { NextPage } from "next";
 import React, { useEffect } from "react";
 import { useContract, useProvider, useNetwork, useSigner, useAccount } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface } from "ethers";
+import { ContractInterface, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
 import { Buffer } from "buffer";
-import { formatEther } from "ethers/lib/utils.js";
-import Image from "next/image";
+import { formatEther, toUtf8Bytes } from "ethers/lib/utils.js";
 import { utils } from "ethers";
 import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
 import { CONFIG, AUTHS, CLAIMS, SIGNATURE_REQUEST, AuthType, ClaimType } from "./../sismo.config";
+import { sign } from "crypto";
+import { useAppStore } from "~~/services/store/store";
 
 const crypto = require("asymmetric-crypto");
 
@@ -90,10 +91,12 @@ const Identity: NextPage = () => {
   const [nftMetadata, setNftMetadata] = React.useState<{ [key: string]: any[] }>({});
   const [pubKey, setPubKey] = React.useState<string>("");
   const [alreadyUser, setAlreadyUser] = React.useState(false);
-
+  const [responseBytes, setResponseBytes] = React.useState<string>();
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
+  const [signature, setSignature] = React.useState<string>();
+  const store = useAppStore();
 
   /* Create an instance of the client */
   const client = create({
@@ -405,11 +408,12 @@ const Identity: NextPage = () => {
   };
 
   async function signIn() {
+    await createPair();
     const seller = await signer?.getAddress();
     if (seller) {
-      try {
+      /*  try {
         const payload = {
-          values: sismoConnectResponse.vaultId,
+          values: sismoConnectVerifiedResult?.auths[1].userId,
           chainId: chain?.id.toString(),
         };
         const response = await fetch("/api/create_user", {
@@ -440,9 +444,9 @@ const Identity: NextPage = () => {
             Something went wrong. Please try again
           </>,
         );
-      }
+      } */
 
-      const tx = await usersCtx?.registerUser(sismoConnectResponse.vaultId);
+      const tx = await usersCtx?.registerUser(responseBytes);
 
       notification.success("User registered");
       notification.info("Transaction hash: " + tx.hash);
@@ -489,6 +493,10 @@ const Identity: NextPage = () => {
     getContractData();
   }, [signer]);
 
+  const signMessage = () => {
+    return ethers.utils.defaultAbiCoder.encode(["string"], ["I love Sismo!"]);
+  };
+
   return (
     <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4 ">
       <div className="max-w-3xl text-center my-2 text-base-content">
@@ -511,12 +519,12 @@ const Identity: NextPage = () => {
                     // Existing Data Groups and how to create one: https://factory.sismo.io/groups-explorer
                     // claims={CLAIMS}
                     // Signature = user can sign a message embedded in their zk proof
+                    // encode the signature with abi.encode
                     signature={SIGNATURE_REQUEST}
-                    text="Prove With Sismo"
+                    text="Join With Sismo"
                     // Triggered when received Sismo Connect response from user data vault
                     onResponse={async (response: SismoConnectResponse) => {
                       setSismoConnectResponse(await response);
-                      console.log(response);
                       setPageState("verifying");
                       const verifiedResult = await fetch("/api/verify", {
                         method: "POST",
@@ -527,14 +535,18 @@ const Identity: NextPage = () => {
                       });
 
                       const data = await verifiedResult.json();
-                      console.log(await data);
                       if (verifiedResult.ok) {
                         setSismoConnectVerifiedResult(data);
+                        store.setSismoData(data);
                         setPageState("verified");
                       } else {
                         setPageState("error");
                         setError(data);
                       }
+                    }}
+                    onResponseBytes={(responseBytes: string) => {
+                      setResponseBytes(responseBytes);
+                      store.setSismoResponse(responseBytes);
                     }}
                   />
                 </div>
@@ -722,105 +734,6 @@ const Identity: NextPage = () => {
             </div>
           </div>
           <div className="max-w-lg">
-            <div className="card-compact bg-base-300  shadow-sm shadow-secondary text-slate-500 text-lg">
-              <h1 className="text-3xl font-bold p-6 ">
-                {nftBalance > 0 ? (
-                  <div className="flex items-center text-base-content justify-center text-3xl font-bold">Your ID</div>
-                ) : (
-                  <div className="text-base-content">Mint a Creator ID</div>
-                )}
-              </h1>
-              <div className="p-2 justify-center text-base-content items-center grid grid-cols-1 gap-2 lg:grid-cols-2">
-                <div>
-                  <div className=" font-bold mb-2">Identity Fee</div>
-                  <div className="">{identityFee ? `${formatEther(String(identityFee))} ETH` : "-"}</div>
-                </div>
-                <div>
-                  <div className=" font-bold mb-2">Name</div>
-                  <div className="">{nftMetadata ? nftMetadata["name"] : "-"}</div>
-                </div>
-                <div>
-                  <div className=" font-bold mb-2">Description</div>
-                  <div className="">{nftMetadata ? nftMetadata["description"] : "-"}</div>
-                </div>
-                <div className="items-center mx-auto text-center">
-                  <div className="avatar my-2">
-                    <div className="w-24 rounded-full">
-                      {nftMetadata["image"] ? (
-                        <Image
-                          decoding="async"
-                          loading="lazy"
-                          width={100}
-                          height={100}
-                          alt="image"
-                          src={String(nftMetadata["image"])}
-                        />
-                      ) : (
-                        "-"
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {nftBalance == 0 ? (
-              <form onSubmit={handleFormSubmit}>
-                <div className="my-5">
-                  <label htmlFor="name" className="block font-medium mb-5">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={name}
-                    onChange={handleNameChange}
-                    className="input w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="description" className="block font-medium mb-5">
-                    Description
-                  </label>
-                  <input
-                    type="text"
-                    id="description"
-                    name="description"
-                    value={description}
-                    onChange={handleDescriptionChange}
-                    className="input w-full px-4 py-2 rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="image" className="block font-medium mb-2">
-                    Image
-                  </label>
-                  <Dropzone onDrop={handleImageDrop}>
-                    {({ getRootProps, getInputProps }) => (
-                      <div
-                        {...getRootProps()}
-                        className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
-                      >
-                        <input {...getInputProps()} />
-                        {imageFile ? (
-                          <p>{imageFile.name}</p>
-                        ) : (
-                          <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
-                        )}
-                      </div>
-                    )}
-                  </Dropzone>
-                </div>
-                <button
-                  type="submit"
-                  className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-2"
-                >
-                  Mint
-                </button>
-              </form>
-            ) : (
-              <div></div>
-            )}
             <div className="max-w-3xl text-center my-20  text-base-content">
               <h1 className="text-6xl font-bold mb-8">Generate your KeyPair.</h1>
               <p className="text-xl  mb-8">
@@ -831,18 +744,11 @@ const Identity: NextPage = () => {
             </div>
             <div className="my-5 ">
               <button
-                className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-2"
-                onClick={createPair}
-                disabled={nftBalance == 0 || alreadyUser == true}
-              >
-                Create Key Pair
-              </button>
-              <button
                 className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500  hover:bg-primary-700"
                 onClick={async () => {
                   await signIn();
                 }}
-                disabled={nftBalance == 0 || pubKey == "" || alreadyUser == true}
+                disabled={sismoConnectResponse != null ? false : true}
               >
                 Sign In
               </button>

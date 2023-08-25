@@ -50,7 +50,11 @@ contract MecenateBay is Ownable, FeedViewer {
         emit RequestCreated(msg.sender, request, allRequests.length - 1);
     }
 
-    function acceptRequest(uint256 index, address _feed) public {
+    function acceptRequest(
+        uint256 index,
+        address _feed,
+        bytes memory sismoConnectResponse
+    ) public {
         Structures.Feed memory feed = _getFeedInfo(_feed);
 
         require(
@@ -68,12 +72,12 @@ contract MecenateBay is Ownable, FeedViewer {
             "stake is not the same of the feed"
         );
 
-        bytes memory vaultId = IMecenateUsers(usersMouduleContract)
+        address userAddress = IMecenateUsers(usersMouduleContract)
             .getUserData(allRequests[index].buyer)
-            .vaultId;
+            .wallet;
+
         IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
-            vaultId,
-            allRequests[index].buyer
+            sismoConnectResponse
         );
 
         allRequests[index].accepted = true;

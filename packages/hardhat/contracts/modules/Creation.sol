@@ -20,7 +20,7 @@ abstract contract Creation is Staking {
         ) = sismoVerify(sismoConnectResponse);
 
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(vaultId),
+            IMecenateUsers(usersModuleContract).checkifUserExist(userAddress),
             "User does not exist"
         );
 
@@ -80,7 +80,6 @@ abstract contract Creation is Staking {
         }
 
         Structures.User memory creator = Structures.User({
-            vaultId: vaultIdBytes,
             wallet: userAddressConverted
         });
 
@@ -89,7 +88,6 @@ abstract contract Creation is Staking {
                 postType: Structures.PostType(postType),
                 status: Structures.PostStatus.Proposed,
                 buyer: buyer,
-                buyerPubKey: "0x00",
                 seller: userAddressConverted,
                 creationTimeStamp: block.timestamp,
                 endTimeStamp: 0,

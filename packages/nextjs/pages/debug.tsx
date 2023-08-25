@@ -5,10 +5,12 @@ import { useDeployedContractNames } from "~~/hooks/scaffold-eth/useDeployedContr
 
 const Debug: NextPage = () => {
   const contractNames = useDeployedContractNames();
+  console.log("contractNames", contractNames);
   const [selectedContract, setSelectedContract] = useState<string>();
 
   useEffect(() => {
     if (!selectedContract && contractNames.length) {
+      console.log(selectedContract);
       setSelectedContract(contractNames[0]);
     }
   }, [contractNames, selectedContract]);

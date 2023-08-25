@@ -6,6 +6,7 @@ const crypto = require("asymmetric-crypto");
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface } from "ethers";
 import { formatEther } from "ethers/lib/utils.js";
+import { useAppStore } from "~~/services/store/store";
 const DEBUG = true;
 
 const Feeds: NextPage = () => {
@@ -22,6 +23,8 @@ const Feeds: NextPage = () => {
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
 
   const [fixedFee, setFixedFee] = React.useState<string>("");
+
+  const store = useAppStore();
 
   type Feed = {
     operator: string;
@@ -75,6 +78,7 @@ const Feeds: NextPage = () => {
     const _fixedFee = await treasuryCtx?.fixedFee();
     setFixedFee(_fixedFee);
     console.log(_feedsInfo);
+    console.log(store);
     if (DEBUG) console.log(feeds);
   }
 
@@ -99,7 +103,7 @@ const Feeds: NextPage = () => {
   }
 
   async function buildFeed() {
-    const tx = await factoryCtx?.buildFeed({ value: fixedFee });
+    const tx = await factoryCtx?.buildFeed(store.sismoResponse, { value: fixedFee });
     if (DEBUG) console.log(tx);
   }
 
@@ -160,38 +164,44 @@ const Feeds: NextPage = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 my-10">
-        {feeds.map((feed, i) => (
-          <div key={i} className="card bg-base-100 shadow-xl p-2 text-base-content">
-            <a href={`/viewFeed?addr=${feed}`}>
-              <div className="grid grid-cols-12 gap-4 border p-2">
-                <div className="col-span-2 font-bold">Addr:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">{feed}</div>
-                <div className="col-span-2 font-bold">Seller:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].seller}</div>
-                <div className="col-span-2 font-bold">Seller Stake:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">
-                  {formatEther(feedsInfos[i].sellerStake)} ETH
+        {feeds &&
+          store?.sismoData?.auths?.length > 0 &&
+          feeds.map((feed, i) => (
+            <div key={i} className="card bg-base-100 shadow-xl p-2 text-base-content">
+              <a
+                href={`/viewFeed?addr=${feed}&vaultId=${store.sismoData.vaultId}&userAddress=${store.sismoData.auths[1].userId}&response=${store.sismoResponse}`}
+              >
+                <div className="grid grid-cols-12 gap-4 border p-2">
+                  <div className="col-span-2 font-bold">Addr:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">{feed}</div>
+                  <div className="col-span-2 font-bold">Seller:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].seller}</div>
+                  <div className="col-span-2 font-bold">Seller Stake:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">
+                    {formatEther(feedsInfos[i].sellerStake)} ETH
+                  </div>
+                  <div className="col-span-2 font-bold">Buyer:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].buyer}</div>
+                  <div className="col-span-2 font-bold">Buyer Stake:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">
+                    {formatEther(feedsInfos[i].buyerStake)} ETH
+                  </div>
+                  <div className="col-span-2 font-bold">Operator:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].operator}</div>
+                  <div className="col-span-2 font-bold">Total:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">
+                    {formatEther(String(feedsInfos[i].totalStake))} ETH
+                  </div>
+                  <div className="col-span-2 font-bold">Payment:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">
+                    {String(feedsInfos[i].buyerPayment)} ETH
+                  </div>
+                  <div className="col-span-2 font-bold">Count:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">{String(feedsInfos[i].postCount)}</div>
                 </div>
-                <div className="col-span-2 font-bold">Buyer:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].buyer}</div>
-                <div className="col-span-2 font-bold">Buyer Stake:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">
-                  {formatEther(feedsInfos[i].buyerStake)} ETH
-                </div>
-                <div className="col-span-2 font-bold">Operator:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].operator}</div>
-                <div className="col-span-2 font-bold">Total:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">
-                  {formatEther(String(feedsInfos[i].totalStake))} ETH
-                </div>
-                <div className="col-span-2 font-bold">Payment:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">{String(feedsInfos[i].buyerPayment)} ETH</div>
-                <div className="col-span-2 font-bold">Count:</div>
-                <div className="col-span-4 overflow-hidden text-truncate">{String(feedsInfos[i].postCount)}</div>
-              </div>
-            </a>
-          </div>
-        ))}
+              </a>
+            </div>
+          ))}
       </div>
     </div>
   );

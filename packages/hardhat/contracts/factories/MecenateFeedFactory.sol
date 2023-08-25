@@ -50,16 +50,21 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     function buildFeed(
         bytes memory sismoConnectResponse
     ) external payable returns (address) {
-        (uint256 vaultId, , , address userAddressConverted) = IMecenateVerifier(
-            verifierContract
-        ).sismoVerify(sismoConnectResponse);
+        (
+            ,
+            ,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse
+            );
 
         require(msg.value == getCreationFee(), "fee is not correct");
 
         payable(treasuryContract).transfer(msg.value);
 
         require(
-            IMecenateUsers(usersMouduleContract).checkifUserExist(vaultId),
+            IMecenateUsers(usersMouduleContract).checkifUserExist(userAddress),
             "user does not exist"
         );
 

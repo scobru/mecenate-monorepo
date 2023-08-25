@@ -11,10 +11,13 @@ import { configureChains } from "wagmi";
 import * as chains from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
+import { infuraProvider } from "wagmi/providers/infura";
+
 import { burnerWalletConfig } from "~~/services/web3/wagmi-burner/burnerWalletConfig";
 import { getTargetNetwork } from "~~/utils/scaffold-eth";
 
 const configuredChain = getTargetNetwork();
+console.log("configuredChain", configuredChain);
 // We always want to have mainnet enabled (ENS resolution, ETH price, etc). But only once.
 const enabledChains = configuredChain.id === 1 ? [configuredChain] : [configuredChain, chains.mainnet];
 
@@ -24,14 +27,19 @@ const enabledChains = configuredChain.id === 1 ? [configuredChain] : [configured
 export const appChains = configureChains(
   enabledChains,
   [
+    infuraProvider({
+      projectId: process.env.INFURA_PROJECT_ID,
+      projectSecret: process.env.INFURA_PROJECT_SECRET,
+      priority: 0,
+    }),
     alchemyProvider({
       // ToDo. Move to .env || scaffold config
       // This is ours Alchemy's default API key.
       // You can get your own at https://dashboard.alchemyapi.io
       apiKey: "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF",
-      priority: 0,
+      priority: 1,
     }),
-    publicProvider({ priority: 1 }),
+    publicProvider({ priority: 2 }),
   ],
   {
     stallTimeout: 3_000,
@@ -56,7 +64,7 @@ export const burnerChains = configureChains(
       // ToDo. Move to .env || scaffold config
       // This is ours Alchemy's default API key.
       // You can get your own at https://dashboard.alchemyapi.io
-      apiKey: "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF",
+      apiKey: "tKi7dSZs2Nqw8EzhMYKn4-83Dg1P7YQe",
     }),
     publicProvider(),
   ],

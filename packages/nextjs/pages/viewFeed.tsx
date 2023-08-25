@@ -2,50 +2,62 @@ import type { NextPage } from "next";
 import React, { useEffect, useState } from "react";
 import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, ethers } from "ethers";
+import { ContractInterface, Signer, ethers, utils } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { useRouter } from "next/router";
-import { AbiCoder, base64, formatEther, parseEther } from "ethers/lib/utils";
+import { AbiCoder, base64, formatEther, parseEther, toUtf8Bytes } from "ethers/lib/utils";
 import pinataSDK from "@pinata/sdk";
 import axios from "axios";
 import dotenv from "dotenv";
 import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
 import { saveAs } from "file-saver";
+//import * as LitJsSdk from "@lit-protocol/lit-node-client";
+//import { SiweMessage } from "siwe";
 
-const crypto = require("asymmetric-crypto");
+// const lit = new LitJsSdk.LitNodeClient({ debug: true });
+// const chain = "sepolia";
 
 dotenv.config();
 
-const ErasureHelper = require("@erasure/crypto-ipfs");
-
-const pinataApiSecret = process.env.PINATA_API_SECRET;
-const pinataApiKey = process.env.PINATA_API_KEY;
-const projectId = process.env.INFURA_PROJECT_ID;
-const projectSecret = process.env.INFURA_PROJECT_SECRET;
-const projectGateway = process.env.IPFS_GATEWAY;
-
-const auth = "Basic " + Buffer.from(projectId + ":" + projectSecret).toString("base64");
-
-const IPFS_HOST = "ipfs.infura.io";
-const IPFS_PORT = 5001;
-
-const client = create({
-  host: "ipfs.infura.io",
-  port: 5001,
-  protocol: "https",
-  headers: {
-    authorization: auth,
-  },
-});
-
 const ViewFeed: NextPage = () => {
+  //const crypto = require("asymmetric-crypto");
+  const crypto = require("crypto");
+
+  const base64url = require("base64url"); // import the base64url library
+
+  const ErasureHelper = require("@erasure/crypto-ipfs");
+  const pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
+  const pinataApiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY;
+  const projectId = process.env.INFURA_PROJECT_ID;
+  const projectSecret = process.env.INFURA_PROJECT_SECRET;
+  const projectGateway = process.env.IPFS_GATEWAY;
+  const auth = "Basic " + Buffer.from(projectId + ":" + projectSecret).toString("base64");
+  const IPFS_HOST = "ipfs.infura.io";
+  const IPFS_PORT = 5001;
+  const client = create({
+    host: "ipfs.infura.io",
+    port: 5001,
+    protocol: "https",
+    headers: {
+      authorization: auth,
+    },
+  });
+
   const { chain } = useNetwork();
+
+  console.log("Chain: ", chain?.id.toString());
+
   const { data: signer } = useSigner();
   const provider = useProvider();
   const router = useRouter();
-  const { addr } = router.query;
 
+  const { addr } = router.query;
+  const { vaultId } = router.query;
+  const { userAddress } = router.query;
+  const { response } = router.query;
+
+  //const [authSig, setAuthSig] = useState<any>();
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
   const [postStake, setPostStake] = useState<any>([]);
@@ -64,6 +76,29 @@ const ViewFeed: NextPage = () => {
   const [imageFile, setImageFile] = React.useState<any>("");
   const [image, setImage] = React.useState("");
   const [postCount, setPostCount] = useState<any>("");
+
+  // const evmContractConditions = [
+  //   {
+  //     contractAddress: addr,
+  //     functionName: "getStatus()",
+  //     functionParams: [],
+  //     functionAbi: {
+  //       name: "getStatus",
+  //       inputs: [],
+  //       outputs: [
+  //         {
+  //           internalType: "uint8",
+  //           name: "status",
+  //           type: "uint8",
+  //         },
+  //       ],
+  //       constant: true,
+  //       stateMutability: "view",
+  //     },
+  //     chain: "sepolia",
+  //     returnValueTest: { key: "status", comparator: "=", value: "3" },
+  //   },
+  // ];
 
   const user = "";
   const owner = "";
@@ -89,9 +124,9 @@ const ViewFeed: NextPage = () => {
   }
 
   const feedCtx = useContract({
-    address: addr?.toString(),
+    address: addr as string,
     abi: feedAbi,
-    signerOrProvider: signer || provider,
+    signerOrProvider: signer as Signer,
   });
 
   const usersCtx = useContract({
@@ -168,6 +203,50 @@ const ViewFeed: NextPage = () => {
     notification.success("Refund successful");
   }
 
+  // async function createSiwe(address: string, statement: string) {
+  //   const domain = "localhost:3000";
+  //   const origin = "http://localhost:3000/";
+
+  //   const siweMessage = new SiweMessage({
+  //     domain,
+  //     address: address,
+  //     statement,
+  //     uri: origin,
+  //     version: "1",
+  //     chainId: 80001,
+  //   });
+
+  //   console.log("siweMessage", siweMessage);
+
+  //   const messageToSign = siweMessage.prepareMessage();
+  //   console.log("messageToSign", messageToSign);
+
+  //   return messageToSign;
+  // }
+
+  // async function getAuthSign() {
+  //   // Create a function to handle signing messages
+
+  //   const messageToSign = await createSiwe(await ethers.utils.getAddress(userAddress), "Free the web!");
+
+  //   const signature: string = await signer?.signMessage(await messageToSign);
+  //   console.log("signature", signature);
+
+  //   const recoveredAddress = ethers.utils.verifyMessage(messageToSign, String(signature));
+  //   console.log("recoveredAddress", recoveredAddress);
+
+  //   const authSig = {
+  //     sig: signature,
+  //     derivedVia: "web3.eth.personal.sign",
+  //     signedMessage: messageToSign,
+  //     address: recoveredAddress,
+  //   };
+
+  //   setAuthSig(authSig);
+
+  //   return authSig;
+  // }
+
   const uploadImageToIpfs = async (file: Blob | any) => {
     try {
       if (!file) {
@@ -206,8 +285,11 @@ const ViewFeed: NextPage = () => {
   };
 
   const fetchData = async function fetchData() {
-    if (feedCtx && signer) {
+    if (feedCtx && signer && provider) {
+      console.log("Handle Fetching Data...");
+      console.log("Feed Address: ", feedCtx?.address);
       const data = await feedCtx?.post();
+      console.log("Data: ", data);
       const user = await usersCtx?.getUserData(signer?.getAddress());
       const sellerDeposit = await feedCtx?.getStake(data.postdata.settings.seller);
       const buyerDeposit = await feedCtx?.getStake(data.postdata.settings.buyer);
@@ -219,14 +301,17 @@ const ViewFeed: NextPage = () => {
       setFeedData(data);
       setPostCount(await feedCtx?.postCount());
       console.log(data);
-      console.log(user);
     }
   };
 
   const createPost = async function createPost() {
     await fetchData();
-    const pubKey = userData.publicKey;
-    const dataSaved = await savePost(postRawData, String(signer?.getAddress()), pubKey);
+
+    console.log("PubKey:", vaultId);
+
+    const pubKey = vaultId;
+
+    const dataSaved = await savePost(postRawData, String(signer?.getAddress()), String(pubKey));
 
     notification.warning(
       <div
@@ -288,9 +373,7 @@ const ViewFeed: NextPage = () => {
     );
 
     notification.warning("Save this data");
-
     //saveAs(JSON.stringify(dataSaved), String(postCount) + feedCtx?.address + "_sellData.json");
-
     downloadFile({
       data: JSON.stringify(dataSaved),
       fileName: String(postCount) + "_" + feedCtx?.address + "_sellData.json",
@@ -303,27 +386,103 @@ const ViewFeed: NextPage = () => {
       outputType: "digest",
     });
 
+    console.log("ProofHash", proofOfHashEncode);
+    console.log("Start Tx...");
+    console.log("Signer Address: ", signer?.getAddress());
+
     const tx = await feedCtx?.createPost(
       proofOfHashEncode,
       Number(postType),
       Number(postDuration),
-      buyer,
+      ethers.constants.AddressZero,
       parseEther(buyerPayment),
-
+      response,
       {
         value: parseEther(postStake),
       },
     );
+
+    console.log(tx);
+
+    await tx?.wait();
   };
 
   async function acceptPost() {
-    const tx = await feedCtx?.acceptPost(userData.publicKey, signer?.getAddress(), { value: parseEther(postPayment) });
+    const tx = await feedCtx?.acceptPost(response, { value: parseEther(postPayment) });
+  }
+
+  async function savePost(RawData: string, seller: string, sellerPubKey: string): Promise<PostData | void> {
+    console.log("Saving Data...");
+
+    // Check Pinata credentials.
+    if (!pinataApiKey || !pinataApiSecret) {
+      console.log("Please call with Pinata Account Credentials");
+      return;
+    }
+
+    // Authenticate with Pinata.
+    const pinata = new pinataSDK(pinataApiKey, pinataApiSecret);
+    const pinataAuth = await pinata.testAuthentication();
+    if (pinataAuth?.authenticated !== true) {
+      console.log("Pinata Authentication Failed.");
+      return;
+    }
+
+    // Create post data.
+    const postData = await createPostData(RawData, seller, sellerPubKey);
+    if (!postData) {
+      console.log("Error creating post data.");
+      return;
+    }
+
+    // Save encrypted data to IPFS.
+    try {
+      let pin = await pinata.pinJSONToIPFS({ encryptedData: postData.encryptedData });
+      if (pin?.IpfsHash !== postData.proofJson.encryptedDatahash) {
+        console.log("Error with Encrypted Data Hash.");
+        return;
+      }
+
+      // Save proof JSON to IPFS.
+      pin = await pinata.pinJSONToIPFS(postData.proofJson);
+      if (pin.IpfsHash !== postData.proofhash) {
+        console.log("Error with proof Hash.");
+        return;
+      }
+
+      console.log("Data Saved.");
+      return postData;
+    } catch (err) {
+      console.log("Error saving data to IPFS:", err);
+    }
   }
 
   async function createPostData(RawData: any, seller: string, sellerPubKey: string) {
+    console.log("Creating Data...");
     try {
-      const symmetricKey = ErasureHelper.crypto.symmetric.generateKey();
+      /*  
+      const authSig = await getAuthSign();
+      const { encryptedString, symmetricKey } = await LitJsSdk.encryptFile(RawData);
+      const { ciphertext, dataToEncryptHash } = await LitJsSdk.encryptFile(
+        {
+          evmContractConditions,
+          authSig,
+          chain: "sepolia",
+          dataToEncrypt: RawData,
+        },
+        lit,
+      );
+      const encryptedSymmetricKey = await lit?.saveEncryptionKey({
+        evmContractConditions: evmContractConditions,
+        symmetricKey: symmetricKey,
+        authSig: authSig,
+        chain: "sepolia",
+      });
+      const encryptedFile = encryptedString;
+      const symmetricKeyHash = LitJsSdk.uint8arrayToString(encryptedSymmetricKey, "base16");
+      */
 
+      const symmetricKey = ErasureHelper.crypto.symmetric.generateKey();
       const encryptedFile = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
 
       const symmetricKeyHash = await ErasureHelper.multihash({
@@ -384,80 +543,37 @@ const ViewFeed: NextPage = () => {
     }
   }
 
-  async function savePost(RawData: string, seller: string, sellerPubKey: string) {
-    // IPFS needs Pinata account credentials.
-    if (pinataApiKey === undefined || pinataApiSecret === undefined) {
-      console.log("Please call with Pinata Account Credentials");
-      return;
-    }
-
-    // Make sure Pinata is authenticating.
-    const pinata = await new pinataSDK(pinataApiKey, pinataApiSecret);
-    const pinataAuth = await pinata.testAuthentication();
-    if (pinataAuth.authenticated !== true) {
-      console.log("Pinata Authentication Failed.");
-      return;
-    }
-
-    // Creates post data - See createPostData function for more info on data format.
-    const postData = await createPostData(RawData, seller, sellerPubKey);
-
-    console.log("Saving encrypted data...");
-    notification.success("Saving encrypted data...");
-    // Saves the encrypted data to IPFS.
-
-    let pin: any = await pinata
-      .pinJSONToIPFS({
-        encryptedData: postData?.encryptedData,
-      })
-      .catch(err => {
-        console.log(err);
-      });
-
-    // Check that JSON proof does have the correct info.
-    if (pin?.IpfsHash !== postData?.proofJson.encryptedDatahash) {
-      console.log("Error with Encrypted Data Hash.");
-      notification.error("Error with Encrypted Data Hash.");
-      console.log(pin?.IpfsHash);
-      console.log(postData?.proofJson.encryptedDatahash);
-      return;
-    }
-
-    console.log("Saving proof JSON...");
-    notification.success("Saving proof JSON...");
-    // Saves the proof JSON to IPFS.
-    pin = await pinata.pinJSONToIPFS(postData?.proofJson);
-    // Check that JSON proof does have the correct info.
-    if (pin.IpfsHash !== postData?.proofhash) {
-      console.log("Error with proof Hash.");
-      notification.error("Error with proof Hash.");
-      console.log(pin.IpfsHash);
-      console.log(postData?.proofhash);
-      return;
-    }
-    console.log("Data Saved.");
-    notification.success("Data Saved.");
-    return postData;
-  }
-
   async function submitData() {
     const abiCoder = new ethers.utils.AbiCoder();
-    const buyerPubKeyDecoded = abiCoder.decode(["string"], feedData[1][0].buyerPubKey);
+    //const buyerPubKeyDecoded = abiCoder.decode(["string"], feedData[1][0].buyerPubKey);
+
     const proofhash = abiCoder.decode(["bytes32"], feedData[1][2].encryptedData);
 
     //const proofhash = abiCoder.decode(["string"], feedData[1][2].encryptedData);
-    const sellerPubKeyDecoded = abiCoder.decode(["string"], userData.publicKey);
-    const encrypted = crypto.encrypt(symmetricKey, buyerPubKeyDecoded, secretKey);
-    console.log(encrypted);
 
-    const encryptedSymKey_Buyer = {
-      ciphertext: encrypted.data,
+    //const sellerPubKeyDecoded = abiCoder.decode(["string"], userData.publicKey);
+    const sellerPubKeyDecoded = userData.wallet;
+
+    console.log("Seller Decoded", sellerPubKeyDecoded);
+
+    //const encrypted = crypto.encrypt(symmetricKey, buyerPubKeyDecoded, secretKey);
+
+    //const encrypted = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey, symmetricKey);
+
+    const encrypted = customEncryption(String(vaultId), symmetricKey);
+
+    /* const symmetricKeyHash = await ErasureHelper.multihash({
+      input: symmetricKey,
+      inputType: "raw",
+      outputType: "hex",
+    }); */
+
+    /*  const encryptedSymKey_Buyer = {
+      ciphertext: encrypted,
       ephemPubKey: sellerPubKeyDecoded,
-      nonce: encrypted.nonce,
+      nonce: 0,
       version: "v1.0.0",
-    };
-
-    console.log("Encrypted Symmetric Key", encryptedSymKey_Buyer);
+    }; */
 
     const json_selldata_v120 = {
       esp_version: "v1.2.0",
@@ -466,7 +582,7 @@ const ViewFeed: NextPage = () => {
       senderPubKey: sellerPubKeyDecoded,
       receiver: feedData[1][0].buyer,
       receiverPubKey: feedData[1][0].buyerPubKey,
-      encryptedSymKey: encryptedSymKey_Buyer,
+      encryptedSymKey: encrypted,
     };
 
     const pinata = await new pinataSDK(pinataApiKey, pinataApiSecret);
@@ -503,24 +619,28 @@ const ViewFeed: NextPage = () => {
     }
 
     console.log("Data Saved.");
+
     notification.success("Data Saved.");
 
     //CHeck Fetch data
-    const response = await axios.get("https://gateway.pinata.cloud/ipfs/" + pin.IpfsHash, {
+    const responseIPFS = await axios.get("https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + pin.IpfsHash, {
       headers: {
         Accept: "text/plain",
       },
     });
 
     // check response is ipfs valid content
-    if (response.data.esp_version !== "v1.2.0") {
+    if (responseIPFS.data.esp_version !== "v1.2.0") {
       console.log("Error with proof Hash.");
-      console.log(response.data.esp_version);
+      console.log(responseIPFS.data.esp_version);
       console.log("v1.2.0");
       return;
     }
 
-    const tx = await feedCtx?.submitHash(proofHash58Digest);
+    console.log("Data Retrieved.");
+    console.log("Proof Hash Digest: ", proofHash58Digest);
+
+    const tx = await feedCtx?.submitHash(proofHash58Digest, response);
     await tx.wait();
 
     await fetchData();
@@ -530,6 +650,34 @@ const ViewFeed: NextPage = () => {
       proofHash58: proofHash58,
       proofHash58Decode: proofHash58Digest,
     };
+  }
+
+  function customEncryption(secretKey: string, message: string): string {
+    const algorithm = "aes-256-cbc"; // Algoritmo di cifratura
+    const key = crypto.createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
+    const iv = crypto.randomBytes(16); // Vettore di inizializzazione casuale
+
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
+    let encrypted = cipher.update(message, "utf8", "hex");
+    encrypted += cipher.final("hex");
+
+    // Concatenare il vettore di inizializzazione e il messaggio cifrato
+    return iv.toString("hex") + encrypted;
+  }
+
+  function customDecryption(secretKey: string, encryptedMessage: string): string {
+    const algorithm = "aes-256-cbc"; // Algoritmo di cifratura
+    const key = crypto.createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
+
+    // Separare il vettore di inizializzazione dal messaggio cifrato
+    const iv = Buffer.from(encryptedMessage.slice(0, 32), "hex");
+    const encrypted = encryptedMessage.slice(32);
+
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(encrypted, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+
+    return decrypted;
   }
 
   const downloadFile = ({ data, fileName, fileType }: { data: BlobPart; fileName: string; fileType: string }): void => {
@@ -553,6 +701,8 @@ const ViewFeed: NextPage = () => {
   };
 
   async function retrievePost() {
+    const vaultIdSecret = await feedCtx?.getVaultIdSecret(response);
+
     console.log("Retrieving Data...");
     await fetchData();
 
@@ -565,24 +715,35 @@ const ViewFeed: NextPage = () => {
     console.log("Decoded Hash: ", decodeHash);
 
     //#endregion
-    const responseDecodeHash = await axios.get("https://gateway.pinata.cloud/ipfs/" + decodeHash, {
-      headers: {
-        Accept: "text/plain",
+    const responseDecodeHash = await axios.get(
+      "https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + decodeHash,
+      {
+        headers: {
+          Accept: "text/plain",
+        },
       },
-    });
+    );
 
     const responseDecodeHahJSON = await JSON.parse(JSON.stringify(responseDecodeHash.data));
+
+    console.log("Response Decode Hash: ", responseDecodeHahJSON);
 
     const encryptedSymKey = await JSON.parse(JSON.stringify(responseDecodeHahJSON.encryptedSymKey));
 
     console.log("Encrypted Symmetric Key: ", encryptedSymKey);
 
-    const decrypted = crypto.decrypt(
+    /* const decrypted = crypto.decrypt(
       encryptedSymKey.ciphertext,
       encryptedSymKey.nonce,
       encryptedSymKey.ephemPubKey,
       secretKey,
-    );
+    ); */
+
+    console.log("Vault Secret", vaultIdSecret);
+
+    const decrypted = customDecryption(String(vaultIdSecret), encryptedSymKey);
+
+    //const decrypted = ErasureHelper.crypto.symmetric.decryptMessage(vaultIdSecret, encryptedSymKey);
 
     console.log(decrypted);
     console.log(responseDecodeHahJSON.proofhash);
@@ -593,7 +754,7 @@ const ViewFeed: NextPage = () => {
       outputType: "b58",
     });
 
-    const url = "https://gateway.pinata.cloud/ipfs/" + _decodeHash;
+    const url = "https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + _decodeHash;
 
     console.log(url);
 
@@ -610,7 +771,7 @@ const ViewFeed: NextPage = () => {
     console.log(responseProofHashJSON);
 
     const response_Encrypteddatahash = await axios.get(
-      "https://gateway.pinata.cloud/ipfs/" + responseProofHashJSON.encryptedDatahash,
+      "https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + responseProofHashJSON.encryptedDatahash,
       {
         headers: {
           Accept: "text/plain",
@@ -637,7 +798,12 @@ const ViewFeed: NextPage = () => {
 
       const hashCheck = responseProofHashJSON.datahash === dataHash;
 
-      if (feedData[1][0].postType == 1 || 2 || 3 || 4) {
+      if (
+        feedData[1][0].postType == 1 ||
+        feedData[1][0].postType == 2 ||
+        feedData[1][0].postType == 3 ||
+        feedData[1][0].postType == 4
+      ) {
         const mimeType: any = base64Mime(decryptFile);
 
         // Repair malformed base64 data
@@ -647,6 +813,8 @@ const ViewFeed: NextPage = () => {
         );
 
         saveAs(file, String(postCount) + feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1]);
+      } else {
+        notification.success(decryptFile);
       }
 
       await fetchData();
@@ -732,7 +900,7 @@ const ViewFeed: NextPage = () => {
 
   async function takeStake() {
     console.log("Adding Stake...");
-    const tx = await feedCtx?.takeStake(parseEther(stakeAmount));
+    const tx = await feedCtx?.takeStake(parseEther(stakeAmount), response);
     await tx.wait();
     await fetchData();
   }
@@ -740,19 +908,25 @@ const ViewFeed: NextPage = () => {
   async function finalizePost() {
     console.log("Finalizing Data...");
     if (valid == true) {
-      const tx = await feedCtx?.finalizePost(valid, parseEther("0"));
+      const tx = await feedCtx?.finalizePost(valid, parseEther("0"), response);
     } else {
-      const tx = await feedCtx?.finalizePost(valid, parseEther(punishment));
+      const tx = await feedCtx?.finalizePost(valid, parseEther(punishment), response);
     }
 
     await fetchData();
   }
 
   useEffect(() => {
-    try {
-      fetchData();
-    } catch (e) {
-      console.error(e);
+    if (signer && provider && feedCtx && router.isReady) {
+      try {
+        const fetch = async () => {
+          console.log("Fetching Data...");
+          await fetchData();
+        };
+        fetch();
+      } catch (e) {
+        console.error(e);
+      }
     }
   }, [feedCtx, router.isReady]);
 
@@ -892,14 +1066,6 @@ const ViewFeed: NextPage = () => {
                         placeholder="Symmetric Key"
                         value={symmetricKey}
                         onChange={e => setSymmetricKey(e.target.value)}
-                      />
-                      <br />
-                      <input
-                        type="password"
-                        className="input w-full"
-                        placeholder="Secret Key"
-                        value={secretKey}
-                        onChange={e => setSecretKey(e.target.value)}
                       />
                       <br />
                       <button
@@ -1218,16 +1384,16 @@ const ViewFeed: NextPage = () => {
                     {feedData.postdata.settings.status === 6
                       ? "Revealed"
                       : feedData.postdata.settings.status === 5
-                        ? "Punished"
-                        : feedData.postdata.settings.status === 4
-                          ? "Finalized"
-                          : feedData.postdata.settings.status === 3
-                            ? "Submitted"
-                            : feedData.postdata.settings.status === 2
-                              ? "Accepted"
-                              : feedData.postdata.settings.status === 1
-                                ? "Proposed"
-                                : "Waiting for Creator"}
+                      ? "Punished"
+                      : feedData.postdata.settings.status === 4
+                      ? "Finalized"
+                      : feedData.postdata.settings.status === 3
+                      ? "Submitted"
+                      : feedData.postdata.settings.status === 2
+                      ? "Accepted"
+                      : feedData.postdata.settings.status === 1
+                      ? "Proposed"
+                      : "Waiting for Creator"}
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">
@@ -1240,10 +1406,7 @@ const ViewFeed: NextPage = () => {
                     </p>
                   </div>
                   <p className="text-lg">
-                    <span className="font-bold">Mecenate ID:</span> {feedData[0][0].toString()}
-                  </p>
-                  <p className="text-lg">
-                    <span className="font-bold">Wallet:</span> {feedData[0][1].toString()}
+                    <span className="font-bold">Wallet:</span> {feedData[0][0].toString()}
                   </p>
                   {/* <p className="text-lg">
         <span className="font-bold">Public Key:</span>{" "}
@@ -1261,10 +1424,7 @@ const ViewFeed: NextPage = () => {
                   <p>
                     <span className="font-bold">Buyer:</span> {feedData[1][0].buyer.toString()}
                   </p>
-                  <p>
-                    <span className="font-bold">Buyer Public Key:</span>{" "}
-                    <span className="break-all">{feedData[1][0].buyerPubKey.toString()}</span>
-                  </p>
+
                   <p>
                     <span className="font-bold">Seller:</span> {feedData[1][0].seller.toString()}
                   </p>

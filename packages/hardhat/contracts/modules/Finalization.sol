@@ -48,6 +48,9 @@ abstract contract Finalization is Staking {
 
             post.postdata.escrow.payment = buyerStake;
 
+            vaultIdSeller = ZEROHASH;
+            vaultIdBuyer = ZEROHASH;
+
             emit Valid(post);
         } else if (post.postdata.settings.endTimeStamp > block.timestamp) {
             require(
@@ -81,6 +84,9 @@ abstract contract Finalization is Staking {
 
                 post.postdata.settings.status = Structures.PostStatus.Finalized;
 
+                vaultIdSeller = ZEROHASH;
+                vaultIdBuyer = ZEROHASH;
+
                 emit Valid(post);
             } else if (valid == false) {
                 require(
@@ -113,6 +119,9 @@ abstract contract Finalization is Staking {
                     post.postdata.settings.seller,
                     punishment
                 );
+
+                vaultIdSeller = ZEROHASH;
+                vaultIdBuyer = ZEROHASH;
 
                 emit Invalid(post);
             }

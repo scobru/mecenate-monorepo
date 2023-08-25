@@ -16,7 +16,7 @@ abstract contract Acceptance is Events, Staking {
         ) = sismoVerify(sismoConnectResponse);
 
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(vaultId),
+            IMecenateUsers(usersModuleContract).checkifUserExist(userAddress),
             "User does not exist"
         );
 
@@ -41,9 +41,10 @@ abstract contract Acceptance is Events, Staking {
         );
 
         post.postdata.settings.buyer = userAddressConverted;
-        post.postdata.settings.buyerPubKey = vaultIdBytes;
         post.postdata.escrow.payment = _payment;
         post.postdata.settings.status = Structures.PostStatus.Accepted;
+
+        vaultIdBuyer = vaultIdBytes;
 
         emit Accepted(post);
     }

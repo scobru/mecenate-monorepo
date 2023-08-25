@@ -17,8 +17,5 @@ interface IMecenateFeed {
 
     function owner() external view returns (address);
 
-    function acceptPost(
-        bytes memory publicKey,
-        address _buyer
-    ) external payable;
+    function acceptPost(bytes memory sismoConnectResponse) external payable;
 }

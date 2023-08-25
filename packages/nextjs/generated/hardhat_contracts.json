@@ -1,382 +1,11 @@
 {
-  "31337": [
-    {
-      "name": "localhost",
-      "chainId": "31337",
-      "contracts": {
-        "MecenateTreasury": {
-          "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-          "abi": [
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "previousOwner",
-                  "type": "address"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "newOwner",
-                  "type": "address"
-                }
-              ],
-              "name": "OwnershipTransferred",
-              "type": "event"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "token",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "addLiquidity",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_native",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_unirouter",
-                  "type": "address"
-                }
-              ],
-              "name": "configLiquidityProvider",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_token",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "customApprove",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_identityContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_usersContract",
-                  "type": "address"
-                }
-              ],
-              "name": "distribute",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "fixedFee",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "globalFee",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "lastDistributed",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "native",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "owner",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "renounceOwnership",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_fixedFee",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setFixedFee",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_globalFee",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setGlobalFee",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_slippage",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setSlippage",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bool",
-                  "name": "_splitLiquidity",
-                  "type": "bool"
-                }
-              ],
-              "name": "setSplitLiqudity",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "slippage",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "splitLiquidity",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "token1",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "token2",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "swapTokensForTokens",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "newOwner",
-                  "type": "address"
-                }
-              ],
-              "name": "transferOwnership",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "unirouter",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address payable",
-                  "name": "_to",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "withdrawNative",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_token",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_to",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "withdrawTokens",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "stateMutability": "payable",
-              "type": "receive"
-            }
-          ]
-        }
-      }
-    }
-  ],
   "11155111": [
     {
       "name": "sepolia",
       "chainId": "11155111",
       "contracts": {
         "MecenateTreasury": {
-          "address": "0x625aa41B4618A38d4734e61eF7b803248C9C757b",
+          "address": "0x2c60634584f5b69f747d98a8B4c56A31dDCa532F",
           "abi": [
             {
               "anonymous": false,
@@ -739,7 +368,7 @@
           ]
         },
         "MecenateVerifier": {
-          "address": "0xCA1424bE2AAdE79Da1eB10F7189B275A9837f854",
+          "address": "0x865A00aC030B8E01657F3BC4a90bfD43a58FD8ba",
           "abi": [
             {
               "inputs": [
@@ -817,6 +446,19 @@
             },
             {
               "inputs": [],
+              "name": "appId",
+              "outputs": [
+                {
+                  "internalType": "bytes16",
+                  "name": "",
+                  "type": "bytes16"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "config",
               "outputs": [
                 {
@@ -884,7 +526,7 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0xeCb7e796c43C63b405A3d6dC52869096922AFFb2",
+          "address": "0x3BA1367176ed437b20CbfdCad166f98A266A2671",
           "abi": [
             {
               "inputs": [
@@ -922,7 +564,7 @@
                 {
                   "indexed": false,
                   "internalType": "bytes",
-                  "name": "vaultID",
+                  "name": "pubKey",
                   "type": "bytes"
                 }
               ],
@@ -980,6 +622,32 @@
                   "internalType": "uint256",
                   "name": "count",
                   "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                }
+              ],
+              "name": "getUserData",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "wallet",
+                      "type": "address"
+                    }
+                  ],
+                  "internalType": "struct Structures.User",
+                  "name": "",
+                  "type": "tuple"
                 }
               ],
               "stateMutability": "view",
@@ -1060,7 +728,7 @@
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0x55B9ad12F6C94728e901f8A159E1297B7F4cDb27",
+          "address": "0x7d80FE5313baEC2165FA6De4Cbd8858066894Be6",
           "abi": [
             {
               "inputs": [
@@ -1473,7 +1141,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0x20dF0Dfd899DE9efb27DEC094BbAe96bCF879711",
+          "address": "0xEB7FD14cd8dea2bb5E840B5D1fD897dB1afFe23D",
           "abi": [
             {
               "inputs": [
@@ -1504,11 +1172,6 @@
                     {
                       "components": [
                         {
-                          "internalType": "bytes",
-                          "name": "vaultId",
-                          "type": "bytes"
-                        },
-                        {
                           "internalType": "address",
                           "name": "wallet",
                           "type": "address"
@@ -1536,11 +1199,6 @@
                               "internalType": "address",
                               "name": "buyer",
                               "type": "address"
-                            },
-                            {
-                              "internalType": "bytes",
-                              "name": "buyerPubKey",
-                              "type": "bytes"
                             },
                             {
                               "internalType": "address",
@@ -1639,11 +1297,6 @@
                     {
                       "components": [
                         {
-                          "internalType": "bytes",
-                          "name": "vaultId",
-                          "type": "bytes"
-                        },
-                        {
                           "internalType": "address",
                           "name": "wallet",
                           "type": "address"
@@ -1671,11 +1324,6 @@
                               "internalType": "address",
                               "name": "buyer",
                               "type": "address"
-                            },
-                            {
-                              "internalType": "bytes",
-                              "name": "buyerPubKey",
-                              "type": "bytes"
                             },
                             {
                               "internalType": "address",
@@ -1824,11 +1472,6 @@
                     {
                       "components": [
                         {
-                          "internalType": "bytes",
-                          "name": "vaultId",
-                          "type": "bytes"
-                        },
-                        {
                           "internalType": "address",
                           "name": "wallet",
                           "type": "address"
@@ -1856,11 +1499,6 @@
                               "internalType": "address",
                               "name": "buyer",
                               "type": "address"
-                            },
-                            {
-                              "internalType": "bytes",
-                              "name": "buyerPubKey",
-                              "type": "bytes"
                             },
                             {
                               "internalType": "address",
@@ -1959,11 +1597,6 @@
                     {
                       "components": [
                         {
-                          "internalType": "bytes",
-                          "name": "vaultId",
-                          "type": "bytes"
-                        },
-                        {
                           "internalType": "address",
                           "name": "wallet",
                           "type": "address"
@@ -1991,11 +1624,6 @@
                               "internalType": "address",
                               "name": "buyer",
                               "type": "address"
-                            },
-                            {
-                              "internalType": "bytes",
-                              "name": "buyerPubKey",
-                              "type": "bytes"
                             },
                             {
                               "internalType": "address",
@@ -2094,11 +1722,6 @@
                     {
                       "components": [
                         {
-                          "internalType": "bytes",
-                          "name": "vaultId",
-                          "type": "bytes"
-                        },
-                        {
                           "internalType": "address",
                           "name": "wallet",
                           "type": "address"
@@ -2126,11 +1749,6 @@
                               "internalType": "address",
                               "name": "buyer",
                               "type": "address"
-                            },
-                            {
-                              "internalType": "bytes",
-                              "name": "buyerPubKey",
-                              "type": "bytes"
                             },
                             {
                               "internalType": "address",
@@ -2248,11 +1866,6 @@
                     {
                       "components": [
                         {
-                          "internalType": "bytes",
-                          "name": "vaultId",
-                          "type": "bytes"
-                        },
-                        {
                           "internalType": "address",
                           "name": "wallet",
                           "type": "address"
@@ -2280,11 +1893,6 @@
                               "internalType": "address",
                               "name": "buyer",
                               "type": "address"
-                            },
-                            {
-                              "internalType": "bytes",
-                              "name": "buyerPubKey",
-                              "type": "bytes"
                             },
                             {
                               "internalType": "address",
@@ -2383,11 +1991,6 @@
                     {
                       "components": [
                         {
-                          "internalType": "bytes",
-                          "name": "vaultId",
-                          "type": "bytes"
-                        },
-                        {
                           "internalType": "address",
                           "name": "wallet",
                           "type": "address"
@@ -2415,11 +2018,6 @@
                               "internalType": "address",
                               "name": "buyer",
                               "type": "address"
-                            },
-                            {
-                              "internalType": "bytes",
-                              "name": "buyerPubKey",
-                              "type": "bytes"
                             },
                             {
                               "internalType": "address",
@@ -2537,11 +2135,6 @@
                     {
                       "components": [
                         {
-                          "internalType": "bytes",
-                          "name": "vaultId",
-                          "type": "bytes"
-                        },
-                        {
                           "internalType": "address",
                           "name": "wallet",
                           "type": "address"
@@ -2569,11 +2162,6 @@
                               "internalType": "address",
                               "name": "buyer",
                               "type": "address"
-                            },
-                            {
-                              "internalType": "bytes",
-                              "name": "buyerPubKey",
-                              "type": "bytes"
                             },
                             {
                               "internalType": "address",
@@ -2762,11 +2350,6 @@
                     {
                       "components": [
                         {
-                          "internalType": "bytes",
-                          "name": "vaultId",
-                          "type": "bytes"
-                        },
-                        {
                           "internalType": "address",
                           "name": "wallet",
                           "type": "address"
@@ -2794,11 +2377,6 @@
                               "internalType": "address",
                               "name": "buyer",
                               "type": "address"
-                            },
-                            {
-                              "internalType": "bytes",
-                              "name": "buyerPubKey",
-                              "type": "bytes"
                             },
                             {
                               "internalType": "address",
@@ -3029,12 +2607,44 @@
             },
             {
               "inputs": [],
+              "name": "getStatus",
+              "outputs": [
+                {
+                  "internalType": "enum Structures.PostStatus",
+                  "name": "",
+                  "type": "uint8"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "getTotalStaked",
               "outputs": [
                 {
                   "internalType": "uint256",
                   "name": "",
                   "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
+                }
+              ],
+              "name": "getVaultIdSecret",
+              "outputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
                 }
               ],
               "stateMutability": "view",
@@ -3059,11 +2669,6 @@
               "outputs": [
                 {
                   "components": [
-                    {
-                      "internalType": "bytes",
-                      "name": "vaultId",
-                      "type": "bytes"
-                    },
                     {
                       "internalType": "address",
                       "name": "wallet",
@@ -3092,11 +2697,6 @@
                           "internalType": "address",
                           "name": "buyer",
                           "type": "address"
-                        },
-                        {
-                          "internalType": "bytes",
-                          "name": "buyerPubKey",
-                          "type": "bytes"
                         },
                         {
                           "internalType": "address",
@@ -3354,7 +2954,7 @@
           ]
         },
         "MecenateBay": {
-          "address": "0x25E6fe7B460F532e91e404aaA401c486644eF49f",
+          "address": "0xBfC136D7FdFA6fD8eD5DB47Eaf63b6872c07F0C4",
           "abi": [
             {
               "inputs": [
@@ -3531,6 +3131,11 @@
                   "internalType": "address",
                   "name": "_feed",
                   "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
                 }
               ],
               "name": "acceptRequest",
@@ -3945,7 +3550,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0x6d065E2BE1b46130a02f32141Ad6D356c40c3B11",
+          "address": "0x986415b9492DD03E14a12E543342417eba361ed4",
           "abi": [
             {
               "inputs": [
