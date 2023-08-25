@@ -5,11 +5,13 @@ import { notification } from "~~/utils/scaffold-eth";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, ethers } from "ethers";
 import { formatEther, parseEther } from "ethers/lib/utils.js";
+import { useAppStore } from "~~/services/store/store";
 
 const Bay: NextPage = () => {
   const provider = useProvider();
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
+  const store = useAppStore();
 
   const deployedContractBay = getDeployedContract(chain?.id.toString(), "MecenateBay");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
@@ -62,7 +64,7 @@ const Bay: NextPage = () => {
 
   async function acceptBayRequest(index: number, address: string) {
     if (signer) {
-      const tx = await bayCtx?.acceptRequest(index, address);
+      const tx = await bayCtx?.acceptRequest(index, address, store.sismoResponse);
       if (tx) {
         notification.success("Request accepted successfully");
       }
@@ -95,7 +97,7 @@ const Bay: NextPage = () => {
         postCount: 0,
       };
 
-      const tx = await bayCtx?.createRequest(request, { value: parseEther(requestPayment) });
+      const tx = await bayCtx?.createRequest(request, store.sismoResponse, { value: parseEther(requestPayment) });
 
       if (tx) {
         notification.success("Request created successfully");
@@ -225,8 +227,6 @@ const Bay: NextPage = () => {
                   key={index}
                   className=" my-2 flex-wrap text-content-base p-4 bg-primary shadow-md rounded-md text-left hover:shadow-lg hover:bg-secondary transition duration-300 ease-in-out"
                 > */}
-                <div className="my-2 font-medium">👾 Buyer : {request.buyer}</div>
-                <div className="my-2 font-medium">🤖 Seller : {request.seller}</div>
                 <div className="my-2 font-medium">💸 Payment : {formatEther(request.payment)}</div>
                 <div className="my-2 font-medium">💰 Stake : {formatEther(request.stake)}</div>
                 <div className="my-2 font-medium">

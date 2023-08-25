@@ -408,7 +408,7 @@ const Identity: NextPage = () => {
   };
 
   async function signIn() {
-    await createPair();
+    // await createPair();
     const seller = await signer?.getAddress();
     if (seller) {
       /*  try {

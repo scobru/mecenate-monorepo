@@ -1,6 +1,5 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { parseEther } from "ethers/lib/utils";
 /**
  * Deploys a contract named "YourContract" using the deployer account and
  * constructor arguments set to the deployer address
@@ -51,7 +50,7 @@ const deployYourContract: DeployFunction = async function (
   const users = await deploy("MecenateUsers", {
     from: deployer,
     // Contract constructor arguments
-    args: [verifier.address],
+    args: [verifier.address, treasury.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -93,7 +92,7 @@ const deployYourContract: DeployFunction = async function (
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
     // Contract constructor arguments
-    args: [users.address],
+    args: [users.address, verifier.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.

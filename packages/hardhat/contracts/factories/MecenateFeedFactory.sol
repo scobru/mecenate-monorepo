@@ -15,7 +15,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     address public treasuryContract;
 
-    address private usersMouduleContract;
+    address private usersModuleContract;
 
     address private verifierContract;
 
@@ -26,11 +26,11 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     event FeedCreated(address indexed addr);
 
     constructor(
-        address _usersMouduleContract,
+        address _usersModuleContract,
         address _treasuryContract,
         address _verifierContract
     ) {
-        usersMouduleContract = _usersMouduleContract;
+        usersModuleContract = _usersModuleContract;
         treasuryContract = _treasuryContract;
         verifierContract = _verifierContract;
     }
@@ -52,7 +52,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     ) external payable returns (address) {
         (
             ,
-            ,
+            bytes memory vaultIdBytes,
             uint256 userAddress,
             address userAddressConverted
         ) = IMecenateVerifier(verifierContract).sismoVerify(
@@ -64,7 +64,9 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         payable(treasuryContract).transfer(msg.value);
 
         require(
-            IMecenateUsers(usersMouduleContract).checkifUserExist(userAddress),
+            IMecenateUsers(usersModuleContract).checkifUserExist(
+                keccak256(vaultIdBytes)
+            ),
             "user does not exist"
         );
 
@@ -72,7 +74,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
         MecenateFeed feed = new MecenateFeed(
             userAddressConverted,
-            usersMouduleContract,
+            usersModuleContract,
             verifierContract
         );
 

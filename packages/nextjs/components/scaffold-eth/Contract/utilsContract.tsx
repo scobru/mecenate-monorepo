@@ -4,7 +4,7 @@ import DisplayVariable from "~~/components/scaffold-eth/Contract/DisplayVariable
 import { ReadOnlyFunctionForm } from "./ReadOnlyFunctionForm";
 import { WriteOnlyFunctionForm } from "./WriteOnlyFunctionForm";
 import { Dispatch, SetStateAction } from "react";
-import ContractData from "~~/generated/hardhat_contracts.json";
+import ContractData from "~~/generated/hardhat_contracts";
 
 type GeneratedContractType = {
   address: string;

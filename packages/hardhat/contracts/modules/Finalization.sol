@@ -35,12 +35,12 @@ abstract contract Finalization is Staking {
             payable(treasuryContract).transfer(buyerFee);
 
             uint256 buyerStake = _takeStake(
-                post.postdata.settings.buyer,
+                postSettingPrivate.buyer,
                 post.postdata.escrow.payment
             );
 
             uint256 sellerStake = _addStake(
-                post.postdata.settings.seller,
+                postSettingPrivate.seller,
                 amountToAdd
             );
 
@@ -48,13 +48,13 @@ abstract contract Finalization is Staking {
 
             post.postdata.escrow.payment = buyerStake;
 
-            vaultIdSeller = ZEROHASH;
-            vaultIdBuyer = ZEROHASH;
+            // reset postSettingPrivate
+            //_cancelPostSettingPrivate();
 
             emit Valid(post);
         } else if (post.postdata.settings.endTimeStamp > block.timestamp) {
             require(
-                post.postdata.settings.buyer == userAddressConverted,
+                postSettingPrivate.buyer == userAddressConverted,
                 "You are not the buyer"
             );
             if (valid == true) {
@@ -69,12 +69,12 @@ abstract contract Finalization is Staking {
                 payable(treasuryContract).transfer(buyerFee);
 
                 uint256 buyerStake = _takeStake(
-                    post.postdata.settings.buyer,
+                    postSettingPrivate.buyer,
                     post.postdata.escrow.payment
                 );
 
                 uint256 sellerStake = _addStake(
-                    post.postdata.settings.seller,
+                    postSettingPrivate.seller,
                     amountToAdd
                 );
 
@@ -84,8 +84,7 @@ abstract contract Finalization is Staking {
 
                 post.postdata.settings.status = Structures.PostStatus.Finalized;
 
-                vaultIdSeller = ZEROHASH;
-                vaultIdBuyer = ZEROHASH;
+                //_cancelPostSettingPrivate();
 
                 emit Valid(post);
             } else if (valid == false) {
@@ -112,19 +111,27 @@ abstract contract Finalization is Staking {
                 payable(treasuryContract).transfer(totalPunishmentFee);
 
                 uint256 buyerStake = _burnStake(
-                    post.postdata.settings.buyer,
+                    postSettingPrivate.buyer,
                     buyerPunishment
                 );
                 uint256 sellerStake = _burnStake(
-                    post.postdata.settings.seller,
+                    postSettingPrivate.seller,
                     punishment
                 );
 
-                vaultIdSeller = ZEROHASH;
-                vaultIdBuyer = ZEROHASH;
+                //_cancelPostSettingPrivate();
 
                 emit Invalid(post);
             }
         }
+    }
+
+    function _cancelPostSettingPrivate() internal virtual {
+        postSettingPrivate = Structures.postSettingPrivate({
+            buyer: address(0),
+            vaultIdBuyer: ZEROHASH,
+            seller: address(0),
+            vaultIdSeller: ZEROHASH
+        });
     }
 }

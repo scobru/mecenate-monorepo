@@ -26,20 +26,34 @@ contract MecenateFeed is
         _transferOwnership(owner);
     }
 
-    function getSeller() external view returns (address) {
-        return post.postdata.settings.seller;
+    /* function getSeller() external view returns (address) {
+        return postSettingPrivate.seller;
     }
 
     function getBuyer() external view returns (address) {
-        return post.postdata.settings.buyer;
-    }
+        returnpostSettingPrivate.buyer;
+    } */
 
     function getBuyerPayment() external view returns (uint256) {
         return post.postdata.escrow.payment;
     }
 
-    function getSellerStake() external view returns (uint256) {
+    function getSellerDeposit() external view returns (uint256) {
         return post.postdata.escrow.stake;
+    }
+
+    function getSellerStake() external view returns (uint256 amount) {
+        // get deposit
+        amount = Deposit._getDeposit(postSettingPrivate.seller);
+        // explicit return
+        return amount;
+    }
+
+    function getBuyerStake() external view returns (uint256 amount) {
+        // get deposit
+        amount = Deposit._getDeposit(postSettingPrivate.buyer);
+        // explicit return
+        return amount;
     }
 
     function getPostStatus() external view returns (Structures.PostStatus) {

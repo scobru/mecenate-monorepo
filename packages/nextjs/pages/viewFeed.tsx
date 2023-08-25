@@ -5,26 +5,27 @@ import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsCo
 import { ContractInterface, Signer, ethers, utils } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { useRouter } from "next/router";
-import { AbiCoder, base64, formatEther, parseEther, toUtf8Bytes } from "ethers/lib/utils";
+import { AbiCoder, base64, formatEther, keccak256, parseEther, toUtf8Bytes } from "ethers/lib/utils";
 import pinataSDK from "@pinata/sdk";
 import axios from "axios";
 import dotenv from "dotenv";
 import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
 import { saveAs } from "file-saver";
-//import * as LitJsSdk from "@lit-protocol/lit-node-client";
-//import { SiweMessage } from "siwe";
 
-// const lit = new LitJsSdk.LitNodeClient({ debug: true });
-// const chain = "sepolia";
+import { SiweMessage } from "siwe";
+import crypto from "crypto";
+import { Address } from "~~/components/scaffold-eth";
+import { useAppStore } from "~~/services/store/store";
 
 dotenv.config();
 
 const ViewFeed: NextPage = () => {
   //const crypto = require("asymmetric-crypto");
-  const crypto = require("crypto");
-
   const base64url = require("base64url"); // import the base64url library
+
+  const store = useAppStore();
+  console.log(store);
 
   const ErasureHelper = require("@erasure/crypto-ipfs");
   const pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
@@ -53,11 +54,11 @@ const ViewFeed: NextPage = () => {
   const router = useRouter();
 
   const { addr } = router.query;
-  const { vaultId } = router.query;
-  const { userAddress } = router.query;
-  const { response } = router.query;
+  const vaultId = store.sismoData.vaultId;
+  const userAddress = store.sismoData.auths[1].userId;
+  const response = store.sismoResponse;
 
-  //const [authSig, setAuthSig] = useState<any>();
+  const [authSig, setAuthSig] = useState<any>();
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
   const [postStake, setPostStake] = useState<any>([]);
@@ -77,28 +78,40 @@ const ViewFeed: NextPage = () => {
   const [image, setImage] = React.useState("");
   const [postCount, setPostCount] = useState<any>("");
 
-  // const evmContractConditions = [
-  //   {
-  //     contractAddress: addr,
-  //     functionName: "getStatus()",
-  //     functionParams: [],
-  //     functionAbi: {
-  //       name: "getStatus",
-  //       inputs: [],
-  //       outputs: [
-  //         {
-  //           internalType: "uint8",
-  //           name: "status",
-  //           type: "uint8",
-  //         },
-  //       ],
-  //       constant: true,
-  //       stateMutability: "view",
-  //     },
-  //     chain: "sepolia",
-  //     returnValueTest: { key: "status", comparator: "=", value: "3" },
-  //   },
-  // ];
+  const accessControlConditions = [
+    {
+      contractAddress: addr,
+      functionName: "getStatus()",
+      functionParams: [],
+      functionAbi: {
+        name: "getStatus",
+        inputs: [],
+        outputs: [
+          {
+            internalType: "uint8",
+            name: "status",
+            type: "uint8",
+          },
+        ],
+        constant: true,
+        stateMutability: "view",
+      },
+      chain: "sepolia",
+      returnValueTest: { key: "status", comparator: "=", value: "3" },
+    },
+    { operator: "and" },
+    {
+      conditionType: "evmBasic",
+      contractAddress: addr,
+      chain: "sepolia",
+      method: "sismoVerifyBuyer",
+      parameters: [":litParam:response"],
+      returnValueTest: {
+        comparator: "=",
+        value: "true",
+      },
+    },
+  ];
 
   const user = "";
   const owner = "";
@@ -203,50 +216,6 @@ const ViewFeed: NextPage = () => {
     notification.success("Refund successful");
   }
 
-  // async function createSiwe(address: string, statement: string) {
-  //   const domain = "localhost:3000";
-  //   const origin = "http://localhost:3000/";
-
-  //   const siweMessage = new SiweMessage({
-  //     domain,
-  //     address: address,
-  //     statement,
-  //     uri: origin,
-  //     version: "1",
-  //     chainId: 80001,
-  //   });
-
-  //   console.log("siweMessage", siweMessage);
-
-  //   const messageToSign = siweMessage.prepareMessage();
-  //   console.log("messageToSign", messageToSign);
-
-  //   return messageToSign;
-  // }
-
-  // async function getAuthSign() {
-  //   // Create a function to handle signing messages
-
-  //   const messageToSign = await createSiwe(await ethers.utils.getAddress(userAddress), "Free the web!");
-
-  //   const signature: string = await signer?.signMessage(await messageToSign);
-  //   console.log("signature", signature);
-
-  //   const recoveredAddress = ethers.utils.verifyMessage(messageToSign, String(signature));
-  //   console.log("recoveredAddress", recoveredAddress);
-
-  //   const authSig = {
-  //     sig: signature,
-  //     derivedVia: "web3.eth.personal.sign",
-  //     signedMessage: messageToSign,
-  //     address: recoveredAddress,
-  //   };
-
-  //   setAuthSig(authSig);
-
-  //   return authSig;
-  // }
-
   const uploadImageToIpfs = async (file: Blob | any) => {
     try {
       if (!file) {
@@ -290,14 +259,12 @@ const ViewFeed: NextPage = () => {
       console.log("Feed Address: ", feedCtx?.address);
       const data = await feedCtx?.post();
       console.log("Data: ", data);
-      const user = await usersCtx?.getUserData(signer?.getAddress());
-      const sellerDeposit = await feedCtx?.getStake(data.postdata.settings.seller);
-      const buyerDeposit = await feedCtx?.getStake(data.postdata.settings.buyer);
+      const sellerDeposit = await feedCtx?.getSellerStake();
+      const buyerDeposit = await feedCtx?.getBuyerStake();
       const totalStaked = await feedCtx?.getTotalStaked();
       setSellerStake(String(sellerDeposit));
       setBuyerStake(formatEther(buyerDeposit));
       setTotalStaked(formatEther(totalStaked));
-      setUserData(user);
       setFeedData(data);
       setPostCount(await feedCtx?.postCount());
       console.log(data);
@@ -311,7 +278,7 @@ const ViewFeed: NextPage = () => {
 
     const pubKey = vaultId;
 
-    const dataSaved = await savePost(postRawData, String(signer?.getAddress()), String(pubKey));
+    const dataSaved = await savePost(postRawData);
 
     notification.warning(
       <div
@@ -390,11 +357,19 @@ const ViewFeed: NextPage = () => {
     console.log("Start Tx...");
     console.log("Signer Address: ", signer?.getAddress());
 
+    let _buyer;
+
+    if (buyer == "") {
+      _buyer = ethers.constants.AddressZero;
+    } else {
+      _buyer = buyer;
+    }
+
     const tx = await feedCtx?.createPost(
       proofOfHashEncode,
       Number(postType),
       Number(postDuration),
-      ethers.constants.AddressZero,
+      _buyer,
       parseEther(buyerPayment),
       response,
       {
@@ -411,7 +386,7 @@ const ViewFeed: NextPage = () => {
     const tx = await feedCtx?.acceptPost(response, { value: parseEther(postPayment) });
   }
 
-  async function savePost(RawData: string, seller: string, sellerPubKey: string): Promise<PostData | void> {
+  async function savePost(RawData: string): Promise<PostData | void> {
     console.log("Saving Data...");
 
     // Check Pinata credentials.
@@ -429,7 +404,7 @@ const ViewFeed: NextPage = () => {
     }
 
     // Create post data.
-    const postData = await createPostData(RawData, seller, sellerPubKey);
+    const postData = await createPostData(RawData);
     if (!postData) {
       console.log("Error creating post data.");
       return;
@@ -457,32 +432,11 @@ const ViewFeed: NextPage = () => {
     }
   }
 
-  async function createPostData(RawData: any, seller: string, sellerPubKey: string) {
+  async function createPostData(RawData: any) {
     console.log("Creating Data...");
     try {
-      /*  
-      const authSig = await getAuthSign();
-      const { encryptedString, symmetricKey } = await LitJsSdk.encryptFile(RawData);
-      const { ciphertext, dataToEncryptHash } = await LitJsSdk.encryptFile(
-        {
-          evmContractConditions,
-          authSig,
-          chain: "sepolia",
-          dataToEncrypt: RawData,
-        },
-        lit,
-      );
-      const encryptedSymmetricKey = await lit?.saveEncryptionKey({
-        evmContractConditions: evmContractConditions,
-        symmetricKey: symmetricKey,
-        authSig: authSig,
-        chain: "sepolia",
-      });
-      const encryptedFile = encryptedString;
-      const symmetricKeyHash = LitJsSdk.uint8arrayToString(encryptedSymmetricKey, "base16");
-      */
-
       const symmetricKey = ErasureHelper.crypto.symmetric.generateKey();
+
       const encryptedFile = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
 
       const symmetricKeyHash = await ErasureHelper.multihash({
@@ -492,6 +446,7 @@ const ViewFeed: NextPage = () => {
       });
 
       // datahash sha256(rawdata)
+
       const dataHash = await ErasureHelper.multihash({
         input: RawData,
         inputType: "raw",
@@ -499,6 +454,7 @@ const ViewFeed: NextPage = () => {
       });
 
       // encryptedDatahash = sha256(encryptedData)
+
       // This hash will match the IPFS pin hash
       const encryptedDataHash = await ErasureHelper.multihash({
         input: JSON.stringify({ encryptedData: encryptedFile }),
@@ -508,9 +464,6 @@ const ViewFeed: NextPage = () => {
 
       // jsonblob_v1_2_0 = JSON(address_seller, salt, multihashformat(datahash), multihashformat(keyhash), multihashformat(encryptedDatahash))
       const jsonblob_v1_2_0 = {
-        creator: seller,
-        creatorPubKey: sellerPubKey,
-        salt: ErasureHelper.crypto.asymmetric.generateNonce(),
         datahash: dataHash,
         encryptedDatahash: encryptedDataHash, // This allows the encrypted data to be located on IPFS or 3Box
         keyhash: symmetricKeyHash,
@@ -560,7 +513,7 @@ const ViewFeed: NextPage = () => {
 
     //const encrypted = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey, symmetricKey);
 
-    const encrypted = customEncryption(String(vaultId), symmetricKey);
+    const encrypted = customEncryption(keccak256(String(vaultId)), symmetricKey);
 
     /* const symmetricKeyHash = await ErasureHelper.multihash({
       input: symmetricKey,
@@ -579,9 +532,6 @@ const ViewFeed: NextPage = () => {
       esp_version: "v1.2.0",
       proofhash: proofhash,
       sender: signer?.getAddress(),
-      senderPubKey: sellerPubKeyDecoded,
-      receiver: feedData[1][0].buyer,
-      receiverPubKey: feedData[1][0].buyerPubKey,
       encryptedSymKey: encrypted,
     };
 
@@ -739,11 +689,8 @@ const ViewFeed: NextPage = () => {
       secretKey,
     ); */
 
-    console.log("Vault Secret", vaultIdSecret);
-
-    const decrypted = customDecryption(String(vaultIdSecret), encryptedSymKey);
-
     //const decrypted = ErasureHelper.crypto.symmetric.decryptMessage(vaultIdSecret, encryptedSymKey);
+    const decrypted = customDecryption(String(vaultIdSecret), encryptedSymKey);
 
     console.log(decrypted);
     console.log(responseDecodeHahJSON.proofhash);
@@ -893,7 +840,7 @@ const ViewFeed: NextPage = () => {
 
   async function addStake() {
     console.log("Adding Stake...");
-    const tx = await feedCtx?.addStake({ value: parseEther(stakeAmount) });
+    const tx = await feedCtx?.addStake(response, { value: parseEther(stakeAmount) });
     await tx.wait();
     await fetchData();
   }
@@ -933,7 +880,8 @@ const ViewFeed: NextPage = () => {
   return (
     <div className="flex flex-col items-center pt-2 p-2 m-2">
       {feedData[0] != null ? (
-        <div className="flex flex-col py-5 justify-center  items-center">
+        <div className="flex flex-col py-5 justify-center  items-center text-left">
+          <Address address={userAddress} format="long" />
           <div className="flex flex-wrap text-left  ">
             <div tabIndex={0} className="collapse">
               <div className="collapse-title text-xl font-medium hover:bg-primary">Seller</div>
@@ -980,7 +928,6 @@ const ViewFeed: NextPage = () => {
                         onChange={e => setBuyerPayment(e.target.value)}
                       />
                       <label className="block text-base-500">Buyer Addreess </label>
-
                       <input
                         type="text"
                         className="input w-full"
@@ -1232,15 +1179,6 @@ const ViewFeed: NextPage = () => {
                       </label>
                     </div>
                     <div className="modal-body space-y-4 text-left">
-                      <br />
-                      <input
-                        type="password"
-                        className="input w-full"
-                        placeholder="Secret Key"
-                        value={secretKey}
-                        onChange={e => setSecretKey(e.target.value)}
-                      />
-                      <br />
                       <button
                         className="btn  w-full"
                         onClick={async () => {
@@ -1310,59 +1248,56 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
 
-            {signer?.getAddress() == feedData.postdata.settings.seller ||
-              (feedData.postdata.settings.buyer && (
-                <div className="fleẋ flex-row">
-                  <label htmlFor="modal-stake" className="btn   modal-button  mx-2 my-2">
-                    Stake
-                  </label>
-                  <input type="checkbox" id="modal-stake" className="modal-toggle" />
-                  <div className="modal">
-                    <div className="modal-box">
-                      <div className="modal-header">
-                        <div className="modal-title text-2xl font-bold">Stake</div>
-                        <label htmlFor="modal-stake" className="btn btn-ghost">
-                          <i className="fas fa-times"></i>
-                        </label>
-                      </div>
-                      <div className="modal-body space-y-4 text-left">
-                        <br />
-                        <input
-                          type="text"
-                          className="input w-full"
-                          placeholder="Stake Amount"
-                          value={stakeAmount}
-                          onChange={e => setStakeAmount(e.target.value)}
-                        />
-                        <br />
-                        <button
-                          className="btn  w-full"
-                          onClick={async () => {
-                            const postData = await addStake();
-                            console.log(postData);
-                          }}
-                        >
-                          Add Stake
-                        </button>
-                        <button
-                          className="btn  w-full"
-                          onClick={async () => {
-                            const postData = await takeStake();
-                            console.log(postData);
-                          }}
-                        >
-                          Take Stake
-                        </button>
-                      </div>
-                      <div className="modal-action space-x-2 mt-4">
-                        <label htmlFor="modal-stake" className="btn">
-                          Close
-                        </label>
-                      </div>
-                    </div>
+            <div className="fleẋ flex-row">
+              <label htmlFor="modal-stake" className="btn   modal-button  mx-2 my-2">
+                Stake
+              </label>
+              <input type="checkbox" id="modal-stake" className="modal-toggle" />
+              <div className="modal">
+                <div className="modal-box">
+                  <div className="modal-header">
+                    <div className="modal-title text-2xl font-bold">Stake</div>
+                    <label htmlFor="modal-stake" className="btn btn-ghost">
+                      <i className="fas fa-times"></i>
+                    </label>
+                  </div>
+                  <div className="modal-body space-y-4 text-left">
+                    <br />
+                    <input
+                      type="text"
+                      className="input w-full"
+                      placeholder="Stake Amount"
+                      value={stakeAmount}
+                      onChange={e => setStakeAmount(e.target.value)}
+                    />
+                    <br />
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        const postData = await addStake();
+                        console.log(postData);
+                      }}
+                    >
+                      Add Stake
+                    </button>
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        const postData = await takeStake();
+                        console.log(postData);
+                      }}
+                    >
+                      Take Stake
+                    </button>
+                  </div>
+                  <div className="modal-action space-x-2 mt-4">
+                    <label htmlFor="modal-stake" className="btn">
+                      Close
+                    </label>
                   </div>
                 </div>
-              ))}
+              </div>
+            </div>
 
             <button
               className="btn   modal-button  mx-2 my-2"
@@ -1374,7 +1309,7 @@ const ViewFeed: NextPage = () => {
             </button>
           </div>
 
-          <div className="flex flex-col  p-2 min-w-fit items-left justify-center">
+          <div className="flex flex-col  p-2 min-w-fit items-left justify-center w-full">
             <div className="card w-fit">
               <div className="card-body">
                 <h2 className="text-xl font-bold">Creator Information</h2>
@@ -1397,17 +1332,26 @@ const ViewFeed: NextPage = () => {
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">
-                      <span className="font-bold">Seller Stake:</span> {sellerStake / 1e18} ETH
+                      <span className="font-bold">Seller Escrow Deposit:</span> {formatEther(sellerStake)} ETH
+                    </p>
+                    <p className="text-lg">
+                      <span className="font-bold">Seller Stake:</span> {formatEther(feedData[1][1].stake.toString())}{" "}
+                      ETH
                     </p>
                   </div>
                   <div className="w-1/2">
                     <p className="text-lg">
-                      <span className="font-bold">Buyer Stake:</span> {buyerStake} ETH
+                      <span className="font-bold">Buyer Escrow Stake:</span> {buyerStake} ETH
+                    </p>
+                    <p className="text-lg">
+                      <span className="font-bold">Buyer Stake:</span> {formatEther(feedData[1][1].payment.toString())}{" "}
+                      ETH
                     </p>
                   </div>
-                  <p className="text-lg">
+
+                  {/*  <p className="text-lg">
                     <span className="font-bold">Wallet:</span> {feedData[0][0].toString()}
-                  </p>
+                  </p> */}
                   {/* <p className="text-lg">
         <span className="font-bold">Public Key:</span>{" "}
         {feedData[0][2].toString()}
@@ -1421,13 +1365,13 @@ const ViewFeed: NextPage = () => {
               <div className="card-body">
                 <h2 className="text-xl font-bold">Post Settings</h2>
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <p>
+                  {/* <p>
                     <span className="font-bold">Buyer:</span> {feedData[1][0].buyer.toString()}
-                  </p>
+                  </p> */}
 
-                  <p>
+                  {/*  <p>
                     <span className="font-bold">Seller:</span> {feedData[1][0].seller.toString()}
-                  </p>
+                  </p> */}
                   <p>
                     <span className="font-bold">Creation Timestamp:</span> {feedData[1][0].creationTimeStamp.toString()}
                   </p>

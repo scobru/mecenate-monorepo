@@ -48,11 +48,16 @@ library Structures {
     struct PostSettings {
         PostStatus status;
         PostType postType;
-        address buyer;
-        address seller;
         uint256 creationTimeStamp;
         uint256 endTimeStamp;
         uint256 duration;
+    }
+
+    struct postSettingPrivate {
+        address seller;
+        bytes vaultIdSeller;
+        address buyer;
+        bytes vaultIdBuyer;
     }
 
     struct PostEscrow {
@@ -63,7 +68,7 @@ library Structures {
     }
 
     struct User {
-        address wallet;
+        bytes32 vaultId;
     }
 
     struct Feed {
@@ -80,12 +85,17 @@ library Structures {
 
     struct BayRequest {
         bytes32 request;
-        address buyer;
-        address seller;
         uint256 payment;
         uint256 stake;
         address postAddress;
         bool accepted;
         uint256 postCount;
+    }
+
+    struct BayRequestPrivate {
+        address seller;
+        bytes vaultIdSeller;
+        address buyer;
+        bytes vaultIdBuyer;
     }
 }

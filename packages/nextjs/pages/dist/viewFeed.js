@@ -60,14 +60,13 @@ var dotenv_1 = require("dotenv");
 var react_dropzone_1 = require("react-dropzone");
 var ipfs_http_client_1 = require("ipfs-http-client");
 var file_saver_1 = require("file-saver");
-//import * as LitJsSdk from "@lit-protocol/lit-node-client";
-//import { SiweMessage } from "siwe";
-// const lit = new LitJsSdk.LitNodeClient({ debug: true });
-// const chain = "sepolia";
+var LitJsSdk = require("@lit-protocol/lit-node-client");
+var siwe_1 = require("siwe");
+var crypto_1 = require("crypto");
+var lit = new LitJsSdk.LitNodeClient({ debug: true });
 dotenv_1["default"].config();
 var ViewFeed = function () {
     //const crypto = require("asymmetric-crypto");
-    var crypto = require("crypto");
     var base64url = require("base64url"); // import the base64url library
     var ErasureHelper = require("@erasure/crypto-ipfs");
     var pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
@@ -95,52 +94,64 @@ var ViewFeed = function () {
     var vaultId = router.query.vaultId;
     var userAddress = router.query.userAddress;
     var response = router.query.response;
-    //const [authSig, setAuthSig] = useState<any>();
-    var _a = react_1.useState([]), postType = _a[0], setPostType = _a[1];
-    var _b = react_1.useState([]), postDuration = _b[0], setPostDuration = _b[1];
-    var _c = react_1.useState([]), postStake = _c[0], setPostStake = _c[1];
-    var _d = react_1.useState([]), postRawData = _d[0], setPostRawData = _d[1];
-    var _e = react_1.useState([]), postPayment = _e[0], setPostPayment = _e[1];
-    var _f = react_1.useState([]), symmetricKey = _f[0], setSymmetricKey = _f[1];
-    var _g = react_1.useState([]), secretKey = _g[0], setSecretKey = _g[1];
-    var _h = react_1.useState(), valid = _h[0], setValid = _h[1];
-    var _j = react_1.useState(0), punishment = _j[0], setPunishment = _j[1];
-    var _k = react_1.useState(0), sellerStake = _k[0], setSellerStake = _k[1];
-    var _l = react_1.useState(0), buyerStake = _l[0], setBuyerStake = _l[1];
-    var _m = react_1.useState(""), buyerPayment = _m[0], setBuyerPayment = _m[1];
-    var _o = react_1.useState(0), totalStaked = _o[0], setTotalStaked = _o[1];
-    var _p = react_1.useState(0), stakeAmount = _p[0], setStakeAmount = _p[1];
-    var _q = react_1.useState(""), buyer = _q[0], setBuyer = _q[1];
-    var _r = react_1["default"].useState(""), imageFile = _r[0], setImageFile = _r[1];
-    var _s = react_1["default"].useState(""), image = _s[0], setImage = _s[1];
-    var _t = react_1.useState(""), postCount = _t[0], setPostCount = _t[1];
-    // const evmContractConditions = [
-    //   {
-    //     contractAddress: addr,
-    //     functionName: "getStatus()",
-    //     functionParams: [],
-    //     functionAbi: {
-    //       name: "getStatus",
-    //       inputs: [],
-    //       outputs: [
-    //         {
-    //           internalType: "uint8",
-    //           name: "status",
-    //           type: "uint8",
-    //         },
-    //       ],
-    //       constant: true,
-    //       stateMutability: "view",
-    //     },
-    //     chain: "sepolia",
-    //     returnValueTest: { key: "status", comparator: "=", value: "3" },
-    //   },
-    // ];
+    var _a = react_1.useState(), authSig = _a[0], setAuthSig = _a[1];
+    var _b = react_1.useState([]), postType = _b[0], setPostType = _b[1];
+    var _c = react_1.useState([]), postDuration = _c[0], setPostDuration = _c[1];
+    var _d = react_1.useState([]), postStake = _d[0], setPostStake = _d[1];
+    var _e = react_1.useState([]), postRawData = _e[0], setPostRawData = _e[1];
+    var _f = react_1.useState([]), postPayment = _f[0], setPostPayment = _f[1];
+    var _g = react_1.useState([]), symmetricKey = _g[0], setSymmetricKey = _g[1];
+    var _h = react_1.useState([]), secretKey = _h[0], setSecretKey = _h[1];
+    var _j = react_1.useState(), valid = _j[0], setValid = _j[1];
+    var _k = react_1.useState(0), punishment = _k[0], setPunishment = _k[1];
+    var _l = react_1.useState(0), sellerStake = _l[0], setSellerStake = _l[1];
+    var _m = react_1.useState(0), buyerStake = _m[0], setBuyerStake = _m[1];
+    var _o = react_1.useState(""), buyerPayment = _o[0], setBuyerPayment = _o[1];
+    var _p = react_1.useState(0), totalStaked = _p[0], setTotalStaked = _p[1];
+    var _q = react_1.useState(0), stakeAmount = _q[0], setStakeAmount = _q[1];
+    var _r = react_1.useState(""), buyer = _r[0], setBuyer = _r[1];
+    var _s = react_1["default"].useState(""), imageFile = _s[0], setImageFile = _s[1];
+    var _t = react_1["default"].useState(""), image = _t[0], setImage = _t[1];
+    var _u = react_1.useState(""), postCount = _u[0], setPostCount = _u[1];
+    var evmContractConditions = [
+        {
+            contractAddress: addr,
+            functionName: "getStatus()",
+            functionParams: [],
+            functionAbi: {
+                name: "getStatus",
+                inputs: [],
+                outputs: [
+                    {
+                        internalType: "uint8",
+                        name: "status",
+                        type: "uint8"
+                    },
+                ],
+                constant: true,
+                stateMutability: "view"
+            },
+            chain: "sepolia",
+            returnValueTest: { key: "status", comparator: "=", value: "3" }
+        },
+        { operator: "and" },
+        {
+            conditionType: "evmBasic",
+            contractAddress: addr,
+            chain: "sepolia",
+            method: "sismoVerifyBuyer",
+            parameters: [":litParam:response"],
+            returnValueTest: {
+                comparator: "=",
+                value: "true"
+            }
+        },
+    ];
     var user = "";
     var owner = "";
-    var _u = react_1.useState([]), feedData = _u[0], setFeedData = _u[1];
+    var _v = react_1.useState([]), feedData = _v[0], setFeedData = _v[1];
     var deployedContractFeed = utilsContract_1.getDeployedContract(chain === null || chain === void 0 ? void 0 : chain.id.toString(), "MecenateFeed");
-    var _v = react_1.useState([]), userData = _v[0], setUserData = _v[1];
+    var _w = react_1.useState([]), userData = _w[0], setUserData = _w[1];
     var deployedContractUsers = utilsContract_1.getDeployedContract(chain === null || chain === void 0 ? void 0 : chain.id.toString(), "MecenateUsers");
     var feedAddress;
     var feedAbi = [];
@@ -245,38 +256,66 @@ var ViewFeed = function () {
             });
         });
     }
-    // async function createSiwe(address: string, statement: string) {
-    //   const domain = "localhost:3000";
-    //   const origin = "http://localhost:3000/";
-    //   const siweMessage = new SiweMessage({
-    //     domain,
-    //     address: address,
-    //     statement,
-    //     uri: origin,
-    //     version: "1",
-    //     chainId: 80001,
-    //   });
-    //   console.log("siweMessage", siweMessage);
-    //   const messageToSign = siweMessage.prepareMessage();
-    //   console.log("messageToSign", messageToSign);
-    //   return messageToSign;
-    // }
-    // async function getAuthSign() {
-    //   // Create a function to handle signing messages
-    //   const messageToSign = await createSiwe(await ethers.utils.getAddress(userAddress), "Free the web!");
-    //   const signature: string = await signer?.signMessage(await messageToSign);
-    //   console.log("signature", signature);
-    //   const recoveredAddress = ethers.utils.verifyMessage(messageToSign, String(signature));
-    //   console.log("recoveredAddress", recoveredAddress);
-    //   const authSig = {
-    //     sig: signature,
-    //     derivedVia: "web3.eth.personal.sign",
-    //     signedMessage: messageToSign,
-    //     address: recoveredAddress,
-    //   };
-    //   setAuthSig(authSig);
-    //   return authSig;
-    // }
+    function createSiwe(address, statement) {
+        return __awaiter(this, void 0, void 0, function () {
+            var domain, origin, siweMessage, messageToSign;
+            return __generator(this, function (_a) {
+                domain = "localhost:3000";
+                origin = "http://localhost:3000/";
+                siweMessage = new siwe_1.SiweMessage({
+                    domain: domain,
+                    address: address,
+                    statement: statement,
+                    uri: origin,
+                    version: "1",
+                    chainId: 11155111
+                });
+                console.log("siweMessage", siweMessage);
+                messageToSign = siweMessage.prepareMessage();
+                console.log("messageToSign", messageToSign);
+                return [2 /*return*/, messageToSign];
+            });
+        });
+    }
+    function getAuthSign() {
+        return __awaiter(this, void 0, void 0, function () {
+            var messageToSign, signature, _a, _b, _c, recoveredAddress, encodedSiweResource, authSig;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0: return [4 /*yield*/, createSiwe(ethers_1.ethers.utils.getAddress(userAddress), "Free the web!")];
+                    case 1:
+                        messageToSign = _d.sent();
+                        if (!(signer === null || signer === void 0)) return [3 /*break*/, 2];
+                        _a = void 0;
+                        return [3 /*break*/, 4];
+                    case 2:
+                        _c = (_b = signer).signMessage;
+                        return [4 /*yield*/, messageToSign];
+                    case 3:
+                        _a = _c.apply(_b, [_d.sent()]);
+                        _d.label = 4;
+                    case 4: return [4 /*yield*/, (_a)];
+                    case 5:
+                        signature = _d.sent();
+                        console.log("signature", signature);
+                        recoveredAddress = ethers_1.ethers.utils.verifyMessage(messageToSign, String(signature));
+                        console.log("recoveredAddress", recoveredAddress);
+                        console.log("test");
+                        encodedSiweResource = response;
+                        authSig = {
+                            sig: signature,
+                            derivedVia: "web3.eth.personal.sign",
+                            signedMessage: messageToSign,
+                            address: recoveredAddress,
+                            resources: ["litParam:response:" + encodedSiweResource]
+                        };
+                        console.log("AuthSig", authSig);
+                        setAuthSig(authSig);
+                        return [2 /*return*/, authSig];
+                }
+            });
+        });
+    }
     var uploadImageToIpfs = function (file) { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
             try {
@@ -342,10 +381,10 @@ var ViewFeed = function () {
                         return [4 /*yield*/, (usersCtx === null || usersCtx === void 0 ? void 0 : usersCtx.getUserData(signer === null || signer === void 0 ? void 0 : signer.getAddress()))];
                     case 2:
                         user_1 = _b.sent();
-                        return [4 /*yield*/, (feedCtx === null || feedCtx === void 0 ? void 0 : feedCtx.getStake(data.postdata.settings.seller))];
+                        return [4 /*yield*/, (feedCtx === null || feedCtx === void 0 ? void 0 : feedCtx.getSellerStake())];
                     case 3:
                         sellerDeposit = _b.sent();
-                        return [4 /*yield*/, (feedCtx === null || feedCtx === void 0 ? void 0 : feedCtx.getStake(data.postdata.settings.buyer))];
+                        return [4 /*yield*/, (feedCtx === null || feedCtx === void 0 ? void 0 : feedCtx.getBuyerStake())];
                     case 4:
                         buyerDeposit = _b.sent();
                         return [4 /*yield*/, (feedCtx === null || feedCtx === void 0 ? void 0 : feedCtx.getTotalStaked())];
@@ -378,7 +417,7 @@ var ViewFeed = function () {
                         _a.sent();
                         console.log("PubKey:", vaultId);
                         pubKey = vaultId;
-                        return [4 /*yield*/, savePost(postRawData, String(signer === null || signer === void 0 ? void 0 : signer.getAddress()), String(pubKey))];
+                        return [4 /*yield*/, savePost(postRawData)];
                     case 2:
                         dataSaved = _a.sent();
                         scaffold_eth_1.notification.warning(react_1["default"].createElement("div", { id: "alert-additional-content-3", className: "p-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800", role: "alert" },
@@ -443,7 +482,7 @@ var ViewFeed = function () {
             });
         });
     }
-    function savePost(RawData, seller, sellerPubKey) {
+    function savePost(RawData) {
         return __awaiter(this, void 0, Promise, function () {
             var pinata, pinataAuth, postData, pin, err_1;
             return __generator(this, function (_a) {
@@ -463,7 +502,7 @@ var ViewFeed = function () {
                             console.log("Pinata Authentication Failed.");
                             return [2 /*return*/];
                         }
-                        return [4 /*yield*/, createPostData(RawData, seller, sellerPubKey)];
+                        return [4 /*yield*/, createPostData(RawData)];
                     case 2:
                         postData = _a.sent();
                         if (!postData) {
@@ -499,39 +538,50 @@ var ViewFeed = function () {
             });
         });
     }
-    function createPostData(RawData, seller, sellerPubKey) {
+    function createPostData(RawData) {
         return __awaiter(this, void 0, void 0, function () {
-            var symmetricKey_1, encryptedFile, symmetricKeyHash, dataHash, encryptedDataHash, jsonblob_v1_2_0, proofHash58, e_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var authSig_1, _a, encryptedString, symmetricKey_1, _chain, encryptedSymmetricKey, encryptedFile, symmetricKeyHash, dataHash, encryptedDataHash, jsonblob_v1_2_0, proofHash58, e_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         console.log("Creating Data...");
-                        _a.label = 1;
+                        _b.label = 1;
                     case 1:
-                        _a.trys.push([1, 6, , 7]);
-                        symmetricKey_1 = ErasureHelper.crypto.symmetric.generateKey();
-                        encryptedFile = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey_1, RawData);
-                        return [4 /*yield*/, ErasureHelper.multihash({
-                                input: symmetricKey_1,
-                                inputType: "raw",
-                                outputType: "hex"
-                            })];
+                        _b.trys.push([1, 8, , 9]);
+                        return [4 /*yield*/, getAuthSign()];
                     case 2:
-                        symmetricKeyHash = _a.sent();
+                        authSig_1 = _b.sent();
+                        console.log("AuthSig Generated");
+                        return [4 /*yield*/, lit.encryptFile(RawData)];
+                    case 3:
+                        _a = _b.sent(), encryptedString = _a.encryptedString, symmetricKey_1 = _a.symmetricKey;
+                        _chain = "sepolia";
+                        console.log("Encrypted String", encryptedString);
+                        console.log("Symmetric Key", symmetricKey_1);
+                        return [4 /*yield*/, (lit === null || lit === void 0 ? void 0 : lit.saveEncryptionKey({
+                                accessControlConditions: evmContractConditions,
+                                symmetricKey: symmetricKey_1,
+                                authSig: authSig_1,
+                                chain: _chain
+                            }))];
+                    case 4:
+                        encryptedSymmetricKey = _b.sent();
+                        encryptedFile = encryptedString;
+                        symmetricKeyHash = lit.uint8arrayToString(encryptedSymmetricKey, "base16");
                         return [4 /*yield*/, ErasureHelper.multihash({
                                 input: RawData,
                                 inputType: "raw",
                                 outputType: "hex"
                             })];
-                    case 3:
-                        dataHash = _a.sent();
+                    case 5:
+                        dataHash = _b.sent();
                         return [4 /*yield*/, ErasureHelper.multihash({
                                 input: JSON.stringify({ encryptedData: encryptedFile }),
                                 inputType: "raw",
                                 outputType: "b58"
                             })];
-                    case 4:
-                        encryptedDataHash = _a.sent();
+                    case 6:
+                        encryptedDataHash = _b.sent();
                         jsonblob_v1_2_0 = {
                             creator: seller,
                             creatorPubKey: sellerPubKey,
@@ -545,8 +595,8 @@ var ViewFeed = function () {
                                 inputType: "raw",
                                 outputType: "b58"
                             })];
-                    case 5:
-                        proofHash58 = _a.sent();
+                    case 7:
+                        proofHash58 = _b.sent();
                         console.log("RawData", RawData);
                         console.log("Encrypted File", encryptedFile);
                         console.log("Symmetric Key", symmetricKey_1);
@@ -560,11 +610,11 @@ var ViewFeed = function () {
                                 symmetricKey: symmetricKey_1,
                                 encryptedData: encryptedFile
                             }];
-                    case 6:
-                        e_1 = _a.sent();
+                    case 8:
+                        e_1 = _b.sent();
                         console.log(e_1);
-                        return [3 /*break*/, 7];
-                    case 7: return [2 /*return*/];
+                        return [3 /*break*/, 9];
+                    case 9: return [2 /*return*/];
                 }
             });
         });
@@ -584,9 +634,6 @@ var ViewFeed = function () {
                             esp_version: "v1.2.0",
                             proofhash: proofhash,
                             sender: signer === null || signer === void 0 ? void 0 : signer.getAddress(),
-                            senderPubKey: sellerPubKeyDecoded,
-                            receiver: feedData[1][0].buyer,
-                            receiverPubKey: feedData[1][0].buyerPubKey,
                             encryptedSymKey: encrypted
                         };
                         return [4 /*yield*/, new sdk_1["default"](pinataApiKey, pinataApiSecret)];
@@ -662,9 +709,9 @@ var ViewFeed = function () {
     }
     function customEncryption(secretKey, message) {
         var algorithm = "aes-256-cbc"; // Algoritmo di cifratura
-        var key = crypto.createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
-        var iv = crypto.randomBytes(16); // Vettore di inizializzazione casuale
-        var cipher = crypto.createCipheriv(algorithm, key, iv);
+        var key = crypto_1["default"].createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
+        var iv = crypto_1["default"].randomBytes(16); // Vettore di inizializzazione casuale
+        var cipher = crypto_1["default"].createCipheriv(algorithm, key, iv);
         var encrypted = cipher.update(message, "utf8", "hex");
         encrypted += cipher.final("hex");
         // Concatenare il vettore di inizializzazione e il messaggio cifrato
@@ -672,11 +719,11 @@ var ViewFeed = function () {
     }
     function customDecryption(secretKey, encryptedMessage) {
         var algorithm = "aes-256-cbc"; // Algoritmo di cifratura
-        var key = crypto.createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
+        var key = crypto_1["default"].createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
         // Separare il vettore di inizializzazione dal messaggio cifrato
         var iv = Buffer.from(encryptedMessage.slice(0, 32), "hex");
         var encrypted = encryptedMessage.slice(32);
-        var decipher = crypto.createDecipheriv(algorithm, key, iv);
+        var decipher = crypto_1["default"].createDecipheriv(algorithm, key, iv);
         var decrypted = decipher.update(encrypted, "hex", "utf8");
         decrypted += decipher.final("utf8");
         return decrypted;
@@ -700,23 +747,23 @@ var ViewFeed = function () {
     };
     function retrievePost() {
         return __awaiter(this, void 0, void 0, function () {
-            var vaultIdSecret, decodeHash, responseDecodeHash, responseDecodeHahJSON, encryptedSymKey, decrypted, _decodeHash, url, responseProofHash, responseProofHashJSON, response_Encrypteddatahash, response_Encrypteddatahash_JSON, decryptFile, dataHash, hashCheck, mimeType, file;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var vaultIdSecret, decodeHash, responseDecodeHash, responseDecodeHahJSON, encryptedSymKey, messageToSign, signature, _a, _b, _c, recoveredAddress, encodedSiweResource, authSig, symmetricKey, decrypted, _decodeHash, url, responseProofHash, responseProofHashJSON, response_Encrypteddatahash, response_Encrypteddatahash_JSON, decryptFile, dataHash, hashCheck, mimeType, file;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0: return [4 /*yield*/, (feedCtx === null || feedCtx === void 0 ? void 0 : feedCtx.getVaultIdSecret(response))];
                     case 1:
-                        vaultIdSecret = _a.sent();
+                        vaultIdSecret = _d.sent();
                         console.log("Retrieving Data...");
                         return [4 /*yield*/, fetchData()];
                     case 2:
-                        _a.sent();
+                        _d.sent();
                         return [4 /*yield*/, ErasureHelper.multihash({
                                 input: feedData[1][2].encryptedKey,
                                 inputType: "sha2-256",
                                 outputType: "b58"
                             })];
                     case 3:
-                        decodeHash = _a.sent();
+                        decodeHash = _d.sent();
                         console.log("Decoded Hash: ", decodeHash);
                         return [4 /*yield*/, axios_1["default"].get("https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + decodeHash, {
                                 headers: {
@@ -724,23 +771,58 @@ var ViewFeed = function () {
                                 }
                             })];
                     case 4:
-                        responseDecodeHash = _a.sent();
+                        responseDecodeHash = _d.sent();
                         return [4 /*yield*/, JSON.parse(JSON.stringify(responseDecodeHash.data))];
                     case 5:
-                        responseDecodeHahJSON = _a.sent();
+                        responseDecodeHahJSON = _d.sent();
                         console.log("Response Decode Hash: ", responseDecodeHahJSON);
                         return [4 /*yield*/, JSON.parse(JSON.stringify(responseDecodeHahJSON.encryptedSymKey))];
                     case 6:
-                        encryptedSymKey = _a.sent();
+                        encryptedSymKey = _d.sent();
                         console.log("Encrypted Symmetric Key: ", encryptedSymKey);
-                        /* const decrypted = crypto.decrypt(
-                          encryptedSymKey.ciphertext,
-                          encryptedSymKey.nonce,
-                          encryptedSymKey.ephemPubKey,
-                          secretKey,
-                        ); */
-                        console.log("Vault Secret", vaultIdSecret);
-                        decrypted = customDecryption(String(vaultIdSecret), encryptedSymKey);
+                        return [4 /*yield*/, createSiwe(ethers_1.ethers.utils.getAddress(userAddress), "Free the web!")];
+                    case 7:
+                        messageToSign = _d.sent();
+                        if (!(signer === null || signer === void 0)) return [3 /*break*/, 8];
+                        _a = void 0;
+                        return [3 /*break*/, 10];
+                    case 8:
+                        _c = (_b = signer).signMessage;
+                        return [4 /*yield*/, messageToSign];
+                    case 9:
+                        _a = _c.apply(_b, [_d.sent()]);
+                        _d.label = 10;
+                    case 10: return [4 /*yield*/, (_a)];
+                    case 11:
+                        signature = _d.sent();
+                        recoveredAddress = ethers_1.ethers.utils.verifyMessage(messageToSign, String(signature));
+                        if (!!lit) return [3 /*break*/, 13];
+                        return [4 /*yield*/, lit.connect()];
+                    case 12:
+                        _d.sent();
+                        _d.label = 13;
+                    case 13:
+                        encodedSiweResource = response;
+                        authSig = {
+                            sig: signature,
+                            derivedVia: "web3.eth.personal.sign",
+                            signedMessage: messageToSign,
+                            address: recoveredAddress,
+                            resources: ["litParam:response:" + encodedSiweResource]
+                        };
+                        return [4 /*yield*/, this.litNodeClient.getEncryptionKey({
+                                accessControlConditions: evmContractConditions,
+                                toDecrypt: encryptedSymKey,
+                                chain: chain,
+                                authSig: authSig
+                            })];
+                    case 14:
+                        symmetricKey = _d.sent();
+                        return [4 /*yield*/, lit.decryptString(encryptedSymKey, symmetricKey)];
+                    case 15:
+                        decrypted = _d.sent();
+                        // END LIT
+                        //const decrypted = customDecryption(String(vaultIdSecret), encryptedSymKey);
                         //const decrypted = ErasureHelper.crypto.symmetric.decryptMessage(vaultIdSecret, encryptedSymKey);
                         console.log(decrypted);
                         console.log(responseDecodeHahJSON.proofhash);
@@ -749,8 +831,8 @@ var ViewFeed = function () {
                                 inputType: "sha2-256",
                                 outputType: "b58"
                             })];
-                    case 7:
-                        _decodeHash = _a.sent();
+                    case 16:
+                        _decodeHash = _d.sent();
                         url = "https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + _decodeHash;
                         console.log(url);
                         return [4 /*yield*/, axios_1["default"].get(url, {
@@ -758,8 +840,8 @@ var ViewFeed = function () {
                                     Accept: "text/plain"
                                 }
                             })];
-                    case 8:
-                        responseProofHash = _a.sent();
+                    case 17:
+                        responseProofHash = _d.sent();
                         console.log(responseProofHash);
                         responseProofHashJSON = JSON.parse(JSON.stringify(responseProofHash.data));
                         console.log(responseProofHashJSON);
@@ -768,11 +850,11 @@ var ViewFeed = function () {
                                     Accept: "text/plain"
                                 }
                             })];
-                    case 9:
-                        response_Encrypteddatahash = _a.sent();
+                    case 18:
+                        response_Encrypteddatahash = _d.sent();
                         response_Encrypteddatahash_JSON = JSON.parse(JSON.stringify(response_Encrypteddatahash.data));
                         decryptFile = ErasureHelper.crypto.symmetric.decryptMessage(decrypted, response_Encrypteddatahash_JSON.encryptedData);
-                        if (!decryptFile) return [3 /*break*/, 12];
+                        if (!decryptFile) return [3 /*break*/, 21];
                         // wait 10 seconds
                         console.log("Decrypted Data: ", decryptFile);
                         return [4 /*yield*/, ErasureHelper.multihash({
@@ -780,8 +862,8 @@ var ViewFeed = function () {
                                 inputType: "raw",
                                 outputType: "hex"
                             })];
-                    case 10:
-                        dataHash = _a.sent();
+                    case 19:
+                        dataHash = _d.sent();
                         hashCheck = responseProofHashJSON.datahash === dataHash;
                         if (feedData[1][0].postType == 1 ||
                             feedData[1][0].postType == 2 ||
@@ -795,13 +877,13 @@ var ViewFeed = function () {
                             scaffold_eth_1.notification.success(decryptFile);
                         }
                         return [4 /*yield*/, fetchData()];
-                    case 11:
-                        _a.sent();
+                    case 20:
+                        _d.sent();
                         return [2 /*return*/, {
                                 rawData: decrypted,
                                 hashCheck: hashCheck
                             }];
-                    case 12:
+                    case 21:
                         console.log("Error decrypting message.");
                         return [2 /*return*/, null];
                 }
@@ -993,8 +1075,6 @@ var ViewFeed = function () {
                                 react_1["default"].createElement("input", { type: "text", className: "input w-full", placeholder: "Amount", value: postStake, onChange: function (e) { return setPostStake(e.target.value); } }),
                                 react_1["default"].createElement("label", { className: "block text-base-500 mt-8" }, "Buyer Payment "),
                                 react_1["default"].createElement("input", { type: "text", className: "input w-full", placeholder: "Put 0 to allow buyer decide the payment", value: buyerPayment, onChange: function (e) { return setBuyerPayment(e.target.value); } }),
-                                react_1["default"].createElement("label", { className: "block text-base-500" }, "Buyer Addreess "),
-                                react_1["default"].createElement("input", { type: "text", className: "input w-full", placeholder: "Put address 0 to make this public to anyone who wants to buy", value: buyer, onChange: function (e) { return setBuyer(e.target.value); } }),
                                 react_1["default"].createElement("label", { className: "block text-base-500" }, "Type"),
                                 react_1["default"].createElement("select", { className: "form-select w-full", value: postType, onChange: function (e) { return setPostType(e.target.value); } },
                                     react_1["default"].createElement("option", { value: "0" }, "Text"),
@@ -1187,46 +1267,45 @@ var ViewFeed = function () {
                                     }); } }, "Submit")),
                             react_1["default"].createElement("div", { className: "modal-action space-x-2 mt-4" },
                                 react_1["default"].createElement("label", { htmlFor: "modal-finalize", className: "btn" }, "Close")))))),
-            (signer === null || signer === void 0 ? void 0 : signer.getAddress()) == feedData.postdata.settings.seller ||
-                (feedData.postdata.settings.buyer && (react_1["default"].createElement("div", { className: "fle\u1E8B flex-row" },
-                    react_1["default"].createElement("label", { htmlFor: "modal-stake", className: "btn   modal-button  mx-2 my-2" }, "Stake"),
-                    react_1["default"].createElement("input", { type: "checkbox", id: "modal-stake", className: "modal-toggle" }),
-                    react_1["default"].createElement("div", { className: "modal" },
-                        react_1["default"].createElement("div", { className: "modal-box" },
-                            react_1["default"].createElement("div", { className: "modal-header" },
-                                react_1["default"].createElement("div", { className: "modal-title text-2xl font-bold" }, "Stake"),
-                                react_1["default"].createElement("label", { htmlFor: "modal-stake", className: "btn btn-ghost" },
-                                    react_1["default"].createElement("i", { className: "fas fa-times" }))),
-                            react_1["default"].createElement("div", { className: "modal-body space-y-4 text-left" },
-                                react_1["default"].createElement("br", null),
-                                react_1["default"].createElement("input", { type: "text", className: "input w-full", placeholder: "Stake Amount", value: stakeAmount, onChange: function (e) { return setStakeAmount(e.target.value); } }),
-                                react_1["default"].createElement("br", null),
-                                react_1["default"].createElement("button", { className: "btn  w-full", onClick: function () { return __awaiter(void 0, void 0, void 0, function () {
-                                        var postData;
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0: return [4 /*yield*/, addStake()];
-                                                case 1:
-                                                    postData = _a.sent();
-                                                    console.log(postData);
-                                                    return [2 /*return*/];
-                                            }
-                                        });
-                                    }); } }, "Add Stake"),
-                                react_1["default"].createElement("button", { className: "btn  w-full", onClick: function () { return __awaiter(void 0, void 0, void 0, function () {
-                                        var postData;
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0: return [4 /*yield*/, takeStake()];
-                                                case 1:
-                                                    postData = _a.sent();
-                                                    console.log(postData);
-                                                    return [2 /*return*/];
-                                            }
-                                        });
-                                    }); } }, "Take Stake")),
-                            react_1["default"].createElement("div", { className: "modal-action space-x-2 mt-4" },
-                                react_1["default"].createElement("label", { htmlFor: "modal-stake", className: "btn" }, "Close"))))))),
+            react_1["default"].createElement("div", { className: "fle\u1E8B flex-row" },
+                react_1["default"].createElement("label", { htmlFor: "modal-stake", className: "btn   modal-button  mx-2 my-2" }, "Stake"),
+                react_1["default"].createElement("input", { type: "checkbox", id: "modal-stake", className: "modal-toggle" }),
+                react_1["default"].createElement("div", { className: "modal" },
+                    react_1["default"].createElement("div", { className: "modal-box" },
+                        react_1["default"].createElement("div", { className: "modal-header" },
+                            react_1["default"].createElement("div", { className: "modal-title text-2xl font-bold" }, "Stake"),
+                            react_1["default"].createElement("label", { htmlFor: "modal-stake", className: "btn btn-ghost" },
+                                react_1["default"].createElement("i", { className: "fas fa-times" }))),
+                        react_1["default"].createElement("div", { className: "modal-body space-y-4 text-left" },
+                            react_1["default"].createElement("br", null),
+                            react_1["default"].createElement("input", { type: "text", className: "input w-full", placeholder: "Stake Amount", value: stakeAmount, onChange: function (e) { return setStakeAmount(e.target.value); } }),
+                            react_1["default"].createElement("br", null),
+                            react_1["default"].createElement("button", { className: "btn  w-full", onClick: function () { return __awaiter(void 0, void 0, void 0, function () {
+                                    var postData;
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0: return [4 /*yield*/, addStake()];
+                                            case 1:
+                                                postData = _a.sent();
+                                                console.log(postData);
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); } }, "Add Stake"),
+                            react_1["default"].createElement("button", { className: "btn  w-full", onClick: function () { return __awaiter(void 0, void 0, void 0, function () {
+                                    var postData;
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0: return [4 /*yield*/, takeStake()];
+                                            case 1:
+                                                postData = _a.sent();
+                                                console.log(postData);
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); } }, "Take Stake")),
+                        react_1["default"].createElement("div", { className: "modal-action space-x-2 mt-4" },
+                            react_1["default"].createElement("label", { htmlFor: "modal-stake", className: "btn" }, "Close"))))),
             react_1["default"].createElement("button", { className: "btn   modal-button  mx-2 my-2", onClick: function () {
                     decodeData();
                 } }, "Decode")),
@@ -1272,14 +1351,6 @@ var ViewFeed = function () {
                 react_1["default"].createElement("div", { className: "card-body" },
                     react_1["default"].createElement("h2", { className: "text-xl font-bold" }, "Post Settings"),
                     react_1["default"].createElement("div", { className: "mt-5 grid grid-cols-1 md:grid-cols-2 gap-4" },
-                        react_1["default"].createElement("p", null,
-                            react_1["default"].createElement("span", { className: "font-bold" }, "Buyer:"),
-                            " ",
-                            feedData[1][0].buyer.toString()),
-                        react_1["default"].createElement("p", null,
-                            react_1["default"].createElement("span", { className: "font-bold" }, "Seller:"),
-                            " ",
-                            feedData[1][0].seller.toString()),
                         react_1["default"].createElement("p", null,
                             react_1["default"].createElement("span", { className: "font-bold" }, "Creation Timestamp:"),
                             " ",

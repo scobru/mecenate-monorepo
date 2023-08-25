@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "../interfaces/IMecenateVerifier.sol";
 
 import "../library/Structures.sol";
 import "../modules/FeedViewer.sol";
@@ -9,8 +10,11 @@ import "../interfaces/IMecenateUsers.sol";
 
 contract MecenateBay is Ownable, FeedViewer {
     Structures.BayRequest[] public allRequests;
+    Structures.BayRequestPrivate[] public allRequestsPrivate;
 
     address public usersMouduleContract;
+
+    address public verifierContract;
 
     mapping(address => Structures.BayRequest[]) public requests;
 
@@ -28,26 +32,53 @@ contract MecenateBay is Ownable, FeedViewer {
         uint256 indexed index
     );
 
-    constructor(address _usersMouduleContract) {
+    constructor(address _usersMouduleContract, address _verifierContract) {
         usersMouduleContract = _usersMouduleContract;
+        verifierContract = _verifierContract;
     }
 
     function createRequest(
-        Structures.BayRequest memory request
+        Structures.BayRequest memory request,
+        bytes memory sismoConnectResponse
     ) public payable returns (Structures.BayRequest memory) {
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
+
+        require(
+            IMecenateUsers(usersMouduleContract).checkifUserExist(
+                keccak256(vaultIdBytes)
+            ),
+            "user does not exist"
+        );
+
         require(request.stake > 0, "stake is not enough");
 
         require(request.payment == msg.value, "Payment is not enough");
 
-        require(request.postAddress == address(0), "post address is not valid");
-
-        require(request.seller == address(0), "Seller is not valid");
-
         contractCounter++;
 
-        requests[msg.sender].push(request);
+        requests[userAddressConverted].push(request);
+
         allRequests.push(request);
-        emit RequestCreated(msg.sender, request, allRequests.length - 1);
+
+        allRequestsPrivate.push(
+            Structures.BayRequestPrivate({
+                seller: address(0),
+                vaultIdSeller: "0x00",
+                buyer: userAddressConverted,
+                vaultIdBuyer: vaultIdBytes
+            })
+        );
+
+        emit RequestCreated(
+            userAddressConverted,
+            request,
+            allRequests.length - 1
+        );
     }
 
     function acceptRequest(
@@ -55,12 +86,14 @@ contract MecenateBay is Ownable, FeedViewer {
         address _feed,
         bytes memory sismoConnectResponse
     ) public {
-        Structures.Feed memory feed = _getFeedInfo(_feed);
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
 
-        require(
-            feed.seller == msg.sender,
-            "seller is not the same of the feed"
-        );
+        Structures.Feed memory feed = _getFeedInfo(_feed);
 
         require(
             feed.buyerPayment >= allRequests[index].payment,
@@ -72,20 +105,45 @@ contract MecenateBay is Ownable, FeedViewer {
             "stake is not the same of the feed"
         );
 
-        address userAddress = IMecenateUsers(usersMouduleContract)
-            .getUserData(allRequests[index].buyer)
-            .wallet;
+        require(
+            IMecenateUsers(usersMouduleContract).checkifUserExist(
+                keccak256(vaultIdBytes)
+            ),
+            "user does not exist"
+        );
+
+        allRequestsPrivate.push(
+            Structures.BayRequestPrivate({
+                seller: userAddressConverted,
+                vaultIdSeller: vaultIdBytes,
+                buyer: allRequestsPrivate[index].buyer,
+                vaultIdBuyer: allRequestsPrivate[index].vaultIdBuyer
+            })
+        );
 
         IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
             sismoConnectResponse
         );
 
         allRequests[index].accepted = true;
-        allRequests[index].seller = msg.sender;
         allRequests[index].postAddress = _feed;
         allRequests[index].postCount = feed.postCount;
 
-        emit RequestAccepted(msg.sender, allRequests[index], index);
+        emit RequestAccepted(userAddressConverted, allRequests[index], index);
+    }
+
+    function sismoVerify(
+        bytes memory sismoConnectResponse
+    ) internal view returns (uint256, bytes memory, uint256, address) {
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse
+            );
+        return (vaultId, vaultIdBytes, userAddress, userAddressConverted);
     }
 
     function getRequests()
@@ -103,39 +161,58 @@ contract MecenateBay is Ownable, FeedViewer {
     }
 
     // removéthe request and refund the user delete the array and move the last element to the index
-    function removeRequest(uint256 index) public {
+    function removeRequest(
+        uint256 index,
+        bytes memory sismoConnectResponse
+    ) public {
+        (
+            uint256 vaultId,
+            bytes memory vaultIdBytes,
+            uint256 userAddress,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
+
         require(
-            allRequests[index].buyer == msg.sender,
-            "user is not the same of the request"
+            allRequestsPrivate[index].buyer == userAddressConverted,
+            "user is not the buyer"
         );
+
         require(
             allRequests[index].accepted == false,
             "request is already accepted"
         );
 
         // Refund the buyer
-        payable(msg.sender).transfer(allRequests[index].payment);
+        payable(userAddressConverted).transfer(allRequests[index].payment);
 
         uint256 lastIndex = allRequests.length - 1;
         allRequests[index] = allRequests[lastIndex];
         allRequests.pop();
 
+        uint256 lastIndexPrivate = allRequestsPrivate.length - 1;
+        allRequestsPrivate[index] = allRequestsPrivate[lastIndexPrivate];
+        allRequestsPrivate.pop();
+
         // Iterate through the requests[msg.sender] array to find and remove the request associated with the msg.sender
-        for (uint256 i = 0; i < requests[msg.sender].length; i++) {
+        for (uint256 i = 0; i < requests[userAddressConverted].length; i++) {
             // If the request in the requests[msg.sender] array matches the given index in allRequests, remove it
             if (
-                requests[msg.sender][i].buyer == msg.sender &&
-                requests[msg.sender][i].payment == allRequests[index].payment &&
-                requests[msg.sender][i].stake == allRequests[index].stake &&
-                requests[msg.sender][i].postAddress ==
+                allRequestsPrivate[i].buyer == userAddressConverted &&
+                requests[userAddressConverted][i].payment ==
+                allRequests[index].payment &&
+                requests[userAddressConverted][i].stake ==
+                allRequests[index].stake &&
+                requests[userAddressConverted][i].postAddress ==
                 allRequests[index].postAddress &&
-                requests[msg.sender][i].seller == allRequests[index].seller &&
-                requests[msg.sender][i].postCount ==
+                requests[userAddressConverted][i].postCount ==
                 allRequests[index].postCount
             ) {
-                uint256 lastIndexSender = requests[msg.sender].length - 1;
-                requests[msg.sender][i] = requests[msg.sender][lastIndexSender];
-                requests[msg.sender].pop();
+                uint256 lastIndexSender = requests[userAddressConverted]
+                    .length - 1;
+                requests[userAddressConverted][i] = requests[
+                    userAddressConverted
+                ][lastIndexSender];
+                requests[userAddressConverted].pop();
                 break;
             }
         }

@@ -8,17 +8,31 @@ import "../interfaces/IMecenateVerifier.sol";
 import "../library/SismoStructs.sol";
 
 contract MecenateUsers is Ownable {
-    using EnumerableSet for EnumerableSet.UintSet;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-    EnumerableSet.UintSet private _users;
-    mapping(address => Structures.User) private _metadata;
+    EnumerableSet.Bytes32Set private _users;
+    EnumerableSet.AddressSet private _usersAddress;
 
-    event UserRegistered(bytes pubKey);
+    Structures.User private _metadata;
+
+    event UserRegistered(bytes32 vaultId);
 
     address public verifierContract;
 
-    constructor(address _verifierContract) {
+    address public treasuryContract;
+
+    constructor(address _verifierContract, address _treasuryContract) {
         verifierContract = _verifierContract;
+        treasuryContract = _treasuryContract;
+    }
+
+    function changeTreasury(address _treasury) external onlyOwner {
+        treasuryContract = _treasury;
+    }
+
+    function changeVerifier(address _verifier) external onlyOwner {
+        verifierContract = _verifier;
     }
 
     function registerUser(bytes memory sismoConnectResponse) public {
@@ -32,22 +46,21 @@ contract MecenateUsers is Ownable {
             );
 
         require(userAddressConverted != address(0), "user address cannot be 0");
+
+        bytes32 vaultIdEncoded = keccak256(vaultIdBytes);
+
         // check if user exists
-        require(!_users.contains(userAddress), "user already exists");
+        require(!_users.contains(vaultIdEncoded), "user already exists");
 
         // add user
-        _users.add(userAddress);
-
-        // set user metadata
-        _metadata[userAddressConverted] = Structures.User({
-            wallet: userAddressConverted
-        });
+        _users.add(vaultIdEncoded);
+        _usersAddress.add(userAddressConverted);
 
         // emit event
-        emit UserRegistered(abi.encodePacked(bytes32(vaultId)));
+        emit UserRegistered(vaultIdEncoded);
     }
 
-    function getUsers() public view returns (uint[] memory users) {
+    function getUsers() public view returns (bytes32[] memory users) {
         return _users.values();
     }
 
@@ -55,20 +68,36 @@ contract MecenateUsers is Ownable {
         count = _users.length();
     }
 
-    function checkifUserExist(uint user) public view returns (bool) {
-        return _users.contains(user);
+    function getUserAt(uint256 index) public view returns (bytes32 user) {
+        require(index < _users.length(), "index out of range");
+        user = _users.at(index);
+    }
+
+    function getUserAddressAt(
+        uint256 index
+    ) public view returns (bytes32 user) {
+        require(
+            msg.sender == treasuryContract,
+            "only treasury can call this function"
+        );
+        require(index < _users.length(), "index out of range");
+        user = _users.at(index);
+    }
+
+    function checkifUserExist(bytes32 vaultId) external view returns (bool) {
+        return _users.contains(vaultId);
     }
 
     // Note: startIndex is inclusive, endIndex exclusive
     function getPaginatedUsers(
         uint256 startIndex,
         uint256 endIndex
-    ) public view returns (uint[] memory users) {
+    ) public view returns (bytes32[] memory users) {
         require(startIndex < endIndex, "startIndex must be less than endIndex");
         require(endIndex <= _users.length(), "end index out of range");
 
         // initialize fixed size memory array
-        uint[] memory range = new uint[](endIndex - startIndex);
+        bytes32[] memory range = new bytes32[](endIndex - startIndex);
 
         // Populate array with addresses in range
         for (uint256 i = startIndex; i < endIndex; i++) {
@@ -77,11 +106,5 @@ contract MecenateUsers is Ownable {
 
         // return array of addresses
         users = range;
-    }
-
-    function getUserData(
-        address user
-    ) public view returns (Structures.User memory) {
-        return _metadata[user];
     }
 }

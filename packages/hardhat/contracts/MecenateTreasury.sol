@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./modules/Swapper.sol";
-import "./interfaces/IMecenateIdentity.sol";
 import "./interfaces/IMecenateUsers.sol";
 
 contract MecenateTreasury is Ownable, Swapper {
@@ -42,11 +41,7 @@ contract MecenateTreasury is Ownable, Swapper {
         _to.transfer(_amount);
     }
 
-    function distribute(
-        uint256 _amount,
-        address _identityContract,
-        address _usersContract
-    ) external {
+    function distribute(uint256 _amount, address _usersContract) external {
         uint256 gasUsed = gasleft();
         require(
             block.timestamp - lastDistributed >= 1 days,
@@ -57,15 +52,15 @@ contract MecenateTreasury is Ownable, Swapper {
         uint256 fee = (balance * globalFee) / 10000;
         uint256 total = balance - fee;
         uint256 perIdentity = total /
-            IMecenateIdentity(_identityContract).getTotalIdentities();
+            IMecenateUsers(_usersContract).getUserCount();
 
         for (
             uint256 i = 0;
-            i < IMecenateIdentity(_identityContract).getTotalIdentities();
+            i < IMecenateUsers(_usersContract).getUserCount();
             i++
         ) {
             address payable _owner = payable(
-                IMecenateIdentity(_identityContract).getOwnerById(i)
+                IMecenateUsers(_usersContract).getUserAddressAt(i)
             );
 
             _owner.transfer(perIdentity);

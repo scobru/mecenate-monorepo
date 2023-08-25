@@ -13,7 +13,7 @@ abstract contract Renounce is Staking {
         ) = sismoVerify(sismoConnectResponse);
 
         require(
-            userAddressConverted == post.postdata.settings.seller,
+            userAddressConverted == postSettingPrivate.seller,
             "You are not the seller"
         );
 
@@ -28,18 +28,16 @@ abstract contract Renounce is Staking {
 
         uint256 stake = post.postdata.escrow.stake;
 
-        _takeStake(post.postdata.settings.seller, stake);
+        _takeStake(postSettingPrivate.seller, stake);
 
-        payable(post.postdata.settings.seller).transfer(stake);
+        payable(postSettingPrivate.seller).transfer(stake);
 
         // Reset the post struct
-        post.creator = Structures.User(address(0));
+        post.creator = Structures.User(bytes32(0));
         post.postdata = Structures.PostData(
             Structures.PostSettings(
                 Structures.PostStatus.Waiting,
                 Structures.PostType.Text,
-                address(0),
-                address(0),
                 0,
                 0,
                 0
@@ -50,6 +48,14 @@ abstract contract Renounce is Staking {
 
         // Update the post status and emit an event
         post.postdata.settings.status = Structures.PostStatus.Renounced;
+
+        postSettingPrivate = Structures.postSettingPrivate({
+            buyer: address(0),
+            vaultIdBuyer: ZEROHASH,
+            seller: address(0),
+            vaultIdSeller: ZEROHASH
+        });
+
         emit Renounced(post);
     }
 
@@ -60,7 +66,7 @@ abstract contract Renounce is Staking {
         );
 
         require(
-            post.postdata.settings.seller == to,
+            postSettingPrivate.seller == to,
             "Only  Seller can refund the post"
         );
 
@@ -68,11 +74,11 @@ abstract contract Renounce is Staking {
 
         require(payment > 0, "Payment is not correct");
 
-        _takeStake(post.postdata.settings.buyer, payment);
+        _takeStake(postSettingPrivate.buyer, payment);
 
-        payable(post.postdata.settings.buyer).transfer(payment);
+        payable(postSettingPrivate.buyer).transfer(payment);
 
-        post.postdata.settings.buyer = address(0);
+        postSettingPrivate.buyer = address(0);
 
         post.postdata.escrow.payment = 0;
 

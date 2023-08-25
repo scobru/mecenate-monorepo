@@ -7,6 +7,7 @@ import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsCo
 import { ContractInterface } from "ethers";
 import { formatEther } from "ethers/lib/utils.js";
 import { useAppStore } from "~~/services/store/store";
+import Link from "next/link";
 const DEBUG = true;
 
 const Feeds: NextPage = () => {
@@ -168,9 +169,8 @@ const Feeds: NextPage = () => {
           store?.sismoData?.auths?.length > 0 &&
           feeds.map((feed, i) => (
             <div key={i} className="card bg-base-100 shadow-xl p-2 text-base-content">
-              <a
-                href={`/viewFeed?addr=${feed}&vaultId=${store.sismoData.vaultId}&userAddress=${store.sismoData.auths[1].userId}&response=${store.sismoResponse}`}
-              >
+              <Link href={`/viewFeed?addr=${feed}`} passHref>
+                <a target="_parent">Link text</a>
                 <div className="grid grid-cols-12 gap-4 border p-2">
                   <div className="col-span-2 font-bold">Addr:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">{feed}</div>
@@ -199,7 +199,7 @@ const Feeds: NextPage = () => {
                   <div className="col-span-2 font-bold">Count:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">{String(feedsInfos[i].postCount)}</div>
                 </div>
-              </a>
+              </Link>
             </div>
           ))}
       </div>

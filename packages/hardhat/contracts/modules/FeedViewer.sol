@@ -11,10 +11,8 @@ contract FeedViewer {
         Structures.Feed memory f;
         f.contractAddress = feed;
         f.operator = IMecenateFeed(feed).owner();
-        f.buyer = IMecenateFeed(feed).getBuyer();
-        f.seller = IMecenateFeed(feed).getSeller();
-        f.sellerStake = IMecenateFeed(feed).getStake(f.seller);
-        f.buyerStake = IMecenateFeed(feed).getStake(f.buyer);
+        f.sellerStake = IMecenateFeed(feed).getSellerStake();
+        f.buyerStake = IMecenateFeed(feed).getBuyerStake();
         f.totalStake = IMecenateFeed(feed).getTotalStaked();
         f.postCount = IMecenateFeed(feed).postCount();
         f.buyerPayment = IMecenateFeed(feed).getBuyerPayment();

@@ -5,7 +5,7 @@
       "chainId": "11155111",
       "contracts": {
         "MecenateTreasury": {
-          "address": "0x2c60634584f5b69f747d98a8B4c56A31dDCa532F",
+          "address": "0x43e99fEf581a9397A284208f5386A78FA651c2d5",
           "abi": [
             {
               "anonymous": false,
@@ -86,11 +86,6 @@
                   "internalType": "uint256",
                   "name": "_amount",
                   "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_identityContract",
-                  "type": "address"
                 },
                 {
                   "internalType": "address",
@@ -368,7 +363,7 @@
           ]
         },
         "MecenateVerifier": {
-          "address": "0x865A00aC030B8E01657F3BC4a90bfD43a58FD8ba",
+          "address": "0xe656CF432B8223e4354036A96F2F055e9f3CC17F",
           "abi": [
             {
               "inputs": [
@@ -526,13 +521,18 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0x3BA1367176ed437b20CbfdCad166f98A266A2671",
+          "address": "0x8f87d8289aEa773DaF53b4b2b66cb799212ff106",
           "abi": [
             {
               "inputs": [
                 {
                   "internalType": "address",
                   "name": "_verifierContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_treasuryContract",
                   "type": "address"
                 }
               ],
@@ -563,9 +563,9 @@
               "inputs": [
                 {
                   "indexed": false,
-                  "internalType": "bytes",
-                  "name": "pubKey",
-                  "type": "bytes"
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
                 }
               ],
               "name": "UserRegistered",
@@ -574,9 +574,35 @@
             {
               "inputs": [
                 {
-                  "internalType": "uint256",
-                  "name": "user",
-                  "type": "uint256"
+                  "internalType": "address",
+                  "name": "_treasury",
+                  "type": "address"
+                }
+              ],
+              "name": "changeTreasury",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_verifier",
+                  "type": "address"
+                }
+              ],
+              "name": "changeVerifier",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
                 }
               ],
               "name": "checkifUserExist",
@@ -606,9 +632,47 @@
               "name": "getPaginatedUsers",
               "outputs": [
                 {
-                  "internalType": "uint256[]",
+                  "internalType": "bytes32[]",
                   "name": "users",
-                  "type": "uint256[]"
+                  "type": "bytes32[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "index",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getUserAddressAt",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "user",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "index",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getUserAt",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "user",
+                  "type": "bytes32"
                 }
               ],
               "stateMutability": "view",
@@ -628,39 +692,13 @@
               "type": "function"
             },
             {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "user",
-                  "type": "address"
-                }
-              ],
-              "name": "getUserData",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "wallet",
-                      "type": "address"
-                    }
-                  ],
-                  "internalType": "struct Structures.User",
-                  "name": "",
-                  "type": "tuple"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
               "inputs": [],
               "name": "getUsers",
               "outputs": [
                 {
-                  "internalType": "uint256[]",
+                  "internalType": "bytes32[]",
                   "name": "users",
-                  "type": "uint256[]"
+                  "type": "bytes32[]"
                 }
               ],
               "stateMutability": "view",
@@ -714,6 +752,19 @@
             },
             {
               "inputs": [],
+              "name": "treasuryContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "verifierContract",
               "outputs": [
                 {
@@ -728,13 +779,13 @@
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0x7d80FE5313baEC2165FA6De4Cbd8858066894Be6",
+          "address": "0x9242cA7B3aB109329CfEBA3696Ef56308A9c0AB3",
           "abi": [
             {
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "_usersMouduleContract",
+                  "name": "_usersModuleContract",
                   "type": "address"
                 },
                 {
@@ -1141,7 +1192,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0xEB7FD14cd8dea2bb5E840B5D1fD897dB1afFe23D",
+          "address": "0xdF19F345508e603674C4b20eaEfCF413fCb060b7",
           "abi": [
             {
               "inputs": [
@@ -1172,9 +1223,9 @@
                     {
                       "components": [
                         {
-                          "internalType": "address",
-                          "name": "wallet",
-                          "type": "address"
+                          "internalType": "bytes32",
+                          "name": "vaultId",
+                          "type": "bytes32"
                         }
                       ],
                       "internalType": "struct Structures.User",
@@ -1194,16 +1245,6 @@
                               "internalType": "enum Structures.PostType",
                               "name": "postType",
                               "type": "uint8"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "buyer",
-                              "type": "address"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "seller",
-                              "type": "address"
                             },
                             {
                               "internalType": "uint256",
@@ -1297,9 +1338,9 @@
                     {
                       "components": [
                         {
-                          "internalType": "address",
-                          "name": "wallet",
-                          "type": "address"
+                          "internalType": "bytes32",
+                          "name": "vaultId",
+                          "type": "bytes32"
                         }
                       ],
                       "internalType": "struct Structures.User",
@@ -1319,16 +1360,6 @@
                               "internalType": "enum Structures.PostType",
                               "name": "postType",
                               "type": "uint8"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "buyer",
-                              "type": "address"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "seller",
-                              "type": "address"
                             },
                             {
                               "internalType": "uint256",
@@ -1472,9 +1503,9 @@
                     {
                       "components": [
                         {
-                          "internalType": "address",
-                          "name": "wallet",
-                          "type": "address"
+                          "internalType": "bytes32",
+                          "name": "vaultId",
+                          "type": "bytes32"
                         }
                       ],
                       "internalType": "struct Structures.User",
@@ -1494,16 +1525,6 @@
                               "internalType": "enum Structures.PostType",
                               "name": "postType",
                               "type": "uint8"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "buyer",
-                              "type": "address"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "seller",
-                              "type": "address"
                             },
                             {
                               "internalType": "uint256",
@@ -1597,9 +1618,9 @@
                     {
                       "components": [
                         {
-                          "internalType": "address",
-                          "name": "wallet",
-                          "type": "address"
+                          "internalType": "bytes32",
+                          "name": "vaultId",
+                          "type": "bytes32"
                         }
                       ],
                       "internalType": "struct Structures.User",
@@ -1619,16 +1640,6 @@
                               "internalType": "enum Structures.PostType",
                               "name": "postType",
                               "type": "uint8"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "buyer",
-                              "type": "address"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "seller",
-                              "type": "address"
                             },
                             {
                               "internalType": "uint256",
@@ -1722,9 +1733,9 @@
                     {
                       "components": [
                         {
-                          "internalType": "address",
-                          "name": "wallet",
-                          "type": "address"
+                          "internalType": "bytes32",
+                          "name": "vaultId",
+                          "type": "bytes32"
                         }
                       ],
                       "internalType": "struct Structures.User",
@@ -1744,16 +1755,6 @@
                               "internalType": "enum Structures.PostType",
                               "name": "postType",
                               "type": "uint8"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "buyer",
-                              "type": "address"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "seller",
-                              "type": "address"
                             },
                             {
                               "internalType": "uint256",
@@ -1866,9 +1867,9 @@
                     {
                       "components": [
                         {
-                          "internalType": "address",
-                          "name": "wallet",
-                          "type": "address"
+                          "internalType": "bytes32",
+                          "name": "vaultId",
+                          "type": "bytes32"
                         }
                       ],
                       "internalType": "struct Structures.User",
@@ -1888,16 +1889,6 @@
                               "internalType": "enum Structures.PostType",
                               "name": "postType",
                               "type": "uint8"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "buyer",
-                              "type": "address"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "seller",
-                              "type": "address"
                             },
                             {
                               "internalType": "uint256",
@@ -1991,9 +1982,9 @@
                     {
                       "components": [
                         {
-                          "internalType": "address",
-                          "name": "wallet",
-                          "type": "address"
+                          "internalType": "bytes32",
+                          "name": "vaultId",
+                          "type": "bytes32"
                         }
                       ],
                       "internalType": "struct Structures.User",
@@ -2013,16 +2004,6 @@
                               "internalType": "enum Structures.PostType",
                               "name": "postType",
                               "type": "uint8"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "buyer",
-                              "type": "address"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "seller",
-                              "type": "address"
                             },
                             {
                               "internalType": "uint256",
@@ -2135,9 +2116,9 @@
                     {
                       "components": [
                         {
-                          "internalType": "address",
-                          "name": "wallet",
-                          "type": "address"
+                          "internalType": "bytes32",
+                          "name": "vaultId",
+                          "type": "bytes32"
                         }
                       ],
                       "internalType": "struct Structures.User",
@@ -2157,16 +2138,6 @@
                               "internalType": "enum Structures.PostType",
                               "name": "postType",
                               "type": "uint8"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "buyer",
-                              "type": "address"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "seller",
-                              "type": "address"
                             },
                             {
                               "internalType": "uint256",
@@ -2350,9 +2321,9 @@
                     {
                       "components": [
                         {
-                          "internalType": "address",
-                          "name": "wallet",
-                          "type": "address"
+                          "internalType": "bytes32",
+                          "name": "vaultId",
+                          "type": "bytes32"
                         }
                       ],
                       "internalType": "struct Structures.User",
@@ -2372,16 +2343,6 @@
                               "internalType": "enum Structures.PostType",
                               "name": "postType",
                               "type": "uint8"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "buyer",
-                              "type": "address"
-                            },
-                            {
-                              "internalType": "address",
-                              "name": "seller",
-                              "type": "address"
                             },
                             {
                               "internalType": "uint256",
@@ -2510,12 +2471,12 @@
             },
             {
               "inputs": [],
-              "name": "getBuyer",
+              "name": "getBuyerPayment",
               "outputs": [
                 {
-                  "internalType": "address",
+                  "internalType": "uint256",
                   "name": "",
-                  "type": "address"
+                  "type": "uint256"
                 }
               ],
               "stateMutability": "view",
@@ -2523,11 +2484,11 @@
             },
             {
               "inputs": [],
-              "name": "getBuyerPayment",
+              "name": "getBuyerStake",
               "outputs": [
                 {
                   "internalType": "uint256",
-                  "name": "",
+                  "name": "amount",
                   "type": "uint256"
                 }
               ],
@@ -2562,12 +2523,12 @@
             },
             {
               "inputs": [],
-              "name": "getSeller",
+              "name": "getSellerDeposit",
               "outputs": [
                 {
-                  "internalType": "address",
+                  "internalType": "uint256",
                   "name": "",
-                  "type": "address"
+                  "type": "uint256"
                 }
               ],
               "stateMutability": "view",
@@ -2579,7 +2540,7 @@
               "outputs": [
                 {
                   "internalType": "uint256",
-                  "name": "",
+                  "name": "amount",
                   "type": "uint256"
                 }
               ],
@@ -2642,9 +2603,9 @@
               "name": "getVaultIdSecret",
               "outputs": [
                 {
-                  "internalType": "bytes",
+                  "internalType": "bytes32",
                   "name": "",
-                  "type": "bytes"
+                  "type": "bytes32"
                 }
               ],
               "stateMutability": "view",
@@ -2670,9 +2631,9 @@
                 {
                   "components": [
                     {
-                      "internalType": "address",
-                      "name": "wallet",
-                      "type": "address"
+                      "internalType": "bytes32",
+                      "name": "vaultId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.User",
@@ -2692,16 +2653,6 @@
                           "internalType": "enum Structures.PostType",
                           "name": "postType",
                           "type": "uint8"
-                        },
-                        {
-                          "internalType": "address",
-                          "name": "buyer",
-                          "type": "address"
-                        },
-                        {
-                          "internalType": "address",
-                          "name": "seller",
-                          "type": "address"
                         },
                         {
                           "internalType": "uint256",
@@ -2954,13 +2905,18 @@
           ]
         },
         "MecenateBay": {
-          "address": "0xBfC136D7FdFA6fD8eD5DB47Eaf63b6872c07F0C4",
+          "address": "0xdDd585022A9a86966c1f3d58E05652a716bbd1EF",
           "abi": [
             {
               "inputs": [
                 {
                   "internalType": "address",
                   "name": "_usersMouduleContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_verifierContract",
                   "type": "address"
                 }
               ],
@@ -3001,16 +2957,6 @@
                       "internalType": "bytes32",
                       "name": "request",
                       "type": "bytes32"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "buyer",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "seller",
-                      "type": "address"
                     },
                     {
                       "internalType": "uint256",
@@ -3068,16 +3014,6 @@
                       "internalType": "bytes32",
                       "name": "request",
                       "type": "bytes32"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "buyer",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "seller",
-                      "type": "address"
                     },
                     {
                       "internalType": "uint256",
@@ -3159,16 +3095,6 @@
                   "type": "bytes32"
                 },
                 {
-                  "internalType": "address",
-                  "name": "buyer",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "seller",
-                  "type": "address"
-                },
-                {
                   "internalType": "uint256",
                   "name": "payment",
                   "type": "uint256"
@@ -3198,6 +3124,40 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allRequestsPrivate",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "seller",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "vaultIdSeller",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "address",
+                  "name": "buyer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "vaultIdBuyer",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "contractCounter",
               "outputs": [
@@ -3218,16 +3178,6 @@
                       "internalType": "bytes32",
                       "name": "request",
                       "type": "bytes32"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "buyer",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "seller",
-                      "type": "address"
                     },
                     {
                       "internalType": "uint256",
@@ -3258,6 +3208,11 @@
                   "internalType": "struct Structures.BayRequest",
                   "name": "request",
                   "type": "tuple"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
                 }
               ],
               "name": "createRequest",
@@ -3268,16 +3223,6 @@
                       "internalType": "bytes32",
                       "name": "request",
                       "type": "bytes32"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "buyer",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "seller",
-                      "type": "address"
                     },
                     {
                       "internalType": "uint256",
@@ -3331,16 +3276,6 @@
                       "type": "bytes32"
                     },
                     {
-                      "internalType": "address",
-                      "name": "buyer",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "seller",
-                      "type": "address"
-                    },
-                    {
                       "internalType": "uint256",
                       "name": "payment",
                       "type": "uint256"
@@ -3384,16 +3319,6 @@
                       "internalType": "bytes32",
                       "name": "request",
                       "type": "bytes32"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "buyer",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "seller",
-                      "type": "address"
                     },
                     {
                       "internalType": "uint256",
@@ -3448,6 +3373,11 @@
                   "internalType": "uint256",
                   "name": "index",
                   "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
                 }
               ],
               "name": "removeRequest",
@@ -3481,16 +3411,6 @@
                   "internalType": "bytes32",
                   "name": "request",
                   "type": "bytes32"
-                },
-                {
-                  "internalType": "address",
-                  "name": "buyer",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "seller",
-                  "type": "address"
                 },
                 {
                   "internalType": "uint256",
@@ -3546,11 +3466,24 @@
               ],
               "stateMutability": "view",
               "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "verifierContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
             }
           ]
         },
         "MecenateStats": {
-          "address": "0x986415b9492DD03E14a12E543342417eba361ed4",
+          "address": "0x3e6BA2747aEe796E7c436617308B6771f369bB65",
           "abi": [
             {
               "inputs": [

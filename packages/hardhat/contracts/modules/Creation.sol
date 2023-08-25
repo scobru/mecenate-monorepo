@@ -20,7 +20,9 @@ abstract contract Creation is Staking {
         ) = sismoVerify(sismoConnectResponse);
 
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(userAddress),
+            IMecenateUsers(usersModuleContract).checkifUserExist(
+                keccak256(vaultIdBytes)
+            ),
             "User does not exist"
         );
 
@@ -47,6 +49,13 @@ abstract contract Creation is Staking {
                 Structures.PostStatus.Renounced,
             "Not Wating or Finalized or Revealed or Proposed"
         );
+
+        postSettingPrivate = Structures.postSettingPrivate({
+            seller: userAddressConverted,
+            vaultIdSeller: vaultIdBytes,
+            buyer: buyer,
+            vaultIdBuyer: ZEROHASH
+        });
 
         uint256 stake = _addStake(userAddressConverted, msg.value);
 
@@ -80,15 +89,13 @@ abstract contract Creation is Staking {
         }
 
         Structures.User memory creator = Structures.User({
-            wallet: userAddressConverted
+            vaultId: keccak256(vaultIdBytes)
         });
 
         Structures.PostData memory postdata = Structures.PostData({
             settings: Structures.PostSettings({
                 postType: Structures.PostType(postType),
                 status: Structures.PostStatus.Proposed,
-                buyer: buyer,
-                seller: userAddressConverted,
                 creationTimeStamp: block.timestamp,
                 endTimeStamp: 0,
                 duration: duration

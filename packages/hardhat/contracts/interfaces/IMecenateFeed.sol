@@ -13,6 +13,10 @@ interface IMecenateFeed {
 
     function getSellerStake() external view returns (uint256);
 
+    function getBuyerStake() external view returns (uint256);
+
+    function getSellerDeposit() external view returns (uint256);
+
     function postCount() external view returns (uint256);
 
     function owner() external view returns (address);

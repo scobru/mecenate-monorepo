@@ -23,9 +23,7 @@ contract Data is Ownable {
 
     bytes public constant ZEROHASH = "0x00";
 
-    bytes internal vaultIdSeller;
-
-    bytes internal vaultIdBuyer;
+    Structures.postSettingPrivate internal postSettingPrivate;
 
     constructor(address _usersModuleContract, address _verifierContract) {
         usersModuleContract = _usersModuleContract;

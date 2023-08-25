@@ -5,7 +5,7 @@
 This new version of Mecenate wants to integrate the following milestones:
 
 - Sismo Integration for zk-proof
-- Lit Protocol Integration
+  git
 
 ## Current State v1.0.0:
 

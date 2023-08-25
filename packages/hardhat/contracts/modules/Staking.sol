@@ -95,11 +95,9 @@ abstract contract Staking is Events, Deposit {
     }
 
     function getTotalStaked() external view returns (uint256) {
-        uint256 amountSeller = Deposit._getDeposit(
-            post.postdata.settings.seller
-        );
+        uint256 amountSeller = Deposit._getDeposit(postSettingPrivate.seller);
 
-        uint256 amountBuyer = Deposit._getDeposit(post.postdata.settings.buyer);
+        uint256 amountBuyer = Deposit._getDeposit(postSettingPrivate.buyer);
 
         return (amountSeller + amountBuyer);
     }
@@ -113,10 +111,10 @@ abstract contract Staking is Events, Deposit {
 
         uint256 stakerBalance;
 
-        if (userAddressConverted == post.postdata.settings.buyer) {
+        if (userAddressConverted == postSettingPrivate.buyer) {
             stakerBalance = _addStake(userAddressConverted, msg.value);
             post.postdata.escrow.payment = stakerBalance;
-        } else if (userAddressConverted == post.postdata.settings.seller) {
+        } else if (userAddressConverted == postSettingPrivate.seller) {
             stakerBalance = _addStake(userAddressConverted, msg.value);
             post.postdata.escrow.stake = stakerBalance;
         } else {
@@ -135,14 +133,15 @@ abstract contract Staking is Events, Deposit {
         );
 
         uint256 currentDeposit = Deposit._getDeposit(userAddressConverted);
+
         uint256 stakerBalance;
 
         require(currentDeposit >= amountToTake, "Not enough deposit");
 
-        if (userAddressConverted == post.postdata.settings.buyer) {
+        if (userAddressConverted == postSettingPrivate.buyer) {
             stakerBalance = _takeStake(userAddressConverted, amountToTake);
             post.postdata.escrow.payment = stakerBalance;
-        } else if (userAddressConverted == post.postdata.settings.seller) {
+        } else if (userAddressConverted == postSettingPrivate.seller) {
             stakerBalance = _takeStake(userAddressConverted, amountToTake);
             post.postdata.escrow.stake = stakerBalance;
         } else {
