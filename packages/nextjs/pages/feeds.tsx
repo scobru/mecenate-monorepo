@@ -174,15 +174,11 @@ const Feeds: NextPage = () => {
                 <div className="grid grid-cols-12 gap-4 border p-2">
                   <div className="col-span-2 font-bold">Addr:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">{feed}</div>
-                  <div className="col-span-2 font-bold">Seller:</div>
-                  <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].seller}</div>
                   <div className="col-span-2 font-bold">Seller Stake:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">
                     {formatEther(feedsInfos[i].sellerStake)} ETH
                   </div>
-                  <div className="col-span-2 font-bold">Buyer:</div>
-                  <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].buyer}</div>
-                  <div className="col-span-2 font-bold">Buyer Stake:</div>
+                  <div className="col-span-2 font-bold">Buyer Payment:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">
                     {formatEther(feedsInfos[i].buyerStake)} ETH
                   </div>
@@ -194,7 +190,7 @@ const Feeds: NextPage = () => {
                   </div>
                   <div className="col-span-2 font-bold">Payment:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">
-                    {String(feedsInfos[i].buyerPayment)} ETH
+                    {formatEther(String(feedsInfos[i].buyerPayment))} ETH
                   </div>
                   <div className="col-span-2 font-bold">Count:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">{String(feedsInfos[i].postCount)}</div>

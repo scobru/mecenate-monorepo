@@ -6,14 +6,23 @@ import "./Staking.sol";
 
 abstract contract Acceptance is Events, Staking {
     function acceptPost(
-        bytes memory sismoConnectResponse
-    ) external payable virtual {
+        bytes memory sismoConnectResponse,
+        uint256 payment
+    ) external virtual {
         (
             uint256 vaultId,
             bytes memory vaultIdBytes,
             uint256 userAddress,
             address userAddressConverted
         ) = sismoVerify(sismoConnectResponse);
+
+        bool result = IMecenateWallet(walletContract).pay(
+            address(this),
+            payment,
+            keccak256(vaultIdBytes)
+        );
+
+        require(result, "Payment failed");
 
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
@@ -22,11 +31,11 @@ abstract contract Acceptance is Events, Staking {
             "user does not exist"
         );
 
-        uint256 _payment = _addStake(userAddressConverted, msg.value);
+        uint256 _payment = _addStake(userAddressConverted, payment);
 
         if (post.postdata.escrow.payment > 0) {
             require(
-                _payment >= post.postdata.escrow.payment,
+                _payment == post.postdata.escrow.payment,
                 "Not enough buyer payment"
             );
         } else {
@@ -49,7 +58,7 @@ abstract contract Acceptance is Events, Staking {
             );
         }
 
-        post.postdata.escrow.payment = post.postdata.escrow.payment;
+        post.postdata.escrow.payment = payment;
 
         post.postdata.settings.status = Structures.PostStatus.Accepted;
 

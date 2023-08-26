@@ -7,6 +7,7 @@ import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
 import "../interfaces/IMecenateFactory.sol";
 import "../interfaces/IMecenateVerifier.sol";
+import "../interfaces/IMecenateWallet.sol";
 
 contract Data is Ownable {
     uint256 public constant punishmentRatio = 100000000000000000;
@@ -21,13 +22,20 @@ contract Data is Ownable {
 
     address public verifierContract;
 
+    address public walletContract;
+
     bytes public constant ZEROHASH = "0x00";
 
     Structures.postSettingPrivate internal postSettingPrivate;
 
-    constructor(address _usersModuleContract, address _verifierContract) {
+    constructor(
+        address _usersModuleContract,
+        address _verifierContract,
+        address _walletContract
+    ) {
         usersModuleContract = _usersModuleContract;
         verifierContract = _verifierContract;
+        walletContract = _walletContract;
         post.postdata.settings.status = Structures.PostStatus.Waiting;
         factoryContract = msg.sender;
     }

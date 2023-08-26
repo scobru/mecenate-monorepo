@@ -24,6 +24,8 @@ const ViewFeed: NextPage = () => {
   //const crypto = require("asymmetric-crypto");
   const base64url = require("base64url"); // import the base64url library
 
+  const AbiCoder = new ethers.utils.AbiCoder();
+
   const store = useAppStore();
   console.log(store);
 
@@ -54,18 +56,18 @@ const ViewFeed: NextPage = () => {
   const router = useRouter();
 
   const { addr } = router.query;
-  const vaultId = store.sismoData.vaultId;
-  const userAddress = store.sismoData.auths[1].userId;
-  const response = store.sismoResponse;
 
-  const [authSig, setAuthSig] = useState<any>();
+  console.log("Store: ", store);
+
+  const [vaultId, setVaultId] = useState<any>("");
+  const [userAddress, setUserAddress] = useState<any>("");
+  const [response, setResponse] = useState<any>("");
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
   const [postStake, setPostStake] = useState<any>([]);
   const [postRawData, setPostRawData] = useState<any>([]);
   const [postPayment, setPostPayment] = useState<any>([]);
   const [symmetricKey, setSymmetricKey] = useState<any>([]);
-  const [secretKey, setSecretKey] = useState<any>([]);
   const [valid, setValid] = useState<boolean>();
   const [punishment, setPunishment] = useState<any>(0);
   const [sellerStake, setSellerStake] = useState<any>(0);
@@ -77,41 +79,6 @@ const ViewFeed: NextPage = () => {
   const [imageFile, setImageFile] = React.useState<any>("");
   const [image, setImage] = React.useState("");
   const [postCount, setPostCount] = useState<any>("");
-
-  const accessControlConditions = [
-    {
-      contractAddress: addr,
-      functionName: "getStatus()",
-      functionParams: [],
-      functionAbi: {
-        name: "getStatus",
-        inputs: [],
-        outputs: [
-          {
-            internalType: "uint8",
-            name: "status",
-            type: "uint8",
-          },
-        ],
-        constant: true,
-        stateMutability: "view",
-      },
-      chain: "sepolia",
-      returnValueTest: { key: "status", comparator: "=", value: "3" },
-    },
-    { operator: "and" },
-    {
-      conditionType: "evmBasic",
-      contractAddress: addr,
-      chain: "sepolia",
-      method: "sismoVerifyBuyer",
-      parameters: [":litParam:response"],
-      returnValueTest: {
-        comparator: "=",
-        value: "true",
-      },
-    },
-  ];
 
   const user = "";
   const owner = "";
@@ -150,9 +117,7 @@ const ViewFeed: NextPage = () => {
 
   async function decodeData() {
     if (feedData[1][2].decryptedData != "0x30783030") {
-      const abiCoder = new AbiCoder();
-
-      const decryptedData = abiCoder.decode(["string", "string"], feedData[1][2].decryptedData);
+      const decryptedData = AbiCoder.decode(["string", "string"], feedData[1][2].decryptedData);
 
       const encryptedData = await ErasureHelper.multihash({
         input: feedData[1][2].encryptedData,
@@ -211,7 +176,7 @@ const ViewFeed: NextPage = () => {
   }
 
   async function renounce() {
-    const tx = await feedCtx?.renouncePost();
+    const tx = await feedCtx?.renouncePost(response);
     await tx?.wait();
     notification.success("Refund successful");
   }
@@ -654,6 +619,7 @@ const ViewFeed: NextPage = () => {
     const vaultIdSecret = await feedCtx?.getVaultIdSecret(response);
 
     console.log("Retrieving Data...");
+
     await fetchData();
 
     const decodeHash = await ErasureHelper.multihash({
@@ -829,7 +795,7 @@ const ViewFeed: NextPage = () => {
     const AbiCoder = new ethers.utils.AbiCoder();
     const dataEncoded = AbiCoder.encode(["string", "string"], [symKeyHash, rawDataHash]);
 
-    const tx = await feedCtx?.revealData(dataEncoded);
+    const tx = await feedCtx?.revealData(dataEncoded, response);
     await tx.wait();
     await fetchData();
 
@@ -864,30 +830,79 @@ const ViewFeed: NextPage = () => {
   }
 
   useEffect(() => {
-    if (signer && provider && feedCtx && router.isReady) {
+    const fetchDataAsync = async () => {
       try {
-        const fetch = async () => {
-          console.log("Fetching Data...");
-          await fetchData();
-        };
-        fetch();
-      } catch (e) {
-        console.error(e);
+        console.log("Fetching Data...");
+        await fetchData();
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-    }
-  }, [feedCtx, router.isReady]);
+    };
+
+    const interval = setInterval(() => {
+      if (signer && provider && feedCtx && router.isReady) {
+        fetchDataAsync();
+        if (
+          store &&
+          store.sismoData &&
+          store.sismoData.auths &&
+          store.sismoData.auths[1] &&
+          store.sismoData.auths[1].userId
+        ) {
+          const userAddress = store.sismoData.auths[1].userId;
+          const vaultId = store.sismoData.vaultId;
+          const response = store.sismoResponse;
+
+          setVaultId(vaultId);
+          setUserAddress(userAddress);
+          setResponse(response);
+        }
+      }
+    }, 10000);
+
+    // Cleanup function
+    return () => clearInterval(interval);
+  }, [signer, provider, feedCtx, router.isReady]);
+
+  const Modal = ({ title, modalId, children }) => (
+    <>
+      <label htmlFor={modalId} className="btn modal-button mx-2 my-2">
+        {title}
+      </label>
+      <input type="checkbox" id={modalId} className="modal-toggle" />
+      <div className="modal">
+        <div className="modal-box rounded-lg shadow-xl">
+          <div className="modal-header">
+            <div className="modal-title text-2xl font-bold">{title}</div>
+            <label htmlFor={modalId} className="btn btn-ghost">
+              <i className="fas fa-times"></i>
+            </label>
+          </div>
+          <div className="modal-body w-auto space-y-6 text-left">{children}</div>
+          <div className="modal-action space-x-2 mt-4">
+            <label htmlFor={modalId} className="btn">
+              Close
+            </label>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <div className="flex flex-col items-center pt-2 p-2 m-2">
       {feedData[0] != null ? (
         <div className="flex flex-col py-5 justify-center  items-center text-left">
-          <Address address={userAddress} format="long" />
-          <div className="flex flex-wrap text-left  ">
+          <div className="my-5">
+            Connect with address:
+            <Address address={userAddress} format="long" />
+          </div>
+          <div className="flex flex-wrap text-left w-full">
             <div tabIndex={0} className="collapse">
               <div className="collapse-title text-xl font-medium hover:bg-primary">Seller</div>
-              <div className="collapse-content">
+              <div className="collapse-content my-5">
                 <label htmlFor="modal-create" className="btn modal-button mx-2 my-2">
-                  Create (S)
+                  Create
                 </label>
                 <input type="checkbox" id="modal-create" className="modal-toggle " />
                 <div className="modal">
@@ -995,7 +1010,7 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
                 <label htmlFor="modal-submit" className="btn  modal-button mx-2 my-2">
-                  Submit (S)
+                  Submit
                 </label>
                 <input type="checkbox" id="modal-submit" className="modal-toggle " />
                 <div className="modal">
@@ -1033,7 +1048,7 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
                 <label htmlFor="modal-reveal" className="btn  modal-button mx-2 my-2">
-                  Reveal (S)
+                  Reveal
                 </label>
                 <input type="checkbox" id="modal-reveal" className="modal-toggle" />
                 <div className="modal">
@@ -1119,15 +1134,15 @@ const ViewFeed: NextPage = () => {
                     await renounce();
                   }}
                 >
-                  Renounce (S)
+                  Renounce
                 </label>
               </div>
             </div>
             <div tabIndex={0} className="collapse">
               <div className="collapse-title text-xl font-medium hover:bg-primary">Buyer</div>
-              <div className="collapse-content">
+              <div className="collapse-content my-5">
                 <label htmlFor="modal-accept" className="btn  modal-button   mx-2 my-2">
-                  Accept (B)
+                  Accept
                 </label>
                 <input type="checkbox" id="modal-accept" className="modal-toggle" />
                 <div className="modal">
@@ -1167,7 +1182,7 @@ const ViewFeed: NextPage = () => {
                 </div>
 
                 <label htmlFor="modal-retrieve" className="btn    modal-button mx-2 my-2">
-                  Retrieve (B)
+                  Retrieve
                 </label>
                 <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
                 <div className="modal">
@@ -1197,7 +1212,7 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
                 <label htmlFor="modal-finalize" className="btn   modal-button mx-2 my-2">
-                  Finalize (B)
+                  Finalize
                 </label>
                 <input type="checkbox" id="modal-finalize" className="modal-toggle" />
                 <div className="modal">
@@ -1247,68 +1262,70 @@ const ViewFeed: NextPage = () => {
                 </div>
               </div>
             </div>
-
-            <div className="fleẋ flex-row">
-              <label htmlFor="modal-stake" className="btn   modal-button  mx-2 my-2">
-                Stake
-              </label>
-              <input type="checkbox" id="modal-stake" className="modal-toggle" />
-              <div className="modal">
-                <div className="modal-box">
-                  <div className="modal-header">
-                    <div className="modal-title text-2xl font-bold">Stake</div>
-                    <label htmlFor="modal-stake" className="btn btn-ghost">
-                      <i className="fas fa-times"></i>
-                    </label>
+            <div tabIndex={0} className="collapse">
+              <div className="collapse-title text-xl font-medium hover:bg-primary">Stake</div>
+              <div className="collapse-content my-5">
+                <div className="grid-rows-1">
+                  <label htmlFor="modal-stake" className="btn   modal-button  mx-2 my-2">
+                    Stake
+                  </label>
+                  <input type="checkbox" id="modal-stake" className="modal-toggle" />
+                  <div className="modal">
+                    <div className="modal-box">
+                      <div className="modal-header">
+                        <div className="modal-title text-2xl font-bold">Stake</div>
+                        <label htmlFor="modal-stake" className="btn btn-ghost">
+                          <i className="fas fa-times"></i>
+                        </label>
+                      </div>
+                      <div className="modal-body space-y-4 text-left">
+                        <br />
+                        <input
+                          type="text"
+                          className="input w-full"
+                          placeholder="Stake Amount"
+                          value={stakeAmount}
+                          onChange={e => setStakeAmount(e.target.value)}
+                        />
+                        <br />
+                        <button
+                          className="btn  w-full"
+                          onClick={async () => {
+                            const postData = await addStake();
+                            console.log(postData);
+                          }}
+                        >
+                          Add Stake
+                        </button>
+                        <button
+                          className="btn  w-full"
+                          onClick={async () => {
+                            const postData = await takeStake();
+                            console.log(postData);
+                          }}
+                        >
+                          Take Stake
+                        </button>
+                      </div>
+                      <div className="modal-action space-x-2 mt-4">
+                        <label htmlFor="modal-stake" className="btn">
+                          Close
+                        </label>
+                      </div>
+                    </div>
                   </div>
-                  <div className="modal-body space-y-4 text-left">
-                    <br />
-                    <input
-                      type="text"
-                      className="input w-full"
-                      placeholder="Stake Amount"
-                      value={stakeAmount}
-                      onChange={e => setStakeAmount(e.target.value)}
-                    />
-                    <br />
-                    <button
-                      className="btn  w-full"
-                      onClick={async () => {
-                        const postData = await addStake();
-                        console.log(postData);
-                      }}
-                    >
-                      Add Stake
-                    </button>
-                    <button
-                      className="btn  w-full"
-                      onClick={async () => {
-                        const postData = await takeStake();
-                        console.log(postData);
-                      }}
-                    >
-                      Take Stake
-                    </button>
-                  </div>
-                  <div className="modal-action space-x-2 mt-4">
-                    <label htmlFor="modal-stake" className="btn">
-                      Close
-                    </label>
-                  </div>
+                  <button
+                    className="btn   modal-button  mx-2 my-2"
+                    onClick={() => {
+                      decodeData();
+                    }}
+                  >
+                    Decode
+                  </button>
                 </div>
               </div>
             </div>
-
-            <button
-              className="btn   modal-button  mx-2 my-2"
-              onClick={() => {
-                decodeData();
-              }}
-            >
-              Decode
-            </button>
           </div>
-
           <div className="flex flex-col  p-2 min-w-fit items-left justify-center w-full">
             <div className="card w-fit">
               <div className="card-body">
@@ -1332,46 +1349,24 @@ const ViewFeed: NextPage = () => {
                   </p>
                   <div className="w-1/2">
                     <p className="text-lg">
-                      <span className="font-bold">Seller Escrow Deposit:</span> {formatEther(sellerStake)} ETH
-                    </p>
-                    <p className="text-lg">
                       <span className="font-bold">Seller Stake:</span> {formatEther(feedData[1][1].stake.toString())}{" "}
                       ETH
                     </p>
                   </div>
                   <div className="w-1/2">
                     <p className="text-lg">
-                      <span className="font-bold">Buyer Escrow Stake:</span> {buyerStake} ETH
-                    </p>
-                    <p className="text-lg">
-                      <span className="font-bold">Buyer Stake:</span> {formatEther(feedData[1][1].payment.toString())}{" "}
+                      <span className="font-bold">Buyer Payment:</span> {formatEther(feedData[1][1].payment.toString())}{" "}
                       ETH
                     </p>
                   </div>
-
-                  {/*  <p className="text-lg">
-                    <span className="font-bold">Wallet:</span> {feedData[0][0].toString()}
-                  </p> */}
-                  {/* <p className="text-lg">
-        <span className="font-bold">Public Key:</span>{" "}
-        {feedData[0][2].toString()}
-      </p> */}
                 </div>
               </div>
             </div>
             <div className="divider" />
-
             <div className="card w-full md:w-fit">
               <div className="card-body">
                 <h2 className="text-xl font-bold">Post Settings</h2>
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* <p>
-                    <span className="font-bold">Buyer:</span> {feedData[1][0].buyer.toString()}
-                  </p> */}
-
-                  {/*  <p>
-                    <span className="font-bold">Seller:</span> {feedData[1][0].seller.toString()}
-                  </p> */}
                   <p>
                     <span className="font-bold">Creation Timestamp:</span> {feedData[1][0].creationTimeStamp.toString()}
                   </p>
@@ -1382,37 +1377,63 @@ const ViewFeed: NextPage = () => {
                     <span className="font-bold">Duration:</span> {feedData[1][0].duration.toString()}
                   </p>
                   <p>
-                    <span className="font-bold">Post Type:</span> {feedData[1][0].postType.toString()}
+                    <span className="font-bold">Post Type:</span>{" "}
+                    {feedData[1][0].postType.toString() == 0
+                      ? "Text"
+                      : feedData[1][0].postType.toString() == 1
+                      ? "Image"
+                      : feedData[1][0].postType.toString() == 2
+                      ? "Video"
+                      : feedData[1][0].postType.toString() == 3
+                      ? "Audio"
+                      : feedData[1][0].postType.toString() == 4
+                      ? "File"
+                      : null}
                   </p>
                   <p>
-                    <span className="font-bold">Status:</span> {feedData[1][0].status.toString()}
+                    <span className="font-bold">Status:</span>{" "}
+                    {feedData[1][0].status.toString() == 0
+                      ? "Wqiting"
+                      : feedData[1][0].status.toString() == 1
+                      ? "Proposed"
+                      : feedData[1][0].status.toString() == 2
+                      ? "Accepted"
+                      : feedData[1][0].status.toString() == 3
+                      ? "Submitted"
+                      : feedData[1][0].status.toString() == 4
+                      ? "Finalized"
+                      : feedData[1][0].status.toString() == 5
+                      ? "Punished"
+                      : feedData[1][0].status.toString() == 6
+                      ? "Revealed"
+                      : null}
                   </p>
                 </div>
               </div>
             </div>
             <div className="divider" />
-
             <div className="card w-fit">
               <div className="card-body">
                 <h2 className="text-xl font-bold">Punishments</h2>
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <p>
-                    <span className="font-bold">Buyer Punishment:</span> {feedData[1][1].buyerPunishment.toString()}
+                    <span className="font-bold">Buyer Punishment:</span>{" "}
+                    {formatEther(feedData[1][1].buyerPunishment.toString())}
                   </p>
                   <p>
-                    <span className="font-bold">Seller Punishment:</span> {feedData[1][1].punishment.toString()}
+                    <span className="font-bold">Seller Punishment:</span>{" "}
+                    {formatEther(feedData[1][1].punishment.toString())}
                   </p>
                   <p>
-                    <span className="font-bold">Seller Stake:</span> {feedData[1][1].stake.toString()}
+                    <span className="font-bold">Seller Stake:</span> {formatEther(feedData[1][1].stake.toString())}
                   </p>
                   <p>
-                    <span className="font-bold">Buyer Payment:</span> {feedData[1][1].payment.toString()}
+                    <span className="font-bold">Buyer Payment:</span> {formatEther(feedData[1][1].payment.toString())}
                   </p>
                 </div>
               </div>
             </div>
             <div className="divider" />
-
             <div className="card w-fit">
               <div className="card-body">
                 <h2 className="text-xl font-bold">Data</h2>
@@ -1425,8 +1446,9 @@ const ViewFeed: NextPage = () => {
                     <span className="font-bold">Encrypted Key:</span>{" "}
                     <span className="break-all"> {feedData[1][2].encryptedKey.toString()}</span>
                   </p>
+
                   <p>
-                    <span className="font-bold">Decrypted Data:</span>
+                    <span className="font-bold">Decrypted Data IPFS Hash:</span>
                     <span className="break-all"> {feedData[1][2].decryptedData.toString()}</span>
                   </p>
                 </div>

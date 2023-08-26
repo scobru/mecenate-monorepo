@@ -5,7 +5,7 @@
       "chainId": "11155111",
       "contracts": {
         "MecenateTreasury": {
-          "address": "0x43e99fEf581a9397A284208f5386A78FA651c2d5",
+          "address": "0x6542BB096171351Ae788C298163F62e8eb9714F9",
           "abi": [
             {
               "anonymous": false,
@@ -363,7 +363,7 @@
           ]
         },
         "MecenateVerifier": {
-          "address": "0xe656CF432B8223e4354036A96F2F055e9f3CC17F",
+          "address": "0x4c91c2E241aD893e37D31Cc0BC6D93F1Bf445865",
           "abi": [
             {
               "inputs": [
@@ -521,7 +521,7 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0x8f87d8289aEa773DaF53b4b2b66cb799212ff106",
+          "address": "0x0ab02024E24c45c42705AB35c276264Ffa1F4F94",
           "abi": [
             {
               "inputs": [
@@ -779,7 +779,7 @@
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0x9242cA7B3aB109329CfEBA3696Ef56308A9c0AB3",
+          "address": "0x61C20afD2f21d1A9c17Ce12291A2a334e8047DF0",
           "abi": [
             {
               "inputs": [
@@ -1192,7 +1192,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0xdF19F345508e603674C4b20eaEfCF413fCb060b7",
+          "address": "0x559c6Ae221814A6381cB61d6F7a7610f288d591f",
           "abi": [
             {
               "inputs": [
@@ -2497,6 +2497,19 @@
             },
             {
               "inputs": [],
+              "name": "getPaymentRequested",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "getPostCount",
               "outputs": [
                 {
@@ -2560,6 +2573,19 @@
                 {
                   "internalType": "uint256",
                   "name": "amount",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getStakeRequested",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
                   "type": "uint256"
                 }
               ],
@@ -2905,7 +2931,7 @@
           ]
         },
         "MecenateBay": {
-          "address": "0xdDd585022A9a86966c1f3d58E05652a716bbd1EF",
+          "address": "0x0dDd66D0576F54d28F78107efCcAbA64C6850ae2",
           "abi": [
             {
               "inputs": [
@@ -3483,7 +3509,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0x3e6BA2747aEe796E7c436617308B6771f369bB65",
+          "address": "0x0800EB8E78eb7e1b171CCF03Fc8152B3133ed2ec",
           "abi": [
             {
               "inputs": [

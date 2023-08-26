@@ -21,8 +21,9 @@ contract MecenateFeed is
     constructor(
         address owner,
         address _usersModuleContract,
-        address _verifierContract
-    ) Data(_usersModuleContract, _verifierContract) {
+        address _verifierContract,
+        address _walletContract
+    ) Data(_usersModuleContract, _verifierContract, _walletContract) {
         _transferOwnership(owner);
     }
 
@@ -54,6 +55,14 @@ contract MecenateFeed is
         amount = Deposit._getDeposit(postSettingPrivate.buyer);
         // explicit return
         return amount;
+    }
+
+    function getPaymentRequested() external view returns (uint256) {
+        return post.postdata.escrow.payment;
+    }
+
+    function getStakeRequested() external view returns (uint256) {
+        return post.postdata.escrow.stake;
     }
 
     function getPostStatus() external view returns (Structures.PostStatus) {

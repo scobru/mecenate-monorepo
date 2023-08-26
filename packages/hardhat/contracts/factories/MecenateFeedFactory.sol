@@ -19,6 +19,8 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     address private verifierContract;
 
+    address private walletContract;
+
     mapping(address => bool) public createdContracts;
 
     mapping(address => bool) public authorized;
@@ -28,11 +30,13 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     constructor(
         address _usersModuleContract,
         address _treasuryContract,
-        address _verifierContract
+        address _verifierContract,
+        address _walletContract
     ) {
         usersModuleContract = _usersModuleContract;
         treasuryContract = _treasuryContract;
         verifierContract = _verifierContract;
+        walletContract = _walletContract;
     }
 
     function setAuthorized(address _addr) external onlyOwner {
@@ -75,7 +79,8 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         MecenateFeed feed = new MecenateFeed(
             userAddressConverted,
             usersModuleContract,
-            verifierContract
+            verifierContract,
+            walletContract
         );
 
         feeds.push(address(feed));

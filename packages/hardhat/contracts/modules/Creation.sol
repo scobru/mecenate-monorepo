@@ -8,10 +8,11 @@ abstract contract Creation is Staking {
         bytes memory encryptedHash,
         Structures.PostType postType,
         Structures.PostDuration postDuration,
-        address buyer,
         uint256 payment,
+        uint256 stake,
+        address buyer,
         bytes memory sismoConnectResponse
-    ) external payable returns (Structures.Post memory) {
+    ) external returns (Structures.Post memory) {
         (
             uint256 vaultId,
             bytes memory vaultIdBytes,
@@ -19,6 +20,13 @@ abstract contract Creation is Staking {
             address userAddressConverted
         ) = sismoVerify(sismoConnectResponse);
 
+        bool result = IMecenateWallet(walletContract).pay(
+            address(this),
+            stake,
+            keccak256(vaultIdBytes)
+        );
+
+        require(result, "Payment failed");
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
                 keccak256(vaultIdBytes)
@@ -27,7 +35,7 @@ abstract contract Creation is Staking {
         );
 
         if (post.postdata.escrow.stake == 0) {
-            require(msg.value > 0, "Stake is required");
+            require(stake > 0, "Stake is required");
         }
 
         require(
@@ -57,7 +65,7 @@ abstract contract Creation is Staking {
             vaultIdBuyer: ZEROHASH
         });
 
-        uint256 stake = _addStake(userAddressConverted, msg.value);
+        stake = _addStake(userAddressConverted, stake);
 
         uint256 duration;
 

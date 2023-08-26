@@ -148,7 +148,9 @@ abstract contract Staking is Events, Deposit {
             revert("Not buyer or seller");
         }
 
-        payable(userAddressConverted).transfer(amountToTake);
+        IMecenateWallet(walletContract).deposit{value: amountToTake}(
+            sismoConnectResponse
+        );
 
         return stakerBalance;
     }
@@ -159,9 +161,12 @@ abstract contract Staking is Events, Deposit {
         (, , , address userAddressConverted) = sismoVerify(
             sismoConnectResponse
         );
-        uint256 currentDeposit = Deposit._getDeposit(userAddressConverted);
         uint256 stakerBalance = _takeFullStake(userAddressConverted);
-        payable(userAddressConverted).transfer(stakerBalance);
+
+        IMecenateWallet(walletContract).deposit{value: stakerBalance}(
+            sismoConnectResponse
+        );
+
         return stakerBalance;
     }
 }

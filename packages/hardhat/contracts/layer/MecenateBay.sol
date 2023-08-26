@@ -121,6 +121,19 @@ contract MecenateBay is Ownable, FeedViewer {
             })
         );
 
+        uint256 paymentRequested = IMecenateFeed(_feed).getPaymentRequested();
+        uint256 stakeRequested = IMecenateFeed(_feed).getStakeRequested();
+
+        require(
+            paymentRequested == allRequests[index].payment,
+            "payment is not the same of the feed"
+        );
+
+        require(
+            stakeRequested >= allRequests[index].stake,
+            "stake is not the same of the feed"
+        );
+
         IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
             sismoConnectResponse
         );
