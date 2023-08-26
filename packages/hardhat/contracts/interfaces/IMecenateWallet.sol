@@ -5,7 +5,7 @@ interface IMecenateWallet {
         address _to,
         uint256 _amount,
         bytes32 _commitment
-    ) external payable returns (bool);
+    ) external returns (bool);
 
     function deposit(bytes calldata sismoConnectResponse) external payable;
 }

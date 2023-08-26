@@ -19,21 +19,13 @@ contract MecenateFeed is
     using Structures for Structures.Post;
 
     constructor(
-        address owner,
+        bytes32 _owner,
         address _usersModuleContract,
         address _verifierContract,
         address _walletContract
     ) Data(_usersModuleContract, _verifierContract, _walletContract) {
-        _transferOwnership(owner);
+        owner = owner;
     }
-
-    /* function getSeller() external view returns (address) {
-        return postSettingPrivate.seller;
-    }
-
-    function getBuyer() external view returns (address) {
-        returnpostSettingPrivate.buyer;
-    } */
 
     function getBuyerPayment() external view returns (uint256) {
         return post.postdata.escrow.payment;
@@ -71,11 +63,5 @@ contract MecenateFeed is
 
     function getPostCount() external view returns (uint256) {
         return postCount;
-    }
-
-    function changeUsersModuleContract(
-        address _usersModuleContract
-    ) external onlyOwner {
-        usersModuleContract = _usersModuleContract;
     }
 }

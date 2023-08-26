@@ -1,5 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
+import { ethers } from "ethers";
 /**
  * Deploys a contract named "YourContract" using the deployer account and
  * constructor arguments set to the deployer address
@@ -60,10 +61,23 @@ const deployYourContract: DeployFunction = async function (
   users.receipt &&
     console.log("Users deployed at:", users.receipt.contractAddress);
 
+  const wallet = await deploy("MecenateWallet", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [verifier.address, users.address],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  wallet.receipt &&
+    console.log("Wallet deployed at:", wallet.receipt.contractAddress);
+
   const feedFactory = await deploy("MecenateFeedFactory", {
     from: deployer,
     // Contract constructor arguments
-    args: [users.address, treasury.address, verifier.address],
+    args: [users.address, treasury.address, verifier.address, wallet.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -78,8 +92,12 @@ const deployYourContract: DeployFunction = async function (
 
   const feed = await deploy("MecenateFeed", {
     from: deployer,
-    // Contract constructor arguments
-    args: [deployer, users.address, verifier.address],
+    args: [
+      ethers.constants.HashZero,
+      users.address,
+      verifier.address,
+      wallet.address,
+    ],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.

@@ -16,6 +16,11 @@ contract MecenateWallet is ReentrancyGuard {
     address public verifierContract;
     address public usersContract;
 
+    constructor(address _verifierContract, address _usersContract) {
+        verifierContract = _verifierContract;
+        usersContract = _usersContract;
+    }
+
     // Funzione per effettuare un deposito
     function deposit(
         bytes calldata sismoConnectResponse
@@ -37,8 +42,7 @@ contract MecenateWallet is ReentrancyGuard {
         address _to,
         uint256 _amount,
         bytes32 _commitment
-    ) public payable nonReentrant returns (bool) {
-        require(msg.value == _amount, "Payment is not enough");
+    ) external nonReentrant returns (bool) {
         require(
             deposits[_commitment].amount >= _amount,
             "Not enough balance please refill your wallet"
@@ -50,12 +54,13 @@ contract MecenateWallet is ReentrancyGuard {
 
     function withdraw(
         bytes calldata sismoConnectResponse,
-        uint256 _amount
+        uint256 _amount,
+        address operator
     ) public {
         (
-            uint256 vaultId,
+            ,
             bytes memory vaultIdBytes,
-            uint256 userAddress,
+            ,
             address userAddressConverted
         ) = sismoVerify(sismoConnectResponse);
 
@@ -86,7 +91,12 @@ contract MecenateWallet is ReentrancyGuard {
             uint256 amount = deposits[keccak256(vaultIdBytes)].amount;
             deposits[keccak256(vaultIdBytes)].amount = 0;
 
-            payable(userAddressConverted).transfer(amount);
+            if (operator != address(0)) {
+                payable(operator).transfer(amount);
+                return;
+            } else {
+                payable(userAddressConverted).transfer(amount);
+            }
         }
     }
 

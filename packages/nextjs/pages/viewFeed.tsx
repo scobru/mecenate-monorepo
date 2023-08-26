@@ -334,12 +334,10 @@ const ViewFeed: NextPage = () => {
       proofOfHashEncode,
       Number(postType),
       Number(postDuration),
-      _buyer,
       parseEther(buyerPayment),
+      parseEther(postStake),
+      _buyer,
       response,
-      {
-        value: parseEther(postStake),
-      },
     );
 
     console.log(tx);

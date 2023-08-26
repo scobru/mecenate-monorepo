@@ -7,12 +7,13 @@ import { notification } from "~~/utils/scaffold-eth";
 import Dropzone from "react-dropzone";
 import { create } from "ipfs-http-client";
 import { Buffer } from "buffer";
-import { formatEther, toUtf8Bytes } from "ethers/lib/utils.js";
+import { formatEther, keccak256, parseEther, toUtf8Bytes } from "ethers/lib/utils.js";
 import { utils } from "ethers";
 import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
 import { CONFIG, AUTHS, CLAIMS, SIGNATURE_REQUEST, AuthType, ClaimType } from "./../sismo.config";
 import { sign } from "crypto";
 import { useAppStore } from "~~/services/store/store";
+import { get } from "http";
 
 const crypto = require("asymmetric-crypto");
 
@@ -95,8 +96,11 @@ const Identity: NextPage = () => {
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
+  const deployedContractWallet = getDeployedContract(chain?.id.toString(), "MecenateWallet");
   const [signature, setSignature] = React.useState<string>();
   const store = useAppStore();
+  const [amount, setAmount] = React.useState(0);
+  const [depositedBalance, setDepositedBalance] = React.useState(0);
 
   /* Create an instance of the client */
   const client = create({
@@ -123,6 +127,9 @@ const Identity: NextPage = () => {
   let treasuryAddress!: string;
   let treasuryAbi: ContractInterface[] = [];
 
+  let walletAddress!: string;
+  let walletAbi: ContractInterface[] = [];
+
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
   }
@@ -135,6 +142,10 @@ const Identity: NextPage = () => {
     ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
   }
 
+  if (deployedContractWallet) {
+    ({ address: walletAddress, abi: walletAbi } = deployedContractWallet);
+  }
+
   const usersCtx = useContract({
     address: UsersAddress,
     abi: UsersAbi,
@@ -144,6 +155,12 @@ const Identity: NextPage = () => {
   const identity = useContract({
     address: identityAddress,
     abi: identityAbi,
+    signerOrProvider: signer || provider,
+  });
+
+  const wallet = useContract({
+    address: walletAddress,
+    abi: walletAbi,
     signerOrProvider: signer || provider,
   });
 
@@ -299,94 +316,6 @@ const Identity: NextPage = () => {
     fetchNFTBalance();
   };
 
-  async function createPair() {
-    console.log("Generating Key Pair...");
-    const kp = crypto.keyPair();
-    const keypairJSON = JSON.stringify({
-      publicKey: kp.publicKey,
-      secretKey: kp.secretKey,
-    });
-    console.log(keypairJSON);
-    setPubKey(kp.publicKey.toString());
-    notification.success("Key pair created");
-    notification.warning(
-      <div
-        id="alert-additional-content-3"
-        className="p-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
-        role="alert"
-      >
-        <div className="flex items-center">
-          <svg
-            aria-hidden="true"
-            className="w-5 h-5 mr-2"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-          <span className="sr-only">Info</span>
-          <h3 className="text-lg font-medium">Save Your Key Pair!</h3>
-        </div>
-        <div className="mt-2 mb-4 text-sm">
-          <div>
-            <p>
-              PUBLIC KEY : <br /> {kp.publicKey.toString()}
-            </p>
-            <p>
-              SECRET KEY : <br /> {kp.secretKey.toString()}
-            </p>
-          </div>
-        </div>
-        <div className="flex">
-          <button
-            type="button"
-            className="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-            onClick={async () => {
-              const data = {
-                publicKey: await kp.publicKey.toString(),
-                secretKey: await kp.secretKey.toString(),
-              };
-              navigator.clipboard.writeText(JSON.stringify(data));
-              notification.success("Public key copied to clipboard");
-            }}
-          >
-            <svg
-              aria-hidden="true"
-              className="-ml-0.5 mr-2 h-4 w-4"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-              <path
-                fill-rule="evenodd"
-                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-            Copy to clipboard
-          </button>
-        </div>
-      </div>,
-    );
-
-    const data = {
-      publicKey: await kp.publicKey.toString(),
-      secretKey: await kp.secretKey.toString(),
-    };
-
-    downloadFile({
-      data: JSON.stringify(data),
-      fileName: (await signer?.getAddress()) + "_keyPair.json",
-      fileType: "text/json",
-    });
-  }
-
   const downloadFile = ({ data, fileName, fileType }: { data: BlobPart; fileName: string; fileType: string }): void => {
     if (!data || !fileName || !fileType) {
       throw new Error("Invalid inputs");
@@ -491,10 +420,28 @@ const Identity: NextPage = () => {
 
   useEffect(() => {
     getContractData();
+    getDeposit();
   }, [signer]);
 
-  const signMessage = () => {
-    return ethers.utils.defaultAbiCoder.encode(["string"], ["I love Sismo!"]);
+  const deposit = async () => {
+    const tx = await wallet?.deposit(responseBytes, {
+      value: parseEther(String(amount)),
+    });
+    if (tx?.hash) {
+      notification.success("Deposit successful!");
+    }
+  };
+
+  const withdraw = async () => {
+    const tx = await wallet?.withdraw(responseBytes, parseEther(String(amount)));
+    if (tx?.hash) {
+      notification.success("Deposit successful!");
+    }
+  };
+
+  const getDeposit = async () => {
+    const tx = await wallet?.getDeposit(responseBytes);
+    setDepositedBalance(Number(formatEther(tx)));
   };
 
   return (
@@ -752,6 +699,44 @@ const Identity: NextPage = () => {
               >
                 Sign In
               </button>
+            </div>
+
+            <div className="my-5 flex-grow">
+              <input
+                type="text"
+                className="input input-bordered"
+                placeholder="Amount"
+                onChange={e => setAmount(Number(e.target.value))}
+              />
+              <button
+                className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500  hover:bg-primary-700"
+                onClick={async () => {
+                  await deposit();
+                }}
+                disabled={sismoConnectResponse != null ? false : true}
+              >
+                Deposit
+              </button>
+              <br />
+              <br />
+
+              <input
+                type="text"
+                className="input input-bordered"
+                placeholder="Amount"
+                onChange={e => setAmount(Number(e.target.value))}
+              />
+              <button
+                className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500  hover:bg-primary-700"
+                onClick={async () => {
+                  await withdraw();
+                }}
+                disabled={sismoConnectResponse != null ? false : true}
+              >
+                Withdraw
+              </button>
+
+              {getDeposit && wallet && <p>Deposited Balance: {depositedBalance}</p>}
             </div>
           </div>
         </div>

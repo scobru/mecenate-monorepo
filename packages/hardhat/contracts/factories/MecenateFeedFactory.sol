@@ -77,7 +77,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         contractCounter++;
 
         MecenateFeed feed = new MecenateFeed(
-            userAddressConverted,
+            keccak256(vaultIdBytes),
             usersModuleContract,
             verifierContract,
             walletContract
@@ -97,11 +97,11 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     }
 
     function getFeedsOwned(
-        address owner
+        bytes32 owner
     ) external view returns (address[] memory) {
         address[] memory ownedFeeds = new address[](feeds.length);
         for (uint256 i = 0; i < ownedFeeds.length; i++) {
-            if (payable(MecenateFeed(payable(feeds[i])).owner()) == owner) {
+            if ((MecenateFeed(payable(feeds[i])).owner()) == owner) {
                 ownedFeeds[i] = feeds[i];
             }
         }

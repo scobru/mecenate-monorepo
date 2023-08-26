@@ -2,14 +2,15 @@
 pragma solidity ^0.8.9;
 
 import "../library/Structures.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
 import "../interfaces/IMecenateFactory.sol";
 import "../interfaces/IMecenateVerifier.sol";
 import "../interfaces/IMecenateWallet.sol";
 
-contract Data is Ownable {
+contract Data {
+    bytes32 public owner;
+
     uint256 public constant punishmentRatio = 100000000000000000;
 
     Structures.Post public post;

@@ -73,9 +73,7 @@ library Structures {
 
     struct Feed {
         address contractAddress;
-        address operator;
-        address buyer;
-        address seller;
+        bytes32 operator;
         uint256 sellerStake;
         uint256 buyerStake;
         uint256 totalStake;

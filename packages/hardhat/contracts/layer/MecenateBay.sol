@@ -42,9 +42,9 @@ contract MecenateBay is Ownable, FeedViewer {
         bytes memory sismoConnectResponse
     ) public payable returns (Structures.BayRequest memory) {
         (
-            uint256 vaultId,
+            ,
             bytes memory vaultIdBytes,
-            uint256 userAddress,
+            ,
             address userAddressConverted
         ) = sismoVerify(sismoConnectResponse);
 
@@ -87,9 +87,9 @@ contract MecenateBay is Ownable, FeedViewer {
         bytes memory sismoConnectResponse
     ) public {
         (
-            uint256 vaultId,
+            ,
             bytes memory vaultIdBytes,
-            uint256 userAddress,
+            ,
             address userAddressConverted
         ) = sismoVerify(sismoConnectResponse);
 
@@ -122,6 +122,7 @@ contract MecenateBay is Ownable, FeedViewer {
         );
 
         uint256 paymentRequested = IMecenateFeed(_feed).getPaymentRequested();
+
         uint256 stakeRequested = IMecenateFeed(_feed).getStakeRequested();
 
         require(
