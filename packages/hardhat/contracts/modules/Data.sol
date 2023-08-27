@@ -25,6 +25,8 @@ contract Data {
 
     address public walletContract;
 
+    bytes internal encodedSymKey;
+
     bytes public constant ZEROHASH = "0x00";
 
     Structures.postSettingPrivate internal postSettingPrivate;
@@ -58,4 +60,6 @@ contract Data {
     function getStatus() external view returns (Structures.PostStatus) {
         return post.postdata.settings.status;
     }
+
+    receive() external payable {}
 }

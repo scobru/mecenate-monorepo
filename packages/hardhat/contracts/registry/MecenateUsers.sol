@@ -75,13 +75,13 @@ contract MecenateUsers is Ownable {
 
     function getUserAddressAt(
         uint256 index
-    ) public view returns (bytes32 user) {
+    ) public view returns (address user) {
         require(
             msg.sender == treasuryContract,
             "only treasury can call this function"
         );
         require(index < _users.length(), "index out of range");
-        user = _users.at(index);
+        user = _usersAddress.at(index);
     }
 
     function checkifUserExist(bytes32 vaultId) external view returns (bool) {

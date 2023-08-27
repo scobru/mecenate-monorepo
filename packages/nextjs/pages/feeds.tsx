@@ -5,9 +5,10 @@ import { notification } from "~~/utils/scaffold-eth";
 const crypto = require("asymmetric-crypto");
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface } from "ethers";
-import { formatEther } from "ethers/lib/utils.js";
+import { formatEther, keccak256 } from "ethers/lib/utils.js";
 import { useAppStore } from "~~/services/store/store";
 import Link from "next/link";
+import { Address, VerifiedBadge } from "~~/components/scaffold-eth";
 const DEBUG = true;
 
 const Feeds: NextPage = () => {
@@ -16,13 +17,12 @@ const Feeds: NextPage = () => {
   const { data: signer } = useSigner();
 
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateFeedFactory");
-  // const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateFeed");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
-
-  // const [pubKey, setPubKey] = React.useState<string>("");
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
-
+  const [vaultId, setVaultId] = React.useState<string>("");
+  const [userAddress, setUserAddress] = React.useState<string>("");
+  const [response, setResponse] = React.useState<string>("");
   const [fixedFee, setFixedFee] = React.useState<string>("");
 
   const store = useAppStore();
@@ -84,7 +84,8 @@ const Feeds: NextPage = () => {
   }
 
   async function getFeedsOwned() {
-    let _feeds = await factoryCtx?.getFeedsOwned(signer?.getAddress());
+    let _feeds = await factoryCtx?.getFeedsOwned(keccak256(store.sismoResponse));
+
     // remove 0x0000000000000000000000000000000000000000 from _feeds
     _feeds = _feeds.filter((feed: string) => feed != "0x0000000000000000000000000000000000000000");
 
@@ -104,7 +105,7 @@ const Feeds: NextPage = () => {
   }
 
   async function buildFeed() {
-    const tx = await factoryCtx?.buildFeed(store.sismoResponse, { value: fixedFee });
+    const tx = await factoryCtx?.buildFeed(store.sismoResponse);
     if (DEBUG) console.log(tx);
   }
 
@@ -112,10 +113,31 @@ const Feeds: NextPage = () => {
     if (factoryCtx) {
       getFeeds();
     }
+    const interval = setInterval(() => {
+      if (signer && provider) {
+        if (
+          store &&
+          store.sismoData &&
+          store.sismoData.auths &&
+          store.sismoData.auths[1] &&
+          store.sismoData.auths[1].userId
+        ) {
+          const userAddress = store.sismoData.auths[1].userId;
+          const vaultId = store.sismoData.vaultId;
+          const response = store.sismoResponse;
+
+          setVaultId(vaultId);
+          setUserAddress(userAddress);
+          setResponse(response);
+        }
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, [signer, factoryCtx]);
 
   // listen for events FeedCreated
-  useEffect(() => {
+  /* useEffect(() => {
     if (factoryCtx) {
       factoryCtx.on("FeedCreated", (feedAddress: string, owner: string, event: any) => {
         if (DEBUG) console.log("FeedCreated", feedAddress, owner, event);
@@ -123,7 +145,7 @@ const Feeds: NextPage = () => {
         getFeeds();
       });
     }
-  });
+  }); */
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black min-w-fit">
@@ -139,6 +161,9 @@ const Feeds: NextPage = () => {
           Mecenate Bay is a marketplace where you can buy and sell data feeds.
         </p>
       </div>
+      {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
+        <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
+      )}
       <div className="flex flex-col items-center mb-5">
         <button
           className="btn-wide text-base-content bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md my-2"
@@ -170,7 +195,6 @@ const Feeds: NextPage = () => {
           feeds.map((feed, i) => (
             <div key={i} className="card bg-base-100 shadow-xl p-2 text-base-content">
               <Link href={`/viewFeed?addr=${feed}`} passHref>
-                <a target="_parent">Link text</a>
                 <div className="grid grid-cols-12 gap-4 border p-2">
                   <div className="col-span-2 font-bold">Addr:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">{feed}</div>
@@ -182,8 +206,8 @@ const Feeds: NextPage = () => {
                   <div className="col-span-4 overflow-hidden text-truncate">
                     {formatEther(feedsInfos[i].buyerStake)} ETH
                   </div>
-                  <div className="col-span-2 font-bold">Operator:</div>
-                  <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].operator}</div>
+                  {/* <div className="col-span-2 font-bold">Operator:</div>
+                  <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].operator}</div> */}
                   <div className="col-span-2 font-bold">Total:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">
                     {formatEther(String(feedsInfos[i].totalStake))} ETH

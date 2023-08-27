@@ -7,6 +7,7 @@ import "../interfaces/IMecenateVerifier.sol";
 import "../library/Structures.sol";
 import "../modules/FeedViewer.sol";
 import "../interfaces/IMecenateUsers.sol";
+import "../interfaces/IMecenateWallet.sol";
 
 contract MecenateBay is Ownable, FeedViewer {
     Structures.BayRequest[] public allRequests;
@@ -15,6 +16,8 @@ contract MecenateBay is Ownable, FeedViewer {
     address public usersMouduleContract;
 
     address public verifierContract;
+
+    address public walletContract;
 
     mapping(address => Structures.BayRequest[]) public requests;
 
@@ -32,15 +35,20 @@ contract MecenateBay is Ownable, FeedViewer {
         uint256 indexed index
     );
 
-    constructor(address _usersMouduleContract, address _verifierContract) {
+    constructor(
+        address _usersMouduleContract,
+        address _verifierContract,
+        address _walletContract
+    ) {
         usersMouduleContract = _usersMouduleContract;
         verifierContract = _verifierContract;
+        walletContract = _walletContract;
     }
 
     function createRequest(
         Structures.BayRequest memory request,
         bytes memory sismoConnectResponse
-    ) public payable returns (Structures.BayRequest memory) {
+    ) public returns (Structures.BayRequest memory) {
         (
             ,
             bytes memory vaultIdBytes,
@@ -57,7 +65,13 @@ contract MecenateBay is Ownable, FeedViewer {
 
         require(request.stake > 0, "stake is not enough");
 
-        require(request.payment == msg.value, "Payment is not enough");
+        bool result = IMecenateWallet(walletContract).pay(
+            address(this),
+            request.payment,
+            keccak256(vaultIdBytes)
+        );
+
+        require(result, "payment failed");
 
         contractCounter++;
 
@@ -135,8 +149,9 @@ contract MecenateBay is Ownable, FeedViewer {
             "stake is not the same of the feed"
         );
 
-        IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
-            sismoConnectResponse
+        IMecenateFeed(_feed).acceptPost(
+            sismoConnectResponse,
+            allRequests[index].payment
         );
 
         allRequests[index].accepted = true;
@@ -231,4 +246,6 @@ contract MecenateBay is Ownable, FeedViewer {
             }
         }
     }
+
+    receive() external payable {}
 }

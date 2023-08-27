@@ -14,11 +14,13 @@ abstract contract Creation is Staking {
         bytes memory sismoConnectResponse
     ) external returns (Structures.Post memory) {
         (
-            uint256 vaultId,
+            ,
             bytes memory vaultIdBytes,
-            uint256 userAddress,
+            ,
             address userAddressConverted
         ) = sismoVerify(sismoConnectResponse);
+
+        require(keccak256(vaultIdBytes) == owner, "Not owner");
 
         bool result = IMecenateWallet(walletContract).pay(
             address(this),
@@ -27,6 +29,7 @@ abstract contract Creation is Staking {
         );
 
         require(result, "Payment failed");
+
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
                 keccak256(vaultIdBytes)
@@ -133,5 +136,35 @@ abstract contract Creation is Staking {
         emit Created(post);
 
         return Structures.Post({creator: creator, postdata: postdata});
+    }
+
+    function storeEncodedSymmetricKey(
+        bytes memory _encodedSymKey,
+        bytes memory sismoConnectResponse
+    ) external {
+        (, , , address userAddressConverted) = sismoVerify(
+            sismoConnectResponse
+        );
+
+        require(
+            postSettingPrivate.seller == userAddressConverted,
+            "You are not the seller"
+        );
+
+        encodedSymKey = _encodedSymKey;
+    }
+
+    function getEncodedSymmetricKey(
+        bytes memory sismoConnectResponse
+    ) external view returns (bytes memory) {
+        (, , , address userAddressConverted) = sismoVerify(
+            sismoConnectResponse
+        );
+
+        require(
+            postSettingPrivate.seller == userAddressConverted,
+            "You are not the seller"
+        );
+        return encodedSymKey;
     }
 }

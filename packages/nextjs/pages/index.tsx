@@ -30,7 +30,6 @@ const Home: NextPage = () => {
   let statsAddress = "";
   let statsAbi: ContractInterface[] = [];
 
-  const [identityTotalSupply, setIdentityTotalSupply] = React.useState<string>("");
   const [stats, setStats] = React.useState<any>([]);
 
   if (deployedContractIdentity) {
@@ -44,12 +43,6 @@ const Home: NextPage = () => {
   const statsCtx = useContract({
     address: statsAddress,
     abi: statsAbi,
-    signerOrProvider: signer || provider,
-  });
-
-  const identityCtx = useContract({
-    address: identityAddress,
-    abi: identityAbi,
     signerOrProvider: signer || provider,
   });
 
@@ -110,7 +103,6 @@ const Home: NextPage = () => {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2  lg:flex-row px-5 ">
-              <div className="text-xl font-thin my-2 ">identities: {Number(stats.totalIdentities)}</div>
               <div className="text-xl font-thin my-2 ">users: {Number(stats.totalUsers)}</div>
               <div className="text-xl font-thin my-2 ">requests: {Number(stats.totalBayRequests)}</div>{" "}
               <div className="text-xl font-thin my-2 ">feeds : {Number(stats.totalFeeds)}</div>{" "}
@@ -120,46 +112,20 @@ const Home: NextPage = () => {
         <div className="container p-10 mx-auto">
           <div className="flex flex-col md:flex-row justify-between">
             <div className="md:w-1/2 p-6 ì mb-6 md:mb-0">
-              <h2 className="text-4xl font-bold mb-4">Create an Identity NFT</h2>
-              <p className="mb-4 text-2xl font-semibold">To create an Identity NFT, follow these steps:</p>
+              <h2 className="text-4xl font-bold mb-4">Get started</h2>
+              <p className="mb-4 text-2xl font-semibold">To use Mecenate Protocol follow this step:</p>
               <ol className="list-decimal ml-4 mb-4 px-8  text-xl font-light ">
                 <li>Visit the "Identity" page</li>
-                <li>Fill in your NFT data with your information</li>
-                <li>Mint your Mecenate ID</li>
+                <li>Join with Sismo</li>
+                <li>Sign In into Mecenate protocol</li>
+                <li>Deposit your funds</li>
+                <li>Create your feed as seller or ask for a request on bay</li>
               </ol>
-            </div>
-            <div className="md:w-1/2 p-6  ">
-              <h2 className="text-4xl font-bold mb-4">Create a KeyPair </h2>
-              <p className="mb-4 text-2xl font-semibold">
-                To create a KeyPair to interact with the Mecenate Feed, follow these steps:
-              </p>
-              <ol className="list-decimal ml-4 mb-4 text-xl font-light">
-                <li>Visit the "Identity" page.</li>
-                <li>Generate a new KeyPair by clicking on the "Generate KeyPair" button.</li>
-                <li>Save your KeyPair securely.</li>
-                <li>Click "Sign In".</li>
-              </ol>
-              <p className="text-lg font-base">
-                Once you have your KeyPair, you can use it to interact with the Mecenate Feed and participate in the
-                Mecenate economy.
-              </p>
             </div>
           </div>
         </div>
         <div className="flex-wrap bg-base-300 w-full  mt-2 px-8 py-12 shadow-sm">
           <div className="flex gap-2 flex-col items-center text-center lg:flex-row ">
-            <div className="flex flex-col bg-base-100 px-5 py-5 text-center  my-5 items-center max-w-md rounded-xl shadow-lg shadow-secondary  mx-auto hover:bg-primary">
-              <UserIcon className="h-8 w-8 fill-secondary" />
-              <div className="p">
-                <div className="font-base align-baseline text-justify-center">
-                  <ul>
-                    <strong>IDENTITY</strong>
-                  </ul>
-                  <br />
-                  <ul>Create your own unique NFT-based identity to be able to interact with the Mecenate ecosystem.</ul>
-                </div>
-              </div>
-            </div>
             <div className="flex flex-col bg-base-100 px-5 py-5 text-center items-center max-w-md rounded-xl shadow-lg shadow-secondary mx-auto hover:bg-primary">
               <MegaphoneIcon className="h-8 w-8 fill-secondary" />
               <div className="p">

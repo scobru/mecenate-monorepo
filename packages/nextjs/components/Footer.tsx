@@ -54,7 +54,7 @@ export default function Footer() {
               >
                 Scobru
               </a>{" "}
-              to BuidlGuidl Hackthon 🏰{" "}
+              from 🏰{" "}
               <a
                 href="https://buidlguidl.com/"
                 target="_blank"
@@ -62,6 +62,10 @@ export default function Footer() {
                 className="underline underline-offset-2"
               >
                 BuidlGuidl
+              </a>{" "}
+              and{" "}
+              <a href="https://100.builders/" target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                100Builders
               </a>{" "}
               <a
                 href="https://github.com/scobru/mecenate-monorepo"
@@ -75,7 +79,7 @@ export default function Footer() {
             <span>·</span>
             <div>
               <a
-                href="https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA"
+                href="https://t.me/+yWNEe13B5pcyNDBk"
                 target="_blank"
                 rel="noreferrer"
                 className="underline underline-offset-2"

@@ -27,19 +27,15 @@ const enabledChains = configuredChain.id === 1 ? [configuredChain] : [configured
 export const appChains = configureChains(
   enabledChains,
   [
-    infuraProvider({
-      projectId: process.env.INFURA_PROJECT_ID,
-      projectSecret: process.env.INFURA_PROJECT_SECRET,
-      priority: 0,
-    }),
     alchemyProvider({
-      // ToDo. Move to .env || scaffold config
-      // This is ours Alchemy's default API key.
-      // You can get your own at https://dashboard.alchemyapi.io
-      apiKey: "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF",
+      apiKey: String(process.env.NEXT_PUBLIC_ALCHEMY_SECRET),
+      priority: 2,
+    }),
+    infuraProvider({
+      apiKey: String(process.env.NEXT_PUBLIC_INFURA_API_KEY),
       priority: 1,
     }),
-    publicProvider({ priority: 2 }),
+    //publicProvider({ priority: 0 }),
   ],
   {
     stallTimeout: 3_000,

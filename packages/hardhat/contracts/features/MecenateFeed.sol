@@ -24,7 +24,7 @@ contract MecenateFeed is
         address _verifierContract,
         address _walletContract
     ) Data(_usersModuleContract, _verifierContract, _walletContract) {
-        owner = owner;
+        owner = _owner;
     }
 
     function getBuyerPayment() external view returns (uint256) {

@@ -6,6 +6,8 @@ import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsCo
 import { ContractInterface, ethers } from "ethers";
 import { formatEther, parseEther } from "ethers/lib/utils.js";
 import { useAppStore } from "~~/services/store/store";
+import { Address } from "~~/components/scaffold-eth";
+import VerifiedBadge from "~~/components/scaffold-eth/VerifiedBadge";
 
 const Bay: NextPage = () => {
   const provider = useProvider();
@@ -97,7 +99,7 @@ const Bay: NextPage = () => {
         postCount: 0,
       };
 
-      const tx = await bayCtx?.createRequest(request, store.sismoResponse, { value: parseEther(requestPayment) });
+      const tx = await bayCtx?.createRequest(request, store.sismoResponse);
 
       if (tx) {
         notification.success("Request created successfully");
@@ -174,7 +176,10 @@ const Bay: NextPage = () => {
           </p>
         </div>
         <div className="flex flex-col min-w-fit mx-auto items-center mb-20 ">
-          <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary py-2  text-base-content p-4 m-4">
+          {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
+            <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
+          )}
+          <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary py-2   p-4 m-4 text-black">
             <label className="text-black font-semibold text-sm" htmlFor="request">
               What do you want?
             </label>
@@ -206,7 +211,7 @@ const Bay: NextPage = () => {
               onChange={e => setRequestStake(e.target.value)}
             />
             <button
-              className="bg-primary hover:bg-accent  font-bold py-2 px-4 rounded my-5"
+              className=" hover:bg-accent  font-bold py-2 px-4 rounded my-5"
               onClick={async () => {
                 await createBayContract();
               }}

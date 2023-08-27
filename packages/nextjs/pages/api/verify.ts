@@ -26,12 +26,6 @@ export default async function verify(
       auths: AUTHS,
       signature: SIGNATURE_REQUEST,
     });
-    const vaultId = result.getUserId(AuthType.VAULT);
-    const userId = result.getUserId(AuthType.USER);
-    console.log("VaultId:", vaultId);
-    console.log("UserId:", userId);
-    result.userId = userId;
-    result.vaultId = vaultId;
     console.log(JSON.stringify(result, null, 2));
     return res.json(result); // Use res.json() instead of Response.json()
   } catch (e: any) {

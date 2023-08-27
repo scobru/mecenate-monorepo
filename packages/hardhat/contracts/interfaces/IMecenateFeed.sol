@@ -19,7 +19,10 @@ interface IMecenateFeed {
 
     function postCount() external view returns (uint256);
 
-    function acceptPost(bytes memory sismoConnectResponse) external payable;
+    function acceptPost(
+        bytes memory sismoConnectResponse,
+        uint256 paymnet
+    ) external;
 
     function getPaymentRequested() external view returns (uint256);
 

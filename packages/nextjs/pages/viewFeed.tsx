@@ -2,54 +2,30 @@ import type { NextPage } from "next";
 import React, { useEffect, useState } from "react";
 import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, Signer, ethers, utils } from "ethers";
+import { ContractInterface, Signer, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { useRouter } from "next/router";
-import { AbiCoder, base64, formatEther, keccak256, parseEther, toUtf8Bytes } from "ethers/lib/utils";
+import { formatEther, keccak256, parseEther, toUtf8Bytes } from "ethers/lib/utils";
 import pinataSDK from "@pinata/sdk";
 import axios from "axios";
 import dotenv from "dotenv";
 import Dropzone from "react-dropzone";
-import { create } from "ipfs-http-client";
 import { saveAs } from "file-saver";
-
-import { SiweMessage } from "siwe";
 import crypto from "crypto";
-import { Address } from "~~/components/scaffold-eth";
+import { VerifiedBadge } from "~~/components/scaffold-eth";
 import { useAppStore } from "~~/services/store/store";
-
-dotenv.config();
+import Spinner from "~~/components/Spinner";
 
 const ViewFeed: NextPage = () => {
   //const crypto = require("asymmetric-crypto");
-  const base64url = require("base64url"); // import the base64url library
-
   const AbiCoder = new ethers.utils.AbiCoder();
 
   const store = useAppStore();
-  console.log(store);
-
   const ErasureHelper = require("@erasure/crypto-ipfs");
   const pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
   const pinataApiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY;
-  const projectId = process.env.INFURA_PROJECT_ID;
-  const projectSecret = process.env.INFURA_PROJECT_SECRET;
-  const projectGateway = process.env.IPFS_GATEWAY;
-  const auth = "Basic " + Buffer.from(projectId + ":" + projectSecret).toString("base64");
-  const IPFS_HOST = "ipfs.infura.io";
-  const IPFS_PORT = 5001;
-  const client = create({
-    host: "ipfs.infura.io",
-    port: 5001,
-    protocol: "https",
-    headers: {
-      authorization: auth,
-    },
-  });
 
   const { chain } = useNetwork();
-
-  console.log("Chain: ", chain?.id.toString());
 
   const { data: signer } = useSigner();
   const provider = useProvider();
@@ -57,10 +33,7 @@ const ViewFeed: NextPage = () => {
 
   const { addr } = router.query;
 
-  console.log("Store: ", store);
-
   const [vaultId, setVaultId] = useState<any>("");
-  const [userAddress, setUserAddress] = useState<any>("");
   const [response, setResponse] = useState<any>("");
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
@@ -70,10 +43,7 @@ const ViewFeed: NextPage = () => {
   const [symmetricKey, setSymmetricKey] = useState<any>([]);
   const [valid, setValid] = useState<boolean>();
   const [punishment, setPunishment] = useState<any>(0);
-  const [sellerStake, setSellerStake] = useState<any>(0);
-  const [buyerStake, setBuyerStake] = useState<any>(0);
   const [buyerPayment, setBuyerPayment] = useState<any>("");
-  const [totalStaked, setTotalStaked] = useState<any>(0);
   const [stakeAmount, setStakeAmount] = useState<any>(0);
   const [buyer, setBuyer] = useState<any>("");
   const [imageFile, setImageFile] = React.useState<any>("");
@@ -220,29 +190,19 @@ const ViewFeed: NextPage = () => {
 
   const fetchData = async function fetchData() {
     if (feedCtx && signer && provider) {
-      console.log("Handle Fetching Data...");
-      console.log("Feed Address: ", feedCtx?.address);
       const data = await feedCtx?.post();
-      console.log("Data: ", data);
       const sellerDeposit = await feedCtx?.getSellerStake();
       const buyerDeposit = await feedCtx?.getBuyerStake();
       const totalStaked = await feedCtx?.getTotalStaked();
-      setSellerStake(String(sellerDeposit));
-      setBuyerStake(formatEther(buyerDeposit));
-      setTotalStaked(formatEther(totalStaked));
+
       setFeedData(data);
       setPostCount(await feedCtx?.postCount());
-      console.log(data);
     }
   };
 
   const createPost = async function createPost() {
     await fetchData();
-
-    console.log("PubKey:", vaultId);
-
     const pubKey = vaultId;
-
     const dataSaved = await savePost(postRawData);
 
     notification.warning(
@@ -304,8 +264,6 @@ const ViewFeed: NextPage = () => {
       </div>,
     );
 
-    notification.warning("Save this data");
-    //saveAs(JSON.stringify(dataSaved), String(postCount) + feedCtx?.address + "_sellData.json");
     downloadFile({
       data: JSON.stringify(dataSaved),
       fileName: String(postCount) + "_" + feedCtx?.address + "_sellData.json",
@@ -340,16 +298,18 @@ const ViewFeed: NextPage = () => {
       response,
     );
 
-    console.log(tx);
-
     await tx?.wait();
+
+    const encrypted = customEncryption(keccak256(String(vaultId)), dataSaved.symmetricKey);
+    const saveToContract = await feedCtx?.storeEncodedSymmetricKey(toUtf8Bytes(encrypted), response);
+    await saveToContract?.wait();
   };
 
   async function acceptPost() {
-    const tx = await feedCtx?.acceptPost(response, { value: parseEther(postPayment) });
+    const tx = await feedCtx?.acceptPost(response, parseEther(postPayment));
   }
 
-  async function savePost(RawData: string): Promise<PostData | void> {
+  async function savePost(RawData: string): Promise<any | void> {
     console.log("Saving Data...");
 
     // Check Pinata credentials.
@@ -368,6 +328,7 @@ const ViewFeed: NextPage = () => {
 
     // Create post data.
     const postData = await createPostData(RawData);
+
     if (!postData) {
       console.log("Error creating post data.");
       return;
@@ -399,7 +360,6 @@ const ViewFeed: NextPage = () => {
     console.log("Creating Data...");
     try {
       const symmetricKey = ErasureHelper.crypto.symmetric.generateKey();
-
       const encryptedFile = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
 
       const symmetricKeyHash = await ErasureHelper.multihash({
@@ -470,11 +430,12 @@ const ViewFeed: NextPage = () => {
     //const sellerPubKeyDecoded = abiCoder.decode(["string"], userData.publicKey);
     const sellerPubKeyDecoded = userData.wallet;
 
-    console.log("Seller Decoded", sellerPubKeyDecoded);
+    let symmetricKey = await feedCtx?.getEncodedSymmetricKey(response);
+    symmetricKey = ethers.utils.toUtf8String(symmetricKey);
 
-    //const encrypted = crypto.encrypt(symmetricKey, buyerPubKeyDecoded, secretKey);
+    console.log("Symmetric Key: ", symmetricKey);
 
-    //const encrypted = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey, symmetricKey);
+    symmetricKey = customDecryption(keccak256(String(vaultId)), symmetricKey);
 
     const encrypted = customEncryption(keccak256(String(vaultId)), symmetricKey);
 
@@ -614,8 +575,6 @@ const ViewFeed: NextPage = () => {
   };
 
   async function retrievePost() {
-    const vaultIdSecret = await feedCtx?.getVaultIdSecret(response);
-
     console.log("Retrieving Data...");
 
     await fetchData();
@@ -653,6 +612,7 @@ const ViewFeed: NextPage = () => {
       secretKey,
     ); */
 
+    const vaultIdSecret = await feedCtx?.getVaultIdSecret(response);
     //const decrypted = ErasureHelper.crypto.symmetric.decryptMessage(vaultIdSecret, encryptedSymKey);
     const decrypted = customDecryption(String(vaultIdSecret), encryptedSymKey);
 
@@ -852,17 +812,26 @@ const ViewFeed: NextPage = () => {
           const response = store.sismoResponse;
 
           setVaultId(vaultId);
-          setUserAddress(userAddress);
           setResponse(response);
         }
       }
-    }, 10000);
+    }, 5000);
 
     // Cleanup function
     return () => clearInterval(interval);
   }, [signer, provider, feedCtx, router.isReady]);
 
-  const Modal = ({ title, modalId, children }) => (
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  type ModalProps = {
+    title: string;
+    modalId: string;
+    children: React.ReactNode;
+  };
+
+  const Modal = ({ title, modalId, children }: ModalProps) => (
     <>
       <label htmlFor={modalId} className="btn modal-button mx-2 my-2">
         {title}
@@ -890,11 +859,10 @@ const ViewFeed: NextPage = () => {
   return (
     <div className="flex flex-col items-center pt-2 p-2 m-2">
       {feedData[0] != null ? (
-        <div className="flex flex-col py-5 justify-center  items-center text-left">
-          <div className="my-5">
-            Connect with address:
-            <Address address={userAddress} format="long" />
-          </div>
+        <div className="flex flex-col py-5  text-left ">
+          {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
+            <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
+          )}
           <div className="flex flex-wrap text-left w-full">
             <div tabIndex={0} className="collapse">
               <div className="collapse-title text-xl font-medium hover:bg-primary">Seller</div>
@@ -944,7 +912,7 @@ const ViewFeed: NextPage = () => {
                       <input
                         type="text"
                         className="input w-full"
-                        placeholder="Put address 0 to make this public to anyone who wants to buy"
+                        placeholder="Leave blank  to make this public for  anyone who wants to buy"
                         value={buyer}
                         onChange={e => setBuyer(e.target.value)}
                       />
@@ -956,9 +924,9 @@ const ViewFeed: NextPage = () => {
                       >
                         <option value="0">Text</option>
                         <option value="1">Image</option>
-                        <option value="2">Video</option>
+                        {/* <option value="2">Video</option>
                         <option value="3">Audio</option>
-                        <option value="4">File</option>
+                        <option value="4">File</option> */}
                       </select>
                       {postType == 0 ? (
                         <div>
@@ -990,6 +958,7 @@ const ViewFeed: NextPage = () => {
                           </Dropzone>
                         </div>
                       ) : null}
+                      <div className="font-bold">⚠️ Please confirm all 2 transactions.</div>
                       <button
                         className="btn btn-primary w-full mt-4"
                         onClick={async () => {
@@ -1014,19 +983,19 @@ const ViewFeed: NextPage = () => {
                 <div className="modal">
                   <div className="modal-box">
                     <div className="modal-header">
-                      <div className="modal-title text-2xl font-bold">Submit Post</div>
+                      <div className="modal-title text-2xl font-bold">Submit encrypted key</div>
                       <label htmlFor="modal-submit" className="btn btn-ghost">
                         <i className="fas fa-times"></i>
                       </label>
                     </div>
                     <div className="modal-body space-y-4 text-left">
-                      <input
+                      {/*  <input
                         type="password"
                         className="input w-full"
                         placeholder="Symmetric Key"
                         value={symmetricKey}
                         onChange={e => setSymmetricKey(e.target.value)}
-                      />
+                      /> */}
                       <br />
                       <button
                         className="btn  w-full"
@@ -1454,7 +1423,9 @@ const ViewFeed: NextPage = () => {
             </div>
           </div>
         </div>
-      ) : null}
+      ) : (
+        <Spinner />
+      )}
     </div>
   );
 };

@@ -5,31 +5,32 @@ module.exports = {
   darkTheme: "dark",
   // DaisyUI theme colors
   daisyui: {
-    themes: [{
-      light: {
-        "primary": "#ffffff",
-        "secondary": "#f6f6f8",
-        "accent": "#007aff",
-        "neutral": "#8e8e93",
-        "base-100": "#f4f4f7",
-        "info": "#0a84ff",
-        "success": "#30d158",
-        "warning": "#ff9f0a",
-        "error": "#ff453a",
+    themes: [
+      {
+        light: {
+          primary: "#ffffff",
+          secondary: "#f6f6f8",
+          accent: "#007aff",
+          neutral: "#8e8e93",
+          "base-100": "#f4f4f7",
+          info: "#0a84ff",
+          success: "#30d158",
+          warning: "#ff9f0a",
+          error: "#ff453a",
+        },
+        dark: {
+          primary: "#121212",
+          secondary: "#1e1e1e",
+          accent: "#0c66ff",
+          neutral: "#646464",
+          "base-100": "#282828",
+          info: "#0c8dff",
+          success: "#2fdd31",
+          warning: "#ff7f0b",
+          error: "#ff3a2f",
+        },
       },
-      dark: {
-        "primary": "#121212",
-        "secondary": "#1e1e1e",
-        "accent": "#0c66ff",
-        "neutral": "#646464",
-        "base-100": "#282828",
-        "info": "#0c8dff",
-        "success": "#2fdd31",
-        "warning": "#ff7f0b",
-        "error": "#ff3a2f",
-      },
-    },]
-
+    ],
   },
   theme: {
     // Extend Tailwind classes (e.g. font-bai-jamjuree, animate-grow)

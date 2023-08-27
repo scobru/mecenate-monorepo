@@ -4,23 +4,13 @@ import { useContract, useProvider, useNetwork, useSigner, useAccount } from "wag
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
-import Dropzone from "react-dropzone";
-import { create } from "ipfs-http-client";
 import { Buffer } from "buffer";
 import { formatEther, keccak256, parseEther, toUtf8Bytes } from "ethers/lib/utils.js";
-import { utils } from "ethers";
 import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
-import { CONFIG, AUTHS, CLAIMS, SIGNATURE_REQUEST, AuthType, ClaimType } from "./../sismo.config";
-import { sign } from "crypto";
+import { CONFIG, AUTHS, SIGNATURE_REQUEST, AuthType, ClaimType } from "./../sismo.config";
 import { useAppStore } from "~~/services/store/store";
-import { get } from "http";
+import { VerifiedBadge } from "~~/components/scaffold-eth/";
 
-const crypto = require("asymmetric-crypto");
-
-const projectId = process.env.INFURA_PROJECT_ID;
-const projectSecret = process.env.INFURA_PROJECT_SECRET;
-// const projectGateway = process.env.IPFS_GATEWAY;
-const auth = "Basic " + Buffer.from(projectId + ":" + projectSecret).toString("base64");
 const DEBUG = true;
 
 type nftMetadata = {
@@ -88,29 +78,17 @@ const Identity: NextPage = () => {
   const [description, setDescription] = React.useState("");
   const [imageFile, setImageFile] = React.useState<File>();
   const [image, setImage] = React.useState("");
-  const [nftBalance, setNftBalance] = React.useState(0);
-  const [nftMetadata, setNftMetadata] = React.useState<{ [key: string]: any[] }>({});
-  const [pubKey, setPubKey] = React.useState<string>("");
-  const [alreadyUser, setAlreadyUser] = React.useState(false);
   const [responseBytes, setResponseBytes] = React.useState<string>();
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
   const deployedContractWallet = getDeployedContract(chain?.id.toString(), "MecenateWallet");
   const [signature, setSignature] = React.useState<string>();
-  const store = useAppStore();
   const [amount, setAmount] = React.useState(0);
   const [depositedBalance, setDepositedBalance] = React.useState(0);
+  const [to, setTo] = React.useState<any>("");
 
-  /* Create an instance of the client */
-  const client = create({
-    host: "ipfs.infura.io",
-    port: 5001,
-    protocol: "https",
-    headers: {
-      authorization: auth,
-    },
-  });
+  const store = useAppStore();
 
   let UsersAddress!: string;
   let UsersAbi: ContractInterface[] = [];
@@ -164,217 +142,16 @@ const Identity: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  const checkIfUserIsRegistered = async () => {
-    const address = await signer?.getAddress();
-    const user = await usersCtx?.checkifUserExist(address);
-    if (user) {
-      setAlreadyUser(true);
-    }
-  };
-
   const treasury = useContract({
     address: treasuryAddress,
     abi: treasuryAbi,
     signerOrProvider: signer || provider,
   });
 
-  const uploadImageToIpfs = async (file: Blob | null) => {
-    try {
-      if (!file) {
-        throw new Error("No file specified");
-      }
-
-      const added = await client.add({ content: file });
-      const cid = added.cid.toString();
-
-      DEBUG && console.log("added", added);
-      DEBUG && console.log("cid", cid);
-      DEBUG && console.log("path", added.path);
-
-      const url = `https://scobru.infura-ipfs.io/ipfs/${added.cid}`;
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = () => {
-          resolve(url);
-        };
-        reader.onerror = event => {
-          reject(event);
-        };
-        console.log(url);
-        notification.info(String(url));
-        notification.success("Image uploaded to IPFS");
-        setImage(url);
-      });
-    } catch (error) {
-      notification.error("Error uploading image to IPFS");
-    }
-  };
-
-  const fetchNFTBalance = async () => {
-    try {
-      const address = await signer?.getAddress();
-      const balance = await identity?.balanceOf(address);
-      const id = await identity?.identityByAddress(address);
-      const metadata = await identity?.tokenURI(Number(id));
-      const response = await fetch(metadata);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      DEBUG && console.log("id", Number(id));
-      DEBUG && console.log("balance", balance);
-      DEBUG && console.log("metadata", metadata);
-      DEBUG && console.log("data", data);
-      setNftMetadata(data);
-      setNftBalance(balance);
-    } catch (error) {
-      console.error(error);
-      // handle error
-    }
-  };
-
-  const uploadJsonToIpfs = async (identityData: { name: any; description: any }, imageFile: any) => {
-    try {
-      await uploadImageToIpfs(imageFile);
-    } catch (error) {
-      notification.error("Error uploading image to IPFS");
-    }
-  };
-
-  const createIdentity = async (identityData: { name: any; description: any }) => {
-    const creator = await signer?.getAddress();
-
-    const nftMetadataWrite = {
-      name: identityData.name,
-      image: image,
-      description: identityData.description,
-      owner: creator,
-    };
-    DEBUG && console.log(nftMetadataWrite);
-
-    try {
-      const payload = {
-        values: nftMetadataWrite,
-        chainId: chain?.id.toString(),
-      };
-
-      const errors = {
-        name: "",
-        description: "",
-        image: "",
-      };
-
-      const urlRegex = /^(http|https):\/\/[^ "]+$/;
-
-      if (!nftMetadataWrite.name) errors.name = "Name is required";
-      if (!nftMetadataWrite.description) errors.description = "Message is required";
-      if (nftMetadataWrite.image && !urlRegex.test(nftMetadataWrite.image)) errors.image = "URL is invalid";
-
-      if (errors.name || errors.description || errors.image) {
-        return notification.error("Error creating identity");
-      }
-
-      const response = await fetch("/api/create_id", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Allow-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.status === 200) {
-        notification.success(<span className="font-bold">Submission received! 🎉</span>);
-      } else {
-        notification.error(
-          <>
-            <span className="font-bold">Server Error.</span>
-            <br />
-            Something went wrong. Please try again
-          </>,
-        );
-      }
-    } catch (error) {
-      console.error(error);
-      notification.error(
-        <>
-          <span className="font-bold">Server Error.</span>
-          <br />
-          Something went wrong. Please try again
-        </>,
-      );
-    }
-
-    const tx = await identity?.mint(nftMetadataWrite, {
-      value: identityFee,
-    });
-
-    if (tx?.hash) {
-      notification.success("Identity minted successfully!");
-    }
-    fetchNFTBalance();
-  };
-
-  const downloadFile = ({ data, fileName, fileType }: { data: BlobPart; fileName: string; fileType: string }): void => {
-    if (!data || !fileName || !fileType) {
-      throw new Error("Invalid inputs");
-    }
-
-    const blob = new Blob([data], { type: fileType });
-    const a = document.createElement("a");
-    a.download = fileName;
-    a.href = window.URL.createObjectURL(blob);
-
-    const clickEvt = new MouseEvent("click", {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-    });
-
-    a.dispatchEvent(clickEvt);
-    a.remove();
-  };
-
   async function signIn() {
     // await createPair();
     const seller = await signer?.getAddress();
     if (seller) {
-      /*  try {
-        const payload = {
-          values: sismoConnectVerifiedResult?.auths[1].userId,
-          chainId: chain?.id.toString(),
-        };
-        const response = await fetch("/api/create_user", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Allow-Control-Allow-Origin": "*",
-          },
-          body: JSON.stringify(payload),
-        });
-        if (response.status === 200) {
-          notification.success(<span className="font-bold">Submission received! 🎉</span>);
-        } else {
-          notification.error(
-            <>
-              <span className="font-bold">Server Error.</span>
-              <br />
-              Something went wrong. Please try again
-            </>,
-          );
-        }
-      } catch (error) {
-        console.error(error);
-        notification.error(
-          <>
-            <span className="font-bold">Server Error.</span>
-            <br />
-            Something went wrong. Please try again
-          </>,
-        );
-      } */
-
       const tx = await usersCtx?.registerUser(responseBytes);
 
       notification.success("User registered");
@@ -382,39 +159,11 @@ const Identity: NextPage = () => {
     }
   }
 
-  const handleNameChange = (event: { target: { value: React.SetStateAction<string> } }) => {
-    setName(event.target.value);
-  };
-
-  const handleDescriptionChange = (event: { target: { value: React.SetStateAction<string> } }) => {
-    setDescription(event.target.value);
-  };
-
-  const handleImageDrop = (acceptedFiles: File[]) => {
-    if (acceptedFiles != null && acceptedFiles.length > 0) {
-      setImageFile(() => acceptedFiles[0]);
-      if (acceptedFiles[0]) {
-        uploadJsonToIpfs({ name: name, description: description }, acceptedFiles[0]);
-      }
-    }
-  };
-
-  const handleFormSubmit = async (event: { preventDefault: () => void }) => {
-    event.preventDefault();
-    const identityData = { name, description };
-    await createIdentity(identityData);
-    alert("Identity minted successfully!");
-  };
-
   const getContractData = async function getContractData() {
     if (identity && signer) {
       const fee = await treasury?.fixedFee();
-      const _identityFee = await treasury?.fixedFee();
-      console.log(_identityFee);
-      await fetchNFTBalance();
-      await checkIfUserIsRegistered();
       setFee(fee);
-      setIdentityFee(_identityFee);
+      setIdentityFee(fee);
     }
   };
 
@@ -424,7 +173,7 @@ const Identity: NextPage = () => {
   }, [signer]);
 
   const deposit = async () => {
-    const tx = await wallet?.deposit(responseBytes, {
+    const tx = await wallet?.deposit(store.sismoResponse, {
       value: parseEther(String(amount)),
     });
     if (tx?.hash) {
@@ -433,15 +182,17 @@ const Identity: NextPage = () => {
   };
 
   const withdraw = async () => {
-    const tx = await wallet?.withdraw(responseBytes, parseEther(String(amount)));
+    const tx = await wallet?.withdraw(store.sismoResponse, parseEther(String(amount)), to);
     if (tx?.hash) {
       notification.success("Deposit successful!");
     }
   };
 
   const getDeposit = async () => {
-    const tx = await wallet?.getDeposit(responseBytes);
-    setDepositedBalance(Number(formatEther(tx)));
+    if (store.sismoResponse) {
+      const tx = await wallet?.getDeposit(store.sismoResponse);
+      setDepositedBalance(Number(formatEther(tx)));
+    }
   };
 
   return (
@@ -450,9 +201,9 @@ const Identity: NextPage = () => {
         <div className="flex flex-col min-w-fit mx-auto items-center mb-20">
           <div className="max-w-3xl text-center">
             <h1 className="text-6xl font-bold mb-8">Identity</h1>
-            <p className="text-xl  mb-20">Mint your NFT. Become a member of the community.</p>
+            <p className="text-xl  mb-20">Register your identity with zk-proof</p>
           </div>
-          <div className="p-4 bg-white dark:bg-gray-800">
+          <div className="p-4 ">
             {pageState == "init" ? (
               <>
                 <div className="text-center">
@@ -494,6 +245,7 @@ const Identity: NextPage = () => {
                     onResponseBytes={(responseBytes: string) => {
                       setResponseBytes(responseBytes);
                       store.setSismoResponse(responseBytes);
+                      store.setVerified("verified");
                     }}
                   />
                 </div>
@@ -517,7 +269,7 @@ const Identity: NextPage = () => {
                   ) : (
                     <>
                       {Boolean(error) ? (
-                        <span className="text-red-500">Error verifying ZK Proofs: {error.message}</span>
+                        <span className="text-red-500">Error verifying ZK Proofs: {error}</span>
                       ) : (
                         <span className="text-green-500">ZK Proofs verified!</span>
                       )}
@@ -526,12 +278,8 @@ const Identity: NextPage = () => {
                 </div>
               </>
             )}
-
-            {/* Table of the Sismo Connect requests and verified result */}
-            <div className="card bordered">
+            {/* <div className="card bordered my-5">
               <div className="card-body">
-                {" "}
-                {/* Table for Verified Auths */}
                 {sismoConnectVerifiedResult && (
                   <>
                     <h3>Verified Auths</h3>
@@ -554,7 +302,6 @@ const Identity: NextPage = () => {
                   </>
                 )}
                 <br />
-                {/* Table for Verified Claims */}
                 {sismoConnectVerifiedResult && (
                   <>
                     <h3>Verified Claims</h3>
@@ -566,24 +313,10 @@ const Identity: NextPage = () => {
                           <th>Verified Value</th>
                         </tr>
                       </thead>
-                      {/*   <tbody>
-                    {sismoConnectVerifiedResult.claims.map((claim, index) => (
-                      <tr key={index}>
-                        <td>
-                          <a target="_blank" href={"https://factory.sismo.io/groups-explorer?search=" + claim.groupId}>
-                            {claim.groupId}
-                          </a>
-                        </td>
-                        <td>{ClaimType[claim.claimType!]}</td>
-                        <td>{claim.value}</td>
-                      </tr>
-                    ))}
-                  </tbody> */}
                     </table>
                   </>
                 )}
               </div>
-              {/* Table of the Auths requests*/}
               <h3>Auths requested</h3>
               <table>
                 <thead>
@@ -611,8 +344,6 @@ const Identity: NextPage = () => {
                 </tbody>
               </table>
               <br />
-
-              {/* Table of the Claims requests*/}
               <h3>Claims requested</h3>
               <table>
                 <thead>
@@ -625,38 +356,7 @@ const Identity: NextPage = () => {
                     <th>ZK proof</th>
                   </tr>
                 </thead>
-                {/* <tbody>
-                {CLAIMS.map((claim, index) => (
-                  <tr key={index}>
-                    <td>
-                      <a target="_blank" href={"https://factory.sismo.io/groups-explorer?search=" + claim.groupId}>
-                        {claim.groupId}
-                      </a>
-                    </td>
-                    <td>{ClaimType[claim.claimType || 0]}</td>
-                    <td>{claim.value ? claim.value : "1"}</td>
-                    <td>{claim.isSelectableByUser ? "yes" : "no"}</td>
-                    <td>{claim.isOptional ? "optional" : "required"}</td>
-                    {sismoConnectResponse ? (
-                      <td>
-                        {readibleHex(
-                          getProofDataForClaim(
-                            sismoConnectResponse,
-                            claim.claimType || 0,
-                            claim.groupId!,
-                            claim.value || 1,
-                          )!,
-                        )}
-                      </td>
-                    ) : (
-                      <td> ZK proof not generated yet </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody> */}
               </table>
-
-              {/* Table of the Signature request and its result */}
               <h3>Signature requested and verified</h3>
               <table>
                 <thead>
@@ -678,17 +378,18 @@ const Identity: NextPage = () => {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </div> */}
           </div>
           <div className="max-w-lg">
             <div className="max-w-3xl text-center my-20  text-base-content">
-              <h1 className="text-6xl font-bold mb-8">Generate your KeyPair.</h1>
+              <h1 className="text-6xl font-bold mb-8">Deposit your fund to protect your privacy</h1>
               <p className="text-xl  mb-8">
-                Once you create your identity, you will be able to generate your own personal public and private key
-                that will allow you to interact with the protocol. You can encrypt and decrypt the information you want
-                to share with other users in a completely anonymous and decentralized manner.
+                Deposit your fund to protect your privacy. You can withdraw your fund at any time.
               </p>
             </div>
+            {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
+              <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
+            )}
             <div className="my-5 ">
               <button
                 className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500  hover:bg-primary-700"
@@ -700,43 +401,57 @@ const Identity: NextPage = () => {
                 Sign In
               </button>
             </div>
+            <div className="card card-bordered border-2 bg-secondary my-10 p-10 w-full md:w-3/4 lg:w-3/4 mx-auto flex flex-col  text-left">
+              {depositedBalance && wallet && <p className="text-left text-lg mb-5">Balance: {depositedBalance} ETH</p>}
+              <span className="text-base font-semibold my-2 ">Deposit</span>
 
-            <div className="my-5 flex-grow">
-              <input
-                type="text"
-                className="input input-bordered"
-                placeholder="Amount"
-                onChange={e => setAmount(Number(e.target.value))}
-              />
-              <button
-                className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500  hover:bg-primary-700"
-                onClick={async () => {
-                  await deposit();
-                }}
-                disabled={sismoConnectResponse != null ? false : true}
-              >
-                Deposit
-              </button>
-              <br />
-              <br />
-
-              <input
-                type="text"
-                className="input input-bordered"
-                placeholder="Amount"
-                onChange={e => setAmount(Number(e.target.value))}
-              />
-              <button
-                className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500  hover:bg-primary-700"
-                onClick={async () => {
-                  await withdraw();
-                }}
-                disabled={sismoConnectResponse != null ? false : true}
-              >
-                Withdraw
-              </button>
-
-              {getDeposit && wallet && <p>Deposited Balance: {depositedBalance}</p>}
+              <div className="w-full mb-5">
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  placeholder="Amount to Deposit"
+                  onChange={e => setAmount(Number(e.target.value))}
+                />
+              </div>
+              <div className="w-full mb-5">
+                <button
+                  className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700"
+                  onClick={async () => {
+                    await deposit();
+                  }}
+                  disabled={store.sismoResponse != null ? false : true}
+                >
+                  Deposit
+                </button>
+              </div>
+              <span className="text-base font-semibold my-2 ">Withdraw</span>
+              <div className="w-full mb-5">
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  placeholder="Amount to Withdraw"
+                  onChange={e => setAmount(Number(e.target.value))}
+                />
+              </div>
+              <div className="w-full mb-5">
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  placeholder="To"
+                  onChange={e => setTo(e.target.value)}
+                />
+              </div>
+              <div className="w-full">
+                <button
+                  className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700"
+                  onClick={async () => {
+                    await withdraw();
+                  }}
+                  disabled={store.sismoResponse != null ? false : true}
+                >
+                  Withdraw
+                </button>
+              </div>
             </div>
           </div>
         </div>

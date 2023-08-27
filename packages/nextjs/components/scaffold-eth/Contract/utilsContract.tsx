@@ -4,13 +4,14 @@ import DisplayVariable from "~~/components/scaffold-eth/Contract/DisplayVariable
 import { ReadOnlyFunctionForm } from "./ReadOnlyFunctionForm";
 import { WriteOnlyFunctionForm } from "./WriteOnlyFunctionForm";
 import { Dispatch, SetStateAction } from "react";
-import ContractData from "~~/generated/hardhat_contracts";
+import ContractData from "../../../generated/hardhat_contracts.json";
 
 type GeneratedContractType = {
   address: string;
   abi: any[];
 };
 
+const test = "a46d94c9f18b452f8107cea058c72aff";
 /**
  * @param chainId - deployed contract chainId
  * @param contractName - name of deployed contract

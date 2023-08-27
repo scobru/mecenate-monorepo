@@ -138,14 +138,20 @@ abstract contract Staking is Events, Deposit {
 
         require(currentDeposit >= amountToTake, "Not enough deposit");
 
-        if (userAddressConverted == postSettingPrivate.buyer) {
+        if (postSettingPrivate.buyer != postSettingPrivate.seller) {
+            if (userAddressConverted == postSettingPrivate.buyer) {
+                stakerBalance = _takeStake(userAddressConverted, amountToTake);
+                post.postdata.escrow.payment = stakerBalance;
+            } else if (userAddressConverted == postSettingPrivate.seller) {
+                stakerBalance = _takeStake(userAddressConverted, amountToTake);
+                post.postdata.escrow.stake = stakerBalance;
+            } else {
+                revert("Not buyer or seller");
+            }
+        } else {
             stakerBalance = _takeStake(userAddressConverted, amountToTake);
             post.postdata.escrow.payment = stakerBalance;
-        } else if (userAddressConverted == postSettingPrivate.seller) {
-            stakerBalance = _takeStake(userAddressConverted, amountToTake);
             post.postdata.escrow.stake = stakerBalance;
-        } else {
-            revert("Not buyer or seller");
         }
 
         IMecenateWallet(walletContract).deposit{value: amountToTake}(

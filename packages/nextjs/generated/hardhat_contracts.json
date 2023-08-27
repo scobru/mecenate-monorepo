@@ -5,7 +5,7 @@
       "chainId": "11155111",
       "contracts": {
         "MecenateBay": {
-          "address": "0x1102D058CeC8568C7c2D9d0cc59eF85aC05B1B9c",
+          "address": "0xCf202b88723e6eaBde6F9B3AEcA12e08e25C6158",
           "abi": [
             {
               "inputs": [
@@ -17,6 +17,11 @@
                 {
                   "internalType": "address",
                   "name": "_verifierContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_walletContract",
                   "type": "address"
                 }
               ],
@@ -355,7 +360,7 @@
                   "type": "tuple"
                 }
               ],
-              "stateMutability": "payable",
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -579,11 +584,28 @@
               ],
               "stateMutability": "view",
               "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "walletContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
             }
           ]
         },
         "MecenateFeed": {
-          "address": "0x6Fce3f9718f3EDc54A2db54CD970D00992137C84",
+          "address": "0x0A87273B8c82361040Def48FA7BE78CCd9Eff89c",
           "abi": [
             {
               "inputs": [
@@ -1870,6 +1892,25 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
+                }
+              ],
+              "name": "getEncodedSymmetricKey",
+              "outputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "getPaymentRequested",
               "outputs": [
@@ -2199,6 +2240,24 @@
               "inputs": [
                 {
                   "internalType": "bytes",
+                  "name": "_encodedSymKey",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
+                }
+              ],
+              "name": "storeEncodedSymmetricKey",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes",
                   "name": "encryptedKey",
                   "type": "bytes"
                 },
@@ -2294,11 +2353,15 @@
               ],
               "stateMutability": "view",
               "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
             }
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0xBbc0B2339c0C64c825F523a59b473D61b9DA9ED6",
+          "address": "0x915db438048Ef651C9f7fc0646a7cd58a73a0E3a",
           "abi": [
             {
               "inputs": [
@@ -2393,7 +2456,7 @@
                   "type": "address"
                 }
               ],
-              "stateMutability": "payable",
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -2696,7 +2759,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0x692a950de8aB3cCea21221cCE61B6CeD227b36D2",
+          "address": "0xF0Ca8854891a7e7E42a937d50EF623A8b5692489",
           "abi": [
             {
               "inputs": [
@@ -2824,7 +2887,7 @@
           ]
         },
         "MecenateTreasury": {
-          "address": "0xeE028b2debC732D9a651f4E4ae47aa39E6637eF8",
+          "address": "0x1670feB44FE8eb249329903e8557e5272FF57793",
           "abi": [
             {
               "anonymous": false,
@@ -3182,7 +3245,7 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0x0b021f53850e9b76222b1d2ADFc35b1828c9A746",
+          "address": "0x9573D5EbA14cA6532aeF8c99d545ad89Af04617A",
           "abi": [
             {
               "inputs": [
@@ -3312,9 +3375,9 @@
               "name": "getUserAddressAt",
               "outputs": [
                 {
-                  "internalType": "bytes32",
+                  "internalType": "address",
                   "name": "user",
-                  "type": "bytes32"
+                  "type": "address"
                 }
               ],
               "stateMutability": "view",
@@ -3440,7 +3503,7 @@
           ]
         },
         "MecenateVerifier": {
-          "address": "0x062Eec5f31Ee575d64A48eDD910C415A34a28e07",
+          "address": "0xFa98129D8d6198fceFf593F6574Ed935043fe514",
           "abi": [
             {
               "inputs": [
@@ -3598,7 +3661,7 @@
           ]
         },
         "MecenateWallet": {
-          "address": "0xb3F990cAd598faf42a753E7E06433282D08198B2",
+          "address": "0xEbcb035291e36e1Ebcb87baF7Ad7106d2CfE3eD9",
           "abi": [
             {
               "inputs": [
@@ -3714,6 +3777,11 @@
                   "internalType": "uint256",
                   "name": "_amount",
                   "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "operator",
+                  "type": "address"
                 }
               ],
               "name": "withdraw",

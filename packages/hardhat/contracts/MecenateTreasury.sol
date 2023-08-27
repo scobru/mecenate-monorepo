@@ -42,15 +42,21 @@ contract MecenateTreasury is Ownable, Swapper {
     }
 
     function distribute(uint256 _amount, address _usersContract) external {
-        uint256 gasUsed = gasleft();
         require(
             block.timestamp - lastDistributed >= 1 days,
             "Can only distribute once a day"
         );
 
         uint256 balance = address(this).balance;
+
         uint256 fee = (balance * globalFee) / 10000;
+
+        address payable owner = payable(owner());
+
+        owner.transfer(fee);
+
         uint256 total = balance - fee;
+
         uint256 perIdentity = total /
             IMecenateUsers(_usersContract).getUserCount();
 
@@ -66,17 +72,7 @@ contract MecenateTreasury is Ownable, Swapper {
             _owner.transfer(perIdentity);
         }
 
-        address payable owner = payable(owner());
-        owner.transfer(fee);
-
         lastDistributed = block.timestamp;
-
-        uint256 gasPrice = tx.gasprice;
-        gasUsed = gasUsed - gasleft() + 21000 + (16 * msg.data.length);
-        uint256 refundAmount = gasUsed * gasPrice;
-        if (refundAmount > 0) {
-            payable(msg.sender).transfer(refundAmount);
-        }
     }
 
     receive() external payable {}

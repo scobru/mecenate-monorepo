@@ -7,6 +7,7 @@ import "../interfaces/IMecenateTreasury.sol";
 import "../interfaces/IMecenateVerifier.sol";
 import "../modules/FeedViewer.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "../interfaces/IMecenateWallet.sol";
 
 contract MecenateFeedFactory is Ownable, FeedViewer {
     uint256 public contractCounter;
@@ -53,19 +54,9 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     function buildFeed(
         bytes memory sismoConnectResponse
-    ) external payable returns (address) {
-        (
-            ,
-            bytes memory vaultIdBytes,
-            uint256 userAddress,
-            address userAddressConverted
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse
-            );
-
-        require(msg.value == getCreationFee(), "fee is not correct");
-
-        payable(treasuryContract).transfer(msg.value);
+    ) external returns (address) {
+        (, bytes memory vaultIdBytes, , ) = IMecenateVerifier(verifierContract)
+            .sismoVerify(sismoConnectResponse);
 
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
@@ -73,6 +64,14 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
             ),
             "user does not exist"
         );
+
+        bool result = IMecenateWallet(walletContract).pay(
+            payable(treasuryContract),
+            getCreationFee(),
+            keccak256(vaultIdBytes)
+        );
+
+        require(result, "payment failed");
 
         contractCounter++;
 

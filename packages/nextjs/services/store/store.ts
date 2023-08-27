@@ -17,6 +17,8 @@ type TAppStore = {
   setSismoResponse: (newSismoResponse: any) => void;
   sismoData: any;
   setSismoData: (newSismoData: any) => void;
+  verified: string;
+  setVerified: (newVerified: string) => void;
 };
 
 export const useAppStore = create<TAppStore>(set => ({
@@ -26,4 +28,6 @@ export const useAppStore = create<TAppStore>(set => ({
   setSismoResponse: (newValue: any): void => set(() => ({ sismoResponse: newValue })),
   sismoData: [],
   setSismoData: (newValue: any): void => set(() => ({ sismoData: newValue })),
+  verified: "",
+  setVerified: (newValue: string): void => set(() => ({ verified: newValue })),
 }));

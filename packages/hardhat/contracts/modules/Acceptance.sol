@@ -10,9 +10,9 @@ abstract contract Acceptance is Events, Staking {
         uint256 payment
     ) external virtual {
         (
-            uint256 vaultId,
+            ,
             bytes memory vaultIdBytes,
-            uint256 userAddress,
+            ,
             address userAddressConverted
         ) = sismoVerify(sismoConnectResponse);
 
@@ -31,15 +31,15 @@ abstract contract Acceptance is Events, Staking {
             "user does not exist"
         );
 
-        uint256 _payment = _addStake(userAddressConverted, payment);
+        _addStake(userAddressConverted, payment);
 
         if (post.postdata.escrow.payment > 0) {
             require(
-                _payment == post.postdata.escrow.payment,
+                payment == post.postdata.escrow.payment,
                 "Not enough buyer payment"
             );
         } else {
-            require(_payment > 0, "Payment is required");
+            require(payment > 0, "Payment is required");
         }
 
         require(
