@@ -15,6 +15,8 @@ This new version of Mecenate wants to integrate the following milestones:
 - [] Fix bugs in IPFS uploads
 - [] Improve the UI
 
+enjoy the beta on : https://mecenate.vercel.app/
+
 ## Current State v1.0.0:
 
 Currently, the protocol allows the anonymous purchase and sale of data of any kind. However, in the old version, the user is required to generate keys and store them locally in order to encrypt and decrypt the data sold or purchased. In this new version, I would like to optimize this process by making it as anonymous as possible by integrating Sismo and Lit Protocol. This integration will also lead to a significant modification of the backend, consisting of the Solidity contracts of the protocol. Therefore, the first phase is to rewrite the contracts, interfacing them with zk-proof instead of keys generated offline, and then move on to implementation in the backend.
