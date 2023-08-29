@@ -146,7 +146,7 @@ const ViewFeed: NextPage = () => {
   }
 
   async function renounce() {
-    const tx = await feedCtx?.renouncePost(response);
+    const tx = await feedCtx?.renouncePost(keccak256(store.sismoData.auths[0].userId));
     await tx?.wait();
     notification.success("Refund successful");
   }
@@ -426,13 +426,12 @@ const ViewFeed: NextPage = () => {
     const proofhash = abiCoder.decode(["bytes32"], feedData[1][2].encryptedData);
 
     //const proofhash = abiCoder.decode(["string"], feedData[1][2].encryptedData);
-
     //const sellerPubKeyDecoded = abiCoder.decode(["string"], userData.publicKey);
     const sellerPubKeyDecoded = userData.wallet;
 
     let symmetricKey = await feedCtx?.getEncodedSymmetricKey(response);
-    symmetricKey = ethers.utils.toUtf8String(symmetricKey);
 
+    symmetricKey = ethers.utils.toUtf8String(symmetricKey);
     console.log("Symmetric Key: ", symmetricKey);
 
     symmetricKey = customDecryption(keccak256(String(vaultId)), symmetricKey);
@@ -514,7 +513,7 @@ const ViewFeed: NextPage = () => {
     console.log("Data Retrieved.");
     console.log("Proof Hash Digest: ", proofHash58Digest);
 
-    const tx = await feedCtx?.submitHash(proofHash58Digest, response);
+    const tx = await feedCtx?.submitHash(proofHash58Digest, keccak256(store.sismoData.auths[0].userId));
     await tx.wait();
 
     await fetchData();

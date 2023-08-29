@@ -11,7 +11,6 @@ type GeneratedContractType = {
   abi: any[];
 };
 
-const test = "a46d94c9f18b452f8107cea058c72aff";
 /**
  * @param chainId - deployed contract chainId
  * @param contractName - name of deployed contract

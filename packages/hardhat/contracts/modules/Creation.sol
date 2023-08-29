@@ -9,10 +9,9 @@ abstract contract Creation is Staking {
         Structures.PostType postType,
         Structures.PostDuration postDuration,
         uint256 payment,
-        uint256 stake,
         address buyer,
         bytes memory sismoConnectResponse
-    ) external returns (Structures.Post memory) {
+    ) external payable returns (Structures.Post memory) {
         (
             ,
             bytes memory vaultIdBytes,
@@ -22,14 +21,6 @@ abstract contract Creation is Staking {
 
         require(keccak256(vaultIdBytes) == owner, "Not owner");
 
-        bool result = IMecenateWallet(walletContract).pay(
-            address(this),
-            stake,
-            keccak256(vaultIdBytes)
-        );
-
-        require(result, "Payment failed");
-
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
                 keccak256(vaultIdBytes)
@@ -38,7 +29,7 @@ abstract contract Creation is Staking {
         );
 
         if (post.postdata.escrow.stake == 0) {
-            require(stake > 0, "Stake is required");
+            require(msg.value > 0, "Stake is required");
         }
 
         require(
@@ -63,12 +54,12 @@ abstract contract Creation is Staking {
 
         postSettingPrivate = Structures.postSettingPrivate({
             seller: userAddressConverted,
-            vaultIdSeller: vaultIdBytes,
+            vaultIdSeller: keccak256(vaultIdBytes),
             buyer: buyer,
-            vaultIdBuyer: ZEROHASH
+            vaultIdBuyer: 0x00
         });
 
-        stake = _addStake(userAddressConverted, stake);
+        _addStake(userAddressConverted, msg.value);
 
         uint256 duration;
 
@@ -112,7 +103,7 @@ abstract contract Creation is Staking {
                 duration: duration
             }),
             escrow: Structures.PostEscrow({
-                stake: stake,
+                stake: msg.value,
                 payment: payment,
                 punishment: 0,
                 buyerPunishment: 0

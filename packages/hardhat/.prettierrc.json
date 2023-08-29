@@ -8,7 +8,6 @@
         "useTabs": false,
         "singleQuote": false,
         "bracketSpacing": false,
-        "trailingComma": "all",
         "plugins": [
           "prettier-plugin-solidity"
         ]

@@ -7,7 +7,6 @@ import "../interfaces/IMecenateTreasury.sol";
 import "../interfaces/IMecenateVerifier.sol";
 import "../modules/FeedViewer.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IMecenateWallet.sol";
 
 contract MecenateFeedFactory is Ownable, FeedViewer {
     uint256 public contractCounter;
@@ -20,7 +19,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     address private verifierContract;
 
-    address private walletContract;
+    mapping(bytes32 => address[]) internal feedStore;
 
     mapping(address => bool) public createdContracts;
 
@@ -31,13 +30,11 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     constructor(
         address _usersModuleContract,
         address _treasuryContract,
-        address _verifierContract,
-        address _walletContract
+        address _verifierContract
     ) {
         usersModuleContract = _usersModuleContract;
         treasuryContract = _treasuryContract;
         verifierContract = _verifierContract;
-        walletContract = _walletContract;
     }
 
     function setAuthorized(address _addr) external onlyOwner {
@@ -54,7 +51,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     function buildFeed(
         bytes memory sismoConnectResponse
-    ) external returns (address) {
+    ) external payable returns (address) {
         (, bytes memory vaultIdBytes, , ) = IMecenateVerifier(verifierContract)
             .sismoVerify(sismoConnectResponse);
 
@@ -65,24 +62,19 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
             "user does not exist"
         );
 
-        bool result = IMecenateWallet(walletContract).pay(
-            payable(treasuryContract),
-            getCreationFee(),
-            keccak256(vaultIdBytes)
-        );
-
-        require(result, "payment failed");
+        require(msg.value >= getCreationFee(), "Not enough payment");
 
         contractCounter++;
 
         MecenateFeed feed = new MecenateFeed(
             keccak256(vaultIdBytes),
             usersModuleContract,
-            verifierContract,
-            walletContract
+            verifierContract
         );
 
         feeds.push(address(feed));
+
+        feedStore[keccak256(vaultIdBytes)].push(address(feed));
 
         createdContracts[address(feed)] = true;
 
@@ -96,16 +88,15 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     }
 
     function getFeedsOwned(
-        bytes32 owner
+        bytes32 vaultId
     ) external view returns (address[] memory) {
-        address[] memory ownedFeeds = new address[](feeds.length);
-        for (uint256 i = 0; i < ownedFeeds.length; i++) {
-            if ((MecenateFeed(payable(feeds[i])).owner()) == owner) {
-                ownedFeeds[i] = feeds[i];
-            }
-        }
+        return feedStore[vaultId];
+    }
 
-        return ownedFeeds;
+    function getFeedsInfoOwned(
+        bytes32 vaultId
+    ) external view returns (Structures.Feed[] memory) {
+        return _getFeedsInfo(feedStore[vaultId]);
     }
 
     function getFeedInfo(

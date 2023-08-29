@@ -7,14 +7,13 @@ abstract contract Finalization is Staking {
     function finalizePost(
         bool valid,
         uint256 punishment,
-        bytes memory sismoConnectResponse
+        bytes32 encryptedVaultId
     ) external virtual returns (bool) {
-        (
-            uint256 vaultId,
-            bytes memory vaultIdBytes,
-            uint256 userAddress,
-            address userAddressConverted
-        ) = sismoVerify(sismoConnectResponse);
+        require(
+            postSettingPrivate.vaultIdBuyer == encryptedVaultId ||
+                postSettingPrivate.vaultIdSeller == encryptedVaultId,
+            "VaultId does not match"
+        );
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Submitted,
@@ -48,15 +47,13 @@ abstract contract Finalization is Staking {
 
             post.postdata.escrow.payment = buyerStake;
 
-            // reset postSettingPrivate
-            //_cancelPostSettingPrivate();
-
             emit Valid(post);
         } else if (post.postdata.settings.endTimeStamp > block.timestamp) {
             require(
-                postSettingPrivate.buyer == userAddressConverted,
+                postSettingPrivate.vaultIdBuyer == encryptedVaultId,
                 "You are not the buyer"
             );
+
             if (valid == true) {
                 address treasuryContract = IMecenateFactory(factoryContract)
                     .treasuryContract();
@@ -129,9 +126,9 @@ abstract contract Finalization is Staking {
     function _cancelPostSettingPrivate() internal virtual {
         postSettingPrivate = Structures.postSettingPrivate({
             buyer: address(0),
-            vaultIdBuyer: ZEROHASH,
+            vaultIdBuyer: 0x00,
             seller: address(0),
-            vaultIdSeller: ZEROHASH
+            vaultIdSeller: 0x00
         });
     }
 }

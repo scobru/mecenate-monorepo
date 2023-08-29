@@ -4,16 +4,9 @@ pragma solidity 0.8.19;
 import "./Staking.sol";
 
 abstract contract Renounce is Staking {
-    function renouncePost(bytes memory sismoConnectResponse) external virtual {
-        (
-            uint256 vaultId,
-            bytes memory vaultIdBytes,
-            uint256 userAddress,
-            address userAddressConverted
-        ) = sismoVerify(sismoConnectResponse);
-
+    function renouncePost(bytes32 encryptedVaultId) external virtual {
         require(
-            userAddressConverted == postSettingPrivate.seller,
+            encryptedVaultId == postSettingPrivate.vaultIdSeller,
             "You are not the seller"
         );
 
@@ -24,7 +17,7 @@ abstract contract Renounce is Staking {
             "Post is not Accepted or Submitted"
         );
 
-        _refundPost(userAddressConverted);
+        _refundPost();
 
         uint256 stake = post.postdata.escrow.stake;
 
@@ -51,23 +44,18 @@ abstract contract Renounce is Staking {
 
         postSettingPrivate = Structures.postSettingPrivate({
             buyer: address(0),
-            vaultIdBuyer: ZEROHASH,
+            vaultIdBuyer: 0x00,
             seller: address(0),
-            vaultIdSeller: ZEROHASH
+            vaultIdSeller: 0x00
         });
 
         emit Renounced(post);
     }
 
-    function _refundPost(address to) internal virtual {
+    function _refundPost() internal virtual {
         require(
             post.postdata.settings.status == Structures.PostStatus.Accepted,
             "Post is not accepted"
-        );
-
-        require(
-            postSettingPrivate.seller == to,
-            "Only  Seller can refund the post"
         );
 
         uint256 payment = post.postdata.escrow.payment;

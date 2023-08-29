@@ -6,7 +6,6 @@ import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
 import "../interfaces/IMecenateFactory.sol";
 import "../interfaces/IMecenateVerifier.sol";
-import "../interfaces/IMecenateWallet.sol";
 
 contract Data {
     bytes32 public owner;
@@ -23,22 +22,15 @@ contract Data {
 
     address public verifierContract;
 
-    address public walletContract;
-
     bytes internal encodedSymKey;
 
     bytes public constant ZEROHASH = "0x00";
 
     Structures.postSettingPrivate internal postSettingPrivate;
 
-    constructor(
-        address _usersModuleContract,
-        address _verifierContract,
-        address _walletContract
-    ) {
+    constructor(address _usersModuleContract, address _verifierContract) {
         usersModuleContract = _usersModuleContract;
         verifierContract = _verifierContract;
-        walletContract = _walletContract;
         post.postdata.settings.status = Structures.PostStatus.Waiting;
         factoryContract = msg.sender;
     }

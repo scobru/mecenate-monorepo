@@ -6,23 +6,14 @@ import "./Staking.sol";
 
 abstract contract Acceptance is Events, Staking {
     function acceptPost(
-        bytes memory sismoConnectResponse,
-        uint256 payment
-    ) external virtual {
+        bytes memory sismoConnectResponse
+    ) external payable virtual {
         (
             ,
             bytes memory vaultIdBytes,
             ,
             address userAddressConverted
         ) = sismoVerify(sismoConnectResponse);
-
-        bool result = IMecenateWallet(walletContract).pay(
-            address(this),
-            payment,
-            keccak256(vaultIdBytes)
-        );
-
-        require(result, "Payment failed");
 
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
@@ -31,25 +22,21 @@ abstract contract Acceptance is Events, Staking {
             "user does not exist"
         );
 
-        _addStake(userAddressConverted, payment);
-
         if (post.postdata.escrow.payment > 0) {
             require(
-                payment == post.postdata.escrow.payment,
+                msg.value == post.postdata.escrow.payment,
                 "Not enough buyer payment"
             );
         } else {
-            require(payment > 0, "Payment is required");
+            require(msg.value > 0, "Payment is required");
         }
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Proposed,
             "Post is not Proposed"
         );
-        require(
-            userAddressConverted != address(0),
-            "Buyer address cannot be zero"
-        );
+
+        _addStake(userAddressConverted, msg.value);
 
         if (postSettingPrivate.buyer != address(0)) {
             require(
@@ -58,13 +45,13 @@ abstract contract Acceptance is Events, Staking {
             );
         }
 
-        post.postdata.escrow.payment = payment;
+        post.postdata.escrow.payment = msg.value;
 
         post.postdata.settings.status = Structures.PostStatus.Accepted;
 
         postSettingPrivate = Structures.postSettingPrivate({
             buyer: userAddressConverted,
-            vaultIdBuyer: vaultIdBytes,
+            vaultIdBuyer: keccak256(vaultIdBytes),
             seller: postSettingPrivate.seller,
             vaultIdSeller: postSettingPrivate.vaultIdSeller
         });

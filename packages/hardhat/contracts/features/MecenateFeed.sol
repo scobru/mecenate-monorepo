@@ -21,9 +21,8 @@ contract MecenateFeed is
     constructor(
         bytes32 _owner,
         address _usersModuleContract,
-        address _verifierContract,
-        address _walletContract
-    ) Data(_usersModuleContract, _verifierContract, _walletContract) {
+        address _verifierContract
+    ) Data(_usersModuleContract, _verifierContract) {
         owner = _owner;
     }
 

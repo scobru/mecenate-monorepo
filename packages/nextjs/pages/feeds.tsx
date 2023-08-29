@@ -1,14 +1,15 @@
 import type { NextPage } from "next";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
-import { notification } from "~~/utils/scaffold-eth";
-const crypto = require("asymmetric-crypto");
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface } from "ethers";
-import { formatEther, keccak256 } from "ethers/lib/utils.js";
+import { ContractInterface, ethers } from "ethers";
+import { formatEther, keccak256, toUtf8Bytes } from "ethers/lib/utils.js";
 import { useAppStore } from "~~/services/store/store";
 import Link from "next/link";
-import { Address, VerifiedBadge } from "~~/components/scaffold-eth";
+import { VerifiedBadge } from "~~/components/scaffold-eth";
+import { relative } from "path";
+import { notification } from "~~/utils/scaffold-eth";
+
 const DEBUG = true;
 
 const Feeds: NextPage = () => {
@@ -18,12 +19,11 @@ const Feeds: NextPage = () => {
 
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateFeedFactory");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
+  const deployedContractWallet = getDeployedContract(chain?.id.toString(), "MecenateWallet");
+
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
-  const [vaultId, setVaultId] = React.useState<string>("");
-  const [userAddress, setUserAddress] = React.useState<string>("");
-  const [response, setResponse] = React.useState<string>("");
-  const [fixedFee, setFixedFee] = React.useState<string>("");
+  const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
 
   const store = useAppStore();
 
@@ -45,6 +45,9 @@ const Feeds: NextPage = () => {
   let treasuryAddress: string;
   let treasuryAbi: ContractInterface[] = [];
 
+  let walletAddress: string;
+  let walletAbi: ContractInterface[] = [];
+
   type UserData = {
     mecenateID: number;
     wallet: string;
@@ -59,6 +62,10 @@ const Feeds: NextPage = () => {
     ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
   }
 
+  if (deployedContractWallet) {
+    ({ address: walletAddress, abi: walletAbi } = deployedContractWallet);
+  }
+
   const treasuryCtx = useContract({
     address: treasuryAddress!,
     abi: treasuryAbi,
@@ -71,81 +78,54 @@ const Feeds: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  async function getFeeds() {
-    const _feeds = await factoryCtx?.getFeeds();
-    const _feedsInfo = await factoryCtx?.getFeedsInfo();
-    setFeeds(_feeds);
-    setFeedsInfos(_feedsInfo);
-    const _fixedFee = await treasuryCtx?.fixedFee();
-    setFixedFee(_fixedFee);
-    console.log(_feedsInfo);
-    console.log(store);
-    if (DEBUG) console.log(feeds);
-  }
+  const walletCtx = useContract({
+    address: walletAddress!,
+    abi: walletAbi,
+    signerOrProvider: signer || provider,
+  });
 
-  async function getFeedsOwned() {
-    let _feeds = await factoryCtx?.getFeedsOwned(keccak256(store.sismoResponse));
-
-    // remove 0x0000000000000000000000000000000000000000 from _feeds
-    _feeds = _feeds.filter((feed: string) => feed != "0x0000000000000000000000000000000000000000");
-
-    setFeeds(_feeds);
-    const _feedsInfo = await factoryCtx?.getFeedsInfo();
-    const _tempFeedInfo: Feed[] = [];
-
-    for (let i = 0; i < _feedsInfo.length; i++) {
-      if (_feedsInfo[i].contractAddress == _feeds[i]) {
-        _tempFeedInfo.push(_feedsInfo[i]);
-      }
+  const getFeeds = async function getFeeds() {
+    if (onlyYourFeeds == false) {
+      const _feeds = await factoryCtx?.getFeeds();
+      const _feedsInfo = await factoryCtx?.getFeedsInfo();
+      setFeeds(_feeds);
+      setFeedsInfos(_feedsInfo);
+      if (DEBUG) console.log(_feeds);
+      if (DEBUG) console.log(_feedsInfo);
+    } else {
+      const _feeds = await factoryCtx?.getFeedsOwned(keccak256(store.sismoData.auths[0].userId));
+      const _feedsInfo = await factoryCtx?.getFeedsInfoOwned(keccak256(store.sismoData.auths[0].userId));
+      setFeeds(_feeds);
+      setFeedsInfos(_feedsInfo);
+      if (DEBUG) console.log(_feeds);
+      if (DEBUG) console.log(_feedsInfo);
     }
-
-    setFeedsInfos(_feedsInfo);
-
-    if (DEBUG) console.log(feeds);
-  }
-
-  async function buildFeed() {
-    const tx = await factoryCtx?.buildFeed(store.sismoResponse);
-    if (DEBUG) console.log(tx);
-  }
+    console.log(onlyYourFeeds);
+  };
 
   useEffect(() => {
     if (factoryCtx) {
       getFeeds();
     }
-    const interval = setInterval(() => {
-      if (signer && provider) {
-        if (
-          store &&
-          store.sismoData &&
-          store.sismoData.auths &&
-          store.sismoData.auths[1] &&
-          store.sismoData.auths[1].userId
-        ) {
-          const userAddress = store.sismoData.auths[1].userId;
-          const vaultId = store.sismoData.vaultId;
-          const response = store.sismoResponse;
+  }, [onlyYourFeeds]);
 
-          setVaultId(vaultId);
-          setUserAddress(userAddress);
-          setResponse(response);
-        }
-      }
-    }, 10000);
+  async function buildFeed() {
+    const id = notification.loading("Transaction sent, waiting for confirmation");
+    // Esegui la transazione
+    const tx = await factoryCtx?.buildFeed(store.sismoResponse);
+    await tx.wait();
 
-    return () => clearInterval(interval);
-  }, [signer, factoryCtx]);
+    if (DEBUG) console.log(tx);
 
-  // listen for events FeedCreated
-  /* useEffect(() => {
-    if (factoryCtx) {
-      factoryCtx.on("FeedCreated", (feedAddress: string, owner: string, event: any) => {
-        if (DEBUG) console.log("FeedCreated", feedAddress, owner, event);
-        notification.success("New Feed Created");
-        getFeeds();
-      });
+    if (tx.status == 0) {
+      notification.error("Transaction failed");
+      notification.remove(id);
+      return;
+    } else {
+      notification.success("Transaction completed successfully");
+      notification.remove(id);
     }
-  }); */
+  }
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black min-w-fit">
@@ -174,7 +154,7 @@ const Feeds: NextPage = () => {
         <button
           className="btn-wide text-base-content bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md my-2"
           onClick={async () => {
-            await getFeedsOwned();
+            setOnlyYourFeeds(true);
           }}
         >
           <i className="fas fa-user-alt mr-2"></i> Your Feeds
@@ -182,7 +162,7 @@ const Feeds: NextPage = () => {
         <button
           className="btn-wide text-base-content bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md my-2"
           onClick={async () => {
-            await getFeeds();
+            setOnlyYourFeeds(false);
           }}
         >
           <i className="fas fa-globe mr-2"></i> All Feeds
@@ -191,6 +171,9 @@ const Feeds: NextPage = () => {
 
       <div className="grid grid-cols-1 gap-4 my-10">
         {feeds &&
+          feedsInfos &&
+          feeds.length > 0 &&
+          store?.sismoData?.auths &&
           store?.sismoData?.auths?.length > 0 &&
           feeds.map((feed, i) => (
             <div key={i} className="card bg-base-100 shadow-xl p-2 text-base-content">
@@ -200,11 +183,11 @@ const Feeds: NextPage = () => {
                   <div className="col-span-4 overflow-hidden text-truncate">{feed}</div>
                   <div className="col-span-2 font-bold">Seller Stake:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">
-                    {formatEther(feedsInfos[i].sellerStake)} ETH
+                    {formatEther(feedsInfos[i]?.sellerStake)} ETH
                   </div>
                   <div className="col-span-2 font-bold">Buyer Payment:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">
-                    {formatEther(feedsInfos[i].buyerStake)} ETH
+                    {formatEther(feedsInfos[i]?.buyerStake)} ETH
                   </div>
                   {/* <div className="col-span-2 font-bold">Operator:</div>
                   <div className="col-span-4 overflow-hidden text-truncate">{feedsInfos[i].operator}</div> */}

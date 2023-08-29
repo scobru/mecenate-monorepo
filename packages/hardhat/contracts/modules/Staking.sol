@@ -105,11 +105,28 @@ abstract contract Staking is Events, Deposit {
     function addStake(
         bytes memory sismoConnectResponse
     ) external payable checkStatus returns (uint256) {
-        (, , , address userAddressConverted) = sismoVerify(
-            sismoConnectResponse
-        );
+        (
+            ,
+            bytes memory vaultIdBytes,
+            ,
+            address userAddressConverted
+        ) = sismoVerify(sismoConnectResponse);
 
         uint256 stakerBalance;
+
+        require(
+            keccak256(vaultIdBytes) == postSettingPrivate.vaultIdBuyer ||
+                keccak256(vaultIdBytes) == postSettingPrivate.vaultIdSeller,
+            "VaultId does not match"
+        );
+
+        require(
+            userAddressConverted == postSettingPrivate.buyer ||
+                userAddressConverted == postSettingPrivate.seller,
+            "Not Buyer or Seller"
+        );
+
+        // check if user
 
         if (userAddressConverted == postSettingPrivate.buyer) {
             stakerBalance = _addStake(userAddressConverted, msg.value);
@@ -117,8 +134,6 @@ abstract contract Staking is Events, Deposit {
         } else if (userAddressConverted == postSettingPrivate.seller) {
             stakerBalance = _addStake(userAddressConverted, msg.value);
             post.postdata.escrow.stake = stakerBalance;
-        } else {
-            revert("Not buyer or seller");
         }
 
         return stakerBalance;
@@ -127,7 +142,7 @@ abstract contract Staking is Events, Deposit {
     function takeStake(
         uint256 amountToTake,
         bytes memory sismoConnectResponse
-    ) external payable checkStatus returns (uint256) {
+    ) external checkStatus returns (uint256) {
         (, , , address userAddressConverted) = sismoVerify(
             sismoConnectResponse
         );
@@ -154,24 +169,20 @@ abstract contract Staking is Events, Deposit {
             post.postdata.escrow.stake = stakerBalance;
         }
 
-        IMecenateWallet(walletContract).deposit{value: amountToTake}(
-            sismoConnectResponse
-        );
+        payable(userAddressConverted).transfer(amountToTake);
 
         return stakerBalance;
     }
 
     function takeFullStake(
         bytes memory sismoConnectResponse
-    ) external payable checkStatus returns (uint256) {
+    ) external checkStatus returns (uint256) {
         (, , , address userAddressConverted) = sismoVerify(
             sismoConnectResponse
         );
         uint256 stakerBalance = _takeFullStake(userAddressConverted);
 
-        IMecenateWallet(walletContract).deposit{value: stakerBalance}(
-            sismoConnectResponse
-        );
+        payable(userAddressConverted).transfer(stakerBalance);
 
         return stakerBalance;
     }

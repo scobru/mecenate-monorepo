@@ -4,7 +4,6 @@ import { useContract, useProvider, useNetwork, useSigner, useAccount } from "wag
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
-import { Buffer } from "buffer";
 import { formatEther, keccak256, parseEther, toUtf8Bytes } from "ethers/lib/utils.js";
 import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
 import { CONFIG, AUTHS, SIGNATURE_REQUEST, AuthType, ClaimType } from "./../sismo.config";
@@ -170,6 +169,7 @@ const Identity: NextPage = () => {
   useEffect(() => {
     getContractData();
     getDeposit();
+    console.log(store);
   }, [signer]);
 
   const deposit = async () => {

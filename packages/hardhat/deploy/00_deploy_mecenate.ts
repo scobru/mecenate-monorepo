@@ -8,7 +8,7 @@ import { ethers } from "ethers";
  * @param hre HardhatRuntimeEnvironment object.
  */
 const deployYourContract: DeployFunction = async function (
-  hre: HardhatRuntimeEnvironment
+  hre: HardhatRuntimeEnvironment,
 ) {
   /*
     On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
@@ -87,7 +87,7 @@ const deployYourContract: DeployFunction = async function (
   feedFactory.receipt &&
     console.log(
       "Feed Factory deployed at:",
-      feedFactory.receipt.contractAddress
+      feedFactory.receipt.contractAddress,
     );
 
   const feed = await deploy("MecenateFeed", {
@@ -120,7 +120,7 @@ const deployYourContract: DeployFunction = async function (
   mecenateBay.receipt &&
     console.log(
       "Mecenate Bay deployed at:",
-      mecenateBay.receipt.contractAddress
+      mecenateBay.receipt.contractAddress,
     );
 
   const mecenateStats = await deploy("MecenateStats", {
@@ -141,7 +141,7 @@ const deployYourContract: DeployFunction = async function (
   mecenateStats.receipt &&
     console.log(
       "Mecenate Stats Factory deployed at:",
-      mecenateStats.receipt.contractAddress
+      mecenateStats.receipt.contractAddress,
     );
 };
 

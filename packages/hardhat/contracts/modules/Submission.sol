@@ -6,14 +6,12 @@ import "./Events.sol";
 abstract contract Submission is Events {
     function submitHash(
         bytes memory encryptedKey,
-        bytes memory sismoConnectResponse
+        bytes32 encryptedVaultId
     ) external virtual {
-        (
-            uint256 vaultId,
-            bytes memory vaultIdBytes,
-            uint256 userAddress,
-            address userAddressConverted
-        ) = sismoVerify(sismoConnectResponse);
+        require(
+            postSettingPrivate.vaultIdSeller == encryptedVaultId,
+            "VaultId does not match"
+        );
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Accepted ||
@@ -24,13 +22,13 @@ abstract contract Submission is Events {
 
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
-                keccak256(vaultIdBytes)
+                encryptedVaultId
             ),
             "user does not exist"
         );
 
         require(
-            post.creator.vaultId == keccak256(vaultIdBytes),
+            post.creator.vaultId == encryptedVaultId,
             "You are not the creator"
         );
 
@@ -54,8 +52,7 @@ abstract contract Submission is Events {
         ) = sismoVerify(sismoConnectResponse);
 
         require(
-            keccak256(vaultIdBytes) ==
-                keccak256(postSettingPrivate.vaultIdBuyer),
+            keccak256(vaultIdBytes) == postSettingPrivate.vaultIdBuyer,
             "VaultId does not match"
         );
 
@@ -71,27 +68,21 @@ abstract contract Submission is Events {
             "Post is not Accepted or Submitted"
         );
 
-        return keccak256(postSettingPrivate.vaultIdSeller);
+        return postSettingPrivate.vaultIdSeller;
     }
 
     function revealData(
         bytes memory decryptedData,
-        bytes memory sismoConnectResponse
+        bytes32 encryptedVaultId
     ) external virtual returns (bytes memory) {
-        (
-            uint256 vaultId,
-            bytes memory vaultIdBytes,
-            uint256 userAddress,
-            address userAddressConverted
-        ) = sismoVerify(sismoConnectResponse);
+        require(
+            postSettingPrivate.vaultIdSeller == encryptedVaultId,
+            "VaultId does not match"
+        );
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Finalized,
             "Post is not Finalized"
-        );
-        require(
-            postSettingPrivate.seller == userAddressConverted,
-            "You are not the buyer"
         );
         post.postdata.data.decryptedData = decryptedData;
         post.postdata.settings.status = Structures.PostStatus.Revealed;
