@@ -3,11 +3,12 @@ import React, { useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { notification } from "~~/utils/scaffold-eth";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, ethers } from "ethers";
+import { ContractInterface, Signer, ethers } from "ethers";
 import { formatEther, parseEther } from "ethers/lib/utils.js";
 import { useAppStore } from "~~/services/store/store";
 import { Address } from "~~/components/scaffold-eth";
 import VerifiedBadge from "~~/components/scaffold-eth/VerifiedBadge";
+import { useTransactor } from "~~/hooks/scaffold-eth";
 
 const Bay: NextPage = () => {
   const provider = useProvider();
@@ -26,6 +27,8 @@ const Bay: NextPage = () => {
   const [requestAddress, setRequestAddress] = React.useState<string>("");
 
   const [signerAddress, setSignerAddress] = React.useState<string>("");
+
+  const txData = useTransactor(signer as Signer);
 
   type BayRequest = {
     request: string;
@@ -66,19 +69,13 @@ const Bay: NextPage = () => {
 
   async function acceptBayRequest(index: number, address: string) {
     if (signer) {
-      const tx = await bayCtx?.acceptRequest(index, address, store.sismoResponse);
-      if (tx) {
-        notification.success("Request accepted successfully");
-      }
+      txData(bayCtx?.acceptRequest(index, address, store.sismoResponse));
     }
   }
 
   async function removeRequest(index: number) {
     if (signer) {
-      const tx = await bayCtx?.removeRequest(index);
-      if (tx) {
-        notification.success("Request removed successfully");
-      }
+      txData(bayCtx?.removeRequest(index));
     }
   }
 
@@ -99,11 +96,7 @@ const Bay: NextPage = () => {
         postCount: 0,
       };
 
-      const tx = await bayCtx?.createRequest(request, store.sismoResponse);
-
-      if (tx) {
-        notification.success("Request created successfully");
-      }
+      txData(bayCtx?.createRequest(request, store.sismoResponse, { value: parseEther(requestPayment) }));
 
       getAllRequest();
     }

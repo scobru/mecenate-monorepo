@@ -16,6 +16,8 @@ import { VerifiedBadge } from "~~/components/scaffold-eth";
 import { useAppStore } from "~~/services/store/store";
 import Spinner from "~~/components/Spinner";
 
+import { useTransactor } from "~~/hooks/scaffold-eth";
+
 const ViewFeed: NextPage = () => {
   //const crypto = require("asymmetric-crypto");
   const AbiCoder = new ethers.utils.AbiCoder();
@@ -30,6 +32,7 @@ const ViewFeed: NextPage = () => {
   const { data: signer } = useSigner();
   const provider = useProvider();
   const router = useRouter();
+  const txData = useTransactor(signer as Signer);
 
   const { addr } = router.query;
 
@@ -49,6 +52,7 @@ const ViewFeed: NextPage = () => {
   const [imageFile, setImageFile] = React.useState<any>("");
   const [image, setImage] = React.useState("");
   const [postCount, setPostCount] = useState<any>("");
+  const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState<any>("");
 
   const user = "";
   const owner = "";
@@ -202,7 +206,6 @@ const ViewFeed: NextPage = () => {
 
   const createPost = async function createPost() {
     await fetchData();
-    const pubKey = vaultId;
     const dataSaved = await savePost(postRawData);
 
     notification.warning(
@@ -288,25 +291,21 @@ const ViewFeed: NextPage = () => {
       _buyer = buyer;
     }
 
-    const tx = await feedCtx?.createPost(
-      proofOfHashEncode,
-      Number(postType),
-      Number(postDuration),
-      parseEther(buyerPayment),
-      parseEther(postStake),
-      _buyer,
-      response,
+    txData(
+      feedCtx?.createPost(
+        proofOfHashEncode,
+        Number(postType),
+        Number(postDuration),
+        parseEther(buyerPayment),
+        _buyer,
+        response,
+        { value: parseEther(postStake) },
+      ),
     );
-
-    await tx?.wait();
-
-    const encrypted = customEncryption(keccak256(String(vaultId)), dataSaved.symmetricKey);
-    const saveToContract = await feedCtx?.storeEncodedSymmetricKey(toUtf8Bytes(encrypted), response);
-    await saveToContract?.wait();
   };
 
   async function acceptPost() {
-    const tx = await feedCtx?.acceptPost(response, parseEther(postPayment));
+    txData(feedCtx?.acceptPost(response, { value: parseEther(postPayment) }));
   }
 
   async function savePost(RawData: string): Promise<any | void> {
@@ -421,23 +420,7 @@ const ViewFeed: NextPage = () => {
 
   async function submitData() {
     const abiCoder = new ethers.utils.AbiCoder();
-    //const buyerPubKeyDecoded = abiCoder.decode(["string"], feedData[1][0].buyerPubKey);
-
     const proofhash = abiCoder.decode(["bytes32"], feedData[1][2].encryptedData);
-
-    //const proofhash = abiCoder.decode(["string"], feedData[1][2].encryptedData);
-    //const sellerPubKeyDecoded = abiCoder.decode(["string"], userData.publicKey);
-    const sellerPubKeyDecoded = userData.wallet;
-
-    let symmetricKey = await feedCtx?.getEncodedSymmetricKey(response);
-
-    symmetricKey = ethers.utils.toUtf8String(symmetricKey);
-    console.log("Symmetric Key: ", symmetricKey);
-
-    symmetricKey = customDecryption(keccak256(String(vaultId)), symmetricKey);
-
-    const encrypted = customEncryption(keccak256(String(vaultId)), symmetricKey);
-
     /* const symmetricKeyHash = await ErasureHelper.multihash({
       input: symmetricKey,
       inputType: "raw",
@@ -455,11 +438,10 @@ const ViewFeed: NextPage = () => {
       esp_version: "v1.2.0",
       proofhash: proofhash,
       sender: signer?.getAddress(),
-      encryptedSymKey: encrypted,
+      encryptedSymKey: symmetricKey,
     };
 
     const pinata = await new pinataSDK(pinataApiKey, pinataApiSecret);
-
     const pinataAuth = await pinata.testAuthentication();
 
     if (pinataAuth.authenticated !== true) {
@@ -471,7 +453,6 @@ const ViewFeed: NextPage = () => {
     notification.success("Saving proof JSON...");
 
     const pin = await pinata.pinJSONToIPFS(json_selldata_v120);
-
     const proofHash58 = await ErasureHelper.multihash({
       input: JSON.stringify(json_selldata_v120),
       inputType: "raw",
@@ -492,7 +473,6 @@ const ViewFeed: NextPage = () => {
     }
 
     console.log("Data Saved.");
-
     notification.success("Data Saved.");
 
     //CHeck Fetch data
@@ -513,10 +493,7 @@ const ViewFeed: NextPage = () => {
     console.log("Data Retrieved.");
     console.log("Proof Hash Digest: ", proofHash58Digest);
 
-    const tx = await feedCtx?.submitHash(proofHash58Digest, keccak256(store.sismoData.auths[0].userId));
-    await tx.wait();
-
-    await fetchData();
+    txData(feedCtx?.submitHash(proofHash58Digest, keccak256(store.sismoData.auths[0].userId)));
 
     return {
       proofJson: json_selldata_v120,
@@ -576,6 +553,7 @@ const ViewFeed: NextPage = () => {
   async function retrievePost() {
     console.log("Retrieving Data...");
 
+    const id = notification.loading("Retrieving Data...");
     await fetchData();
 
     const decodeHash = await ErasureHelper.multihash({
@@ -597,11 +575,9 @@ const ViewFeed: NextPage = () => {
     );
 
     const responseDecodeHahJSON = await JSON.parse(JSON.stringify(responseDecodeHash.data));
-
     console.log("Response Decode Hash: ", responseDecodeHahJSON);
 
     const encryptedSymKey = await JSON.parse(JSON.stringify(responseDecodeHahJSON.encryptedSymKey));
-
     console.log("Encrypted Symmetric Key: ", encryptedSymKey);
 
     /* const decrypted = crypto.decrypt(
@@ -610,13 +586,6 @@ const ViewFeed: NextPage = () => {
       encryptedSymKey.ephemPubKey,
       secretKey,
     ); */
-
-    const vaultIdSecret = await feedCtx?.getVaultIdSecret(response);
-    //const decrypted = ErasureHelper.crypto.symmetric.decryptMessage(vaultIdSecret, encryptedSymKey);
-    const decrypted = customDecryption(String(vaultIdSecret), encryptedSymKey);
-
-    console.log(decrypted);
-    console.log(responseDecodeHahJSON.proofhash);
 
     const _decodeHash = await ErasureHelper.multihash({
       input: responseDecodeHahJSON.proofhash.toString(),
@@ -652,7 +621,7 @@ const ViewFeed: NextPage = () => {
     const response_Encrypteddatahash_JSON = JSON.parse(JSON.stringify(response_Encrypteddatahash.data));
 
     const decryptFile = ErasureHelper.crypto.symmetric.decryptMessage(
-      decrypted,
+      encryptedSymKey,
       response_Encrypteddatahash_JSON.encryptedData,
     );
 
@@ -684,13 +653,14 @@ const ViewFeed: NextPage = () => {
 
         saveAs(file, String(postCount) + feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1]);
       } else {
+        notification.remove(id);
         notification.success(decryptFile);
       }
 
       await fetchData();
 
       return {
-        rawData: decrypted,
+        rawData: encryptedSymKey,
         hashCheck: hashCheck,
       };
     } else {
@@ -752,35 +722,35 @@ const ViewFeed: NextPage = () => {
     const AbiCoder = new ethers.utils.AbiCoder();
     const dataEncoded = AbiCoder.encode(["string", "string"], [symKeyHash, rawDataHash]);
 
-    const tx = await feedCtx?.revealData(dataEncoded, response);
-    await tx.wait();
-    await fetchData();
+    txData(feedCtx?.revealData(dataEncoded, keccak256(store.sismoData.auths[0].userId)));
 
-    if (tx.hash) {
-      notification.success("Post Revealed");
-    }
+    await fetchData();
   }
 
   async function addStake() {
     console.log("Adding Stake...");
-    const tx = await feedCtx?.addStake(response, { value: parseEther(stakeAmount) });
-    await tx.wait();
+    txData(feedCtx?.addStake(response, { value: parseEther(stakeAmount) }));
+    await fetchData();
+  }
+
+  async function takeAll() {
+    console.log("Take All Stake...");
+    txData(feedCtx?.takeFullStake(response));
     await fetchData();
   }
 
   async function takeStake() {
-    console.log("Adding Stake...");
-    const tx = await feedCtx?.takeStake(parseEther(stakeAmount), response);
-    await tx.wait();
+    console.log("Take Stake...");
+    txData(feedCtx?.takeStake(parseEther(stakeAmount), response));
     await fetchData();
   }
 
   async function finalizePost() {
     console.log("Finalizing Data...");
     if (valid == true) {
-      const tx = await feedCtx?.finalizePost(valid, parseEther("0"), response);
+      txData(feedCtx?.finalizePost(valid, parseEther("0"), keccak256(store.sismoData.auths[0].userId)));
     } else {
-      const tx = await feedCtx?.finalizePost(valid, parseEther(punishment), response);
+      txData(feedCtx?.finalizePost(valid, parseEther(punishment), keccak256(store.sismoData.auths[0].userId)));
     }
 
     await fetchData();
@@ -858,10 +828,25 @@ const ViewFeed: NextPage = () => {
   return (
     <div className="flex flex-col items-center pt-2 p-2 m-2">
       {feedData[0] != null ? (
-        <div className="flex flex-col py-5  text-left ">
+        <div className="flex flex-col py-2  text-left ">
           {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
             <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
           )}
+          <div className="text-2xl my-5 font-bold hover:text-success">
+            {feedData.postdata.settings.status === 6
+              ? "> Waiting for Creator"
+              : feedData.postdata.settings.status === 5
+              ? "> Waiting for Creator"
+              : feedData.postdata.settings.status === 4
+              ? "> Waiting for Creator"
+              : feedData.postdata.settings.status === 3
+              ? "> Waiting for buyer validate the data"
+              : feedData.postdata.settings.status === 2
+              ? "> Waiting for submission from seller"
+              : feedData.postdata.settings.status === 1
+              ? "> Waiting for Acceptance from a buyer"
+              : "> Waiting for Creator"}
+          </div>
           <div className="flex flex-wrap text-left w-full">
             <div tabIndex={0} className="collapse">
               <div className="collapse-title text-xl font-medium hover:bg-primary">Seller</div>
@@ -957,7 +942,6 @@ const ViewFeed: NextPage = () => {
                           </Dropzone>
                         </div>
                       ) : null}
-                      <div className="font-bold">⚠️ Please confirm all 2 transactions.</div>
                       <button
                         className="btn btn-primary w-full mt-4"
                         onClick={async () => {
@@ -988,13 +972,13 @@ const ViewFeed: NextPage = () => {
                       </label>
                     </div>
                     <div className="modal-body space-y-4 text-left">
-                      {/*  <input
+                      <input
                         type="password"
                         className="input w-full"
                         placeholder="Symmetric Key"
                         value={symmetricKey}
                         onChange={e => setSymmetricKey(e.target.value)}
-                      /> */}
+                      />
                       <br />
                       <button
                         className="btn  w-full"
@@ -1258,7 +1242,6 @@ const ViewFeed: NextPage = () => {
                           className="btn  w-full"
                           onClick={async () => {
                             const postData = await addStake();
-                            console.log(postData);
                           }}
                         >
                           Add Stake
@@ -1267,10 +1250,17 @@ const ViewFeed: NextPage = () => {
                           className="btn  w-full"
                           onClick={async () => {
                             const postData = await takeStake();
-                            console.log(postData);
                           }}
                         >
                           Take Stake
+                        </button>
+                        <button
+                          className="btn  w-full"
+                          onClick={async () => {
+                            const postData = await takeAll();
+                          }}
+                        >
+                          Take All
                         </button>
                       </div>
                       <div className="modal-action space-x-2 mt-4">
@@ -1280,14 +1270,14 @@ const ViewFeed: NextPage = () => {
                       </div>
                     </div>
                   </div>
-                  <button
+                  <label
                     className="btn   modal-button  mx-2 my-2"
                     onClick={() => {
                       decodeData();
                     }}
                   >
                     Decode
-                  </button>
+                  </label>
                 </div>
               </div>
             </div>

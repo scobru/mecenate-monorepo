@@ -61,7 +61,7 @@ const deployYourContract: DeployFunction = async function (
   users.receipt &&
     console.log("Users deployed at:", users.receipt.contractAddress);
 
-  const wallet = await deploy("MecenateWallet", {
+  const vault = await deploy("MecenateVault", {
     from: deployer,
     // Contract constructor arguments
     args: [verifier.address, users.address],
@@ -71,13 +71,13 @@ const deployYourContract: DeployFunction = async function (
     autoMine: true,
   });
 
-  wallet.receipt &&
-    console.log("Wallet deployed at:", wallet.receipt.contractAddress);
+  vault.receipt &&
+    console.log("Vault deployed at:", vault.receipt.contractAddress);
 
   const feedFactory = await deploy("MecenateFeedFactory", {
     from: deployer,
     // Contract constructor arguments
-    args: [users.address, treasury.address, verifier.address, wallet.address],
+    args: [users.address, treasury.address, verifier.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -92,12 +92,7 @@ const deployYourContract: DeployFunction = async function (
 
   const feed = await deploy("MecenateFeed", {
     from: deployer,
-    args: [
-      ethers.constants.HashZero,
-      users.address,
-      verifier.address,
-      wallet.address,
-    ],
+    args: [ethers.constants.HashZero, users.address, verifier.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -110,7 +105,7 @@ const deployYourContract: DeployFunction = async function (
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
     // Contract constructor arguments
-    args: [users.address, verifier.address, wallet.address],
+    args: [users.address, verifier.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.

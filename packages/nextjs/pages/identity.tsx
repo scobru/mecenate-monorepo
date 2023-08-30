@@ -1,14 +1,14 @@
 import type { NextPage } from "next";
 import React, { useEffect } from "react";
-import { useContract, useProvider, useNetwork, useSigner, useAccount } from "wagmi";
+import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, ethers } from "ethers";
+import { ContractInterface, Signer, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
-import { formatEther, keccak256, parseEther, toUtf8Bytes } from "ethers/lib/utils.js";
+import { keccak256 } from "ethers/lib/utils.js";
 import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
 import { CONFIG, AUTHS, SIGNATURE_REQUEST, AuthType, ClaimType } from "./../sismo.config";
 import { useAppStore } from "~~/services/store/store";
-import { VerifiedBadge } from "~~/components/scaffold-eth/";
+import { useTransactor } from "~~/hooks/scaffold-eth";
 
 const DEBUG = true;
 
@@ -72,40 +72,22 @@ const Identity: NextPage = () => {
   const [pageState, setPageState] = React.useState<string>("init");
   const [error, setError] = React.useState<string>();
   const [fee, setFee] = React.useState(0);
-  const [identityFee, setIdentityFee] = React.useState(0);
-  const [name, setName] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [imageFile, setImageFile] = React.useState<File>();
-  const [image, setImage] = React.useState("");
   const [responseBytes, setResponseBytes] = React.useState<string>();
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
-  const deployedContractWallet = getDeployedContract(chain?.id.toString(), "MecenateWallet");
-  const [signature, setSignature] = React.useState<string>();
-  const [amount, setAmount] = React.useState(0);
-  const [depositedBalance, setDepositedBalance] = React.useState(0);
-  const [to, setTo] = React.useState<any>("");
-
+  const txData = useTransactor(signer as Signer);
+  const [userExists, setUserExists] = React.useState<boolean>(false);
   const store = useAppStore();
 
   let UsersAddress!: string;
   let UsersAbi: ContractInterface[] = [];
-
-  type UserData = {
-    mecenateID: number;
-    wallet: string;
-    publicKey: string;
-  };
 
   let identityAddress!: string;
   let identityAbi: ContractInterface[] = [];
 
   let treasuryAddress!: string;
   let treasuryAbi: ContractInterface[] = [];
-
-  let walletAddress!: string;
-  let walletAbi: ContractInterface[] = [];
 
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
@@ -117,10 +99,6 @@ const Identity: NextPage = () => {
 
   if (deployedContractTreasury) {
     ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
-  }
-
-  if (deployedContractWallet) {
-    ({ address: walletAddress, abi: walletAbi } = deployedContractWallet);
   }
 
   const usersCtx = useContract({
@@ -135,12 +113,6 @@ const Identity: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  const wallet = useContract({
-    address: walletAddress,
-    abi: walletAbi,
-    signerOrProvider: signer || provider,
-  });
-
   const treasury = useContract({
     address: treasuryAddress,
     abi: treasuryAbi,
@@ -151,10 +123,7 @@ const Identity: NextPage = () => {
     // await createPair();
     const seller = await signer?.getAddress();
     if (seller) {
-      const tx = await usersCtx?.registerUser(responseBytes);
-
-      notification.success("User registered");
-      notification.info("Transaction hash: " + tx.hash);
+      txData(usersCtx?.registerUser(responseBytes));
     }
   }
 
@@ -162,38 +131,23 @@ const Identity: NextPage = () => {
     if (identity && signer) {
       const fee = await treasury?.fixedFee();
       setFee(fee);
-      setIdentityFee(fee);
+    }
+  };
+
+  const checkIfUserExists = async function checkIfUserExists() {
+    if (usersCtx && signer && sismoConnectVerifiedResult) {
+      console.log("SISMO", sismoConnectVerifiedResult);
+      const userExists = await usersCtx?.checkifUserExist(
+        keccak256(String(sismoConnectVerifiedResult?.auths[0].userId)),
+      );
+      setUserExists(userExists);
     }
   };
 
   useEffect(() => {
     getContractData();
-    getDeposit();
-    console.log(store);
-  }, [signer]);
-
-  const deposit = async () => {
-    const tx = await wallet?.deposit(store.sismoResponse, {
-      value: parseEther(String(amount)),
-    });
-    if (tx?.hash) {
-      notification.success("Deposit successful!");
-    }
-  };
-
-  const withdraw = async () => {
-    const tx = await wallet?.withdraw(store.sismoResponse, parseEther(String(amount)), to);
-    if (tx?.hash) {
-      notification.success("Deposit successful!");
-    }
-  };
-
-  const getDeposit = async () => {
-    if (store.sismoResponse) {
-      const tx = await wallet?.getDeposit(store.sismoResponse);
-      setDepositedBalance(Number(formatEther(tx)));
-    }
-  };
+    checkIfUserExists();
+  }, [signer, userExists, sismoConnectVerifiedResult]);
 
   return (
     <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4 ">
@@ -271,7 +225,14 @@ const Identity: NextPage = () => {
                       {Boolean(error) ? (
                         <span className="text-red-500">Error verifying ZK Proofs: {error}</span>
                       ) : (
-                        <span className="text-green-500">ZK Proofs verified!</span>
+                        <div>
+                          <span className="text-green-500 ">ZK Proofs verified!</span>
+                          <div className="mt-5">
+                            <button className="btn btn-primary" onClick={signIn} disabled={userExists}>
+                              Sign In{" "}
+                            </button>
+                          </div>
+                        </div>
                       )}
                     </>
                   )}
@@ -379,80 +340,6 @@ const Identity: NextPage = () => {
                 </tbody>
               </table>
             </div> */}
-          </div>
-          <div className="max-w-lg">
-            <div className="max-w-3xl text-center my-20  text-base-content">
-              <h1 className="text-6xl font-bold mb-8">Deposit your fund to protect your privacy</h1>
-              <p className="text-xl  mb-8">
-                Deposit your fund to protect your privacy. You can withdraw your fund at any time.
-              </p>
-            </div>
-            {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
-              <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
-            )}
-            <div className="my-5 ">
-              <button
-                className="btn w-1/2 p-2 border rounded-md shadow-sm bg-primary-500  hover:bg-primary-700"
-                onClick={async () => {
-                  await signIn();
-                }}
-                disabled={sismoConnectResponse != null ? false : true}
-              >
-                Sign In
-              </button>
-            </div>
-            <div className="card card-bordered border-2 bg-secondary my-10 p-10 w-full md:w-3/4 lg:w-3/4 mx-auto flex flex-col  text-left">
-              {depositedBalance && wallet && <p className="text-left text-lg mb-5">Balance: {depositedBalance} ETH</p>}
-              <span className="text-base font-semibold my-2 ">Deposit</span>
-
-              <div className="w-full mb-5">
-                <input
-                  type="text"
-                  className="input input-bordered w-full"
-                  placeholder="Amount to Deposit"
-                  onChange={e => setAmount(Number(e.target.value))}
-                />
-              </div>
-              <div className="w-full mb-5">
-                <button
-                  className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700"
-                  onClick={async () => {
-                    await deposit();
-                  }}
-                  disabled={store.sismoResponse != null ? false : true}
-                >
-                  Deposit
-                </button>
-              </div>
-              <span className="text-base font-semibold my-2 ">Withdraw</span>
-              <div className="w-full mb-5">
-                <input
-                  type="text"
-                  className="input input-bordered w-full"
-                  placeholder="Amount to Withdraw"
-                  onChange={e => setAmount(Number(e.target.value))}
-                />
-              </div>
-              <div className="w-full mb-5">
-                <input
-                  type="text"
-                  className="input input-bordered w-full"
-                  placeholder="To"
-                  onChange={e => setTo(e.target.value)}
-                />
-              </div>
-              <div className="w-full">
-                <button
-                  className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700"
-                  onClick={async () => {
-                    await withdraw();
-                  }}
-                  disabled={store.sismoResponse != null ? false : true}
-                >
-                  Withdraw
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

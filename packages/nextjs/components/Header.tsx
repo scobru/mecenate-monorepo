@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaucetButton } from "~~/components/scaffold-eth";
 import RainbowKitCustomConnectButton from "~~/components/scaffold-eth/RainbowKitCustomConnectButton";
-import { Bars3Icon, BugAntIcon, DocumentIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, BugAntIcon, DocumentIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 
@@ -84,7 +84,13 @@ export default function Header() {
         </NavLink>
       </li>
       <li className="font-semibold">
-        <NavLink href="https://scobru.gitbook.io/mecenate/">
+        <NavLink href="/vault">
+          <KeyIcon className="h-4 w-4" />
+          Vault
+        </NavLink>
+      </li>
+      <li className="font-semibold">
+        <NavLink href="https://scobru.gitbook.io/mecenate-v1.1.0/">
           <DocumentIcon className="h-4 w-4" />
           Docs
         </NavLink>

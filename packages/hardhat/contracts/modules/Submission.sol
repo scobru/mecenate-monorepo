@@ -9,7 +9,7 @@ abstract contract Submission is Events {
         bytes32 encryptedVaultId
     ) external virtual {
         require(
-            postSettingPrivate.vaultIdSeller == encryptedVaultId,
+            keccak256(postSettingPrivate.vaultIdSeller) == encryptedVaultId,
             "VaultId does not match"
         );
 
@@ -32,6 +32,7 @@ abstract contract Submission is Events {
             "You are not the creator"
         );
 
+        encodedSymKey = encryptedKey;
         post.postdata.data.encryptedKey = encryptedKey;
         post.postdata.settings.status = Structures.PostStatus.Submitted;
         post.postdata.settings.endTimeStamp =
@@ -41,42 +42,12 @@ abstract contract Submission is Events {
         emit Valid(post);
     }
 
-    function getVaultIdSecret(
-        bytes memory sismoConnectResponse
-    ) external view returns (bytes32) {
-        (
-            ,
-            bytes memory vaultIdBytes,
-            ,
-            address userAddressConverted
-        ) = sismoVerify(sismoConnectResponse);
-
-        require(
-            keccak256(vaultIdBytes) == postSettingPrivate.vaultIdBuyer,
-            "VaultId does not match"
-        );
-
-        require(
-            userAddressConverted == postSettingPrivate.buyer,
-            "You are not the buyer"
-        );
-
-        require(
-            post.postdata.settings.status == Structures.PostStatus.Accepted ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Submitted,
-            "Post is not Accepted or Submitted"
-        );
-
-        return postSettingPrivate.vaultIdSeller;
-    }
-
     function revealData(
         bytes memory decryptedData,
         bytes32 encryptedVaultId
     ) external virtual returns (bytes memory) {
         require(
-            postSettingPrivate.vaultIdSeller == encryptedVaultId,
+            keccak256(postSettingPrivate.vaultIdSeller) == encryptedVaultId,
             "VaultId does not match"
         );
 
@@ -87,5 +58,16 @@ abstract contract Submission is Events {
         post.postdata.data.decryptedData = decryptedData;
         post.postdata.settings.status = Structures.PostStatus.Revealed;
         return post.postdata.data.decryptedData;
+    }
+
+    function getVaultIdSecret(
+        bytes32 encryptedVaultId
+    ) external view virtual returns (bytes memory) {
+        require(
+            keccak256(postSettingPrivate.vaultIdBuyer) == encryptedVaultId,
+            "VaultId does not match"
+        );
+
+        return postSettingPrivate.vaultIdSeller;
     }
 }

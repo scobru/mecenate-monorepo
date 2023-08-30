@@ -2,13 +2,14 @@ import type { NextPage } from "next";
 import React, { useCallback, useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, ethers } from "ethers";
+import { ContractInterface, Signer, ethers } from "ethers";
 import { formatEther, keccak256, toUtf8Bytes } from "ethers/lib/utils.js";
 import { useAppStore } from "~~/services/store/store";
 import Link from "next/link";
 import { VerifiedBadge } from "~~/components/scaffold-eth";
 import { relative } from "path";
 import { notification } from "~~/utils/scaffold-eth";
+import { useTransactor } from "~~/hooks/scaffold-eth";
 
 const DEBUG = true;
 
@@ -24,6 +25,7 @@ const Feeds: NextPage = () => {
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
+  const txData = useTransactor(signer as Signer);
 
   const store = useAppStore();
 
@@ -112,19 +114,7 @@ const Feeds: NextPage = () => {
   async function buildFeed() {
     const id = notification.loading("Transaction sent, waiting for confirmation");
     // Esegui la transazione
-    const tx = await factoryCtx?.buildFeed(store.sismoResponse);
-    await tx.wait();
-
-    if (DEBUG) console.log(tx);
-
-    if (tx.status == 0) {
-      notification.error("Transaction failed");
-      notification.remove(id);
-      return;
-    } else {
-      notification.success("Transaction completed successfully");
-      notification.remove(id);
-    }
+    txData(factoryCtx?.buildFeed(store.sismoResponse, { value: treasuryCtx?.fixedFee() }));
   }
 
   return (

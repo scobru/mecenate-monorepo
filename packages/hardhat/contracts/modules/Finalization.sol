@@ -10,8 +10,8 @@ abstract contract Finalization is Staking {
         bytes32 encryptedVaultId
     ) external virtual returns (bool) {
         require(
-            postSettingPrivate.vaultIdBuyer == encryptedVaultId ||
-                postSettingPrivate.vaultIdSeller == encryptedVaultId,
+            keccak256(postSettingPrivate.vaultIdBuyer) == encryptedVaultId ||
+                keccak256(postSettingPrivate.vaultIdSeller) == encryptedVaultId,
             "VaultId does not match"
         );
 
@@ -50,7 +50,7 @@ abstract contract Finalization is Staking {
             emit Valid(post);
         } else if (post.postdata.settings.endTimeStamp > block.timestamp) {
             require(
-                postSettingPrivate.vaultIdBuyer == encryptedVaultId,
+                keccak256(postSettingPrivate.vaultIdBuyer) == encryptedVaultId,
                 "You are not the buyer"
             );
 
@@ -126,9 +126,9 @@ abstract contract Finalization is Staking {
     function _cancelPostSettingPrivate() internal virtual {
         postSettingPrivate = Structures.postSettingPrivate({
             buyer: address(0),
-            vaultIdBuyer: 0x00,
+            vaultIdBuyer: ZEROHASH,
             seller: address(0),
-            vaultIdSeller: 0x00
+            vaultIdSeller: ZEROHASH
         });
     }
 }

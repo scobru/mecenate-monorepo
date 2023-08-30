@@ -22,6 +22,11 @@ abstract contract Acceptance is Events, Staking {
             "user does not exist"
         );
 
+        require(
+            userAddressConverted != postSettingPrivate.seller,
+            "You are the seller"
+        );
+
         if (post.postdata.escrow.payment > 0) {
             require(
                 msg.value == post.postdata.escrow.payment,
@@ -51,7 +56,7 @@ abstract contract Acceptance is Events, Staking {
 
         postSettingPrivate = Structures.postSettingPrivate({
             buyer: userAddressConverted,
-            vaultIdBuyer: keccak256(vaultIdBytes),
+            vaultIdBuyer: vaultIdBytes,
             seller: postSettingPrivate.seller,
             vaultIdSeller: postSettingPrivate.vaultIdSeller
         });

@@ -6,7 +6,7 @@ import "./Staking.sol";
 abstract contract Renounce is Staking {
     function renouncePost(bytes32 encryptedVaultId) external virtual {
         require(
-            encryptedVaultId == postSettingPrivate.vaultIdSeller,
+            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller),
             "You are not the seller"
         );
 
@@ -44,9 +44,9 @@ abstract contract Renounce is Staking {
 
         postSettingPrivate = Structures.postSettingPrivate({
             buyer: address(0),
-            vaultIdBuyer: 0x00,
+            vaultIdBuyer: ZEROHASH,
             seller: address(0),
-            vaultIdSeller: 0x00
+            vaultIdSeller: ZEROHASH
         });
 
         emit Renounced(post);

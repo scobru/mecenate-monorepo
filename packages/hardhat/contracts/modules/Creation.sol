@@ -54,9 +54,9 @@ abstract contract Creation is Staking {
 
         postSettingPrivate = Structures.postSettingPrivate({
             seller: userAddressConverted,
-            vaultIdSeller: keccak256(vaultIdBytes),
+            vaultIdSeller: vaultIdBytes,
             buyer: buyer,
-            vaultIdBuyer: 0x00
+            vaultIdBuyer: ZEROHASH
         });
 
         _addStake(userAddressConverted, msg.value);
@@ -94,6 +94,14 @@ abstract contract Creation is Staking {
             vaultId: keccak256(vaultIdBytes)
         });
 
+        uint256 stake;
+
+        if (post.postdata.escrow.stake > 0) {
+            stake = post.postdata.escrow.stake + msg.value;
+        } else {
+            stake = msg.value;
+        }
+
         Structures.PostData memory postdata = Structures.PostData({
             settings: Structures.PostSettings({
                 postType: Structures.PostType(postType),
@@ -103,7 +111,7 @@ abstract contract Creation is Staking {
                 duration: duration
             }),
             escrow: Structures.PostEscrow({
-                stake: msg.value,
+                stake: stake,
                 payment: payment,
                 punishment: 0,
                 buyerPunishment: 0
@@ -127,35 +135,5 @@ abstract contract Creation is Staking {
         emit Created(post);
 
         return Structures.Post({creator: creator, postdata: postdata});
-    }
-
-    function storeEncodedSymmetricKey(
-        bytes memory _encodedSymKey,
-        bytes memory sismoConnectResponse
-    ) external {
-        (, , , address userAddressConverted) = sismoVerify(
-            sismoConnectResponse
-        );
-
-        require(
-            postSettingPrivate.seller == userAddressConverted,
-            "You are not the seller"
-        );
-
-        encodedSymKey = _encodedSymKey;
-    }
-
-    function getEncodedSymmetricKey(
-        bytes memory sismoConnectResponse
-    ) external view returns (bytes memory) {
-        (, , , address userAddressConverted) = sismoVerify(
-            sismoConnectResponse
-        );
-
-        require(
-            postSettingPrivate.seller == userAddressConverted,
-            "You are not the seller"
-        );
-        return encodedSymKey;
     }
 }

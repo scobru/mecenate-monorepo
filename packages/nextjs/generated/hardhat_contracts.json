@@ -5,7 +5,7 @@
       "chainId": "11155111",
       "contracts": {
         "MecenateTreasury": {
-          "address": "0xc7b92BC1f70B29485f436436110855A8F907CAC7",
+          "address": "0x79d3FDf74dD8B487D1A3Bf2E5683834B70232dD2",
           "abi": [
             {
               "anonymous": false,
@@ -363,7 +363,7 @@
           ]
         },
         "MecenateVerifier": {
-          "address": "0xe166C942D5A21f8eeBdE0BbbBBe84c0Dd50bd62D",
+          "address": "0xEc784572BbA98C9e33213cDe43b7925F5c0fE6Aa",
           "abi": [
             {
               "inputs": [
@@ -521,7 +521,7 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0x6698671657586f5F32115c738687c1Ec9a48A343",
+          "address": "0x1b3a92Cc2E3Eabb2b1E8552023d1016a6Ae1ec17",
           "abi": [
             {
               "inputs": [
@@ -778,8 +778,8 @@
             }
           ]
         },
-        "MecenateWallet": {
-          "address": "0x5B685Cc8dC102b531857521306f717c3636a39Ad",
+        "MecenateVault": {
+          "address": "0x21405BCfB5A5ef7e36EaC8ca5a2842F56e7A1243",
           "abi": [
             {
               "inputs": [
@@ -819,9 +819,9 @@
             {
               "inputs": [
                 {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
+                  "internalType": "bytes32",
+                  "name": "_commitment",
+                  "type": "bytes32"
                 }
               ],
               "name": "deposit",
@@ -832,9 +832,9 @@
             {
               "inputs": [
                 {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
+                  "internalType": "bytes32",
+                  "name": "_commitment",
+                  "type": "bytes32"
                 }
               ],
               "name": "getDeposit",
@@ -939,9 +939,9 @@
             {
               "inputs": [
                 {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
+                  "internalType": "address",
+                  "name": "operator",
+                  "type": "address"
                 },
                 {
                   "internalType": "uint256",
@@ -949,9 +949,9 @@
                   "type": "uint256"
                 },
                 {
-                  "internalType": "address",
-                  "name": "operator",
-                  "type": "address"
+                  "internalType": "bytes32",
+                  "name": "_commitment",
+                  "type": "bytes32"
                 }
               ],
               "name": "withdraw",
@@ -962,7 +962,7 @@
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0x3BFf52F0a60436656EE4B24Bdd5a023aD3CBe167",
+          "address": "0x55D99ce8cABa86e93A3E6Ac00E3f0e5d7723CECA",
           "abi": [
             {
               "inputs": [
@@ -979,11 +979,6 @@
                 {
                   "internalType": "address",
                   "name": "_verifierContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_walletContract",
                   "type": "address"
                 }
               ],
@@ -1057,7 +1052,7 @@
                   "type": "address"
                 }
               ],
-              "stateMutability": "nonpayable",
+              "stateMutability": "payable",
               "type": "function"
             },
             {
@@ -1416,7 +1411,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0x12a53859EFE1b2955FbCB8E1253CEc2c9ed456aD",
+          "address": "0x0d9784370DFE3206D3015b38dd87C363a91298f5",
           "abi": [
             {
               "inputs": [
@@ -1433,11 +1428,6 @@
                 {
                   "internalType": "address",
                   "name": "_verifierContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_walletContract",
                   "type": "address"
                 }
               ],
@@ -2452,16 +2442,11 @@
                   "internalType": "bytes",
                   "name": "sismoConnectResponse",
                   "type": "bytes"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "payment",
-                  "type": "uint256"
                 }
               ],
               "name": "acceptPost",
               "outputs": [],
-              "stateMutability": "nonpayable",
+              "stateMutability": "payable",
               "type": "function"
             },
             {
@@ -2503,11 +2488,6 @@
                 {
                   "internalType": "uint256",
                   "name": "payment",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "stake",
                   "type": "uint256"
                 },
                 {
@@ -2631,7 +2611,7 @@
                   "type": "tuple"
                 }
               ],
-              "stateMutability": "nonpayable",
+              "stateMutability": "payable",
               "type": "function"
             },
             {
@@ -2697,25 +2677,6 @@
                   "internalType": "uint256",
                   "name": "amount",
                   "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
-                }
-              ],
-              "name": "getEncodedSymmetricKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
                 }
               ],
               "stateMutability": "view",
@@ -2847,17 +2808,17 @@
             {
               "inputs": [
                 {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
+                  "internalType": "bytes32",
+                  "name": "encryptedVaultId",
+                  "type": "bytes32"
                 }
               ],
               "name": "getVaultIdSecret",
               "outputs": [
                 {
-                  "internalType": "bytes32",
+                  "internalType": "bytes",
                   "name": "",
-                  "type": "bytes32"
+                  "type": "bytes"
                 }
               ],
               "stateMutability": "view",
@@ -3051,24 +3012,6 @@
               "inputs": [
                 {
                   "internalType": "bytes",
-                  "name": "_encodedSymKey",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
-                }
-              ],
-              "name": "storeEncodedSymmetricKey",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes",
                   "name": "encryptedKey",
                   "type": "bytes"
                 },
@@ -3099,7 +3042,7 @@
                   "type": "uint256"
                 }
               ],
-              "stateMutability": "payable",
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -3123,7 +3066,7 @@
                   "type": "uint256"
                 }
               ],
-              "stateMutability": "payable",
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -3153,26 +3096,13 @@
               "type": "function"
             },
             {
-              "inputs": [],
-              "name": "walletContract",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
               "stateMutability": "payable",
               "type": "receive"
             }
           ]
         },
         "MecenateBay": {
-          "address": "0xed6dFC27E8A9dc94b157F8582cbF4e6d0F67b168",
+          "address": "0xA1FC56839550D78464893f77664217E115e56291",
           "abi": [
             {
               "inputs": [
@@ -3184,11 +3114,6 @@
                 {
                   "internalType": "address",
                   "name": "_verifierContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_walletContract",
                   "type": "address"
                 }
               ],
@@ -3527,7 +3452,7 @@
                   "type": "tuple"
                 }
               ],
-              "stateMutability": "nonpayable",
+              "stateMutability": "payable",
               "type": "function"
             },
             {
@@ -3753,26 +3678,13 @@
               "type": "function"
             },
             {
-              "inputs": [],
-              "name": "walletContract",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
               "stateMutability": "payable",
               "type": "receive"
             }
           ]
         },
         "MecenateStats": {
-          "address": "0xce64754ED1032C0A76088F096e18fb5a4978c28c",
+          "address": "0x83AfD6a29603CcA7cb675F84Ac11A8eEa86b615a",
           "abi": [
             {
               "inputs": [

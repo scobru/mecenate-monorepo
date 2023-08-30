@@ -115,8 +115,10 @@ abstract contract Staking is Events, Deposit {
         uint256 stakerBalance;
 
         require(
-            keccak256(vaultIdBytes) == postSettingPrivate.vaultIdBuyer ||
-                keccak256(vaultIdBytes) == postSettingPrivate.vaultIdSeller,
+            keccak256(vaultIdBytes) ==
+                keccak256(postSettingPrivate.vaultIdBuyer) ||
+                keccak256(vaultIdBytes) ==
+                keccak256(postSettingPrivate.vaultIdSeller),
             "VaultId does not match"
         );
 
@@ -153,20 +155,14 @@ abstract contract Staking is Events, Deposit {
 
         require(currentDeposit >= amountToTake, "Not enough deposit");
 
-        if (postSettingPrivate.buyer != postSettingPrivate.seller) {
-            if (userAddressConverted == postSettingPrivate.buyer) {
-                stakerBalance = _takeStake(userAddressConverted, amountToTake);
-                post.postdata.escrow.payment = stakerBalance;
-            } else if (userAddressConverted == postSettingPrivate.seller) {
-                stakerBalance = _takeStake(userAddressConverted, amountToTake);
-                post.postdata.escrow.stake = stakerBalance;
-            } else {
-                revert("Not buyer or seller");
-            }
-        } else {
+        if (userAddressConverted == postSettingPrivate.buyer) {
             stakerBalance = _takeStake(userAddressConverted, amountToTake);
             post.postdata.escrow.payment = stakerBalance;
+        } else if (userAddressConverted == postSettingPrivate.seller) {
+            stakerBalance = _takeStake(userAddressConverted, amountToTake);
             post.postdata.escrow.stake = stakerBalance;
+        } else {
+            revert("Not buyer or seller");
         }
 
         payable(userAddressConverted).transfer(amountToTake);
@@ -180,7 +176,16 @@ abstract contract Staking is Events, Deposit {
         (, , , address userAddressConverted) = sismoVerify(
             sismoConnectResponse
         );
-        uint256 stakerBalance = _takeFullStake(userAddressConverted);
+        uint256 stakerBalance;
+        if (userAddressConverted == postSettingPrivate.buyer) {
+            stakerBalance = _takeFullStake(userAddressConverted);
+            post.postdata.escrow.payment = stakerBalance;
+        } else if (userAddressConverted == postSettingPrivate.seller) {
+            stakerBalance = _takeFullStake(userAddressConverted);
+            post.postdata.escrow.stake = stakerBalance;
+        } else {
+            revert("Not buyer or seller");
+        }
 
         payable(userAddressConverted).transfer(stakerBalance);
 

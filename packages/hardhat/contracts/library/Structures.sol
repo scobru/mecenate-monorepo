@@ -55,9 +55,9 @@ library Structures {
 
     struct postSettingPrivate {
         address seller;
-        bytes32 vaultIdSeller;
+        bytes vaultIdSeller;
         address buyer;
-        bytes32 vaultIdBuyer;
+        bytes vaultIdBuyer;
     }
 
     struct PostEscrow {
