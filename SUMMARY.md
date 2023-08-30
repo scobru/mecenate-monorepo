@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Mecenate v1.1.0](README.md)
+* [Mecenate v1.0.2](README.md)
 * [Research](RESEARCH.md)
 * [Feeds](feeds.md)
 * [Bay](bay.md)
