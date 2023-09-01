@@ -80,7 +80,9 @@ const Vault: NextPage = () => {
   const [amount, setAmount] = React.useState(0);
   const [depositedBalance, setDepositedBalance] = React.useState(0);
   const [to, setTo] = React.useState<any>("");
-
+  const [sismoData, setSismoData] = React.useState<any>(null);
+  const [verified, setVerified] = React.useState<any>(null);
+  const [sismoResponse, setSismoResponse] = React.useState<any>(null);
   const store = useAppStore();
 
   let walletAddress!: string;
@@ -98,13 +100,15 @@ const Vault: NextPage = () => {
 
   useEffect(() => {
     getDeposit();
-    console.log(wallet);
+    setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
+    setVerified(localStorage.getItem("verified"));
+    setSismoResponse(localStorage.getItem("sismoResponse"));
   }, [signer]);
 
   const deposit = async () => {
     console.log("Start Deposit");
     console.log(store);
-    const tx = await wallet?.deposit(keccak256(store.sismoData.auths[0].userId), {
+    const tx = await wallet?.deposit(keccak256(sismoData.auths[0].userId), {
       value: parseEther(String(amount)),
     });
     if (tx?.hash) {
@@ -113,15 +117,15 @@ const Vault: NextPage = () => {
   };
 
   const withdraw = async () => {
-    const tx = await wallet?.withdraw(to, parseEther(String(amount)), keccak256(store.sismoData.auths[0].userId));
+    const tx = await wallet?.withdraw(to, parseEther(String(amount)), keccak256(sismoData.auths[0].userId));
     if (tx?.hash) {
       notification.success("Deposit successful!");
     }
   };
 
   const getDeposit = async () => {
-    if (store.sismoResponse) {
-      const tx = await wallet?.getDeposit(keccak256(store.sismoData.auths[0].userId));
+    if (sismoData) {
+      const tx = await wallet?.getDeposit(keccak256(sismoData.auths[0].userId));
       if (tx) setDepositedBalance(Number(formatEther(tx)));
     }
   };
@@ -136,8 +140,8 @@ const Vault: NextPage = () => {
           </div>
           <div className="p-4 ">
             <div className="w-full">
-              {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
-                <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
+              {sismoData && sismoData.auths && sismoData.auths.length > 0 && verified && (
+                <VerifiedBadge sismoData={sismoData.auths[1]} verified={String(verified)} />
               )}
               <div className="card card-bordered border-2 bg-secondary my-10 p-10 w-full mx-auto flex flex-col  text-left">
                 {depositedBalance && wallet && (
@@ -158,7 +162,7 @@ const Vault: NextPage = () => {
                     onClick={async () => {
                       await deposit();
                     }}
-                    disabled={store.sismoResponse != null ? false : true}
+                    disabled={sismoResponse != null ? false : true}
                   >
                     Deposit
                   </button>
@@ -186,7 +190,7 @@ const Vault: NextPage = () => {
                     onClick={async () => {
                       await withdraw();
                     }}
-                    disabled={store.sismoResponse != null ? false : true}
+                    disabled={sismoResponse != null ? false : true}
                   >
                     Withdraw
                   </button>

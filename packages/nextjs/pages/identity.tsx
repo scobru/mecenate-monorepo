@@ -9,6 +9,7 @@ import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } 
 import { CONFIG, AUTHS, SIGNATURE_REQUEST, AuthType, ClaimType } from "./../sismo.config";
 import { useAppStore } from "~~/services/store/store";
 import { useTransactor } from "~~/hooks/scaffold-eth";
+import { VerifiedBadge } from "~~/components/scaffold-eth";
 
 const DEBUG = true;
 
@@ -69,7 +70,7 @@ const Identity: NextPage = () => {
   const provider = useProvider();
   const [sismoConnectVerifiedResult, setSismoConnectVerifiedResult] = React.useState<SismoConnectVerifiedResult>();
   const [sismoConnectResponse, setSismoConnectResponse] = React.useState<SismoConnectResponse>();
-  const [pageState, setPageState] = React.useState<string>("init");
+  const [pageState, setPageState] = React.useState<string>("");
   const [error, setError] = React.useState<string>();
   const [fee, setFee] = React.useState(0);
   const [responseBytes, setResponseBytes] = React.useState<string>();
@@ -78,7 +79,9 @@ const Identity: NextPage = () => {
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
   const txData = useTransactor(signer as Signer);
   const [userExists, setUserExists] = React.useState<boolean>(false);
-  const store = useAppStore();
+  const [sismoData, setSismoData] = React.useState<any>(null);
+  const [verified, setVerified] = React.useState<any>(null);
+  const [sismoResponse, setSismoResponse] = React.useState<any>(null);
 
   let UsersAddress!: string;
   let UsersAbi: ContractInterface[] = [];
@@ -123,7 +126,7 @@ const Identity: NextPage = () => {
     // await createPair();
     const seller = await signer?.getAddress();
     if (seller) {
-      txData(usersCtx?.registerUser(responseBytes));
+      txData(usersCtx?.registerUser(store.sismoResponse));
     }
   }
 
@@ -135,19 +138,36 @@ const Identity: NextPage = () => {
   };
 
   const checkIfUserExists = async function checkIfUserExists() {
-    if (usersCtx && signer && sismoConnectVerifiedResult) {
-      console.log("SISMO", sismoConnectVerifiedResult);
-      const userExists = await usersCtx?.checkifUserExist(
-        keccak256(String(sismoConnectVerifiedResult?.auths[0].userId)),
-      );
-      setUserExists(userExists);
-    }
+    const localSismoData = localStorage.getItem("sismoData");
+    if (!localSismoData) return;
+    const localSismoDataConverted = JSON.parse(String(localSismoData));
+    const _userExists = await usersCtx?.checkifUserExist(keccak256(String(localSismoDataConverted?.auths[0].userId)));
+    setUserExists(_userExists);
+  };
+
+  const resetLocalStorage = async function resetLocalStorage() {
+    localStorage.removeItem("verified");
+    localStorage.removeItem("sismoData");
+    localStorage.removeItem("sismoResponse");
   };
 
   useEffect(() => {
-    getContractData();
-    checkIfUserExists();
-  }, [signer, userExists, sismoConnectVerifiedResult]);
+    const runEffect = async () => {
+      await getContractData();
+      await checkIfUserExists();
+      setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
+      setVerified(localStorage.getItem("verified"));
+      setSismoResponse(localStorage.getItem("sismoResponse"));
+    };
+
+    if (localStorage.getItem("verified") == "verified") {
+      runEffect();
+      setPageState("verified");
+    } else {
+      runEffect();
+      setPageState("init");
+    }
+  }, [sismoData, verified, sismoResponse, getContractData, checkIfUserExists]);
 
   return (
     <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4 ">
@@ -189,7 +209,8 @@ const Identity: NextPage = () => {
                       const data = await verifiedResult.json();
                       if (verifiedResult.ok) {
                         setSismoConnectVerifiedResult(data);
-                        store.setSismoData(data);
+                        localStorage.setItem("verified", "verified");
+                        localStorage.setItem("sismoData", JSON.stringify(await data));
                         setPageState("verified");
                       } else {
                         setPageState("error");
@@ -198,8 +219,7 @@ const Identity: NextPage = () => {
                     }}
                     onResponseBytes={(responseBytes: string) => {
                       setResponseBytes(responseBytes);
-                      store.setSismoResponse(responseBytes);
-                      store.setVerified("verified");
+                      localStorage.setItem("sismoResponse", responseBytes);
                     }}
                   />
                 </div>
@@ -208,8 +228,10 @@ const Identity: NextPage = () => {
               <>
                 <div className="text-center">
                   <button
+                    className="btn btn-ghost bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     onClick={() => {
-                      window.location.href = "/";
+                      window.location.href = "/identity";
+                      resetLocalStorage();
                     }}
                   >
                     {" "}
@@ -228,7 +250,11 @@ const Identity: NextPage = () => {
                         <div>
                           <span className="text-green-500 ">ZK Proofs verified!</span>
                           <div className="mt-5">
-                            <button className="btn btn-primary" onClick={signIn} disabled={userExists}>
+                            <button
+                              className="btn btn-primary  py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                              onClick={signIn}
+                              disabled={userExists}
+                            >
                               Sign In{" "}
                             </button>
                           </div>

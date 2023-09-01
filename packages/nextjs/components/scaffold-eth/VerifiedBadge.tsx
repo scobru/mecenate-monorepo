@@ -18,16 +18,13 @@ export default function VerifiedBadge({ sismoData, verified }: TVerifiedProps) {
 
   return (
     <>
-      <div className="text-left my-10">
-        <div className="text-left p-5 bg-white hover:bg-blue-200 font-semibold border-1 text-black w-fit rounded-md">
-          <Address address={newSismoData?.userId || null} format="long" />
-          Verified{" "}
-          {newVerified == "verified" ? (
-            <span className="text-green-500">✅</span>
-          ) : (
-            <span className="text-red-500">❌</span>
-          )}
-        </div>
+      <div className="badge badge-primary p-4 hover:text-black w-fit bg-success rounded-full">
+        <span className="font-semibold "> Verified</span>
+        {newVerified == "verified" ? (
+          <div className="badge-success ml-2">✅</div>
+        ) : (
+          <div className="badge-error ml-2">❌</div>
+        )}
       </div>
     </>
   );

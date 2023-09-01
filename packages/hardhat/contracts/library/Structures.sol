@@ -93,7 +93,9 @@ library Structures {
     struct BayRequestPrivate {
         address seller;
         bytes vaultIdSeller;
+        bytes sellerResponse;
         address buyer;
         bytes vaultIdBuyer;
+        bytes buyerResponse;
     }
 }

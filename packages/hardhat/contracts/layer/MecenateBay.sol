@@ -20,6 +20,8 @@ contract MecenateBay is Ownable, FeedViewer {
 
     uint256 public contractCounter;
 
+    mapping(uint256 => bytes) private sismoResponseMapping;
+
     event RequestCreated(
         address indexed user,
         Structures.BayRequest,
@@ -59,8 +61,6 @@ contract MecenateBay is Ownable, FeedViewer {
         require(request.payment == msg.value, "payment is not enough");
         require(request.payment > 0, "payment is not enough");
 
-        contractCounter++;
-
         requests[userAddressConverted].push(request);
 
         allRequests.push(request);
@@ -69,10 +69,14 @@ contract MecenateBay is Ownable, FeedViewer {
             Structures.BayRequestPrivate({
                 seller: address(0),
                 vaultIdSeller: "0x00",
+                sellerResponse: "0x00",
                 buyer: userAddressConverted,
-                vaultIdBuyer: vaultIdBytes
+                vaultIdBuyer: vaultIdBytes,
+                buyerResponse: sismoConnectResponse
             })
         );
+
+        contractCounter++;
 
         emit RequestCreated(
             userAddressConverted,
@@ -116,13 +120,14 @@ contract MecenateBay is Ownable, FeedViewer {
             Structures.BayRequestPrivate({
                 seller: userAddressConverted,
                 vaultIdSeller: vaultIdBytes,
+                sellerResponse: sismoConnectResponse,
                 buyer: allRequestsPrivate[index].buyer,
-                vaultIdBuyer: allRequestsPrivate[index].vaultIdBuyer
+                vaultIdBuyer: allRequestsPrivate[index].vaultIdBuyer,
+                buyerResponse: allRequestsPrivate[index].buyerResponse
             })
         );
 
         uint256 paymentRequested = IMecenateFeed(_feed).getPaymentRequested();
-
         uint256 stakeRequested = IMecenateFeed(_feed).getStakeRequested();
 
         require(
@@ -136,7 +141,7 @@ contract MecenateBay is Ownable, FeedViewer {
         );
 
         IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
-            sismoConnectResponse
+            allRequestsPrivate[index].buyerResponse
         );
 
         allRequests[index].accepted = true;

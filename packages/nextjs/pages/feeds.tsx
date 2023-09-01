@@ -27,7 +27,9 @@ const Feeds: NextPage = () => {
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
   const txData = useTransactor(signer as Signer);
 
-  const store = useAppStore();
+  const [sismoData, setSismoData] = React.useState<any>(null);
+  const [verified, setVerified] = React.useState<any>(null);
+  const [sismoResponse, setSismoResponse] = React.useState<any>(null);
 
   type Feed = {
     operator: string;
@@ -86,35 +88,30 @@ const Feeds: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  const getFeeds = async function getFeeds() {
-    if (onlyYourFeeds == false) {
-      const _feeds = await factoryCtx?.getFeeds();
-      const _feedsInfo = await factoryCtx?.getFeedsInfo();
-      setFeeds(_feeds);
-      setFeedsInfos(_feedsInfo);
-      if (DEBUG) console.log(_feeds);
-      if (DEBUG) console.log(_feedsInfo);
-    } else {
-      const _feeds = await factoryCtx?.getFeedsOwned(keccak256(store.sismoData.auths[0].userId));
-      const _feedsInfo = await factoryCtx?.getFeedsInfoOwned(keccak256(store.sismoData.auths[0].userId));
-      setFeeds(_feeds);
-      setFeedsInfos(_feedsInfo);
-      if (DEBUG) console.log(_feeds);
-      if (DEBUG) console.log(_feedsInfo);
-    }
-    console.log(onlyYourFeeds);
-  };
-
   useEffect(() => {
+    const getFeeds = async function getFeeds() {
+      if (onlyYourFeeds == false) {
+        const _feeds = await factoryCtx?.getFeeds();
+        const _feedsInfo = await factoryCtx?.getFeedsInfo();
+        setFeeds(_feeds);
+        setFeedsInfos(_feedsInfo);
+      } else {
+        const _feeds = await factoryCtx?.getFeedsOwned(keccak256(sismoData.auths[0].userId));
+        const _feedsInfo = await factoryCtx?.getFeedsInfoOwned(keccak256(sismoData.auths[0].userId));
+        setFeeds(_feeds);
+        setFeedsInfos(_feedsInfo);
+      }
+    };
     if (factoryCtx) {
       getFeeds();
+      setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
+      setVerified(localStorage.getItem("verified"));
+      setSismoResponse(localStorage.getItem("sismoResponse"));
     }
-  }, [onlyYourFeeds]);
+  }, [factoryCtx, onlyYourFeeds]);
 
   async function buildFeed() {
-    const id = notification.loading("Transaction sent, waiting for confirmation");
-    // Esegui la transazione
-    txData(factoryCtx?.buildFeed(store.sismoResponse, { value: treasuryCtx?.fixedFee() }));
+    txData(factoryCtx?.buildFeed(String(sismoResponse), { value: treasuryCtx?.fixedFee() }));
   }
 
   return (
@@ -131,9 +128,6 @@ const Feeds: NextPage = () => {
           Mecenate Bay is a marketplace where you can buy and sell data feeds.
         </p>
       </div>
-      {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
-        <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
-      )}
       <div className="flex flex-col items-center mb-5">
         <button
           className="btn-wide text-base-content bg-primary hover:bg-secondary  font-bold py-2 px-4 rounded-md my-2"
@@ -163,8 +157,8 @@ const Feeds: NextPage = () => {
         {feeds &&
           feedsInfos &&
           feeds.length > 0 &&
-          store?.sismoData?.auths &&
-          store?.sismoData?.auths?.length > 0 &&
+          sismoData?.auths &&
+          sismoData?.auths?.length > 0 &&
           feeds.map((feed, i) => (
             <div key={i} className="card bg-base-100 shadow-xl p-2 text-base-content">
               <Link href={`/viewFeed?addr=${feed}`} passHref>

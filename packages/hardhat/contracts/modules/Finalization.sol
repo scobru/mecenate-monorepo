@@ -8,10 +8,9 @@ abstract contract Finalization is Staking {
         bool valid,
         uint256 punishment,
         bytes32 encryptedVaultId
-    ) external virtual returns (bool) {
+    ) external virtual {
         require(
-            keccak256(postSettingPrivate.vaultIdBuyer) == encryptedVaultId ||
-                keccak256(postSettingPrivate.vaultIdSeller) == encryptedVaultId,
+            keccak256(postSettingPrivate.vaultIdBuyer) == encryptedVaultId,
             "VaultId does not match"
         );
 

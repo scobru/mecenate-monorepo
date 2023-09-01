@@ -116,9 +116,8 @@ const Home: NextPage = () => {
               <p className="mb-4 text-2xl font-semibold">To use Mecenate Protocol follow this step:</p>
               <ol className="list-decimal ml-4 mb-4 px-8  text-xl font-light ">
                 <li>Visit the "Identity" page</li>
-                <li>Join with Sismo</li>
+                <li>Join with Sismo and create your zkp</li>
                 <li>Sign In into Mecenate protocol</li>
-                <li>Deposit your funds</li>
                 <li>Create your feed as seller or ask for a request on bay</li>
               </ol>
             </div>

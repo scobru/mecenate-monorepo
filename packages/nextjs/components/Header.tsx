@@ -1,11 +1,11 @@
-import React, { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FaucetButton } from "~~/components/scaffold-eth";
+import { FaucetButton, VerifiedBadge } from "~~/components/scaffold-eth";
 import RainbowKitCustomConnectButton from "~~/components/scaffold-eth/RainbowKitCustomConnectButton";
 import { Bars3Icon, BugAntIcon, DocumentIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 
 import {
   QuestionMarkCircleIcon,
@@ -34,16 +34,32 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
   );
 };
 
+let storage;
+
+if (typeof window !== "undefined") {
+  storage = window.localStorage;
+}
+
 /**
  * Site header
  */
 export default function Header() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const burgerMenuRef = useRef<HTMLDivElement>(null);
+  const [isLocalStorage, setIsLocalStorage] = useState(false);
+  const [verified, setVerified] = useState("");
   useOutsideClick(
     burgerMenuRef,
     useCallback(() => setIsDrawerOpen(false), []),
   );
+
+  useEffect(() => {
+    const verified = localStorage.getItem("verified");
+    if (verified == "verified") {
+      setIsLocalStorage(true);
+      setVerified(String(verified));
+    }
+  }, []);
 
   const navLinks = (
     <>
@@ -90,7 +106,7 @@ export default function Header() {
         </NavLink>
       </li>
       <li className="font-semibold">
-        <NavLink href="https://scobru.gitbook.io/mecenate-v1.1.0/">
+        <NavLink href="https://scobru.gitbook.io/mecenatedocs/">
           <DocumentIcon className="h-4 w-4" />
           Docs
         </NavLink>
@@ -119,10 +135,20 @@ export default function Header() {
               }}
             >
               {navLinks}
+              {isLocalStorage && localStorage.getItem("verified") == "verified" ? (
+                <div>
+                  <VerifiedBadge
+                    sismoData={JSON.parse(String(localStorage.getItem("sismoData"))).auths[1]}
+                    verified={String(localStorage.getItem("verified"))}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
             </ul>
           )}
         </div>
-        <div className="hidden lg:flex items-center gap-2 mx-4">
+        <div className="hidden lg:flex items-left gap-2 mx-4 min-w-fit">
           {/* <Link href="/" passHref className="flex relative w-10 h-10">
             <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
           </Link> */}
@@ -131,8 +157,17 @@ export default function Header() {
             <span className="text-base font-proxima">Decentralized Data Marketplace</span>{" "}
           </div>
         </div>
-        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>
+        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
+          {navLinks}{" "}
+          {isLocalStorage && (
+            <VerifiedBadge
+              sismoData={JSON.parse(String(localStorage.getItem("sismoData"))).auths[1]}
+              verified={String(localStorage.getItem("verified"))}
+            />
+          )}
+        </ul>{" "}
       </div>
+
       <div className="navbar-end flex-grow mr-4">
         <RainbowKitCustomConnectButton />
         <FaucetButton />

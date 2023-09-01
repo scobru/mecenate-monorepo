@@ -18,17 +18,16 @@ const Bay: NextPage = () => {
 
   const deployedContractBay = getDeployedContract(chain?.id.toString(), "MecenateBay");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
-
   const [requests, setRequests] = React.useState<BayRequest[]>([]);
-
   const [requestString, setRequestString] = React.useState<string>("");
   const [requestPayment, setRequestPayment] = React.useState<string>("");
   const [requestStake, setRequestStake] = React.useState<string>("");
   const [requestAddress, setRequestAddress] = React.useState<string>("");
-
   const [signerAddress, setSignerAddress] = React.useState<string>("");
-
   const txData = useTransactor(signer as Signer);
+  const [sismoData, setSismoData] = React.useState<any>(null);
+  const [verified, setVerified] = React.useState<any>(null);
+  const [sismoResponse, setSismoResponse] = React.useState<any>(null);
 
   type BayRequest = {
     request: string;
@@ -69,7 +68,7 @@ const Bay: NextPage = () => {
 
   async function acceptBayRequest(index: number, address: string) {
     if (signer) {
-      txData(bayCtx?.acceptRequest(index, address, store.sismoResponse));
+      txData(bayCtx?.acceptRequest(index, address, sismoResponse));
     }
   }
 
@@ -96,7 +95,7 @@ const Bay: NextPage = () => {
         postCount: 0,
       };
 
-      txData(bayCtx?.createRequest(request, store.sismoResponse, { value: parseEther(requestPayment) }));
+      txData(bayCtx?.createRequest(request, sismoResponse, { value: parseEther(requestPayment) }));
 
       getAllRequest();
     }
@@ -108,6 +107,12 @@ const Bay: NextPage = () => {
     setRequests(_requests);
   }
 
+  useEffect(() => {
+    setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
+    setVerified(localStorage.getItem("verified"));
+    setSismoResponse(localStorage.getItem("sismoResponse"));
+  }, [sismoResponse]);
+
   /* async function getRequestByAddress() {
     const _request = await bayCtx?.getRequestByAddress(identityCtx?.address);
     setRequests(_request);
@@ -116,7 +121,6 @@ const Bay: NextPage = () => {
   useEffect(() => {
     if (bayCtx) {
       getAllRequest();
-      console.log(requests);
     }
   }, [bayCtx, signer]);
 
@@ -169,9 +173,6 @@ const Bay: NextPage = () => {
           </p>
         </div>
         <div className="flex flex-col min-w-fit mx-auto items-center mb-20 ">
-          {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
-            <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
-          )}
           <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary py-2   p-4 m-4 text-black">
             <label className="text-black font-semibold text-sm" htmlFor="request">
               What do you want?

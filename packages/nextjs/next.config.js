@@ -15,4 +15,8 @@ module.exports = {
 
     return config;
   },
+  serverRuntimeConfig: {
+    // Will only be available on the server side
+    wsPort: 3001, // you can set any unused port number
+  },
 };

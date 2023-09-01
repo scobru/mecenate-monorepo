@@ -4,9 +4,25 @@
       "name": "sepolia",
       "chainId": "11155111",
       "contracts": {
-        "MecenateTreasury": {
-          "address": "0x79d3FDf74dD8B487D1A3Bf2E5683834B70232dD2",
+        "MecenateBay": {
+          "address": "0xE6f6aF5fB81147896709A7cFFe1F937e3D453366",
           "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_usersMouduleContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_verifierContract",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
             {
               "anonymous": false,
               "inputs": [
@@ -27,618 +43,118 @@
               "type": "event"
             },
             {
+              "anonymous": false,
               "inputs": [
                 {
+                  "indexed": true,
                   "internalType": "address",
-                  "name": "token",
+                  "name": "user",
                   "type": "address"
                 },
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "addLiquidity",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_native",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_unirouter",
-                  "type": "address"
-                }
-              ],
-              "name": "configLiquidityProvider",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_token",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "customApprove",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_usersContract",
-                  "type": "address"
-                }
-              ],
-              "name": "distribute",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "fixedFee",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "globalFee",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "lastDistributed",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "native",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "owner",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "renounceOwnership",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_fixedFee",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setFixedFee",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_globalFee",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setGlobalFee",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_slippage",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setSlippage",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bool",
-                  "name": "_splitLiquidity",
-                  "type": "bool"
-                }
-              ],
-              "name": "setSplitLiqudity",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "slippage",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "splitLiquidity",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "token1",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "token2",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "swapTokensForTokens",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "newOwner",
-                  "type": "address"
-                }
-              ],
-              "name": "transferOwnership",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "unirouter",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address payable",
-                  "name": "_to",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "withdrawNative",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_token",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_to",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "withdrawTokens",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "stateMutability": "payable",
-              "type": "receive"
-            }
-          ]
-        },
-        "MecenateVerifier": {
-          "address": "0xEc784572BbA98C9e33213cDe43b7925F5c0fE6Aa",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes16",
-                  "name": "_appId",
-                  "type": "bytes16"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "enum AuthType",
-                  "name": "authType",
-                  "type": "uint8"
-                }
-              ],
-              "name": "AuthTypeNotFoundInVerifiedResult",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "ADDRESSES_PROVIDER_V2",
-              "outputs": [
-                {
-                  "internalType": "contract IAddressesProvider",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "APP_ID",
-              "outputs": [
-                {
-                  "internalType": "bytes16",
-                  "name": "",
-                  "type": "bytes16"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "IS_IMPERSONATION_MODE",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "SISMO_CONNECT_LIB_VERSION",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "appId",
-              "outputs": [
-                {
-                  "internalType": "bytes16",
-                  "name": "",
-                  "type": "bytes16"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "config",
-              "outputs": [
                 {
                   "components": [
                     {
-                      "internalType": "bytes16",
-                      "name": "appId",
-                      "type": "bytes16"
+                      "internalType": "bytes32",
+                      "name": "request",
+                      "type": "bytes32"
                     },
                     {
-                      "components": [
-                        {
-                          "internalType": "bool",
-                          "name": "isImpersonationMode",
-                          "type": "bool"
-                        }
-                      ],
-                      "internalType": "struct VaultConfig",
-                      "name": "vault",
-                      "type": "tuple"
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "postAddress",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "accepted",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "postCount",
+                      "type": "uint256"
                     }
                   ],
-                  "internalType": "struct SismoConnectConfig",
+                  "indexed": false,
+                  "internalType": "struct Structures.BayRequest",
                   "name": "",
                   "type": "tuple"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
-                }
-              ],
-              "name": "sismoVerify",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            }
-          ]
-        },
-        "MecenateUsers": {
-          "address": "0x1b3a92Cc2E3Eabb2b1E8552023d1016a6Ae1ec17",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_verifierContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_treasuryContract",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "previousOwner",
-                  "type": "address"
                 },
                 {
                   "indexed": true,
-                  "internalType": "address",
-                  "name": "newOwner",
-                  "type": "address"
+                  "internalType": "uint256",
+                  "name": "index",
+                  "type": "uint256"
                 }
               ],
-              "name": "OwnershipTransferred",
+              "name": "RequestAccepted",
               "type": "event"
             },
             {
               "anonymous": false,
               "inputs": [
                 {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes32",
+                      "name": "request",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "postAddress",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "accepted",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "postCount",
+                      "type": "uint256"
+                    }
+                  ],
                   "indexed": false,
-                  "internalType": "bytes32",
-                  "name": "vaultId",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "UserRegistered",
-              "type": "event"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_treasury",
-                  "type": "address"
-                }
-              ],
-              "name": "changeTreasury",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_verifier",
-                  "type": "address"
-                }
-              ],
-              "name": "changeVerifier",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "vaultId",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "checkifUserExist",
-              "outputs": [
-                {
-                  "internalType": "bool",
+                  "internalType": "struct Structures.BayRequest",
                   "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "startIndex",
-                  "type": "uint256"
+                  "type": "tuple"
                 },
                 {
+                  "indexed": true,
                   "internalType": "uint256",
-                  "name": "endIndex",
+                  "name": "index",
                   "type": "uint256"
                 }
               ],
-              "name": "getPaginatedUsers",
-              "outputs": [
-                {
-                  "internalType": "bytes32[]",
-                  "name": "users",
-                  "type": "bytes32[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
+              "name": "RequestCreated",
+              "type": "event"
             },
             {
               "inputs": [
@@ -646,391 +162,62 @@
                   "internalType": "uint256",
                   "name": "index",
                   "type": "uint256"
-                }
-              ],
-              "name": "getUserAddressAt",
-              "outputs": [
+                },
                 {
                   "internalType": "address",
-                  "name": "user",
+                  "name": "_feed",
                   "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "index",
-                  "type": "uint256"
-                }
-              ],
-              "name": "getUserAt",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "user",
-                  "type": "bytes32"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getUserCount",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "count",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getUsers",
-              "outputs": [
-                {
-                  "internalType": "bytes32[]",
-                  "name": "users",
-                  "type": "bytes32[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "owner",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
+                },
                 {
                   "internalType": "bytes",
                   "name": "sismoConnectResponse",
                   "type": "bytes"
                 }
               ],
-              "name": "registerUser",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "renounceOwnership",
+              "name": "acceptRequest",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
             },
             {
               "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "newOwner",
-                  "type": "address"
-                }
-              ],
-              "name": "transferOwnership",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "treasuryContract",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "verifierContract",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            }
-          ]
-        },
-        "MecenateVault": {
-          "address": "0x21405BCfB5A5ef7e36EaC8ca5a2842F56e7A1243",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_verifierContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_usersContract",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "previousOwner",
-                  "type": "address"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "newOwner",
-                  "type": "address"
-                }
-              ],
-              "name": "OwnershipTransferred",
-              "type": "event"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "_commitment",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "deposit",
-              "outputs": [],
-              "stateMutability": "payable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "_commitment",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "getDeposit",
-              "outputs": [
                 {
                   "internalType": "uint256",
                   "name": "",
                   "type": "uint256"
                 }
               ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "owner",
+              "name": "allRequests",
               "outputs": [
                 {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_to",
-                  "type": "address"
+                  "internalType": "bytes32",
+                  "name": "request",
+                  "type": "bytes32"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "_amount",
+                  "name": "payment",
                   "type": "uint256"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_commitment",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "pay",
-              "outputs": [
+                  "internalType": "uint256",
+                  "name": "stake",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "postAddress",
+                  "type": "address"
+                },
                 {
                   "internalType": "bool",
-                  "name": "",
+                  "name": "accepted",
                   "type": "bool"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "renounceOwnership",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "newOwner",
-                  "type": "address"
-                }
-              ],
-              "name": "transferOwnership",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "usersContract",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "verifierContract",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "operator",
-                  "type": "address"
                 },
                 {
                   "internalType": "uint256",
-                  "name": "_amount",
+                  "name": "postCount",
                   "type": "uint256"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "_commitment",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "withdraw",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            }
-          ]
-        },
-        "MecenateFeedFactory": {
-          "address": "0x55D99ce8cABa86e93A3E6Ac00E3f0e5d7723CECA",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_usersModuleContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_treasuryContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_verifierContract",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "addr",
-                  "type": "address"
-                }
-              ],
-              "name": "FeedCreated",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "previousOwner",
-                  "type": "address"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "newOwner",
-                  "type": "address"
-                }
-              ],
-              "name": "OwnershipTransferred",
-              "type": "event"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "authorized",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
                 }
               ],
               "stateMutability": "view",
@@ -1038,34 +225,46 @@
             },
             {
               "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allRequestsPrivate",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "seller",
+                  "type": "address"
+                },
                 {
                   "internalType": "bytes",
-                  "name": "sismoConnectResponse",
+                  "name": "vaultIdSeller",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "sellerResponse",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "address",
+                  "name": "buyer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "vaultIdBuyer",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "buyerResponse",
                   "type": "bytes"
                 }
               ],
-              "name": "buildFeed",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "payable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_treasury",
-                  "type": "address"
-                }
-              ],
-              "name": "changeTreasury",
-              "outputs": [],
-              "stateMutability": "nonpayable",
+              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -1084,249 +283,182 @@
             {
               "inputs": [
                 {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "createdContracts",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "name": "feeds",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_feed",
-                  "type": "address"
-                }
-              ],
-              "name": "getFeedInfo",
-              "outputs": [
-                {
                   "components": [
                     {
-                      "internalType": "address",
-                      "name": "contractAddress",
-                      "type": "address"
-                    },
-                    {
                       "internalType": "bytes32",
-                      "name": "operator",
+                      "name": "request",
                       "type": "bytes32"
                     },
                     {
                       "internalType": "uint256",
-                      "name": "sellerStake",
+                      "name": "payment",
                       "type": "uint256"
                     },
                     {
                       "internalType": "uint256",
-                      "name": "buyerStake",
+                      "name": "stake",
                       "type": "uint256"
                     },
                     {
-                      "internalType": "uint256",
-                      "name": "totalStake",
-                      "type": "uint256"
+                      "internalType": "address",
+                      "name": "postAddress",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "accepted",
+                      "type": "bool"
                     },
                     {
                       "internalType": "uint256",
                       "name": "postCount",
                       "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.BayRequest",
+                  "name": "request",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
+                }
+              ],
+              "name": "createRequest",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes32",
+                      "name": "request",
+                      "type": "bytes32"
                     },
                     {
                       "internalType": "uint256",
-                      "name": "buyerPayment",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "postAddress",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "accepted",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "postCount",
                       "type": "uint256"
                     }
                   ],
-                  "internalType": "struct Structures.Feed",
+                  "internalType": "struct Structures.BayRequest",
                   "name": "",
                   "type": "tuple"
                 }
               ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getFeeds",
-              "outputs": [
-                {
-                  "internalType": "address[]",
-                  "name": "",
-                  "type": "address[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getFeedsInfo",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "contractAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bytes32",
-                      "name": "operator",
-                      "type": "bytes32"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "sellerStake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "buyerStake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "totalStake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "postCount",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "buyerPayment",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct Structures.Feed[]",
-                  "name": "",
-                  "type": "tuple[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "vaultId",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "getFeedsInfoOwned",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "contractAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bytes32",
-                      "name": "operator",
-                      "type": "bytes32"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "sellerStake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "buyerStake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "totalStake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "postCount",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "buyerPayment",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct Structures.Feed[]",
-                  "name": "",
-                  "type": "tuple[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "vaultId",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "getFeedsOwned",
-              "outputs": [
-                {
-                  "internalType": "address[]",
-                  "name": "",
-                  "type": "address[]"
-                }
-              ],
-              "stateMutability": "view",
+              "stateMutability": "payable",
               "type": "function"
             },
             {
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "contractAddress",
+                  "name": "_address",
                   "type": "address"
                 }
               ],
-              "name": "isContractCreated",
+              "name": "getRequestForAddress",
               "outputs": [
                 {
-                  "internalType": "bool",
+                  "components": [
+                    {
+                      "internalType": "bytes32",
+                      "name": "request",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "postAddress",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "accepted",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "postCount",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.BayRequest[]",
                   "name": "",
-                  "type": "bool"
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getRequests",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes32",
+                      "name": "request",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "postAddress",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "accepted",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "postCount",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.BayRequest[]",
+                  "name": "",
+                  "type": "tuple[]"
                 }
               ],
               "stateMutability": "view",
@@ -1348,12 +480,17 @@
             {
               "inputs": [
                 {
-                  "internalType": "address",
-                  "name": "_addr",
-                  "type": "address"
+                  "internalType": "uint256",
+                  "name": "index",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
                 }
               ],
-              "name": "removeAuthorized",
+              "name": "removeRequest",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -1369,13 +506,49 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "_addr",
+                  "name": "",
                   "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
                 }
               ],
-              "name": "setAuthorized",
-              "outputs": [],
-              "stateMutability": "nonpayable",
+              "name": "requests",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "request",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "payment",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "stake",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "postAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "accepted",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "postCount",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -1393,7 +566,20 @@
             },
             {
               "inputs": [],
-              "name": "treasuryContract",
+              "name": "usersMouduleContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "verifierContract",
               "outputs": [
                 {
                   "internalType": "address",
@@ -1411,7 +597,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0x0d9784370DFE3206D3015b38dd87C363a91298f5",
+          "address": "0x12548a154CC593E621eA795bcf47ce40ED6a95AF",
           "abi": [
             {
               "inputs": [
@@ -2646,13 +1832,7 @@
                 }
               ],
               "name": "finalizePost",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
+              "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
             },
@@ -3101,14 +2281,19 @@
             }
           ]
         },
-        "MecenateBay": {
-          "address": "0xA1FC56839550D78464893f77664217E115e56291",
+        "MecenateFeedFactory": {
+          "address": "0x8E479ccDc9CD6F46E043c1e9CDDE1A001366080C",
           "abi": [
             {
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "_usersMouduleContract",
+                  "name": "_usersModuleContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_treasuryContract",
                   "type": "address"
                 },
                 {
@@ -3119,6 +2304,19 @@
               ],
               "stateMutability": "nonpayable",
               "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "addr",
+                  "type": "address"
+                }
+              ],
+              "name": "FeedCreated",
+              "type": "event"
             },
             {
               "anonymous": false,
@@ -3140,218 +2338,54 @@
               "type": "event"
             },
             {
-              "anonymous": false,
               "inputs": [
                 {
-                  "indexed": true,
                   "internalType": "address",
-                  "name": "user",
-                  "type": "address"
-                },
-                {
-                  "components": [
-                    {
-                      "internalType": "bytes32",
-                      "name": "request",
-                      "type": "bytes32"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "payment",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "stake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "postAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "accepted",
-                      "type": "bool"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "postCount",
-                      "type": "uint256"
-                    }
-                  ],
-                  "indexed": false,
-                  "internalType": "struct Structures.BayRequest",
                   "name": "",
-                  "type": "tuple"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "uint256",
-                  "name": "index",
-                  "type": "uint256"
+                  "type": "address"
                 }
               ],
-              "name": "RequestAccepted",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
+              "name": "authorized",
+              "outputs": [
                 {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "user",
-                  "type": "address"
-                },
-                {
-                  "components": [
-                    {
-                      "internalType": "bytes32",
-                      "name": "request",
-                      "type": "bytes32"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "payment",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "stake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "postAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "accepted",
-                      "type": "bool"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "postCount",
-                      "type": "uint256"
-                    }
-                  ],
-                  "indexed": false,
-                  "internalType": "struct Structures.BayRequest",
+                  "internalType": "bool",
                   "name": "",
-                  "type": "tuple"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "uint256",
-                  "name": "index",
-                  "type": "uint256"
+                  "type": "bool"
                 }
               ],
-              "name": "RequestCreated",
-              "type": "event"
+              "stateMutability": "view",
+              "type": "function"
             },
             {
               "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "index",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_feed",
-                  "type": "address"
-                },
                 {
                   "internalType": "bytes",
                   "name": "sismoConnectResponse",
                   "type": "bytes"
                 }
               ],
-              "name": "acceptRequest",
+              "name": "buildFeed",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_treasury",
+                  "type": "address"
+                }
+              ],
+              "name": "changeTreasury",
               "outputs": [],
               "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "name": "allRequests",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "request",
-                  "type": "bytes32"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "payment",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "stake",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "postAddress",
-                  "type": "address"
-                },
-                {
-                  "internalType": "bool",
-                  "name": "accepted",
-                  "type": "bool"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "postCount",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "name": "allRequestsPrivate",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "seller",
-                  "type": "address"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "vaultIdSeller",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "address",
-                  "name": "buyer",
-                  "type": "address"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "vaultIdBuyer",
-                  "type": "bytes"
-                }
-              ],
-              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -3370,135 +2404,153 @@
             {
               "inputs": [
                 {
-                  "components": [
-                    {
-                      "internalType": "bytes32",
-                      "name": "request",
-                      "type": "bytes32"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "payment",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "stake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "postAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "accepted",
-                      "type": "bool"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "postCount",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct Structures.BayRequest",
-                  "name": "request",
-                  "type": "tuple"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
                 }
               ],
-              "name": "createRequest",
+              "name": "createdContracts",
               "outputs": [
                 {
-                  "components": [
-                    {
-                      "internalType": "bytes32",
-                      "name": "request",
-                      "type": "bytes32"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "payment",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "stake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "address",
-                      "name": "postAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "accepted",
-                      "type": "bool"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "postCount",
-                      "type": "uint256"
-                    }
-                  ],
-                  "internalType": "struct Structures.BayRequest",
+                  "internalType": "bool",
                   "name": "",
-                  "type": "tuple"
+                  "type": "bool"
                 }
               ],
-              "stateMutability": "payable",
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "feeds",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
               "type": "function"
             },
             {
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "_address",
+                  "name": "_feed",
                   "type": "address"
                 }
               ],
-              "name": "getRequestForAddress",
+              "name": "getFeedInfo",
               "outputs": [
                 {
                   "components": [
                     {
+                      "internalType": "address",
+                      "name": "contractAddress",
+                      "type": "address"
+                    },
+                    {
                       "internalType": "bytes32",
-                      "name": "request",
+                      "name": "operator",
                       "type": "bytes32"
                     },
                     {
                       "internalType": "uint256",
-                      "name": "payment",
+                      "name": "sellerStake",
                       "type": "uint256"
                     },
                     {
                       "internalType": "uint256",
-                      "name": "stake",
+                      "name": "buyerStake",
                       "type": "uint256"
                     },
                     {
-                      "internalType": "address",
-                      "name": "postAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "accepted",
-                      "type": "bool"
+                      "internalType": "uint256",
+                      "name": "totalStake",
+                      "type": "uint256"
                     },
                     {
                       "internalType": "uint256",
                       "name": "postCount",
                       "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "buyerPayment",
+                      "type": "uint256"
                     }
                   ],
-                  "internalType": "struct Structures.BayRequest[]",
+                  "internalType": "struct Structures.Feed",
+                  "name": "",
+                  "type": "tuple"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getFeeds",
+              "outputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "",
+                  "type": "address[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getFeedsInfo",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "contractAddress",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "operator",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "sellerStake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "buyerStake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "totalStake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "postCount",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "buyerPayment",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.Feed[]",
                   "name": "",
                   "type": "tuple[]"
                 }
@@ -3507,45 +2559,94 @@
               "type": "function"
             },
             {
-              "inputs": [],
-              "name": "getRequests",
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "getFeedsInfoOwned",
               "outputs": [
                 {
                   "components": [
                     {
+                      "internalType": "address",
+                      "name": "contractAddress",
+                      "type": "address"
+                    },
+                    {
                       "internalType": "bytes32",
-                      "name": "request",
+                      "name": "operator",
                       "type": "bytes32"
                     },
                     {
                       "internalType": "uint256",
-                      "name": "payment",
+                      "name": "sellerStake",
                       "type": "uint256"
                     },
                     {
                       "internalType": "uint256",
-                      "name": "stake",
+                      "name": "buyerStake",
                       "type": "uint256"
                     },
                     {
-                      "internalType": "address",
-                      "name": "postAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bool",
-                      "name": "accepted",
-                      "type": "bool"
+                      "internalType": "uint256",
+                      "name": "totalStake",
+                      "type": "uint256"
                     },
                     {
                       "internalType": "uint256",
                       "name": "postCount",
                       "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "buyerPayment",
+                      "type": "uint256"
                     }
                   ],
-                  "internalType": "struct Structures.BayRequest[]",
+                  "internalType": "struct Structures.Feed[]",
                   "name": "",
                   "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "getFeedsOwned",
+              "outputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "",
+                  "type": "address[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "contractAddress",
+                  "type": "address"
+                }
+              ],
+              "name": "isContractCreated",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
                 }
               ],
               "stateMutability": "view",
@@ -3567,17 +2668,12 @@
             {
               "inputs": [
                 {
-                  "internalType": "uint256",
-                  "name": "index",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
+                  "internalType": "address",
+                  "name": "_addr",
+                  "type": "address"
                 }
               ],
-              "name": "removeRequest",
+              "name": "removeAuthorized",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -3593,49 +2689,13 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "",
+                  "name": "_addr",
                   "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
                 }
               ],
-              "name": "requests",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "request",
-                  "type": "bytes32"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "payment",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "stake",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "address",
-                  "name": "postAddress",
-                  "type": "address"
-                },
-                {
-                  "internalType": "bool",
-                  "name": "accepted",
-                  "type": "bool"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "postCount",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
+              "name": "setAuthorized",
+              "outputs": [],
+              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -3653,20 +2713,7 @@
             },
             {
               "inputs": [],
-              "name": "usersMouduleContract",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "verifierContract",
+              "name": "treasuryContract",
               "outputs": [
                 {
                   "internalType": "address",
@@ -3684,7 +2731,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0x83AfD6a29603CcA7cb675F84Ac11A8eEa86b615a",
+          "address": "0xFc7DD7385262c884295adf575D03272A2cBF4232",
           "abi": [
             {
               "inputs": [
@@ -3802,6 +2849,963 @@
               "outputs": [
                 {
                   "internalType": "contract IMecenateUsers",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ]
+        },
+        "MecenateTreasury": {
+          "address": "0xbb5459C60cB1e0295102B9338046c253091f8cf7",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                }
+              ],
+              "name": "addLiquidity",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_native",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_unirouter",
+                  "type": "address"
+                }
+              ],
+              "name": "configLiquidityProvider",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                }
+              ],
+              "name": "customApprove",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_usersContract",
+                  "type": "address"
+                }
+              ],
+              "name": "distribute",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "fixedFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "globalFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "lastDistributed",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "native",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_fixedFee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFixedFee",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_globalFee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setGlobalFee",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_slippage",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setSlippage",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bool",
+                  "name": "_splitLiquidity",
+                  "type": "bool"
+                }
+              ],
+              "name": "setSplitLiqudity",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "slippage",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "splitLiquidity",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token1",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "token2",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                }
+              ],
+              "name": "swapTokensForTokens",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "unirouter",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address payable",
+                  "name": "_to",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                }
+              ],
+              "name": "withdrawNative",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_to",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                }
+              ],
+              "name": "withdrawTokens",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            }
+          ]
+        },
+        "MecenateUsers": {
+          "address": "0x11c06d002d53bBa5f7Aed45FBbB97DdB453db9C0",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_verifierContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_treasuryContract",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "UserRegistered",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_treasury",
+                  "type": "address"
+                }
+              ],
+              "name": "changeTreasury",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_verifier",
+                  "type": "address"
+                }
+              ],
+              "name": "changeVerifier",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "checkifUserExist",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "startIndex",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "endIndex",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getPaginatedUsers",
+              "outputs": [
+                {
+                  "internalType": "bytes32[]",
+                  "name": "users",
+                  "type": "bytes32[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "index",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getUserAddressAt",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "index",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getUserAt",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "user",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getUserCount",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "count",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getUsers",
+              "outputs": [
+                {
+                  "internalType": "bytes32[]",
+                  "name": "users",
+                  "type": "bytes32[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
+                }
+              ],
+              "name": "registerUser",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "treasuryContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "verifierContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ]
+        },
+        "MecenateVault": {
+          "address": "0x365776D8F67347fA8bc93df00cA76c623D68451F",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_verifierContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_usersContract",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "_commitment",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "deposit",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "_commitment",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "getDeposit",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_to",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "_commitment",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "pay",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "usersContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "verifierContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "operator",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "_commitment",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "withdraw",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "MecenateVerifier": {
+          "address": "0xEc784572BbA98C9e33213cDe43b7925F5c0fE6Aa",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes16",
+                  "name": "_appId",
+                  "type": "bytes16"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "enum AuthType",
+                  "name": "authType",
+                  "type": "uint8"
+                }
+              ],
+              "name": "AuthTypeNotFoundInVerifiedResult",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "ADDRESSES_PROVIDER_V2",
+              "outputs": [
+                {
+                  "internalType": "contract IAddressesProvider",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "APP_ID",
+              "outputs": [
+                {
+                  "internalType": "bytes16",
+                  "name": "",
+                  "type": "bytes16"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "IS_IMPERSONATION_MODE",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "SISMO_CONNECT_LIB_VERSION",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "appId",
+              "outputs": [
+                {
+                  "internalType": "bytes16",
+                  "name": "",
+                  "type": "bytes16"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "config",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes16",
+                      "name": "appId",
+                      "type": "bytes16"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "bool",
+                          "name": "isImpersonationMode",
+                          "type": "bool"
+                        }
+                      ],
+                      "internalType": "struct VaultConfig",
+                      "name": "vault",
+                      "type": "tuple"
+                    }
+                  ],
+                  "internalType": "struct SismoConnectConfig",
+                  "name": "",
+                  "type": "tuple"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
+                }
+              ],
+              "name": "sismoVerify",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
                   "name": "",
                   "type": "address"
                 }

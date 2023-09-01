@@ -53,6 +53,9 @@ const ViewFeed: NextPage = () => {
   const [image, setImage] = React.useState("");
   const [postCount, setPostCount] = useState<any>("");
   const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState<any>("");
+  const [sismoData, setSismoData] = React.useState<any>(null);
+  const [verified, setVerified] = React.useState<any>(null);
+  const [sismoResponse, setSismoResponse] = React.useState<any>(null);
 
   const user = "";
   const owner = "";
@@ -150,7 +153,7 @@ const ViewFeed: NextPage = () => {
   }
 
   async function renounce() {
-    const tx = await feedCtx?.renouncePost(keccak256(store.sismoData.auths[0].userId));
+    const tx = await feedCtx?.renouncePost(keccak256(sismoData.auths[0].userId));
     await tx?.wait();
     notification.success("Refund successful");
   }
@@ -493,7 +496,7 @@ const ViewFeed: NextPage = () => {
     console.log("Data Retrieved.");
     console.log("Proof Hash Digest: ", proofHash58Digest);
 
-    txData(feedCtx?.submitHash(proofHash58Digest, keccak256(store.sismoData.auths[0].userId)));
+    txData(feedCtx?.submitHash(proofHash58Digest, keccak256(sismoData.auths[0].userId)));
 
     return {
       proofJson: json_selldata_v120,
@@ -722,7 +725,7 @@ const ViewFeed: NextPage = () => {
     const AbiCoder = new ethers.utils.AbiCoder();
     const dataEncoded = AbiCoder.encode(["string", "string"], [symKeyHash, rawDataHash]);
 
-    txData(feedCtx?.revealData(dataEncoded, keccak256(store.sismoData.auths[0].userId)));
+    txData(feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)));
 
     await fetchData();
   }
@@ -748,9 +751,9 @@ const ViewFeed: NextPage = () => {
   async function finalizePost() {
     console.log("Finalizing Data...");
     if (valid == true) {
-      txData(feedCtx?.finalizePost(valid, parseEther("0"), keccak256(store.sismoData.auths[0].userId)));
+      txData(feedCtx?.finalizePost(valid, parseEther("0"), keccak256(sismoData.auths[0].userId)));
     } else {
-      txData(feedCtx?.finalizePost(valid, parseEther(punishment), keccak256(store.sismoData.auths[0].userId)));
+      txData(feedCtx?.finalizePost(valid, parseEther(punishment), keccak256(sismoData.auths[0].userId)));
     }
 
     await fetchData();
@@ -761,6 +764,9 @@ const ViewFeed: NextPage = () => {
       try {
         console.log("Fetching Data...");
         await fetchData();
+        setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
+        setVerified(localStorage.getItem("verified"));
+        setSismoResponse(localStorage.getItem("sismoResponse"));
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -769,16 +775,10 @@ const ViewFeed: NextPage = () => {
     const interval = setInterval(() => {
       if (signer && provider && feedCtx && router.isReady) {
         fetchDataAsync();
-        if (
-          store &&
-          store.sismoData &&
-          store.sismoData.auths &&
-          store.sismoData.auths[1] &&
-          store.sismoData.auths[1].userId
-        ) {
-          const userAddress = store.sismoData.auths[1].userId;
-          const vaultId = store.sismoData.vaultId;
-          const response = store.sismoResponse;
+        if (store && sismoData && sismoData.auths && sismoData.auths[1] && sismoData.auths[1].userId) {
+          const userAddress = sismoData.auths[1].userId;
+          const vaultId = sismoData.vaultId;
+          const response = sismoResponse;
 
           setVaultId(vaultId);
           setResponse(response);
@@ -829,9 +829,6 @@ const ViewFeed: NextPage = () => {
     <div className="flex flex-col items-center pt-2 p-2 m-2">
       {feedData[0] != null ? (
         <div className="flex flex-col py-2  text-left ">
-          {store.sismoData && store.sismoData.auths && store.sismoData.auths.length > 0 && store.verified && (
-            <VerifiedBadge sismoData={store.sismoData.auths[1]} verified={String(store.verified)} />
-          )}
           <div className="text-2xl my-5 font-bold hover:text-success">
             {feedData.postdata.settings.status === 6
               ? "> Waiting for Creator"
@@ -870,10 +867,11 @@ const ViewFeed: NextPage = () => {
                         value={postDuration}
                         onChange={e => setPostDuration(e.target.value)}
                       >
-                        <option value="0">3 Days</option>
-                        <option value="1">1 Week</option>
-                        <option value="2">2 Weeks</option>
-                        <option value="3">1 Month</option>
+                        <option value="0">1 Days</option>
+                        <option value="1">3 Days</option>
+                        <option value="2">1 Week</option>
+                        <option value="3">2 Weeks</option>
+                        <option value="4">1 Month</option>
                       </select>
                       <label className="block text-base-500 mt-8">Stake</label>
                       <input
@@ -1324,13 +1322,16 @@ const ViewFeed: NextPage = () => {
                 <h2 className="text-xl font-bold">Post Settings</h2>
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <p>
-                    <span className="font-bold">Creation Timestamp:</span> {feedData[1][0].creationTimeStamp.toString()}
+                    <span className="font-bold">Creation Timestamp:</span>{" "}
+                    {new Date(Number(feedData[1][0].creationTimeStamp) * 1000).toUTCString()}
                   </p>
                   <p>
-                    <span className="font-bold">End Timestamp:</span> {feedData[1][0].endTimeStamp.toString()}
+                    <span className="font-bold">End Timestamp:</span>{" "}
+                    {new Date(Number(feedData[1][0].endTimeStamp) * 1000).toString()}
                   </p>
                   <p>
-                    <span className="font-bold">Duration:</span> {feedData[1][0].duration.toString()}
+                    <span className="font-bold">Duration:</span>{" "}
+                    {Number(feedData[1][0].duration.toString() * 1000) / 86400000} days{" "}
                   </p>
                   <p>
                     <span className="font-bold">Post Type:</span>{" "}
@@ -1373,11 +1374,11 @@ const ViewFeed: NextPage = () => {
                 <h2 className="text-xl font-bold">Punishments</h2>
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <p>
-                    <span className="font-bold">Buyer Punishment:</span>{" "}
+                    <span className="font-bold">Buyer Penality:</span>{" "}
                     {formatEther(feedData[1][1].buyerPunishment.toString())}
                   </p>
                   <p>
-                    <span className="font-bold">Seller Punishment:</span>{" "}
+                    <span className="font-bold">Seller Penality:</span>{" "}
                     {formatEther(feedData[1][1].punishment.toString())}
                   </p>
                   <p>

@@ -37,6 +37,7 @@ module.exports = {
     extend: {
       fontFamily: {
         "bai-jamjuree": ["Bai Jamjuree", "sans-serif"],
+        "inter": ["Inter", "sans-serif"],
       },
       keyframes: {
         grow: {
