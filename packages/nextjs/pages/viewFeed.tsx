@@ -36,8 +36,6 @@ const ViewFeed: NextPage = () => {
 
   const { addr } = router.query;
 
-  const [vaultId, setVaultId] = useState<any>("");
-  const [response, setResponse] = useState<any>("");
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
   const [postStake, setPostStake] = useState<any>([]);
@@ -52,7 +50,6 @@ const ViewFeed: NextPage = () => {
   const [imageFile, setImageFile] = React.useState<any>("");
   const [image, setImage] = React.useState("");
   const [postCount, setPostCount] = useState<any>("");
-  const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState<any>("");
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
@@ -294,21 +291,34 @@ const ViewFeed: NextPage = () => {
       _buyer = buyer;
     }
 
+    console.log(
+      "Buyer: ",
+      _buyer,
+      "Post Type: ",
+      Number(postType),
+      "Post Duration: ",
+      Number(postDuration),
+      "Post Payment: ",
+      parseEther(await buyerPayment),
+      "Post Stake: ",
+      parseEther(await postStake),
+    );
+
     txData(
       feedCtx?.createPost(
         proofOfHashEncode,
         Number(postType),
         Number(postDuration),
-        parseEther(buyerPayment),
+        parseEther(await buyerPayment),
         _buyer,
-        response,
+        sismoResponse,
         { value: parseEther(postStake) },
       ),
     );
   };
 
   async function acceptPost() {
-    txData(feedCtx?.acceptPost(response, { value: parseEther(postPayment) }));
+    txData(feedCtx?.acceptPost(sismoResponse, { value: parseEther(postPayment) }));
   }
 
   async function savePost(RawData: string): Promise<any | void> {
@@ -732,19 +742,19 @@ const ViewFeed: NextPage = () => {
 
   async function addStake() {
     console.log("Adding Stake...");
-    txData(feedCtx?.addStake(response, { value: parseEther(stakeAmount) }));
+    txData(feedCtx?.addStake(sismoResponse, { value: parseEther(stakeAmount) }));
     await fetchData();
   }
 
   async function takeAll() {
     console.log("Take All Stake...");
-    txData(feedCtx?.takeFullStake(response));
+    txData(feedCtx?.takeFullStake(sismoResponse));
     await fetchData();
   }
 
   async function takeStake() {
     console.log("Take Stake...");
-    txData(feedCtx?.takeStake(parseEther(stakeAmount), response));
+    txData(feedCtx?.takeStake(parseEther(stakeAmount), sismoResponse));
     await fetchData();
   }
 
@@ -775,14 +785,6 @@ const ViewFeed: NextPage = () => {
     const interval = setInterval(() => {
       if (signer && provider && feedCtx && router.isReady) {
         fetchDataAsync();
-        if (store && sismoData && sismoData.auths && sismoData.auths[1] && sismoData.auths[1].userId) {
-          const userAddress = sismoData.auths[1].userId;
-          const vaultId = sismoData.vaultId;
-          const response = sismoResponse;
-
-          setVaultId(vaultId);
-          setResponse(response);
-        }
       }
     }, 5000);
 
@@ -792,7 +794,7 @@ const ViewFeed: NextPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [signer]);
 
   type ModalProps = {
     title: string;
@@ -867,6 +869,7 @@ const ViewFeed: NextPage = () => {
                         value={postDuration}
                         onChange={e => setPostDuration(e.target.value)}
                       >
+                        <option>Select Duration</option>
                         <option value="0">1 Days</option>
                         <option value="1">3 Days</option>
                         <option value="2">1 Week</option>
@@ -904,6 +907,7 @@ const ViewFeed: NextPage = () => {
                         value={postType}
                         onChange={e => setPostType(e.target.value)}
                       >
+                        <option>Select Type</option>
                         <option value="0">Text</option>
                         <option value="1">Image</option>
                         {/* <option value="2">Video</option>
@@ -944,7 +948,6 @@ const ViewFeed: NextPage = () => {
                         className="btn btn-primary w-full mt-4"
                         onClick={async () => {
                           const postData = await createPost();
-                          console.log(postData);
                         }}
                       >
                         Create Post

@@ -64,6 +64,8 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
         require(msg.value >= getCreationFee(), "Not enough payment");
 
+        payable(treasuryContract).transfer(msg.value);
+
         contractCounter++;
 
         MecenateFeed feed = new MecenateFeed(

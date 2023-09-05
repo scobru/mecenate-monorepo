@@ -135,16 +135,10 @@ export default function Header() {
               }}
             >
               {navLinks}
-              {isLocalStorage && localStorage.getItem("verified") == "verified" ? (
-                <div>
-                  <VerifiedBadge
-                    sismoData={JSON.parse(String(localStorage.getItem("sismoData"))).auths[1]}
-                    verified={String(localStorage.getItem("verified"))}
-                  />
-                </div>
-              ) : (
-                ""
-              )}
+
+              <div>
+                <VerifiedBadge verified={String(verified)} />
+              </div>
             </ul>
           )}
         </div>
@@ -157,15 +151,8 @@ export default function Header() {
             <span className="text-base font-proxima">Decentralized Data Marketplace</span>{" "}
           </div>
         </div>
-        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
-          {navLinks}{" "}
-          {isLocalStorage && (
-            <VerifiedBadge
-              sismoData={JSON.parse(String(localStorage.getItem("sismoData"))).auths[1]}
-              verified={String(localStorage.getItem("verified"))}
-            />
-          )}
-        </ul>{" "}
+        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>{" "}
+        {verified == "verified" ? <VerifiedBadge verified={String(verified)} /> : null}
       </div>
 
       <div className="navbar-end flex-grow mr-4">

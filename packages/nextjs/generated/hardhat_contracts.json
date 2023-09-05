@@ -2282,7 +2282,7 @@
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0x8E479ccDc9CD6F46E043c1e9CDDE1A001366080C",
+          "address": "0x88f12656bE5b75A2A273AFA9f7c72105105796DE",
           "abi": [
             {
               "inputs": [
@@ -2731,7 +2731,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0xFc7DD7385262c884295adf575D03272A2cBF4232",
+          "address": "0x7c650FE5bA589391822Fa982Be1C4488b9568edB",
           "abi": [
             {
               "inputs": [

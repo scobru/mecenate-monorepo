@@ -1,20 +1,18 @@
 import { useEffect } from "react";
-import { Address } from ".";
 import React from "react";
 
 type TVerifiedProps = {
-  sismoData?: any;
   verified?: string;
 };
 
-export default function VerifiedBadge({ sismoData, verified }: TVerifiedProps) {
-  const [newSismoData, setNewSismoData] = React.useState<any>(null);
-  const [newVerified, setNewVerified] = React.useState<string>("");
+export default function VerifiedBadge({ verified }: TVerifiedProps) {
+  const [newVerified, setNewVerified] = React.useState("");
 
   useEffect(() => {
-    setNewSismoData(sismoData);
-    setNewVerified(String(verified));
-  }, [sismoData, verified]);
+    if (verified == "verified") {
+      setNewVerified("verified");
+    }
+  }, [verified]);
 
   return (
     <>

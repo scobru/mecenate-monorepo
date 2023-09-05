@@ -126,7 +126,7 @@ const Identity: NextPage = () => {
     // await createPair();
     const seller = await signer?.getAddress();
     if (seller) {
-      txData(usersCtx?.registerUser(store.sismoResponse));
+      txData(usersCtx?.registerUser(sismoResponse));
     }
   }
 
@@ -167,7 +167,7 @@ const Identity: NextPage = () => {
       runEffect();
       setPageState("init");
     }
-  }, [sismoData, verified, sismoResponse, getContractData, checkIfUserExists]);
+  }, []);
 
   return (
     <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4 ">

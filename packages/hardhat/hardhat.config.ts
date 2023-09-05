@@ -6,6 +6,7 @@ import "@nomicfoundation/hardhat-foundry";
 import "hardhat-deploy";
 import "ipfs-http-client";
 import "hardhat-contract-sizer";
+import "hardhat-docgen";
 
 // If not set, it uses ours Alchemy's default API key.
 // You can get your own at https://dashboard.alchemyapi.io
@@ -101,6 +102,11 @@ const config: HardhatUserConfig = {
     disambiguatePaths: false,
     runOnCompile: true,
     strict: true,
+  },
+  docgen: {
+    path: "./docs",
+    clear: true,
+    runOnCompile: true,
   },
 };
 

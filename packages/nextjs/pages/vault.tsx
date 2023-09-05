@@ -140,9 +140,6 @@ const Vault: NextPage = () => {
           </div>
           <div className="p-4 ">
             <div className="w-full">
-              {sismoData && sismoData.auths && sismoData.auths.length > 0 && verified && (
-                <VerifiedBadge sismoData={sismoData.auths[1]} verified={String(verified)} />
-              )}
               <div className="card card-bordered border-2 bg-secondary my-10 p-10 w-full mx-auto flex flex-col  text-left">
                 {depositedBalance && wallet && (
                   <p className="text-left text-lg mb-5">Balance: {depositedBalance} ETH</p>
