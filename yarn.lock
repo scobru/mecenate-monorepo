@@ -5790,7 +5790,7 @@ __metadata:
     redis: ^4.6.8
     siwe: ^2.1.4
     tailwindcss: ^3.1.8
-    terser: 3.14.1
+    terser: 4.8.1
     ts-node: ^10.9.1
     typescript: ^4.9.5
     use-debounce: ^8.0.4
@@ -13499,13 +13499,6 @@ __metadata:
   version: 8.3.0
   resolution: "commander@npm:8.3.0"
   checksum: 0f82321821fc27b83bd409510bb9deeebcfa799ff0bf5d102128b500b7af22872c0c92cb6a0ebc5a4cf19c6b550fba9cedfa7329d18c6442a625f851377bacf0
-  languageName: node
-  linkType: hard
-
-"commander@npm:~2.17.1":
-  version: 2.17.1
-  resolution: "commander@npm:2.17.1"
-  checksum: 22e7ed5b422079a13a496e5eb8f73f36c15b5809d46f738e168e20f9ad485c12951bdc2cb366a36eb5f4927dae4f17b355b8adb96a5b9093f5fa4c439e8b9419
   languageName: node
   linkType: hard
 
@@ -34943,7 +34936,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-support@npm:^0.5.13, source-map-support@npm:^0.5.16, source-map-support@npm:^0.5.21, source-map-support@npm:~0.5.20, source-map-support@npm:~0.5.6":
+"source-map-support@npm:^0.5.13, source-map-support@npm:^0.5.16, source-map-support@npm:^0.5.21, source-map-support@npm:~0.5.12, source-map-support@npm:~0.5.20":
   version: 0.5.21
   resolution: "source-map-support@npm:0.5.21"
   dependencies:
@@ -35960,16 +35953,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser@npm:3.14.1":
-  version: 3.14.1
-  resolution: "terser@npm:3.14.1"
+"terser@npm:4.8.1":
+  version: 4.8.1
+  resolution: "terser@npm:4.8.1"
   dependencies:
-    commander: ~2.17.1
+    commander: ^2.20.0
     source-map: ~0.6.1
-    source-map-support: ~0.5.6
+    source-map-support: ~0.5.12
   bin:
-    terser: bin/uglifyjs
-  checksum: 966857772f6b1068b7fc8e24123bc29ff6785ee45a9ddec171ecd54e9960dc83d0e0cb6af51a141ee8ba8228b22ff6e18a822a5eaa0ec2604fe4a4162a8ebe66
+    terser: bin/terser
+  checksum: b342819bf7e82283059aaa3f22bb74deb1862d07573ba5a8947882190ad525fd9b44a15074986be083fd379c58b9a879457a330b66dcdb77b485c44267f9a55a
   languageName: node
   linkType: hard
 

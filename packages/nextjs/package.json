@@ -52,7 +52,7 @@
     "react-router-dom": "^6.8.1",
     "redis": "^4.6.8",
     "siwe": "^2.1.4",
-    "terser": "3.14.1",
+    "terser": "4.8.1",
     "ts-node": "^10.9.1",
     "use-debounce": "^8.0.4",
     "usehooks-ts": "^2.7.2",
