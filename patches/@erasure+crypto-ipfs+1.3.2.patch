@@ -1,0 +1,15 @@
+diff --git a/node_modules/@erasure/crypto-ipfs/index.js b/node_modules/@erasure/crypto-ipfs/index.js
+index b4fc385..8d513fd 100644
+--- a/node_modules/@erasure/crypto-ipfs/index.js
++++ b/node_modules/@erasure/crypto-ipfs/index.js
+@@ -98,8 +98,8 @@ const ErasureHelper = {
+     },
+   },
+   encodeCreateCall: (templateABI, abiValues) => {
+-    const interface = new ethers.utils.Interface(templateABI)
+-    const calldata = interface.functions.initialize.encode(abiValues)
++    const ethersInterface  = new ethers.utils.Interface(templateABI)
++    const calldata = ethersInterface .functions.initialize.encode(abiValues)
+     return calldata
+   },
+   crypto: {
