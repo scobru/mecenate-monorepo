@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, ethers } from "ethers";
@@ -100,11 +100,11 @@ const Bay: NextPage = () => {
     }
   }
 
-  async function getAllRequest() {
+  const getAllRequest = useCallback(async () => {
     const _requests = await bayCtx?.getRequests();
     setSignerAddress(String(await signer?.getAddress()));
     setRequests(_requests);
-  }
+  }, [bayCtx, signer]);
 
   useEffect(() => {
     setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
@@ -121,7 +121,7 @@ const Bay: NextPage = () => {
     if (bayCtx) {
       getAllRequest();
     }
-  }, [bayCtx, signer, requests]);
+  }, [bayCtx, signer, requests, getAllRequest]);
 
   const sendPublicTelegramMessage = async () => {
     const url = `https://api.telegram.org/bot${String(process.env.NEXT_PUBLIC_TELEGRAM_TOKEN)}/sendMessage`;

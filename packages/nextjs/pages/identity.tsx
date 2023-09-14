@@ -98,31 +98,33 @@ const Identity: NextPage = () => {
   const initializeState = async () => {
     await getContractData();
     await checkIfUserExists();
-    const sismoDataFromLocalStorage = localStorage.getItem("sismoData");
-    const verifiedFromLocalStorage = localStorage.getItem("verified");
-    const sismoResponseFromLocalStorage = localStorage.getItem("sismoResponse");
+    if (pageState !== "verified") {
+      const sismoDataFromLocalStorage = localStorage.getItem("sismoData");
+      const verifiedFromLocalStorage = localStorage.getItem("verified");
+      const sismoResponseFromLocalStorage = localStorage.getItem("sismoResponse");
 
-    if (sismoDataFromLocalStorage) {
-      setSismoData(JSON.parse(sismoDataFromLocalStorage));
-    }
-    if (verifiedFromLocalStorage) {
-      setVerified(verifiedFromLocalStorage);
-    }
-    if (sismoResponseFromLocalStorage) {
-      setSismoResponse(sismoResponseFromLocalStorage);
-    }
+      if (sismoDataFromLocalStorage) {
+        setSismoData(JSON.parse(sismoDataFromLocalStorage));
+      }
+      if (verifiedFromLocalStorage) {
+        setVerified(verifiedFromLocalStorage);
+      }
+      if (sismoResponseFromLocalStorage) {
+        setSismoResponse(sismoResponseFromLocalStorage);
+      }
 
-    const pageStateToSet = verifiedFromLocalStorage === "verified" ? "verified" : "init";
-    setPageState(pageStateToSet);
+      const pageStateToSet = verifiedFromLocalStorage === "verified" ? "verified" : "init";
+      setPageState(pageStateToSet);
 
-    if (!sismoData) return;
+      if (!sismoData) return;
 
-    if (userName) {
-      localStorage.setItem("userName", userName);
-    } else {
-      const _username = await usersCtx?.getUserName(keccak256(String(sismoData?.auths[0].userId)));
-      localStorage.setItem("userName", _username);
-      setUserName(_username);
+      if (userName) {
+        localStorage.setItem("userName", userName);
+      } else {
+        const _username = await usersCtx?.getUserName(keccak256(String(sismoData?.auths[0].userId)));
+        localStorage.setItem("userName", _username);
+        setUserName(_username);
+      }
     }
   };
 
@@ -131,11 +133,29 @@ const Identity: NextPage = () => {
     window.location.href = "/";
   }
 
-  useEffect(() => {
+  /*  useEffect(() => {
     initializeState();
     if (!responseBytes) return;
     setPageState("responseReceived");
-  }, [responseBytes]);
+  }, [responseBytes]); */
+
+  useEffect(() => {
+    let isMounted = true; // flag to keep track of component mounted state
+
+    // your async operations
+    async function fetchData() {
+      if (isMounted) {
+        // set state only if component is still mounted
+        const data = await initializeState();
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      isMounted = false; // cleanup toggles mounted flag
+    };
+  }, []);
 
   return (
     <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4 ">
@@ -146,6 +166,7 @@ const Identity: NextPage = () => {
             <p className="text-xl  mb-20">Register your identity with zk-proof</p>
           </div>
           <div className="p-4 ">
+            {!signer?.provider && <div className="text-center font-bold text-xl my-5">Please connect your wallet</div>}
             {pageState == "init" ? (
               <>
                 <div className="text-center">
@@ -154,26 +175,34 @@ const Identity: NextPage = () => {
                     auths={AUTHS}
                     signature={SIGNATURE_REQUEST}
                     text="Join With Sismo"
+                    disabled={!signer}
                     onResponse={async (response: SismoConnectResponse) => {
-                      setSismoConnectResponse(await response);
+                      setSismoConnectResponse(response);
                       setPageState("verifying");
-                      const verifiedResult = await fetch("/api/verify", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(await response),
-                      });
+                      try {
+                        const verifiedResult = await fetch("/api/verify", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(response),
+                        });
 
-                      const data = await verifiedResult.json();
-                      if (verifiedResult.ok) {
-                        setSismoConnectVerifiedResult(data);
-                        localStorage.setItem("verified", "verified");
-                        localStorage.setItem("sismoData", JSON.stringify(await data));
-                        setPageState("verified");
-                      } else {
+                        const data = await verifiedResult.json();
+
+                        if (verifiedResult.ok) {
+                          setSismoConnectVerifiedResult(data);
+                          localStorage.setItem("verified", "verified");
+                          localStorage.setItem("sismoData", JSON.stringify(await data));
+                          setPageState("verified");
+                        } else {
+                          setPageState("error");
+                          setError(data.error.toString()); // or JSON.stringify(data.error)
+                        }
+                      } catch (error) {
+                        console.error("Error:", error);
                         setPageState("error");
-                        setError(data);
+                        setError(error as any);
                       }
                     }}
                     onResponseBytes={(responseBytes: string) => {
@@ -186,20 +215,20 @@ const Identity: NextPage = () => {
             ) : (
               <>
                 <div className="text-center">
-                  <button
-                    className="btn btn-ghost bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    onClick={() => {
-                      window.location.href = "/identity";
-                      resetLocalStorage();
-                      resetApp();
-                    }}
-                  >
-                    {" "}
-                    RESET{" "}
-                  </button>
-                </div>
-                <br></br>
-                <div className="status-wrapper">
+                  <div className="status-wrapper">
+                    <button
+                      className="btn btn-primary bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      onClick={() => {
+                        window.location.href = "/identity";
+                        resetLocalStorage();
+                        resetApp();
+                      }}
+                    >
+                      {" "}
+                      RESET{" "}
+                    </button>
+                  </div>
+                  <br></br>
                   {pageState == "verifying" ? (
                     <div className="text-center items-center flex flex-row gap-3">
                       <Spinner></Spinner>{" "}
@@ -222,7 +251,7 @@ const Identity: NextPage = () => {
                             <button
                               className="btn btn-primary  py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                               onClick={signIn}
-                              disabled={userExists}
+                              /* disabled={userExists} */
                             >
                               Sign In{" "}
                             </button>

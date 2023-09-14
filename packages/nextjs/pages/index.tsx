@@ -1,10 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import {
-  Square3Stack3DIcon,
-  MegaphoneIcon,
-} from "@heroicons/react/24/outline";
-import React, { useEffect } from "react";
+import { Square3Stack3DIcon, MegaphoneIcon } from "@heroicons/react/24/outline";
+import React, { useCallback, useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface } from "ethers";
@@ -41,14 +38,14 @@ const Home: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  async function getStats() {
+  const getStats = useCallback(async () => {
     const stats = await statsCtx?.getStats();
     setStats(stats);
-  }
+  }, [statsCtx]);
 
   useEffect(() => {
     getStats();
-  }, [statsCtx]);
+  }, [getStats, statsCtx]);
 
   return (
     <>

@@ -2,7 +2,7 @@ import { SismoConnect, SismoConnectVerifiedResult } from "@sismo-core/sismo-conn
 import { AUTHS, CONFIG, SIGNATURE_REQUEST } from "../../sismo.config";
 
 const sismoConnect = SismoConnect({ config: CONFIG });
-const TIMEOUT_DURATION = 5000; // 5 seconds
+const TIMEOUT_DURATION = 9000; // 9 seconds
 
 // Promise that resolves after a set time
 const timeout = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms));
@@ -25,9 +25,12 @@ export default async function verify(
 
   const sismoConnectResponse = req.body;
 
+  console.log("Received POST request.");
+
   try {
-    // Promise.race will resolve or reject as soon as one of the promises resolves or rejects
-    const result = await Promise.race([
+    console.log("SismoConnectResponse:", JSON.stringify(sismoConnectResponse));
+
+    const result: SismoConnectVerifiedResult = await Promise.race([
       sismoConnect.verify(sismoConnectResponse, {
         auths: AUTHS,
         signature: SIGNATURE_REQUEST,
@@ -37,10 +40,18 @@ export default async function verify(
       }),
     ]);
 
+    console.log("Verification result:", JSON.stringify(result));
+
     return res.json(result);
-  } catch (e) {
-    console.error(e);
-    const statusCode = e === "Timeout" ? 408 : 500;
-    return res.status(statusCode).json({ error: e });
+  } catch (e: any) {
+    console.error("Error in verify function: ", e);
+
+    if (e.message === "Timeout") {
+      console.error("Error during verification:", e);
+
+      return res.status(408).json({ error: "Request timed out" });
+    }
+
+    return res.status(500).json({ error: e.message });
   }
 }

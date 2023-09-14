@@ -59,20 +59,14 @@ const Feeds: NextPage = () => {
   }
 
   const treasuryCtx = useContract({
-    address: treasuryAddress!,
+    address: deployedContractTreasury?.address,
     abi: treasuryAbi,
     signerOrProvider: signer || provider,
   });
 
   const factoryCtx = useContract({
-    address: factoryAddress!,
+    address: deployedContractFactory?.address,
     abi: factoryAbi,
-    signerOrProvider: signer || provider,
-  });
-
-  const walletCtx = useContract({
-    address: walletAddress!,
-    abi: walletAbi,
     signerOrProvider: signer || provider,
   });
 

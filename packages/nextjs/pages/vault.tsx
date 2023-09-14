@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface } from "ethers";
@@ -100,12 +100,21 @@ const Vault: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
+  const getDeposit = useCallback(async () => {
+    if (sismoData?.auths[0].userId == null) return;
+    const commitment = userCommitment || keccak256(sismoData.auths[0].userId);
+    if (commitment) {
+      const tx = await wallet?.getEthDeposit(commitment);
+      if (tx) setDepositedBalance(Number(formatEther(tx)));
+    }
+  }, [sismoData, userCommitment, wallet]);
+
   useEffect(() => {
     getDeposit();
     setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
     setVerified(localStorage.getItem("verified"));
     setSismoResponse(localStorage.getItem("sismoResponse"));
-  }, [signer]);
+  }, [getDeposit, signer]);
 
   const deposit = async () => {
     const commitment = userCommitment || keccak256(sismoData.auths[0].userId);
@@ -122,15 +131,6 @@ const Vault: NextPage = () => {
     const tx = await wallet?.withdrawETH(to, parseEther(String(amount)), commitment);
     if (tx?.hash) {
       notification.success("Withdrawal successful!");
-    }
-  };
-
-  const getDeposit = async () => {
-    if (sismoData?.auths[0].userId == null) return;
-    const commitment = userCommitment || keccak256(sismoData.auths[0].userId);
-    if (commitment) {
-      const tx = await wallet?.getEthDeposit(commitment);
-      if (tx) setDepositedBalance(Number(formatEther(tx)));
     }
   };
 

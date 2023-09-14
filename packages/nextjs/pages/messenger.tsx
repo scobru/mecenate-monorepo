@@ -1,17 +1,42 @@
 import React, { use, useEffect, useState } from "react";
 import axios from "axios";
+import { keccak256 } from "ethers/lib/utils.js";
+import { useScaffoldContractRead } from "~~/hooks/scaffold-eth/useScaffoldContractRead";
+import { getDeployedContract } from "~~/components/scaffold-eth/Contract/utilsContract";
+import { ContractInterface } from "ethers";
+import { useContract, useNetwork, useProvider, useSigner } from "wagmi";
 
 const Messenger: React.FC = () => {
+  const { chain } = useNetwork();
+  const { data: signer } = useSigner();
+  const provider = useProvider();
   const [message, setMessage] = useState<string>("");
   const [messageType, setMessageType] = useState<string>("General");
   const [sending, setSending] = useState<boolean>(false);
+  const [sismoData, setSismoData] = React.useState<any>(null);
+  const [userName, setUserName] = React.useState<any>(null);
+
+  const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
+
+  let UsersAddress!: string;
+  let UsersAbi: ContractInterface[] = [];
+
+  if (deployedContractUser) {
+    ({ address: UsersAddress, abi: UsersAbi } = deployedContractUser);
+  }
+
+  const usersCtx = useContract({
+    address: UsersAddress,
+    abi: UsersAbi,
+    signerOrProvider: signer || provider,
+  });
 
   const sendMessage = async () => {
     setSending(true);
     const url = `https://api.telegram.org/bot${String(process.env.NEXT_PUBLIC_TELEGRAM_TOKEN)}/sendMessage`;
     const formattedText = `
       <b>📦 ${messageType} Message</b>
-      \n<b>👤 from: </b>${localStorage.getItem("userName")}
+      \n<b>👤 from: </b>${userName}
       \n<b>✉️ message: </b>${message}
     `;
     try {
@@ -28,11 +53,22 @@ const Messenger: React.FC = () => {
     }
   };
 
-  const [userName, setUserName] = useState<string>("");
+  const checkIfUserExists = async function checkIfUserExists() {
+    const localSismoData = localStorage.getItem("sismoData");
+    if (!localSismoData) return;
+    const localSismoDataConverted = JSON.parse(String(localSismoData));
+    const _userName = await usersCtx?.getUserName(keccak256(String(localSismoDataConverted?.auths[0].userId)));
+    setUserName(_userName);
+  };
 
   useEffect(() => {
-    setUserName(localStorage.getItem("userName") || "");
-  }, []);
+    if (localStorage.getItem("sismoData")) {
+      const run = async () => {
+        await checkIfUserExists();
+      };
+      run();
+    }
+  }, [sismoData]);
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10  min-w-fit">
@@ -90,7 +126,7 @@ const Messenger: React.FC = () => {
         <button
           className={`btn btn-primary ${sending ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={sendMessage}
-          disabled={sending}
+          disabled={sending || !message || !messageType || !userName}
         >
           {sending ? "Sending..." : "Send Message"}
         </button>
