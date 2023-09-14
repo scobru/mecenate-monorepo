@@ -1,8 +1,11 @@
-// pages/api/verifySismo.js
 import { SismoConnect, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-server";
 import { AUTHS, CONFIG, SIGNATURE_REQUEST } from "../../sismo.config";
 
 const sismoConnect = SismoConnect({ config: CONFIG });
+const TIMEOUT_DURATION = 5000; // 5 seconds
+
+// Promise that resolves after a set time
+const timeout = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default async function verify(
   req: { method: string; body: any },
@@ -20,16 +23,24 @@ export default async function verify(
     return res.status(405).end();
   }
 
-  const sismoConnectResponse = req.body; // Use req.body instead of req.json()
+  const sismoConnectResponse = req.body;
+
   try {
-    const result: SismoConnectVerifiedResult = await sismoConnect.verify(sismoConnectResponse, {
-      auths: AUTHS,
-      signature: SIGNATURE_REQUEST,
-    });
-    console.log(JSON.stringify(result, null, 2));
-    return res.json(result); // Use res.json() instead of Response.json()
-  } catch (e: any) {
+    // Promise.race will resolve or reject as soon as one of the promises resolves or rejects
+    const result = await Promise.race([
+      sismoConnect.verify(sismoConnectResponse, {
+        auths: AUTHS,
+        signature: SIGNATURE_REQUEST,
+      }),
+      timeout(TIMEOUT_DURATION).then(() => {
+        throw new Error("Timeout");
+      }),
+    ]);
+
+    return res.json(result);
+  } catch (e) {
     console.error(e);
-    return res.status(500).json({ error: e.message });
+    const statusCode = e === "Timeout" ? 408 : 500;
+    return res.status(statusCode).json({ error: e });
   }
 }

@@ -6,6 +6,8 @@ This project is dedicated to anyone who wishes to exchange information and data 
 
 ### Video Demo
 
+[![Mecenate](https://cdn.loom.com/sessions/thumbnails/7d4cf55ac98945d783336054ad8fa760-with-play.gif)](https://www.loom.com/share/Mecenate-Intro-7d4cf55ac98945d783336054ad8fa760?sid=ab63c201-b490-4dd3-abba-daeff6fa2546)
+
 [![Mecenate](https://cdn.loom.com/sessions/thumbnails/4c26b5547a8940ed856bd87e2f45d363-1694630925996-with-play.gif)](https://www.loom.com/share/Mecenate-An-Anonymous-Data-Marketplace-4c26b5547a8940ed856bd87e2f45d363?sid=5db72e72-7330-483c-af26-522bbeb415c2)
 
 ## Update 14/09/2023 v1.0.5
