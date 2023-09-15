@@ -16,6 +16,7 @@ import { useAppStore } from "~~/services/store/store";
 import { useEthPrice } from "~~/hooks/scaffold-eth";
 import NextNProgress from "nextjs-progressbar";
 import "url-polyfill";
+import { Analytics } from "@vercel/analytics/react";
 
 const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
   const price = useEthPrice();
@@ -32,9 +33,13 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
       <NextNProgress />
       <RainbowKitProvider chains={appChains.chains} avatar={BlockieAvatar}>
         <div className="flex flex-col min-h-screen min-w-fit bg-base-100 font-opensans antialiased">
+          <div className="text-center bg-gradient-to-r from-blue-100 to-yellow-200 p-2 w-screen">
+            Live on <strong>Base Goerli</strong> 🎉
+          </div>{" "}
           <Header />
           <main className="relative flex flex-col flex-1 min-w-fit bg-primary">
             <Component {...pageProps} />
+            <Analytics />
           </main>
           <Footer />
         </div>

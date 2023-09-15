@@ -160,7 +160,6 @@ export default function Header() {
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>{" "}
         {verified == "verified" ? <VerifiedBadge verified={String(verified)} /> : null}
       </div>
-
       <div className="navbar-end flex-grow mr-4">
         <RainbowKitCustomConnectButton />
         <FaucetButton />

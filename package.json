@@ -33,6 +33,7 @@
   "packageManager": "yarn@3.2.3",
   "dependencies": {
     "@types/file-saver": "^2",
+    "@vercel/analytics": "^1.0.2",
     "asymmetric-crypto": "^1.0.2",
     "eth-crypto": "^2.6.0",
     "file-saver": "^2.0.5",
