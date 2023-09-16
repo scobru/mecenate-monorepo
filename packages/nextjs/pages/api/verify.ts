@@ -2,7 +2,7 @@ import { SismoConnect, SismoConnectVerifiedResult } from "@sismo-core/sismo-conn
 import { AUTHS, CONFIG, SIGNATURE_REQUEST } from "../../sismo.config";
 
 const sismoConnect = SismoConnect({ config: CONFIG });
-const TIMEOUT_DURATION = 5000; // 9 seconds
+const TIMEOUT_DURATION = 15000; // 9 seconds
 
 // Promise that resolves after a set time
 const timeout = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms));

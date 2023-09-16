@@ -53,7 +53,7 @@ export const NETWORKS_EXTRA_DATA: Record<string, TChainAttributes> = {
     color: "#1969ff",
   },
   [chains.baseGoerli.id]: {
-    color: "#1969ff",
+    color: "#28a0f0",
   },
 };
 

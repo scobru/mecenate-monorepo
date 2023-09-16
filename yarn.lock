@@ -1625,8 +1625,8 @@ __metadata:
   linkType: hard
 
 "@coinbase/wallet-sdk@npm:^3.5.4":
-  version: 3.7.1
-  resolution: "@coinbase/wallet-sdk@npm:3.7.1"
+  version: 3.7.2
+  resolution: "@coinbase/wallet-sdk@npm:3.7.2"
   dependencies:
     "@metamask/safe-event-emitter": 2.0.0
     "@solana/web3.js": ^1.70.1
@@ -1645,7 +1645,7 @@ __metadata:
     sha.js: ^2.4.11
     stream-browserify: ^3.0.0
     util: ^0.12.4
-  checksum: e88c656d08c06d42dcd03006c62162705a7c7dc27171ee721910f76c15c995f0482a314057a582af6e9548e6f49e4a1aff22f33685a33535c9b2550a615efbaf
+  checksum: d42a7b7e443942f657f636eede671979024308c6713af68f774309c04c0e1974cdbfe83514adebf4c0bcdb84adce6a026e5a92b5cff35e08eb1fb0772b1ec7e5
   languageName: node
   linkType: hard
 
@@ -7357,47 +7357,47 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:4.33.0":
-  version: 4.33.0
-  resolution: "@tanstack/query-core@npm:4.33.0"
-  checksum: fae325f1d79b936435787797c32367331d5b8e9c5ced84852bf2085115e3aafef57a7ae530a6b0af46da4abafb4b0afaef885926b71715a0e6f166d74da61c7f
+"@tanstack/query-core@npm:4.35.3":
+  version: 4.35.3
+  resolution: "@tanstack/query-core@npm:4.35.3"
+  checksum: 0184cd19a26c4f96d05bbebd7966866741d46e5be19ac99d8cd6e5bbeb6550f257e7b52b674fb2673190696e113dd601422d196bf4870b58b4d2e2edf4307e92
   languageName: node
   linkType: hard
 
-"@tanstack/query-persist-client-core@npm:4.33.0":
-  version: 4.33.0
-  resolution: "@tanstack/query-persist-client-core@npm:4.33.0"
+"@tanstack/query-persist-client-core@npm:4.35.3":
+  version: 4.35.3
+  resolution: "@tanstack/query-persist-client-core@npm:4.35.3"
   dependencies:
-    "@tanstack/query-core": 4.33.0
-  checksum: c80e2805061da3c497504a6132d273fc351ef94b4685c0da5658fe25f759f692fad2c752f9f8af17c47edcf9ce9064f3f44d2b99d03f011345d8450b1bb940d5
+    "@tanstack/query-core": 4.35.3
+  checksum: c48f33936216e0ddbeb7fb0ed4242bb24a4086f4d719547a0f12461293a039b6fc9586056f5d3d8894c2043a014a614f155af8705f539edea633f7403ff7f5b6
   languageName: node
   linkType: hard
 
 "@tanstack/query-sync-storage-persister@npm:^4.14.5":
-  version: 4.33.0
-  resolution: "@tanstack/query-sync-storage-persister@npm:4.33.0"
+  version: 4.35.3
+  resolution: "@tanstack/query-sync-storage-persister@npm:4.35.3"
   dependencies:
-    "@tanstack/query-persist-client-core": 4.33.0
-  checksum: ad949f94e18b5188de363e780cf99e738d8468dafff72345f464e784b493f774dffbaa554122306a8fd81f9965de58588a2cf4f940d52e77b2ca4346a650aed9
+    "@tanstack/query-persist-client-core": 4.35.3
+  checksum: 17865d295d6f7092642adf8282174c059ae459226f84ccf90c4de9d0f7e1116e1db8da7e0ad2e9ebd9acba90057b673703bf4cc22bbf3813bc4bdccdfb3b6973
   languageName: node
   linkType: hard
 
 "@tanstack/react-query-persist-client@npm:^4.14.5":
-  version: 4.33.0
-  resolution: "@tanstack/react-query-persist-client@npm:4.33.0"
+  version: 4.35.3
+  resolution: "@tanstack/react-query-persist-client@npm:4.35.3"
   dependencies:
-    "@tanstack/query-persist-client-core": 4.33.0
+    "@tanstack/query-persist-client-core": 4.35.3
   peerDependencies:
-    "@tanstack/react-query": ^4.33.0
-  checksum: 403de6e6659d87f21ee4412e7e8e15b32cbcf5adcb7d340b93c890321fa8a88f7681690774c6e5253d28227869f01b170a32d23bd0ed8870fbd109890ee5fa9f
+    "@tanstack/react-query": ^4.35.3
+  checksum: 1f8d5630c34b177341443e34dcc2ce916e9888af9b975a8d3de899fa14a8125abde7009299f5529ab5d1d5de5341ece2b6c68acfe6546e5f83efa39988e8d36e
   languageName: node
   linkType: hard
 
 "@tanstack/react-query@npm:^4.14.5":
-  version: 4.33.0
-  resolution: "@tanstack/react-query@npm:4.33.0"
+  version: 4.35.3
+  resolution: "@tanstack/react-query@npm:4.35.3"
   dependencies:
-    "@tanstack/query-core": 4.33.0
+    "@tanstack/query-core": 4.35.3
     use-sync-external-store: ^1.2.0
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -7408,7 +7408,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: b3cf4afa427435e464e077b3f23c891e38e5f78873518f15c1d061ad55f1464d6241ecd92d796a5dbc9412b4fd7eb30b01f2a9cfc285ee9f30dfdd2ca0ecaf4b
+  checksum: 4d7e4e6a8466095848d2924fdbcd2d22a36b53e2d0f79a7dec121c8d7af36ff857b1bae5a7b802f3a399922c9c9f38f2a06372b1fc7b1d5de960e78fa1d3d722
   languageName: node
   linkType: hard
 

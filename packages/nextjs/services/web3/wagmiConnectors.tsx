@@ -17,7 +17,6 @@ import { burnerWalletConfig } from "~~/services/web3/wagmi-burner/burnerWalletCo
 import { getTargetNetwork } from "~~/utils/scaffold-eth";
 
 const configuredChain = getTargetNetwork();
-console.log("configuredChain", configuredChain);
 // We always want to have mainnet enabled (ENS resolution, ETH price, etc). But only once.
 
 const enabledChains = configuredChain.id === 1 ? [configuredChain] : [configuredChain, chains.mainnet];
@@ -36,8 +35,7 @@ export const appChains = configureChains(
       apiKey: String(process.env.NEXT_PUBLIC_INFURA_API_KEY),
       priority: 1,
     }),
-    /*     publicProvider({ priority: 2 }),
-     */
+    publicProvider({ priority: 2 }),
   ],
   {
     stallTimeout: 3_000,
