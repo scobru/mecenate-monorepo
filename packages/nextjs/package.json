@@ -28,6 +28,7 @@
     "@sismo-core/sismo-connect-react": "^0.0.23",
     "@sismo-core/sismo-connect-server": "^0.0.23",
     "@uniswap/sdk": "^3.0.3",
+    "@vercel/analytics": "^1.0.2",
     "asymmetric-crypto": "^1.0.2",
     "base64url": "^3.0.1",
     "cids": "^1.1.9",
