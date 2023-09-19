@@ -17,6 +17,7 @@ import {
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import { InboxIcon } from "@heroicons/react/20/solid";
+import { keccak256 } from "ethers/lib/utils.js";
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const router = useRouter();
@@ -49,6 +50,7 @@ export default function Header() {
   const burgerMenuRef = useRef<HTMLDivElement>(null);
   const [isLocalStorage, setIsLocalStorage] = useState(false);
   const [verified, setVerified] = useState("");
+  const [encryptedVaultId, setEncryptedVaultId] = useState("");
   useOutsideClick(
     burgerMenuRef,
     useCallback(() => setIsDrawerOpen(false), []),
@@ -56,9 +58,12 @@ export default function Header() {
 
   useEffect(() => {
     const verified = localStorage.getItem("verified");
-    if (verified == "verified") {
+    const sismoData = JSON.parse(localStorage.getItem("sismoData"));
+    if (verified == "verified" && sismoData) {
       setIsLocalStorage(true);
       setVerified(String(verified));
+
+      setEncryptedVaultId(keccak256(String(sismoData?.auths[0]?.userId)));
     }
   }, []);
 
@@ -101,9 +106,9 @@ export default function Header() {
         </NavLink>
       </li>
       <li className="font-semibold">
-        <NavLink href="/">
+        <NavLink href="/vault">
           <KeyIcon className="h-4 w-4" />
-          Vault (coming soon)
+          Vault
         </NavLink>
       </li>
       <li className="font-semibold">
@@ -144,7 +149,7 @@ export default function Header() {
               {navLinks}
 
               <div>
-                <VerifiedBadge verified={String(verified)} />
+                <VerifiedBadge verified={String(verified)} encryptedVaultId={encryptedVaultId} />
               </div>
             </ul>
           )}
@@ -158,7 +163,9 @@ export default function Header() {
           </div>
         </div>
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>{" "}
-        {verified == "verified" ? <VerifiedBadge verified={String(verified)} /> : null}
+        {verified == "verified" ? (
+          <VerifiedBadge verified={String(verified)} encryptedVaultId={encryptedVaultId} />
+        ) : null}
       </div>
       <div className="navbar-end flex-grow mr-4">
         <RainbowKitCustomConnectButton />

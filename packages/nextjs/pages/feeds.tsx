@@ -2,8 +2,8 @@ import type { NextPage } from "next";
 import React, { useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, Signer } from "ethers";
-import { formatEther, keccak256 } from "ethers/lib/utils.js";
+import { ContractInterface, Signer, ethers } from "ethers";
+import { AbiCoder, formatEther, keccak256 } from "ethers/lib/utils.js";
 import Link from "next/link";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 
@@ -14,16 +14,19 @@ const Feeds: NextPage = () => {
 
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateFeedFactory");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
-  const deployedContractWallet = getDeployedContract(chain?.id.toString(), "MecenateWallet");
 
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
   const txData = useTransactor(signer as Signer);
-
+  const [ethWallet, setEthWallet] = React.useState<any>(null);
+  const [customSigner, setCustomSigner] = React.useState<any>(null);
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
+  const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
+
+  const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
 
   type Feed = {
     operator: string;
@@ -43,19 +46,12 @@ const Feeds: NextPage = () => {
   let treasuryAddress: string;
   let treasuryAbi: ContractInterface[] = [];
 
-  let walletAddress: string;
-  let walletAbi: ContractInterface[] = [];
-
   if (deployedContractFactory) {
     ({ address: factoryAddress, abi: factoryAbi } = deployedContractFactory);
   }
 
   if (deployedContractTreasury) {
     ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
-  }
-
-  if (deployedContractWallet) {
-    ({ address: walletAddress, abi: walletAbi } = deployedContractWallet);
   }
 
   const treasuryCtx = useContract({
@@ -67,6 +63,19 @@ const Feeds: NextPage = () => {
   const factoryCtx = useContract({
     address: deployedContractFactory?.address,
     abi: factoryAbi,
+    signerOrProvider: signer || provider,
+  });
+
+  let vaultAddress!: string;
+  let vaultAbi: ContractInterface[] = [];
+
+  if (deployedContractVault) {
+    ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
+  }
+
+  const vaultCtx = useContract({
+    address: vaultAddress,
+    abi: vaultAbi,
     signerOrProvider: signer || provider,
   });
 
@@ -89,11 +98,34 @@ const Feeds: NextPage = () => {
       setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
       setVerified(localStorage.getItem("verified"));
       setSismoResponse(localStorage.getItem("sismoResponse"));
+      const storedEthWallet = JSON.parse(String(localStorage.getItem("ethWallet")));
+
+      setEthWallet(storedEthWallet);
+
+      console.log("Stored ethWallet: ", storedEthWallet);
+
+      // Check if storedEthWallet and its privateKey are not null or undefined
+      if (storedEthWallet && storedEthWallet?.key) {
+        // Create new ethers.Wallet instance
+        const instance = new ethers.Wallet(storedEthWallet?.key, customProvider);
+        console.log("Instance: ", instance);
+        setCustomSigner(instance);
+      } else {
+        console.warn("Stored ethWallet or its privateKey is undefined.");
+      }
     }
-  }, [factoryCtx, onlyYourFeeds]);
+  }, [onlyYourFeeds]);
 
   async function buildFeed() {
-    txData(factoryCtx?.buildFeed(String(sismoResponse), { value: treasuryCtx?.fixedFee() }));
+    //await factoryCtx?.buildFeed(String(sismoResponse), { value: treasuryCtx?.fixedFee() });
+
+    // encode abi call
+    const abiCoder = new AbiCoder();
+    // Encode the function call
+    const iface = new ethers.utils.Interface(deployedContractFactory?.abi as ContractInterface[]);
+    const data = iface.encodeFunctionData("buildFeed", [sismoResponse, keccak256(String(vaultCtx?.address))]);
+
+    txData(vaultCtx?.execute(factoryCtx?.address, data, treasuryCtx?.fixedFee(), keccak256(sismoData.auths[0].userId)));
   }
 
   return (
@@ -102,6 +134,7 @@ const Feeds: NextPage = () => {
         <h1 className="text-6xl font-bold mb-8">FEEDS</h1>
         <p className="text-xl  mb-20">Create your feed and sell your data</p>
       </div>
+      <div className="mx-auto  w-fit text-center items-center"></div>
       <div className="flex flex-row items-center mb-5  gap-4 text-lg p-5">
         <button className="link-hover font-bold" onClick={buildFeed}>
           Create

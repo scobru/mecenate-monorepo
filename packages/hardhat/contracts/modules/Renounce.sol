@@ -25,14 +25,6 @@ abstract contract Renounce is Staking {
             "Post is not Accepted or Submitted"
         );
 
-        _refundPost();
-
-        uint256 stake = post.postdata.escrow.stake;
-
-        _takeStake(postSettingPrivate.seller, stake);
-
-        payable(postSettingPrivate.seller).transfer(stake);
-
         // Reset the post struct
         post.creator = Structures.User(bytes32(0));
         post.postdata = Structures.PostData(
@@ -51,37 +43,14 @@ abstract contract Renounce is Staking {
         post.postdata.settings.status = Structures.PostStatus.Renounced;
 
         postSettingPrivate = Structures.postSettingPrivate({
-            buyer: address(0),
             vaultIdBuyer: ZEROHASH,
+            buyerTwitterId: 0,
             buyerTelegramId: 0,
-            seller: address(0),
             vaultIdSeller: ZEROHASH,
+            sellerTwitterId: 0,
             sellerTelegramId: 0
         });
 
         emit Renounced(post);
-    }
-
-    function _refundPost() internal virtual {
-        require(
-            post.postdata.settings.status == Structures.PostStatus.Accepted,
-            "Post is not accepted"
-        );
-
-        uint256 payment = post.postdata.escrow.payment;
-
-        require(payment > 0, "Payment is not correct");
-
-        _takeStake(postSettingPrivate.buyer, payment);
-
-        payable(postSettingPrivate.buyer).transfer(payment);
-
-        postSettingPrivate.buyer = address(0);
-
-        post.postdata.escrow.payment = 0;
-
-        post.postdata.settings.status = Structures.PostStatus.Waiting;
-
-        emit Refunded(post);
     }
 }

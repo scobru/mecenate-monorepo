@@ -12,5 +12,5 @@ interface IMecenateUsers {
 
     function getUserAt(uint256 index) external view returns (address);
 
-    function getUserAddressAt(uint256 index) external view returns (address);
+    function getUserVaultIdAt(uint256 index) external view returns (bytes32);
 }

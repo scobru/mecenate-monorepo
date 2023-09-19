@@ -4,9 +4,6 @@
       "path": "."
     },
     {
-      "path": "../wallit-monorepo"
-    },
-    {
       "path": "../wallit-lite-monorepo"
     }
   ],

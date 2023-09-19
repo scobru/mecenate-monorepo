@@ -15,9 +15,8 @@ export const AUTHS: AuthRequest[] = [
   // vaultId = hash(vaultSecret, appId).
   // full docs: https://docs.sismo.io/sismo-docs/build-with-sismo-connect/technical-documentation/vault-and-proof-identifiers
   { authType: AuthType.VAULT },
-  { authType: AuthType.EVM_ACCOUNT },
-  { authType: AuthType.TWITTER },
-  { authType: AuthType.TELEGRAM, isOptional: true, isSelectableByUser: true },
+  { authType: AuthType.TELEGRAM, isOptional: true, isSelectableByUser: false },
+  { authType: AuthType.TELEGRAM, isOptional: true, isSelectableByUser: false },
 ];
 export const SIGNATURE_REQUEST: SignatureRequest = {
   message: "I love Sismo!",

@@ -19,9 +19,11 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     address public treasuryContract;
 
-    address private usersModuleContract;
+    address public usersModuleContract;
 
-    address private verifierContract;
+    address public verifierContract;
+
+    address public vaultContract;
 
     mapping(bytes32 => address[]) internal feedStore;
 
@@ -34,11 +36,17 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     constructor(
         address _usersModuleContract,
         address _treasuryContract,
-        address _verifierContract
+        address _verifierContract,
+        address _vaultContract
     ) {
         usersModuleContract = _usersModuleContract;
         treasuryContract = _treasuryContract;
         verifierContract = _verifierContract;
+        vaultContract = _vaultContract;
+    }
+
+    function isFeed(address _feed) external view returns (bool) {
+        return createdContracts[_feed];
     }
 
     function setAuthorized(address _addr) external onlyOwner {
@@ -53,35 +61,56 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         treasuryContract = _treasury;
     }
 
+    function changeVault(address _vault) external onlyOwner {
+        vaultContract = _vault;
+    }
+
     function buildFeed(
-        bytes memory sismoConnectResponse
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) external payable returns (address) {
-        (, bytes memory vaultIdBytes, , , , ) = IMecenateVerifier(
-            verifierContract
-        ).sismoVerify(sismoConnectResponse);
+        (
+            bytes memory vaultId,
+            ,
+            ,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
+
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
 
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
-                keccak256(vaultIdBytes)
+                encryptedVaultId
             ),
             "user does not exist"
         );
 
         require(msg.value >= getCreationFee(), "Not enough payment");
 
-        payable(treasuryContract).transfer(msg.value);
+        (bool _result, ) = payable(treasuryContract).call{value: msg.value}("");
+
+        require(_result, "Treasury call failed");
 
         contractCounter++;
 
         MecenateFeed feed = new MecenateFeed(
-            keccak256(vaultIdBytes),
+            encryptedVaultId,
             usersModuleContract,
-            verifierContract
+            verifierContract,
+            vaultContract
         );
 
         feeds.push(address(feed));
 
-        feedStore[keccak256(vaultIdBytes)].push(address(feed));
+        feedStore[encryptedVaultId].push(address(feed));
 
         createdContracts[address(feed)] = true;
 

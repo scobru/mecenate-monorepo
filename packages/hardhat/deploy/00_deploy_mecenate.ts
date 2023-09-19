@@ -1,6 +1,9 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { EthereumProvider, HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { ethers } from "ethers";
+import { ethers } from "hardhat";
+//import { ethers } from "ethers";
+import { Create2Factory } from "../scripts/Create2Factory";
+import { factories } from "../typechain-types";
 /**
  * Deploys a contract named "YourContract" using the deployer account and
  * constructor arguments set to the deployer address
@@ -22,8 +25,9 @@ const deployYourContract: DeployFunction = async function (
   */
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
+  const from = deployer;
 
-  console.log(deployer);
+  //await new Create2Factory(ethers.provider).deployFactory();
 
   const treasury = await deploy("MecenateTreasury", {
     from: deployer,
@@ -61,28 +65,26 @@ const deployYourContract: DeployFunction = async function (
   users.receipt &&
     console.log("Users deployed at:", users.receipt.contractAddress);
 
-  const vault = await deploy("MecenateVault", {
-    from: deployer,
-    // Contract constructor arguments
-    args: [verifier.address, users.address],
-    log: true,
-    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-    // automatically mining the contract deployment transaction. There is no effect on live networks.
-    autoMine: true,
-  });
-
-  vault.receipt &&
-    console.log("Vault deployed at:", vault.receipt.contractAddress);
-
   const feedFactory = await deploy("MecenateFeedFactory", {
     from: deployer,
     // Contract constructor arguments
-    args: [users.address, treasury.address, verifier.address],
+    args: [
+      users.address,
+      treasury.address,
+      verifier.address,
+      ethers.constants.AddressZero,
+    ],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
     autoMine: true,
   });
+
+  // feed Factory instance
+  const feedFactoryInstance = await ethers.getContractAt(
+    "MecenateFeedFactory",
+    feedFactory.address,
+  );
 
   feedFactory.receipt &&
     console.log(
@@ -92,7 +94,12 @@ const deployYourContract: DeployFunction = async function (
 
   const feed = await deploy("MecenateFeed", {
     from: deployer,
-    args: [ethers.constants.HashZero, users.address, verifier.address],
+    args: [
+      ethers.constants.HashZero,
+      users.address,
+      verifier.address,
+      ethers.constants.AddressZero,
+    ],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -102,10 +109,36 @@ const deployYourContract: DeployFunction = async function (
   feed.receipt &&
     console.log("Feed deployed at:", feed.receipt.contractAddress);
 
+  const vault = await deploy("MecenateVault", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [
+      verifier.address,
+      feedFactory.address,
+      ethers.constants.AddressZero,
+      users.address,
+      "0x8aA5F726d9F868a21a8bd748E2f1E43bA31eb670",
+    ],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  vault.receipt &&
+    console.log("Vault deployed at:", vault.receipt.contractAddress);
+
+  console.log("Setting Vault...");
+
+  const setVault = await feedFactoryInstance.changeVault(vault.address);
+  console.log("Vault setted at:", vault.address);
+
+  setVault.wait();
+
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
     // Contract constructor arguments
-    args: [users.address, verifier.address],
+    args: [users.address, verifier.address, vault.address],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -117,6 +150,23 @@ const deployYourContract: DeployFunction = async function (
       "Mecenate Bay deployed at:",
       mecenateBay.receipt.contractAddress,
     );
+
+  // wall setMecenateBay of instance of vault
+
+  console.log("Setting Mecenate Bay...");
+
+  const vaultInstance = await ethers.getContractAt(
+    "MecenateVault",
+    vault.address,
+  );
+
+  const setMecenateBay = await vaultInstance.setMecenateBay(
+    mecenateBay.address,
+  );
+
+  setMecenateBay.wait();
+
+  console.log("Mecenate Bay setted at:", mecenateBay.address);
 
   const mecenateStats = await deploy("MecenateStats", {
     from: deployer,
@@ -137,6 +187,25 @@ const deployYourContract: DeployFunction = async function (
     console.log(
       "Mecenate Stats Factory deployed at:",
       mecenateStats.receipt.contractAddress,
+    );
+
+  const mecenateEthDepositorFactory = await deploy(
+    "MecenateETHDepositorFactory",
+    {
+      from: deployer,
+      // Contract constructor arguments
+      args: [],
+      log: true,
+      // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+      // automatically mining the contract deployment transaction. There is no effect on live networks.
+      autoMine: true,
+    },
+  );
+
+  mecenateEthDepositorFactory.receipt &&
+    console.log(
+      "Mecenate Stats Factory deployed at:",
+      mecenateEthDepositorFactory.receipt.contractAddress,
     );
 };
 

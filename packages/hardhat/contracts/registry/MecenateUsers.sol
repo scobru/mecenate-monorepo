@@ -20,8 +20,6 @@ contract MecenateUsers is Ownable {
 
     EnumerableSet.Bytes32Set private _users;
 
-    EnumerableSet.AddressSet private _usersAddress;
-
     Structures.User private _metadata;
 
     event UserRegistered(bytes32 vaultId);
@@ -48,56 +46,63 @@ contract MecenateUsers is Ownable {
 
     function registerUser(
         bytes memory sismoConnectResponse,
+        bytes32 _to,
         string memory _username
     ) public {
         (
-            uint256 vaultId,
-            bytes memory vaultIdBytes,
-            uint256 userAddress,
-            address userAddressConverted,
-            uint256 twitterId,
-            uint256 telegramId
+            bytes memory vaultId,
+            ,
+            ,
+            bytes memory signedMessage
         ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse
+                sismoConnectResponse,
+                _to
             );
 
-        require(userAddressConverted != address(0), "user address cannot be 0");
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "To address does not match signed message"
+        );
 
-        bytes32 vaultIdEncoded = keccak256(vaultIdBytes);
+        bytes32 encryptedVaultId = keccak256(vaultId);
 
-        userNames[vaultIdEncoded] = _username;
+        userNames[encryptedVaultId] = _username;
 
         // check if user exists
-        require(!_users.contains(vaultIdEncoded), "user already exists");
+        require(!_users.contains(encryptedVaultId), "user already exists");
 
         // add user
-        _users.add(vaultIdEncoded);
-
-        _usersAddress.add(userAddressConverted);
+        _users.add(encryptedVaultId);
 
         // emit event
-        emit UserRegistered(vaultIdEncoded);
+        emit UserRegistered(encryptedVaultId);
     }
 
     function changeUserName(
         bytes memory sismoConnectResponse,
-        string memory _username
+        string memory _username,
+        bytes32 _to
     ) external {
         (
-            uint256 vaultId,
-            bytes memory vaultIdBytes,
-            uint256 userAddress,
-            address userAddressConverted,
-            uint256 twitterId,
-            uint256 telegramId
+            bytes memory vaultId,
+            ,
+            ,
+            bytes memory signedMessage
         ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse
+                sismoConnectResponse,
+                _to
             );
-        bytes32 vaultIdEncoded = keccak256(vaultIdBytes);
 
-        require(_users.contains(vaultIdEncoded), "user does not exist");
+        require(
+            _to == keccak256(signedMessage),
+            "_to address does not match signed message"
+        );
 
-        userNames[vaultIdEncoded] = _username;
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
+        require(_users.contains(encryptedVaultId), "user does not exist");
+
+        userNames[encryptedVaultId] = _username;
     }
 
     function getUserName(bytes32 vaultId) public view returns (string memory) {
@@ -117,15 +122,15 @@ contract MecenateUsers is Ownable {
         user = _users.at(index);
     }
 
-    function getUserAddressAt(
+    function getUserVaultIdAt(
         uint256 index
-    ) public view returns (address user) {
+    ) public view returns (bytes32 user) {
         require(
             msg.sender == treasuryContract,
             "only treasury can call this function"
         );
         require(index < _users.length(), "index out of range");
-        user = _usersAddress.at(index);
+        user = _users.at(index);
     }
 
     function checkifUserExist(bytes32 vaultId) external view returns (bool) {

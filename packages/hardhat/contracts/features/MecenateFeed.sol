@@ -30,8 +30,9 @@ contract MecenateFeed is
     constructor(
         bytes32 _owner,
         address _usersModuleContract,
-        address _verifierContract
-    ) Data(_usersModuleContract, _verifierContract) {
+        address _verifierContract,
+        address _vaultContract
+    ) Data(_usersModuleContract, _verifierContract, _vaultContract) {
         owner = _owner;
     }
 
@@ -45,14 +46,18 @@ contract MecenateFeed is
 
     function getSellerStake() external view returns (uint256 amount) {
         // get deposit
-        amount = Deposit._getDeposit(postSettingPrivate.seller);
+        amount = Deposit._getDeposit(
+            keccak256(postSettingPrivate.vaultIdSeller)
+        );
         // explicit return
         return amount;
     }
 
     function getBuyerStake() external view returns (uint256 amount) {
         // get deposit
-        amount = Deposit._getDeposit(postSettingPrivate.buyer);
+        amount = Deposit._getDeposit(
+            keccak256(postSettingPrivate.vaultIdBuyer)
+        );
         // explicit return
         return amount;
     }

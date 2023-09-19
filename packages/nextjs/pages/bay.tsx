@@ -3,7 +3,7 @@ import React, { useCallback, useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, ethers } from "ethers";
-import { formatEther, parseEther } from "ethers/lib/utils.js";
+import { formatEther, keccak256, parseEther } from "ethers/lib/utils.js";
 import { useAppStore } from "~~/services/store/store";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
@@ -13,20 +13,25 @@ const Bay: NextPage = () => {
   const provider = useProvider();
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
-  const store = useAppStore();
+  const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
 
   const deployedContractBay = getDeployedContract(chain?.id.toString(), "MecenateBay");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
+  const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
+
   const [requests, setRequests] = React.useState<BayRequest[]>([]);
   const [requestString, setRequestString] = React.useState<string>("");
   const [requestPayment, setRequestPayment] = React.useState<string>("");
   const [requestStake, setRequestStake] = React.useState<string>("");
   const [requestAddress, setRequestAddress] = React.useState<string>("");
-  const [signerAddress, setSignerAddress] = React.useState<string>("");
+  const [customSigner, setCustomSigner] = React.useState<any>();
   const txData = useTransactor(signer as Signer);
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
+  const [ethWallet, setEthWallet] = React.useState<any>(null);
+  const [ethWalletInstance, setEthWalletInstance] = React.useState<any>(null);
 
   type BayRequest = {
     request: string;
@@ -53,75 +58,111 @@ const Bay: NextPage = () => {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
   }
 
+  let vaultAddress!: string;
+  let vaultAbi: ContractInterface[] = [];
+
+  if (deployedContractVault) {
+    ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
+  }
+
+  const vaultCtx = useContract({
+    address: vaultAddress,
+    abi: vaultAbi,
+    signerOrProvider: customWallet || provider,
+  });
+
   const bayCtx = useContract({
     address: bayAddress,
     abi: bayAbi,
-    signerOrProvider: signer || provider,
+    signerOrProvider: customWallet || provider,
   });
-
-  // const identityCtx = useContract({
-  //   address: identityAddress,
-  //   abi: identityAbi,
-  //   signerOrProvider: signer || provider,
-  // });
 
   async function acceptBayRequest(index: number, address: string) {
     if (signer) {
-      txData(bayCtx?.acceptRequest(index, address, sismoResponse));
+      const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
+      const data = iface.encodeFunctionData("acceptRequest", [
+        index,
+        address,
+        sismoResponse,
+        keccak256(String(vaultCtx?.address)),
+      ]);
+      txData(vaultCtx?.execute(bayCtx?.address, data, 0, keccak256(String(sismoData.auths[0].userId))));
     }
   }
 
   async function removeRequest(index: number) {
-    if (signer) {
-      txData(bayCtx?.removeRequest(index, sismoResponse));
-    }
+    const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
+    const data = iface.encodeFunctionData("removeRequest", [index, sismoResponse]);
+    txData(vaultCtx?.execute(bayCtx?.address, data, 0, sismoResponse));
   }
 
   async function createBayContract() {
     const _request = ethers.utils.formatBytes32String(requestString);
-    console.log(_request);
-    const counter = await bayCtx?.contractCounter();
 
-    if (signer) {
-      const request = {
-        request: _request,
-        buyer: await signer?.getAddress(),
-        seller: "0x0000000000000000000000000000000000000000",
-        payment: parseEther(requestPayment),
-        stake: parseEther(requestStake),
-        postAddress: "0x0000000000000000000000000000000000000000",
-        accepted: false,
-        postCount: 0,
-      };
+    const request = {
+      request: _request,
+      payment: parseEther(requestPayment),
+      stake: parseEther(requestStake),
+      postAddress: "0x0000000000000000000000000000000000000000",
+      accepted: false,
+      postCount: 0,
+    };
 
-      txData(bayCtx?.createRequest(request, sismoResponse, { value: parseEther(requestPayment) }));
-      getAllRequest();
-      await sendPublicTelegramMessage();
-    }
+    const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
+    const data = iface.encodeFunctionData("createRequest", [
+      request,
+      sismoResponse,
+      keccak256(String(vaultCtx?.address)),
+    ]);
+    txData(
+      vaultCtx?.execute(
+        bayCtx?.address,
+        data,
+        parseEther(requestPayment),
+        keccak256(String(sismoData.auths[0].userId)),
+      ),
+    );
+
+    getAllRequest();
+    await sendPublicTelegramMessage();
   }
 
   const getAllRequest = useCallback(async () => {
-    const _requests = await bayCtx?.getRequests();
-    setSignerAddress(String(await signer?.getAddress()));
-    setRequests(_requests);
-  }, [bayCtx, signer]);
-
-  useEffect(() => {
-    setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
-    setVerified(localStorage.getItem("verified"));
-    setSismoResponse(localStorage.getItem("sismoResponse"));
-  }, [sismoResponse]);
-
-  /* async function getRequestByAddress() {
-    const _request = await bayCtx?.getRequestByAddress(identityCtx?.address);
-    setRequests(_request);
-  } */
-
-  useEffect(() => {
-    if (bayCtx) {
-      getAllRequest();
+    if (customProvider && deployedContractBay) {
+      const _requests = await bayCtx?.getRequests();
+      setRequests(_requests);
     }
-  }, [bayCtx, signer, requests, getAllRequest]);
+  }, [deployedContractBay]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Get and set data from localStorage
+      setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
+      setVerified(localStorage.getItem("verified"));
+      setSismoResponse(localStorage.getItem("sismoResponse"));
+      const storedEthWallet = await JSON.parse(String(localStorage.getItem("ethWallet")));
+
+      setEthWallet(storedEthWallet);
+
+      console.log("Stored ethWallet: ", storedEthWallet);
+
+      // Check if storedEthWallet and its privateKey are not null or undefined
+      if (storedEthWallet && storedEthWallet?.key) {
+        // Create new ethers.Wallet instance
+        const instance = new ethers.Wallet(storedEthWallet?.key, customProvider);
+        console.log("Instance: ", instance);
+        setCustomSigner(instance);
+      } else {
+        console.warn("Stored ethWallet or its privateKey is undefined.");
+      }
+    };
+
+    fetchData();
+  }, [sismoResponse]); // include customProvider if it's expected to change over time
+
+  useEffect(() => {
+    getAllRequest();
+  }, [deployedContractBay, requests, getAllRequest]);
 
   const sendPublicTelegramMessage = async () => {
     const url = `https://api.telegram.org/bot${String(process.env.NEXT_PUBLIC_TELEGRAM_TOKEN)}/sendMessage`;
@@ -163,6 +204,7 @@ const Bay: NextPage = () => {
 
           <p className="text-xl  mb-20">Request any data</p>
         </div>
+
         <div className="flex flex-col min-w-fit mx-auto items-center mb-20 ">
           <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary py-2   p-4 m-4 text-black">
             <label className="text-black font-semibold text-sm" htmlFor="request">

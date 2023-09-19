@@ -10,12 +10,26 @@ import "./Events.sol";
 abstract contract Submission is Events {
     function submitHash(
         bytes memory encryptedKey,
-        bytes32 encryptedVaultId
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) external virtual {
+        // verify user
+        (
+            bytes memory vaultId,
+            uint256 twitterId,
+            uint256 telegramId,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
+
         require(
-            keccak256(postSettingPrivate.vaultIdSeller) == encryptedVaultId,
-            "VaultId does not match"
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
         );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Accepted ||
@@ -51,12 +65,26 @@ abstract contract Submission is Events {
 
     function revealData(
         bytes memory decryptedData,
-        bytes32 encryptedVaultId
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) external virtual returns (bytes memory) {
+        // verify user
+        (
+            bytes memory vaultId,
+            uint256 twitterId,
+            uint256 telegramId,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
+
         require(
-            keccak256(postSettingPrivate.vaultIdSeller) == encryptedVaultId,
-            "VaultId does not match"
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
         );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Finalized,

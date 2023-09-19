@@ -12,7 +12,7 @@ import "./Events.sol";
 abstract contract Staking is Events, Deposit {
     using SafeMath for uint256;
 
-    event StakeBurned(address staker, uint256 amount);
+    event StakeBurned(bytes32 staker, uint256 amount);
 
     // create modifier
     modifier checkStatus() {
@@ -34,7 +34,7 @@ abstract contract Staking is Events, Deposit {
     }
 
     function _addStake(
-        address staker,
+        bytes32 staker,
         uint256 amountToAdd
     ) internal returns (uint256 newStake) {
         // update deposit
@@ -44,7 +44,7 @@ abstract contract Staking is Events, Deposit {
     }
 
     function _takeStake(
-        address staker,
+        bytes32 staker,
         uint256 amountToTake
     ) internal returns (uint256 newStake) {
         // update deposit
@@ -54,7 +54,7 @@ abstract contract Staking is Events, Deposit {
     }
 
     function _takeFullStake(
-        address staker
+        bytes32 staker
     ) internal returns (uint256 amountTaken) {
         // get deposit
         uint256 currentDeposit = Deposit._getDeposit(staker);
@@ -67,7 +67,7 @@ abstract contract Staking is Events, Deposit {
     }
 
     function _burnStake(
-        address staker,
+        bytes32 staker,
         uint256 amountToBurn
     ) internal returns (uint256 newStake) {
         // update deposit
@@ -81,7 +81,7 @@ abstract contract Staking is Events, Deposit {
     }
 
     function _burnFullStake(
-        address staker
+        bytes32 staker
     ) internal returns (uint256 amountBurned) {
         // get deposit
         uint256 currentDeposit = Deposit._getDeposit(staker);
@@ -93,7 +93,7 @@ abstract contract Staking is Events, Deposit {
         return currentDeposit;
     }
 
-    function getStake(address staker) external view returns (uint256 amount) {
+    function getStake(bytes32 staker) external view returns (uint256 amount) {
         // get deposit
         amount = Deposit._getDeposit(staker);
         // explicit return
@@ -101,48 +101,55 @@ abstract contract Staking is Events, Deposit {
     }
 
     function getTotalStaked() external view returns (uint256) {
-        uint256 amountSeller = Deposit._getDeposit(postSettingPrivate.seller);
+        uint256 amountSeller = Deposit._getDeposit(
+            keccak256(postSettingPrivate.vaultIdSeller)
+        );
 
-        uint256 amountBuyer = Deposit._getDeposit(postSettingPrivate.buyer);
+        uint256 amountBuyer = Deposit._getDeposit(
+            keccak256(postSettingPrivate.vaultIdBuyer)
+        );
 
         return (amountSeller + amountBuyer);
     }
 
     function addStake(
-        bytes memory sismoConnectResponse
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) external payable checkStatus returns (uint256) {
+        // verify user
         (
-            ,
-            bytes memory vaultIdBytes,
-            ,
-            address userAddressConverted,
-            ,
+            bytes memory vaultId,
+            uint256 twitterId,
+            uint256 telegramId,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
 
-        ) = sismoVerify(sismoConnectResponse);
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
 
+        bytes32 encryptedVaultId = keccak256(vaultId);
         uint256 stakerBalance;
 
         require(
-            keccak256(vaultIdBytes) ==
-                keccak256(postSettingPrivate.vaultIdBuyer) ||
-                keccak256(vaultIdBytes) ==
-                keccak256(postSettingPrivate.vaultIdSeller),
+            encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer) ||
+                encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller),
             "VaultId does not match"
-        );
-
-        require(
-            userAddressConverted == postSettingPrivate.buyer ||
-                userAddressConverted == postSettingPrivate.seller,
-            "Not Buyer or Seller"
         );
 
         // check if user
 
-        if (userAddressConverted == postSettingPrivate.buyer) {
-            stakerBalance = _addStake(userAddressConverted, msg.value);
+        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
+            stakerBalance = _addStake(encryptedVaultId, msg.value);
             post.postdata.escrow.payment = stakerBalance;
-        } else if (userAddressConverted == postSettingPrivate.seller) {
-            stakerBalance = _addStake(userAddressConverted, msg.value);
+        } else if (
+            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)
+        ) {
+            stakerBalance = _addStake(encryptedVaultId, msg.value);
             post.postdata.escrow.stake = stakerBalance;
         }
 
@@ -151,51 +158,115 @@ abstract contract Staking is Events, Deposit {
 
     function takeStake(
         uint256 amountToTake,
-        bytes memory sismoConnectResponse
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) external checkStatus returns (uint256) {
-        (, , , address userAddressConverted, , ) = sismoVerify(
-            sismoConnectResponse
+        // verify user
+        (
+            bytes memory vaultId,
+            uint256 twitterId,
+            uint256 telegramId,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
+
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
         );
 
-        uint256 currentDeposit = Deposit._getDeposit(userAddressConverted);
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
+        uint256 currentDeposit = Deposit._getDeposit(encryptedVaultId);
 
         uint256 stakerBalance;
 
         require(currentDeposit >= amountToTake, "Not enough deposit");
 
-        if (userAddressConverted == postSettingPrivate.buyer) {
-            stakerBalance = _takeStake(userAddressConverted, amountToTake);
+        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
+            stakerBalance = _takeStake(encryptedVaultId, amountToTake);
 
             post.postdata.escrow.payment = stakerBalance;
 
-            payable(userAddressConverted).transfer(amountToTake);
-        } else if (userAddressConverted == postSettingPrivate.seller) {
-            stakerBalance = _takeStake(userAddressConverted, amountToTake);
+            //send to vault instead
+
+            (bool result, ) = vaultContract.call{value: amountToTake}(
+                abi.encode(encryptedVaultId)
+            );
+            require(result, "Vault call failed");
+        } else if (
+            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)
+        ) {
+            stakerBalance = _takeStake(encryptedVaultId, amountToTake);
 
             post.postdata.escrow.stake = stakerBalance;
 
-            payable(userAddressConverted).transfer(amountToTake);
+            (bool result, ) = vaultContract.call{value: amountToTake}(
+                abi.encode(encryptedVaultId)
+            );
+            require(result, "Vault call failed");
         }
 
         return stakerBalance;
     }
 
     function takeFullStake(
-        bytes memory sismoConnectResponse
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) external checkStatus returns (uint256) {
-        (, , , address userAddressConverted, , ) = sismoVerify(
-            sismoConnectResponse
+        // verify user
+        (
+            bytes memory vaultId,
+            uint256 twitterId,
+            uint256 telegramId,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
+
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
         );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
+        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
+            require(
+                twitterId == postSettingPrivate.buyerTwitterId,
+                "Not the buyer"
+            );
+        } else if (
+            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)
+        ) {
+            require(
+                twitterId == postSettingPrivate.sellerTwitterId,
+                "Not the seller"
+            );
+        }
+
         uint256 stakerBalance;
 
-        if (userAddressConverted == postSettingPrivate.buyer) {
-            stakerBalance = _takeFullStake(userAddressConverted);
+        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
+            stakerBalance = _takeFullStake(encryptedVaultId);
             post.postdata.escrow.payment = stakerBalance;
-            payable(userAddressConverted).transfer(stakerBalance);
-        } else if (userAddressConverted == postSettingPrivate.seller) {
-            stakerBalance = _takeFullStake(userAddressConverted);
+
+            (bool result, ) = vaultContract.call{value: stakerBalance}(
+                abi.encode(encryptedVaultId)
+            );
+            require(result, "Vault call failed");
+        } else if (
+            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)
+        ) {
+            stakerBalance = _takeFullStake(encryptedVaultId);
             post.postdata.escrow.stake = stakerBalance;
-            payable(userAddressConverted).transfer(stakerBalance);
+            (bool result, ) = vaultContract.call{value: stakerBalance}(
+                abi.encode(encryptedVaultId)
+            );
+            require(result, "Vault call failed");
         }
 
         return stakerBalance;

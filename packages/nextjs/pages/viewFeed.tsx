@@ -32,20 +32,23 @@ import crypto from "crypto";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 
 const ViewFeed: NextPage = () => {
-  const AbiCoder = new ethers.utils.AbiCoder();
-
-  const ErasureHelper = require("@erasure/crypto-ipfs");
-  const pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
-  const pinataApiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY;
-
-  const { chain } = useNetwork();
-
   const { data: signer } = useSigner();
   const provider = useProvider();
   const router = useRouter();
   const txData = useTransactor(signer as Signer);
+  const AbiCoder = new ethers.utils.AbiCoder();
+  const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+
+  const ErasureHelper = require("@erasure/crypto-ipfs");
+  const pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
+  const pinataApiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY;
+  const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
+
+  const { chain } = useNetwork();
 
   const { addr } = router?.query;
+  const [ethWallet, setEthWallet] = useState<any>(null);
+  const [customSigner, setCustomSigner] = useState<any>(null);
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
   const [postStake, setPostStake] = useState<any>([]);
@@ -64,7 +67,6 @@ const ViewFeed: NextPage = () => {
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
   const [yourStake, setYourStake] = useState<any>(0);
-  const [evmAccount, setEvmAccount] = useState<any>(0);
   const [hashedVaultId, setHashedVaultId] = useState<any>([]);
   const [secretMessage, setSecretMessage] = useState<any>("");
   const [message, setMessage] = useState<any>("");
@@ -72,6 +74,9 @@ const ViewFeed: NextPage = () => {
   const [feedData, setFeedData] = useState<any>([]);
   const deployedContractFeed = getDeployedContract(chain?.id.toString(), "MecenateFeed");
   const deployedContractUsers = getDeployedContract(chain?.id.toString(), "MecenateUsers");
+  const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
+
+  const [receiver, setReceiver] = useState<any>("");
   const allStatuses = ["Waiting for Creator", "Proposed", "Accepted", "Submitted", "Finalized", "Punished", "Revealed"];
 
   let feedAddress!: string;
@@ -88,64 +93,83 @@ const ViewFeed: NextPage = () => {
     ({ address: feedAddress, abi: feedAbi } = deployedContractFeed);
   }
 
+  let vaultAddress!: string;
+  let vaultAbi: ContractInterface[] = [];
+
+  if (deployedContractVault) {
+    ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
+  }
+
+  const vaultCtx = useContract({
+    address: vaultAddress,
+    abi: vaultAbi,
+    signerOrProvider: customWallet,
+  });
+
   const feedCtx = useContract({
     address: addr as string,
     abi: feedAbi,
-    signerOrProvider: signer as Signer,
+    signerOrProvider: customWallet,
   });
 
   //******************** Messenger *********************//
 
   const sendTelegramMessage = async () => {
-    const telegramIds = await feedCtx?.getTelegramIds(keccak256(sismoData.auths[0].userId));
-    const buyerID = telegramIds[0].toHexString().slice(33);
-    const sellerID = telegramIds[1].toHexString().slice(33);
+    if (
+      feedData.postdata.settings.status != 0 &&
+      feedData.postdata.settings.status != 1 &&
+      feedData.postdata.settings.status != 2
+    ) {
+      const telegramIds = await feedCtx?.getTelegramIds(keccak256(sismoData.auths[0].userId));
+      const buyerID = telegramIds[0].toHexString().slice(33);
+      const sellerID = telegramIds[1].toHexString().slice(33);
 
-    const isBuyer = buyerID == sismoData.auths[3].userId;
+      const isBuyer = buyerID == sismoData.auths[3].userId;
 
-    const url = `https://api.telegram.org/bot${String(process.env.NEXT_PUBLIC_TELEGRAM_TOKEN)}/sendMessage`;
+      const url = `https://api.telegram.org/bot${String(process.env.NEXT_PUBLIC_TELEGRAM_TOKEN)}/sendMessage`;
 
-    if (isBuyer) {
-      const message = {
-        feed: "https://mecenate.vercel.app/viewFeed?addr=" + addr,
-        username: userName,
-        message: secretMessage,
-      };
+      if (isBuyer) {
+        const message = {
+          feed: "https://mecenate.vercel.app/viewFeed?addr=" + addr,
+          username: userName,
+          message: secretMessage,
+        };
 
-      const formattedText = `<b>🔏 Private Message</b>\n\n<b>➡️ feed: </b> <a href="${message.feed}">${message.feed}</a>\n<b>📨 message: </b> ${message.message}`;
+        const formattedText = `<b>🔏 Private Message</b>\n\n<b>➡️ feed: </b> <a href="${message.feed}">${message.feed}</a>\n<b>📨 message: </b> ${message.message}`;
 
-      try {
-        const response = await axios.post(url, {
-          chat_id: sellerID,
-          text: formattedText,
-          parse_mode: "HTML",
-        });
+        try {
+          const response = await axios.post(url, {
+            chat_id: sellerID,
+            text: formattedText,
+            parse_mode: "HTML",
+          });
 
-        console.log("Message sent:", response.data);
-      } catch (error) {
-        console.error("Error sending message:", error);
+          console.log("Message sent:", response.data);
+        } catch (error) {
+          console.error("Error sending message:", error);
+        }
+        notification.success("Message sent successfully");
+      } else {
+        const message = {
+          feed: "https://mecenate.vercel.app/viewFeed?addr=" + addr,
+          message: secretMessage,
+        };
+
+        const formattedText = `<b>🔏 Private Message</b><b>🔡</b> <a href="${message.feed}">${message.feed}</a>\n<b>📨</b> ${message.message}`;
+
+        try {
+          const response = await axios.post(url, {
+            chat_id: buyerID,
+            text: formattedText,
+            parse_mode: "HTML",
+          });
+
+          console.log("Message sent:", response.data);
+        } catch (error) {
+          console.error("Error sending message:", error);
+        }
+        notification.success("Message sent successfully");
       }
-      notification.success("Message sent successfully");
-    } else {
-      const message = {
-        feed: "https://mecenate.vercel.app/viewFeed?addr=" + addr,
-        message: secretMessage,
-      };
-
-      const formattedText = `<b>🔏 Private Message</b><b>🔡</b> <a href="${message.feed}">${message.feed}</a>\n<b>📨</b> ${message.message}`;
-
-      try {
-        const response = await axios.post(url, {
-          chat_id: buyerID,
-          text: formattedText,
-          parse_mode: "HTML",
-        });
-
-        console.log("Message sent:", response.data);
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
-      notification.success("Message sent successfully");
     }
   };
 
@@ -158,15 +182,22 @@ const ViewFeed: NextPage = () => {
   };
 
   const getSecretMessage = async () => {
-    const _secretMessage = await feedCtx?.getMessage(keccak256(sismoData.auths[0].userId));
-    console.log("Secret Message: ", _secretMessage);
+    // postStatus != 0
+    if (
+      feedData.postdata.settings.status != 0 &&
+      feedData.postdata.settings.status != 1 &&
+      feedData.postdata.settings.status != 2
+    ) {
+      const _secretMessage = await feedCtx?.getMessage(keccak256(sismoData.auths[0].userId));
+      console.log("Secret Message: ", _secretMessage);
 
-    const encryptedVaultId = await getHashedVaultId();
-    console.log("Encrypted Vault Id: ", encryptedVaultId);
+      const encryptedVaultId = await getHashedVaultId();
+      console.log("Encrypted Vault Id: ", encryptedVaultId);
 
-    const decryptedMessage = decryptMessage(encryptedVaultId, toUtf8String(_secretMessage));
-    console.log("Decrypted Message: ", decryptedMessage);
-    return decryptedMessage;
+      const decryptedMessage = decryptMessage(encryptedVaultId, toUtf8String(_secretMessage));
+      console.log("Decrypted Message: ", decryptedMessage);
+      return decryptedMessage;
+    }
   };
 
   //******************** Feed Operation *********************//
@@ -252,21 +283,23 @@ const ViewFeed: NextPage = () => {
       _buyer = buyer;
     }
 
-    txData(
-      feedCtx?.createPost(
-        proofOfHashEncode,
-        Number(postType),
-        Number(postDuration),
-        parseEther(await buyerPayment),
-        _buyer,
-        sismoResponse,
-        { value: parseEther(postStake) },
-      ),
-    );
+    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+
+    const data = iface.encodeFunctionData("createPost", [
+      proofOfHashEncode,
+      Number(postType),
+      Number(postDuration),
+      parseEther(await buyerPayment),
+      sismoResponse,
+      keccak256(String(vaultCtx?.address)),
+    ]);
+    txData(vaultCtx?.execute(feedCtx?.address, data, parseEther(postStake), keccak256(sismoData?.auths[0]?.userId)));
   };
 
   async function acceptPost() {
-    txData(feedCtx?.acceptPost(sismoResponse, { value: parseEther(postPayment) }));
+    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+    const data = iface.encodeFunctionData("acceptPost", [sismoResponse]);
+    txData(vaultCtx?.execute(feedCtx?.address, data, parseEther(postPayment), sismoResponse));
   }
 
   async function createPostData(RawData: any) {
@@ -408,7 +441,13 @@ const ViewFeed: NextPage = () => {
     console.log("Data Retrieved.");
     console.log("Proof Hash Digest: ", proofHash58Digest);
 
-    txData(feedCtx?.submitHash(proofHash58Digest, keccak256(sismoData.auths[0].userId)));
+    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+    const data = iface.encodeFunctionData("submitHash", [
+      proofHash58Digest,
+      sismoResponse,
+      keccak256(String(vaultCtx?.address)),
+    ]);
+    txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
 
     return {
       proofJson: json_selldata_v120,
@@ -576,7 +615,9 @@ const ViewFeed: NextPage = () => {
     const AbiCoder = new ethers.utils.AbiCoder();
     const dataEncoded = AbiCoder.encode(["string", "string"], [symKeyHash, rawDataHash]);
 
-    txData(feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)));
+    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+    const data = iface.encodeFunctionData("revealData", [dataEncoded, keccak256(sismoData.auths[0].userId)]);
+    txData(vaultCtx?.execute(feedCtx?.address, data, 0, sismoResponse));
 
     await fetchData();
   }
@@ -584,17 +625,30 @@ const ViewFeed: NextPage = () => {
   async function finalizePost() {
     console.log("Finalizing Data...");
     if (valid == true) {
-      txData(feedCtx?.finalizePost(valid, parseEther("0"), keccak256(sismoData.auths[0].userId)));
+      const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+      const data = iface.encodeFunctionData("finalizePost", [
+        valid,
+        parseEther("0"),
+        keccak256(sismoData.auths[0].userId),
+      ]);
+      txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
     } else {
-      txData(feedCtx?.finalizePost(valid, parseEther(punishment), keccak256(sismoData.auths[0].userId)));
+      const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+      const data = iface.encodeFunctionData("finalizePost", [
+        valid,
+        parseEther(punishment),
+        keccak256(sismoData.auths[0].userId),
+      ]);
+      txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
     }
 
     await fetchData();
   }
 
   async function renounce() {
-    const tx = await feedCtx?.renouncePost(keccak256(sismoData.auths[0].userId));
-    await tx?.wait();
+    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+    const data = iface.encodeFunctionData("renouncePost", [keccak256(sismoData.auths[0].userId)]);
+    txData(vaultCtx?.execute(feedCtx?.address, data, 0, sismoResponse));
     notification.success("Refund successful");
   }
 
@@ -608,13 +662,19 @@ const ViewFeed: NextPage = () => {
 
   async function takeAll() {
     console.log("Take All Stake...");
-    txData(feedCtx?.takeFullStake(sismoResponse));
+    txData(feedCtx?.takeFullStake(sismoResponse), receiver);
     await fetchData();
   }
 
   async function takeStake() {
     console.log("Take Stake...");
-    txData(feedCtx?.takeStake(parseEther(stakeAmount), sismoResponse));
+    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+    const data = iface.encodeFunctionData("takeStake", [
+      parseEther(stakeAmount),
+      sismoResponse,
+      keccak256(String(vaultCtx?.address)),
+    ]);
+    txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
     await fetchData();
   }
 
@@ -876,6 +936,22 @@ const ViewFeed: NextPage = () => {
         setVerified(localStorage.getItem("verified"));
         setSismoResponse(localStorage.getItem("sismoResponse"));
 
+        const storedEthWallet = await JSON.parse(String(localStorage.getItem("ethWallet")));
+
+        setEthWallet(storedEthWallet);
+
+        console.log("Stored ethWallet: ", storedEthWallet);
+
+        // Check if storedEthWallet and its privateKey are not null or undefined
+        if (storedEthWallet && storedEthWallet?.key) {
+          // Create new ethers.Wallet instance
+          const instance = new ethers.Wallet(storedEthWallet?.key, customProvider);
+          console.log("Instance: ", instance);
+          setCustomSigner(instance);
+        } else {
+          console.warn("Stored ethWallet or its privateKey is undefined.");
+        }
+
         if (sismoData) {
           const _message = await getSecretMessage();
           console.log("Message: ", _message);
@@ -894,16 +970,15 @@ const ViewFeed: NextPage = () => {
 
     // Cleanup function
     return () => clearInterval(interval);
-  }, [signer, provider, feedCtx, router.isReady, sismoData]);
+  }, [feedCtx, router.isReady, sismoData]);
 
   useEffect(() => {
     fetchData();
-  }, [signer]);
+  }, [customSigner]);
 
   useEffect(() => {
     const run = async () => {
-      const yourStake = await feedCtx?.getStake(sismoData.auths[1].userId);
-      setEvmAccount(sismoData.auths[1].userId);
+      const yourStake = await feedCtx?.getStake(keccak256(sismoData.auths[0].userId));
       setYourStake(yourStake);
     };
     if (sismoData) {
@@ -1004,6 +1079,7 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
           </div>
+
           <div className="flex flex-wrap text-xl mb-5 mx-10 font-bold hover:text-success animate-pulse">
             {feedData.postdata.settings.status === 6
               ? "Waiting for Seller"
@@ -1022,11 +1098,8 @@ const ViewFeed: NextPage = () => {
           <div className="mx-10  font-base text-lg">
             Smart Contract address is <strong>{addr}</strong>{" "}
           </div>
-          <div className="mx-10  font-base text-lg">
+          <div className="mx-10  mb-5 font-base text-lg">
             Your current deposit is <strong>{formatEther(yourStake)} ETH</strong>
-          </div>
-          <div className="mx-10 mb-16 font-base text-lg">
-            Your EVM account is <strong>{evmAccount}</strong>
           </div>
           <div className="flex flex-col  mb-16  min-w-fit items-left justify-center w-full">
             <ul className="steps">
@@ -1067,14 +1140,14 @@ const ViewFeed: NextPage = () => {
               >
                 <PaperAirplaneIcon className="h-8 w-8 mx-2" /> Send On-Chain
               </button>
-              {sismoData && sismoData.auths[3].userId ? (
+              {sismoData && sismoData.auths[2] && sismoData.auths[2].userId ? (
                 <div>
                   <button
                     className="btn btn-primary mt-8 "
                     onClick={() => {
                       sendTelegramMessage();
                     }}
-                    disabled={!sismoData.auths[3].userId}
+                    disabled={!sismoData.auths[2].userId}
                   >
                     <PaperAirplaneIcon className="h-8 w-8 mx-2" /> Send Private on Telegram
                   </button>
@@ -1436,6 +1509,13 @@ const ViewFeed: NextPage = () => {
                     onChange={e => setStakeAmount(e.target.value)}
                   />
                   <br />
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Receiver Address"
+                    value={receiver}
+                    onChange={e => setReceiver(e.target.value)}
+                  />
                   <button
                     className="btn  w-full"
                     onClick={async () => {

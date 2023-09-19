@@ -13,31 +13,42 @@ abstract contract Creation is Staking {
         Structures.PostType postType,
         Structures.PostDuration postDuration,
         uint256 payment,
-        address buyer,
-        bytes memory sismoConnectResponse
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) external payable returns (Structures.Post memory) {
+        // verify user
         (
-            ,
-            bytes memory vaultIdBytes,
-            ,
-            address userAddressConverted,
-            ,
-            uint256 telegramId
-        ) = sismoVerify(sismoConnectResponse);
-
-        require(keccak256(vaultIdBytes) == owner, "Not owner");
+            bytes memory vaultId,
+            uint256 twitterId,
+            uint256 telegramId,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
 
         require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
+
+        // get encrypted vault id
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
+        require(encryptedVaultId == owner, "Not owner");
+        require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
-                keccak256(vaultIdBytes)
+                encryptedVaultId
             ),
             "User does not exist"
         );
 
+        // check if user has stake
         if (post.postdata.escrow.stake == 0) {
             require(msg.value > 0, "Stake is required");
         }
 
+        // check if post is in waiting status
         require(
             post.postdata.settings.status == Structures.PostStatus.Waiting ||
                 post.postdata.settings.status ==
@@ -53,19 +64,21 @@ abstract contract Creation is Staking {
             "Wrong Status"
         );
 
+        // set post settings
         postSettingPrivate = Structures.postSettingPrivate({
-            seller: userAddressConverted,
-            vaultIdSeller: vaultIdBytes,
+            vaultIdSeller: vaultId,
+            sellerTwitterId: twitterId,
             sellerTelegramId: telegramId,
-            buyer: buyer,
             vaultIdBuyer: ZEROHASH,
+            buyerTwitterId: 0,
             buyerTelegramId: 0
         });
 
-        uint256 stake = _addStake(userAddressConverted, msg.value);
-
+        // set post escrow
+        uint256 stake = _addStake(encryptedVaultId, msg.value);
         uint256 duration;
 
+        // set post duration
         if (
             Structures.PostDuration(postDuration) ==
             Structures.PostDuration.OneDay
@@ -93,8 +106,9 @@ abstract contract Creation is Staking {
             duration = 30 days;
         }
 
+        // set post data
         Structures.User memory creator = Structures.User({
-            vaultId: keccak256(vaultIdBytes)
+            vaultId: encryptedVaultId
         });
 
         Structures.PostData memory postdata = Structures.PostData({
@@ -118,6 +132,7 @@ abstract contract Creation is Staking {
             })
         });
 
+        // set post
         Structures.Post memory _post = Structures.Post({
             creator: creator,
             postdata: postdata
@@ -125,6 +140,7 @@ abstract contract Creation is Staking {
 
         post = _post;
 
+        // increment post count
         postCount++;
 
         emit Created(post);

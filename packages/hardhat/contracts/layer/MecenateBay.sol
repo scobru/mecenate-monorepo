@@ -20,45 +20,62 @@ contract MecenateBay is Ownable, FeedViewer {
 
     address public verifierContract;
 
-    mapping(address => Structures.BayRequest[]) public requests;
+    address public vaultContract;
+
+    mapping(bytes32 => Structures.BayRequest[]) public requests;
 
     uint256 public contractCounter;
 
     mapping(uint256 => bytes) private sismoResponseMapping;
 
     event RequestCreated(
-        address indexed user,
+        bytes32 indexed user,
         Structures.BayRequest,
         uint256 indexed index
     );
 
     event RequestAccepted(
-        address indexed user,
+        bytes32 indexed user,
         Structures.BayRequest,
         uint256 indexed index
     );
 
-    constructor(address _usersMouduleContract, address _verifierContract) {
+    constructor(
+        address _usersMouduleContract,
+        address _verifierContract,
+        address _vaultContract
+    ) {
         usersMouduleContract = _usersMouduleContract;
         verifierContract = _verifierContract;
+        vaultContract = _vaultContract;
     }
 
     function createRequest(
         Structures.BayRequest memory request,
-        bytes memory sismoConnectResponse
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) public payable returns (Structures.BayRequest memory) {
+        // verify user
         (
-            ,
-            bytes memory vaultIdBytes,
-            ,
-            address userAddressConverted,
-            ,
+            bytes memory vaultId,
+            uint256 twitterId,
+            uint256 telegramId,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
 
-        ) = sismoVerify(sismoConnectResponse);
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
 
         require(
             IMecenateUsers(usersMouduleContract).checkifUserExist(
-                keccak256(vaultIdBytes)
+                keccak256(vaultId)
             ),
             "user does not exist"
         );
@@ -69,43 +86,47 @@ contract MecenateBay is Ownable, FeedViewer {
 
         require(request.payment > 0, "BAY:payment is not enough");
 
-        requests[userAddressConverted].push(request);
+        requests[encryptedVaultId].push(request);
 
         allRequests.push(request);
 
         allRequestsPrivate.push(
             Structures.BayRequestPrivate({
-                seller: address(0),
                 vaultIdSeller: "0x00",
                 sellerResponse: "0x00",
-                buyer: userAddressConverted,
-                vaultIdBuyer: vaultIdBytes,
+                vaultIdBuyer: vaultId,
                 buyerResponse: sismoConnectResponse
             })
         );
 
         contractCounter++;
 
-        emit RequestCreated(
-            userAddressConverted,
-            request,
-            allRequests.length - 1
-        );
+        emit RequestCreated(encryptedVaultId, request, allRequests.length - 1);
     }
 
     function acceptRequest(
         uint256 index,
         address _feed,
-        bytes memory sismoConnectResponse
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) public {
+        // verify user
         (
+            bytes memory vaultId,
             ,
-            bytes memory vaultIdBytes,
             ,
-            address userAddressConverted,
-            ,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
 
-        ) = sismoVerify(sismoConnectResponse);
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
 
         Structures.Feed memory feed = _getFeedInfo(_feed);
 
@@ -121,17 +142,15 @@ contract MecenateBay is Ownable, FeedViewer {
 
         require(
             IMecenateUsers(usersMouduleContract).checkifUserExist(
-                keccak256(vaultIdBytes)
+                encryptedVaultId
             ),
             "BAY:user does not exist"
         );
 
         allRequestsPrivate.push(
             Structures.BayRequestPrivate({
-                seller: userAddressConverted,
-                vaultIdSeller: vaultIdBytes,
+                vaultIdSeller: vaultId,
                 sellerResponse: sismoConnectResponse,
-                buyer: allRequestsPrivate[index].buyer,
                 vaultIdBuyer: allRequestsPrivate[index].vaultIdBuyer,
                 buyerResponse: allRequestsPrivate[index].buyerResponse
             })
@@ -151,7 +170,8 @@ contract MecenateBay is Ownable, FeedViewer {
         // );
 
         IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
-            allRequestsPrivate[index].buyerResponse
+            allRequestsPrivate[index].buyerResponse,
+            _to
         );
 
         allRequests[index].accepted = true;
@@ -160,34 +180,23 @@ contract MecenateBay is Ownable, FeedViewer {
 
         allRequests[index].postCount = feed.postCount;
 
-        emit RequestAccepted(userAddressConverted, allRequests[index], index);
+        emit RequestAccepted(encryptedVaultId, allRequests[index], index);
     }
 
     function sismoVerify(
-        bytes memory sismoConnectResponse
-    )
-        internal
-        view
-        returns (uint256, bytes memory, uint256, address, uint256, uint256)
-    {
+        bytes memory sismoConnectResponse,
+        bytes32 _to
+    ) internal view returns (bytes memory, uint256, uint256) {
         (
-            uint256 vaultId,
-            bytes memory vaultIdBytes,
-            uint256 userAddress,
-            address userAddressConverted,
+            bytes memory vaultId,
             uint256 twitterId,
-            uint256 telegramId
+            uint256 telegramId,
+            bytes memory signedMessage
         ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse
+                sismoConnectResponse,
+                _to
             );
-        return (
-            vaultId,
-            vaultIdBytes,
-            userAddress,
-            userAddressConverted,
-            twitterId,
-            telegramId
-        );
+        return (vaultId, twitterId, telegramId);
     }
 
     function getRequests()
@@ -199,28 +208,39 @@ contract MecenateBay is Ownable, FeedViewer {
     }
 
     function getRequestForAddress(
-        address _address
+        bytes32 _user
     ) public view returns (Structures.BayRequest[] memory) {
-        return requests[_address];
+        return requests[_user];
     }
 
     // removéthe request and refund the user delete the array and move the last element to the index
     function removeRequest(
         uint256 index,
-        bytes memory sismoConnectResponse
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) public {
+        // verify user
         (
-            uint256 vaultId,
-            bytes memory vaultIdBytes,
-            uint256 userAddress,
-            address userAddressConverted,
-            uint256 twitterId,
-            uint256 telegramId
-        ) = sismoVerify(sismoConnectResponse);
+            bytes memory vaultId,
+            ,
+            ,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
 
         require(
-            allRequestsPrivate[index].buyer == userAddressConverted,
-            "BAY:user is not the buyer"
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
+        require(
+            encryptedVaultId ==
+                keccak256(allRequestsPrivate[index].vaultIdBuyer),
+            "BAY:you are not the buyer"
         );
 
         require(
@@ -230,8 +250,12 @@ contract MecenateBay is Ownable, FeedViewer {
 
         Structures.BayRequest memory requestToRemove = allRequests[index];
 
-        // Refund the buyer
-        payable(userAddressConverted).transfer(requestToRemove.payment);
+        //  send eth with data to the vaultctx
+        (bool _result, ) = vaultContract.call{value: requestToRemove.payment}(
+            sismoConnectResponse
+        );
+
+        require(_result, "BAY:Vault call failed");
 
         // Remove from allRequests array
         uint256 lastIndex = allRequests.length - 1;
@@ -248,28 +272,38 @@ contract MecenateBay is Ownable, FeedViewer {
         allRequestsPrivate.pop();
 
         // Remove from requests mapping
-        for (uint256 i = 0; i < requests[userAddressConverted].length; i++) {
+        for (uint256 i = 0; i < requests[encryptedVaultId].length; i++) {
             if (
-                requests[userAddressConverted][i].payment ==
+                requests[encryptedVaultId][i].payment ==
                 requestToRemove.payment &&
-                requests[userAddressConverted][i].stake ==
-                requestToRemove.stake &&
-                requests[userAddressConverted][i].postAddress ==
+                requests[encryptedVaultId][i].stake == requestToRemove.stake &&
+                requests[encryptedVaultId][i].postAddress ==
                 requestToRemove.postAddress &&
-                requests[userAddressConverted][i].postCount ==
+                requests[encryptedVaultId][i].postCount ==
                 requestToRemove.postCount
             ) {
-                uint256 lastIndexSender = requests[userAddressConverted]
-                    .length - 1;
+                uint256 lastIndexSender = requests[encryptedVaultId].length - 1;
                 if (i < lastIndexSender) {
-                    requests[userAddressConverted][i] = requests[
-                        userAddressConverted
-                    ][lastIndexSender];
+                    requests[encryptedVaultId][i] = requests[encryptedVaultId][
+                        lastIndexSender
+                    ];
                 }
-                requests[userAddressConverted].pop();
+                requests[encryptedVaultId].pop();
                 break;
             }
         }
+    }
+
+    function changeVault(address _vault) external onlyOwner {
+        vaultContract = _vault;
+    }
+
+    function changeVerifier(address _verifier) external onlyOwner {
+        verifierContract = _verifier;
+    }
+
+    function changeUsersModule(address _usersModule) external onlyOwner {
+        usersMouduleContract = _usersModule;
     }
 
     receive() external payable {}

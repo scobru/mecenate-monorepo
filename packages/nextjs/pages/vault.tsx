@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import React, { useCallback, useEffect } from "react";
-import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
+import { useContract, useProvider, useNetwork, useSigner, useTransaction } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
@@ -8,6 +8,8 @@ import { formatEther, keccak256, parseEther } from "ethers/lib/utils.js";
 import { SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
 import { AuthType } from "../sismo.config";
 import { useAppStore } from "~~/services/store/store";
+import { useScaffoldContractRead, useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
+import { Address } from "~~/components/scaffold-eth";
 
 const DEBUG = true;
 
@@ -75,6 +77,10 @@ const Vault: NextPage = () => {
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
   const deployedContractWallet = getDeployedContract(chain?.id.toString(), "MecenateVault");
+  const deployedContractDepositorFactory = getDeployedContract(chain?.id.toString(), "MecenateETHDepositorFactory");
+
+  const txData = useTransactor();
+
   const [signature, setSignature] = React.useState<string>();
   const [amount, setAmount] = React.useState(0);
   const [depositedBalance, setDepositedBalance] = React.useState(0);
@@ -86,12 +92,20 @@ const Vault: NextPage = () => {
   const [tokenAddress, setTokenAddress] = React.useState<string>("");
   const [userCommitment, setUserCommitment] = React.useState<string>("");
   const [randomBytes32Hash, setRandomBytes32Hash] = React.useState<string>("");
+  const [depositorCtx, setDepositorCtx] = React.useState<string>("");
 
   let walletAddress!: string;
   let walletAbi: ContractInterface[] = [];
 
+  let depositorAddress: string;
+  let depositorAbi: ContractInterface[] = [];
+
   if (deployedContractWallet) {
     ({ address: walletAddress, abi: walletAbi } = deployedContractWallet);
+  }
+
+  if (deployedContractDepositorFactory) {
+    ({ address: depositorAddress, abi: depositorAbi } = deployedContractDepositorFactory);
   }
 
   const wallet = useContract({
@@ -100,25 +114,39 @@ const Vault: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
+  const depositorFactory = useContract({
+    address: deployedContractDepositorFactory?.address,
+    abi: depositorAbi,
+    signerOrProvider: signer || provider,
+  });
+
   const getDeposit = useCallback(async () => {
-    if (sismoData?.auths[0].userId == null) return;
-    const commitment = userCommitment || keccak256(sismoData.auths[0].userId);
-    if (commitment) {
-      const tx = await wallet?.getEthDeposit(commitment);
-      if (tx) setDepositedBalance(Number(formatEther(tx)));
+    const tx = await wallet?.getEthDeposit(keccak256(sismoData?.auths[0]?.userId));
+    if (tx) setDepositedBalance(Number(formatEther(tx)));
+  }, [wallet, depositedBalance]);
+
+  const createDepositor = async () => {
+    console.log(depositorFactory);
+    txData(depositorFactory?.createDepositor(keccak256(sismoData?.auths[0]?.userId), wallet?.address));
+  };
+
+  const getDepositor = async () => {
+    const result = await depositorFactory?.getDepositors(keccak256(sismoData?.auths[0]?.userId));
+    if (result) {
+      setDepositorCtx(result);
     }
-  }, [sismoData, userCommitment, wallet]);
+  };
 
   useEffect(() => {
     getDeposit();
+    getDepositor();
     setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
     setVerified(localStorage.getItem("verified"));
     setSismoResponse(localStorage.getItem("sismoResponse"));
-  }, [getDeposit, signer]);
+  }, [getDeposit]);
 
   const deposit = async () => {
-    const commitment = userCommitment || keccak256(sismoData.auths[0].userId);
-    const tx = await wallet?.depositETH(commitment, {
+    const tx = await wallet?.depositETH(keccak256(sismoData.auths[0].userId), {
       value: parseEther(String(amount)),
     });
     if (tx?.hash) {
@@ -127,8 +155,12 @@ const Vault: NextPage = () => {
   };
 
   const withdraw = async () => {
-    const commitment = userCommitment || keccak256(sismoData.auths[0].userId);
-    const tx = await wallet?.withdrawETH(to, parseEther(String(amount)), commitment);
+    const tx = await wallet?.withdrawETH(
+      to,
+      parseEther(String(amount)),
+      sismoResponse,
+      keccak256(String(wallet?.address)),
+    );
     if (tx?.hash) {
       notification.success("Withdrawal successful!");
     }
@@ -136,16 +168,14 @@ const Vault: NextPage = () => {
 
   // Nuove funzioni per gestire i token ERC20
   const depositToken = async (tokenAddress: string) => {
-    const commitment = userCommitment || keccak256(sismoData.auths[0].userId);
-    const tx = await wallet?.depositToken(tokenAddress, parseEther(String(amount)), commitment);
+    const tx = await wallet?.depositToken(tokenAddress, parseEther(String(amount)), sismoResponse);
     if (tx?.hash) {
       notification.success("Token Deposit successful!");
     }
   };
 
   const withdrawToken = async (tokenAddress: string) => {
-    const commitment = userCommitment || keccak256(sismoData.auths[0].userId);
-    const tx = await wallet?.withdrawToken(tokenAddress, to, parseEther(String(amount)), commitment);
+    const tx = await wallet?.withdrawToken(tokenAddress, to, parseEther(String(amount)), sismoResponse);
     if (tx?.hash) {
       notification.success("Token Withdrawal successful!");
     }
@@ -239,6 +269,38 @@ const Vault: NextPage = () => {
           <div className="max-w-3xl text-center">
             <h1 className="text-6xl font-bold mb-8">Vault</h1>
             <p className="text-xl  mb-10">Where Zero-Knowledge Proofs Meet Secure Deposits.</p>
+            <p className="text-xl  mb-10">{wallet?.address}</p>
+          </div>
+          <div>
+            <button
+              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-1"
+              onClick={async () => {
+                const result = await createDepositor();
+                if (result) {
+                  notification.success("Depositor created!");
+                }
+              }}
+            >
+              Create Depositor
+            </button>
+            {depositorCtx && (
+              <p className="text-xl  mb-10">
+                Send ETH to deposit into vault at : <Address address={depositorCtx} format="long"></Address>{" "}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col min-w-fit mx-auto items-center mb-5">
+            <div className="max-w-3xl text-center">
+              <button
+                className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700"
+                onClick={async () => {
+                  navigator.clipboard.writeText(keccak256(sismoData.auths[0].userId));
+                  notification.success("Sismo Response copied to clipboard");
+                }}
+              >
+                Copy encrypted vaultId to clipboard
+              </button>
+            </div>
           </div>
           <div className="p-4 ">
             <div className="w-full">
@@ -247,21 +309,7 @@ const Vault: NextPage = () => {
                   <p className="text-left text-lg mb-5">Balance: {depositedBalance} ETH</p>
                 )}
                 <span className="text-base font-semibold my-5 ">Deposit</span>
-                <div className="w-full mb-5">
-                  <button
-                    className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700"
-                    onClick={() => generateRandomBytes32()}
-                  >
-                    Generate Commitment
-                  </button>
-                  <input
-                    type="text"
-                    className="input input-bordered w-full"
-                    placeholder="Commitment Hash (Leave empty for sismo commitment)"
-                    onChange={e => setUserCommitment(e.target.value)}
-                    value={userCommitment}
-                  />
-                </div>
+
                 <div className="w-full mb-5">
                   <input
                     type="text"

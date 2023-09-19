@@ -44,12 +44,12 @@ abstract contract Finalization is Staking {
             payable(treasuryContract).transfer(buyerFee);
 
             uint256 buyerStake = _takeStake(
-                postSettingPrivate.buyer,
+                keccak256(postSettingPrivate.vaultIdBuyer),
                 post.postdata.escrow.payment
             );
 
             uint256 sellerStake = _addStake(
-                postSettingPrivate.seller,
+                keccak256(postSettingPrivate.vaultIdSeller),
                 amountToAdd
             );
 
@@ -73,15 +73,19 @@ abstract contract Finalization is Staking {
 
                 uint256 amountToAdd = post.postdata.escrow.payment - buyerFee;
 
-                payable(treasuryContract).transfer(buyerFee);
+                (bool success, ) = payable(treasuryContract).call{
+                    value: buyerFee
+                }("");
+
+                require(success, "Transfer failed");
 
                 uint256 buyerStake = _takeStake(
-                    postSettingPrivate.buyer,
+                    keccak256(postSettingPrivate.vaultIdBuyer),
                     post.postdata.escrow.payment
                 );
 
                 uint256 sellerStake = _addStake(
-                    postSettingPrivate.seller,
+                    keccak256(postSettingPrivate.vaultIdSeller),
                     amountToAdd
                 );
 
@@ -116,12 +120,12 @@ abstract contract Finalization is Staking {
                 post.postdata.escrow.penality = penality;
 
                 post.postdata.escrow.payment = _burnStake(
-                    postSettingPrivate.buyer,
+                    keccak256(postSettingPrivate.vaultIdBuyer),
                     penality
                 );
 
                 post.postdata.escrow.stake = _burnStake(
-                    postSettingPrivate.seller,
+                    keccak256(postSettingPrivate.vaultIdSeller),
                     punishment
                 );
 
@@ -132,11 +136,11 @@ abstract contract Finalization is Staking {
 
     function _cancelPostSettingPrivate() internal virtual {
         postSettingPrivate = Structures.postSettingPrivate({
-            buyer: address(0),
             vaultIdBuyer: ZEROHASH,
+            buyerTwitterId: 0,
             buyerTelegramId: 0,
-            seller: address(0),
             vaultIdSeller: ZEROHASH,
+            sellerTwitterId: 0,
             sellerTelegramId: 0
         });
     }

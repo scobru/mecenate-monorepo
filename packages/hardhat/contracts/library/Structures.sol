@@ -82,11 +82,11 @@ library Structures {
      * @dev Struct representing the private settings of a post on the Mecenate platform.
      */
     struct postSettingPrivate {
-        address seller;
         bytes vaultIdSeller;
+        uint256 sellerTwitterId;
         uint256 sellerTelegramId;
-        address buyer;
         bytes vaultIdBuyer;
+        uint256 buyerTwitterId;
         uint256 buyerTelegramId;
     }
 
@@ -136,10 +136,8 @@ library Structures {
      * @dev Struct representing the private settings of a bay request on the Mecenate platform.
      */
     struct BayRequestPrivate {
-        address seller;
         bytes vaultIdSeller;
         bytes sellerResponse;
-        address buyer;
         bytes vaultIdBuyer;
         bytes buyerResponse;
     }

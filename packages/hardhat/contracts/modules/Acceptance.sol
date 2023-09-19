@@ -10,65 +10,68 @@ import "./Staking.sol";
 
 abstract contract Acceptance is Events, Staking {
     function acceptPost(
-        bytes memory sismoConnectResponse
+        bytes memory sismoConnectResponse,
+        bytes32 _to
     ) external payable virtual {
+        // verify user
         (
-            ,
-            bytes memory vaultIdBytes,
-            ,
-            address userAddressConverted,
-            ,
-            uint256 telegramId
-        ) = sismoVerify(sismoConnectResponse);
+            bytes memory vaultId,
+            uint256 twitterId,
+            uint256 telegramId,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
+
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
 
         require(
             IMecenateUsers(usersModuleContract).checkifUserExist(
-                keccak256(vaultIdBytes)
+                encryptedVaultId
             ),
             "FEEDS:user does not exist"
         );
-
         require(
-            userAddressConverted != postSettingPrivate.seller,
+            encryptedVaultId != keccak256(postSettingPrivate.vaultIdSeller),
             "FEEDS: You are the seller"
         );
 
+        // add stake
         uint256 payment;
 
         if (post.postdata.escrow.payment > 0) {
-            payment = _addStake(userAddressConverted, msg.value);
-
+            payment = _addStake(encryptedVaultId, msg.value);
             require(
                 payment >= post.postdata.escrow.payment,
                 "FEEDS: Payment is not enough"
             );
         } else {
             require(msg.value > 0, "FEEDS: Payment is zero");
-            payment = _addStake(userAddressConverted, msg.value);
+            payment = _addStake(encryptedVaultId, msg.value);
         }
-
         require(
             post.postdata.settings.status == Structures.PostStatus.Proposed,
             "FEEDS: Post is not Proposed"
         );
 
-        if (postSettingPrivate.buyer != address(0)) {
-            require(
-                postSettingPrivate.buyer == userAddressConverted,
-                "You are not the buyer"
-            );
-        }
+        // update post status
 
         post.postdata.escrow.payment = payment;
 
         post.postdata.settings.status = Structures.PostStatus.Accepted;
 
         postSettingPrivate = Structures.postSettingPrivate({
-            buyer: userAddressConverted,
-            vaultIdBuyer: vaultIdBytes,
+            vaultIdBuyer: vaultId,
+            buyerTwitterId: twitterId,
             buyerTelegramId: telegramId,
-            seller: postSettingPrivate.seller,
             vaultIdSeller: postSettingPrivate.vaultIdSeller,
+            sellerTwitterId: postSettingPrivate.sellerTwitterId,
             sellerTelegramId: postSettingPrivate.sellerTelegramId
         });
 

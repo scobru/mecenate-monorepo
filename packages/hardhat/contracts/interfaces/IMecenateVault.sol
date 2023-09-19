@@ -4,8 +4,6 @@ interface IMecenateVault {
     function pay(
         address _to,
         uint256 _amount,
-        bytes32 _commitment
+        bytes memory _sismoConnectResponse
     ) external returns (bool);
-
-    function deposit(bytes calldata sismoConnectResponse) external payable;
 }

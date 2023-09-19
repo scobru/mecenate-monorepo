@@ -10,4 +10,6 @@ interface IMecenateFeedFactory {
     function feeds() external view returns (address[] memory);
 
     function contractCounter() external view returns (uint256);
+
+    function isFeed(address _feed) external view returns (bool);
 }

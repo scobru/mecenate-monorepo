@@ -1,11 +1,21 @@
 import { SismoConnect, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-server";
 import { AUTHS, CONFIG, SIGNATURE_REQUEST } from "../../sismo.config";
+import { keccak256 } from "ethers/lib/utils.js";
+import { decodeAbiParameters, encodeAbiParameters } from "viem";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 
 const sismoConnect = SismoConnect({ config: CONFIG });
 const TIMEOUT_DURATION = 150000; // 9 seconds
 
 // Promise that resolves after a set time
 const timeout = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms));
+
+const signMessage = () => {
+  return encodeAbiParameters(
+    [{ type: "bytes32", name: "_to" }],
+    [keccak256(String("0x917C5Fc4FB2010743ee4a5c368d1b4A3139C6385")) as `0x${string}`],
+  );
+};
 
 export default async function verify(
   req: { method: string; body: any },
@@ -33,7 +43,7 @@ export default async function verify(
     const result: SismoConnectVerifiedResult = await Promise.race([
       sismoConnect.verify(sismoConnectResponse, {
         auths: AUTHS,
-        signature: SIGNATURE_REQUEST,
+        signature: { message: String(signMessage()) },
       }),
       timeout(TIMEOUT_DURATION).then(() => {
         throw new Error("Timeout");
