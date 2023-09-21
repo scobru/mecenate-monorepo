@@ -58,14 +58,13 @@ export default function Header() {
 
   useEffect(() => {
     const verified = localStorage.getItem("verified");
-    const sismoData = JSON.parse(localStorage.getItem("sismoData"));
+    const sismoData = JSON.parse(localStorage.getItem("sismoData") || "{}");
     if (verified == "verified" && sismoData) {
       setIsLocalStorage(true);
       setVerified(String(verified));
-
       setEncryptedVaultId(keccak256(String(sismoData?.auths[0]?.userId)));
     }
-  }, []);
+  }, [encryptedVaultId]);
 
   const navLinks = (
     <>
@@ -147,10 +146,6 @@ export default function Header() {
               }}
             >
               {navLinks}
-
-              <div>
-                <VerifiedBadge verified={String(verified)} encryptedVaultId={encryptedVaultId} />
-              </div>
             </ul>
           )}
         </div>
@@ -163,11 +158,14 @@ export default function Header() {
           </div>
         </div>
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>{" "}
-        {verified == "verified" ? (
-          <VerifiedBadge verified={String(verified)} encryptedVaultId={encryptedVaultId} />
-        ) : null}
       </div>
+
       <div className="navbar-end flex-grow mr-4">
+        <div>
+          {verified == "verified" ? (
+            <VerifiedBadge verified={String(verified)} encryptedVaultId={encryptedVaultId} />
+          ) : null}
+        </div>
         <RainbowKitCustomConnectButton />
         <FaucetButton />
       </div>

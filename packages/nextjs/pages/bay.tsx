@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, ethers } from "ethers";
@@ -30,8 +30,6 @@ const Bay: NextPage = () => {
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
-  const [ethWallet, setEthWallet] = React.useState<any>(null);
-  const [ethWalletInstance, setEthWalletInstance] = React.useState<any>(null);
 
   type BayRequest = {
     request: string;
@@ -77,26 +75,45 @@ const Bay: NextPage = () => {
     signerOrProvider: customWallet || provider,
   });
 
-  async function acceptBayRequest(index: number, address: string) {
-    if (signer) {
+  const acceptBayRequest = useCallback(
+    async (index: number, address: string) => {
+      if (signer) {
+        const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
+        const data = iface.encodeFunctionData("acceptRequest", [
+          index,
+          address,
+          sismoResponse,
+          keccak256(String(vaultCtx?.address)),
+        ]);
+        txData(vaultCtx?.execute(bayCtx?.address, data, 0, keccak256(String(sismoData.auths[0].userId))));
+      }
+    },
+    [signer, txData, vaultCtx, bayCtx, sismoData],
+  );
+
+  const removeRequest = useCallback(
+    async (index: number) => {
       const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
-      const data = iface.encodeFunctionData("acceptRequest", [
+      const data = iface.encodeFunctionData("removeRequest", [
         index,
-        address,
         sismoResponse,
         keccak256(String(vaultCtx?.address)),
       ]);
       txData(vaultCtx?.execute(bayCtx?.address, data, 0, keccak256(String(sismoData.auths[0].userId))));
-    }
-  }
+    },
+    [txData, vaultCtx, bayCtx],
+  );
 
-  async function removeRequest(index: number) {
-    const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
-    const data = iface.encodeFunctionData("removeRequest", [index, sismoResponse]);
-    txData(vaultCtx?.execute(bayCtx?.address, data, 0, sismoResponse));
-  }
+  const getAllRequest = useMemo(() => {
+    return async () => {
+      if (customProvider && deployedContractBay) {
+        const _requests = await bayCtx?.getRequests();
+        setRequests(_requests);
+      }
+    };
+  }, [deployedContractBay, customProvider, bayCtx]);
 
-  async function createBayContract() {
+  const createBayContract = useCallback(async () => {
     const _request = ethers.utils.formatBytes32String(requestString);
 
     const request = {
@@ -125,14 +142,7 @@ const Bay: NextPage = () => {
 
     getAllRequest();
     await sendPublicTelegramMessage();
-  }
-
-  const getAllRequest = useCallback(async () => {
-    if (customProvider && deployedContractBay) {
-      const _requests = await bayCtx?.getRequests();
-      setRequests(_requests);
-    }
-  }, [deployedContractBay]);
+  }, [requestString, requestPayment, requestStake, txData, vaultCtx, bayCtx, getAllRequest]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,8 +151,6 @@ const Bay: NextPage = () => {
       setVerified(localStorage.getItem("verified"));
       setSismoResponse(localStorage.getItem("sismoResponse"));
       const storedEthWallet = await JSON.parse(String(localStorage.getItem("ethWallet")));
-
-      setEthWallet(storedEthWallet);
 
       console.log("Stored ethWallet: ", storedEthWallet);
 

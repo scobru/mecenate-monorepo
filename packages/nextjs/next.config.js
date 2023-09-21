@@ -12,7 +12,7 @@ module.exports = {
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
-      url: require.resolve('url/'),
+      url: require.resolve("url/"),
       fs: false,
     };
 

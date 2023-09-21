@@ -111,7 +111,11 @@ abstract contract Finalization is Staking {
 
                 uint256 totalPunishmentFee = penality + punishment;
 
-                payable(treasuryContract).transfer(totalPunishmentFee);
+                (bool success, ) = payable(treasuryContract).call{
+                    value: totalPunishmentFee
+                }("");
+
+                require(success, "Transfer failed");
 
                 post.postdata.settings.status = Structures.PostStatus.Finalized;
 

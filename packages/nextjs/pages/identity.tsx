@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import React, { useEffect } from "react";
+import React, { use, useCallback, useEffect, useMemo } from "react";
 import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, ethers } from "ethers";
@@ -9,7 +9,7 @@ import { CONFIG, AUTHS, SIGNATURE_REQUEST, AuthType } from "./../sismo.config";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import Spinner from "~~/components/Spinner";
 import crypto from "crypto";
-import { decodeAbiParameters, encodeAbiParameters } from "viem";
+import { Address } from "~~/components/scaffold-eth";
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
@@ -32,9 +32,9 @@ const Identity: NextPage = () => {
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
   const [userName, setUserName] = React.useState<any>(null);
-  const [customPK, setCustomPK] = React.useState<any>(null);
-  const [ethWallet, setEthWallet] = React.useState<any>(null);
-  const [wallets, setWallets] = React.useState<any[]>([]);
+
+  const [depositorCtx, setDepositorCtx] = React.useState<string>("");
+  const deployedContractDepositorFactory = getDeployedContract(chain?.id.toString(), "MecenateETHDepositorFactory");
 
   const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
 
@@ -46,6 +46,12 @@ const Identity: NextPage = () => {
 
   let treasuryAddress!: string;
   let treasuryAbi: ContractInterface[] = [];
+
+  let depositorAddress: string;
+  let depositorAbi: ContractInterface[] = [];
+
+  let vaultAddress!: string;
+  let vaultAbi: ContractInterface[] = [];
 
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
@@ -59,11 +65,12 @@ const Identity: NextPage = () => {
     ({ address: treasuryAddress, abi: treasuryAbi } = deployedContractTreasury);
   }
 
-  let vaultAddress!: string;
-  let vaultAbi: ContractInterface[] = [];
-
   if (deployedContractVault) {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
+  }
+
+  if (deployedContractDepositorFactory) {
+    ({ address: depositorAddress, abi: depositorAbi } = deployedContractDepositorFactory);
   }
 
   const vaultCtx = useContract({
@@ -90,7 +97,13 @@ const Identity: NextPage = () => {
     signerOrProvider: customWallet || provider,
   });
 
-  async function signIn() {
+  const depositorFactory = useContract({
+    address: deployedContractDepositorFactory?.address,
+    abi: depositorAbi,
+    signerOrProvider: customWallet || provider,
+  });
+
+  const signIn = useCallback(async () => {
     const iface = new ethers.utils.Interface(deployedContractUser?.abi as any[]);
     const data = iface.encodeFunctionData("registerUser", [
       sismoResponse,
@@ -99,7 +112,7 @@ const Identity: NextPage = () => {
     ]);
     console.log(sismoData?.auths[0]?.userId);
     txData(vaultCtx?.execute(usersCtx?.address, data, 0, keccak256(String(sismoData?.auths[0]?.userId))));
-  }
+  }, [txData, vaultCtx, usersCtx, sismoData, userName]);
 
   const getContractData = async function getContractData() {
     if (identity && signer) {
@@ -136,7 +149,6 @@ const Identity: NextPage = () => {
     const sismoDataFromLocalStorage = localStorage.getItem("sismoData");
     const verifiedFromLocalStorage = localStorage.getItem("verified");
     const sismoResponseFromLocalStorage = localStorage.getItem("sismoResponse");
-    const ethWalletFromLocalStorage = localStorage.getItem("ethWallet");
 
     if (sismoDataFromLocalStorage) {
       setSismoData(JSON.parse(sismoDataFromLocalStorage));
@@ -147,10 +159,6 @@ const Identity: NextPage = () => {
     }
     if (sismoResponseFromLocalStorage) {
       setSismoResponse(sismoResponseFromLocalStorage);
-    }
-
-    if (ethWalletFromLocalStorage) {
-      setEthWallet(JSON.parse(ethWalletFromLocalStorage));
     }
 
     const pageStateToSet = verifiedFromLocalStorage === "verified" ? "verified" : "init";
@@ -197,105 +205,17 @@ const Identity: NextPage = () => {
   }
   /* *************************  Account Abstraction *********************/
 
-  const downloadObjectAsJson = (exportObj: any, exportName: string) => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
-    const downloadAnchorNode = document.createElement("a");
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", exportName + ".json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  };
-
-  async function addWallet(vaultId: string, address: string, encryptedPK: string) {
-    try {
-      const response = await fetch("/api/write", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          vaultId: vaultId,
-          address: address,
-          encryptedPK: encryptedPK,
-        }),
-      });
-
-      // Parse JSON data from the HTTP response
-      const data = await response.json();
-
-      if (response.status === 201) {
-        console.log("Successfully added the wallet:", data);
-      } else {
-        console.error("Failed to add the wallet:", data.error);
-      }
-
-      return data;
-    } catch (error) {
-      console.error("An error occurred while fetching:", error);
-    }
-  }
-
-  const [selectedAddress, setSelectedAddress] = React.useState<string | null>(null);
-
-  function filterAddressesByVaultId(data, vaultId) {
-    return data.filter(item => item.vaultId === vaultId).map(item => item.address);
-  }
-
-  const generateETHWallet = async (): Promise<any> => {
-    try {
-      const ethWallet = await ethers.Wallet.createRandom(provider);
-      setEthWallet(ethWallet);
-      const privateKey = ethWallet.privateKey;
-
-      const wallet = {
-        address: ethWallet.address,
-        key: privateKey,
-      };
-
-      downloadObjectAsJson(wallet, ethWallet.address);
-
-      const encyptedVaultId = keccak256(sismoData?.auths[0].userId);
-      const encryptedPK = encryptMessage(sismoData?.auths[0].userId, privateKey);
-      await addWallet(encyptedVaultId, ethWallet.address, encryptedPK);
-
-      localStorage.setItem("ethWallet", JSON.stringify(wallet));
-
-      return ethWallet.address;
-    } catch (error) {
-      console.error("An error occurred:", error);
-      return null;
+  const createDepositor = async () => {
+    if (sismoData) {
+      console.log(depositorFactory);
+      txData(depositorFactory?.createDepositor(keccak256(sismoData?.auths[0]?.userId), vaultCtx?.address));
     }
   };
 
-  const restoreWalletFromPK = async (): Promise<any> => {
-    try {
-      if (!customPK) {
-        const pk = localStorage.getItem("ethWallet");
-        const ethWallet = new ethers.Wallet(pk.privateKey as string, provider);
-
-        const wallet = {
-          address: ethWallet.address,
-          key: pk,
-        };
-
-        setEthWallet(wallet);
-
-        return ethWallet;
-      } else {
-        const ethWallet = new ethers.Wallet(customPK, provider);
-        const wallet = {
-          address: ethWallet.address,
-          key: customPK,
-        };
-        setEthWallet(wallet);
-        localStorage.setItem("ethWallet", JSON.stringify(ethWallet));
-        console.log("Wallet restored with custom PK");
-        return ethWallet;
-      }
-    } catch (error) {
-      console.error("An error occurred:", error);
-      return null;
+  const getDepositor = async () => {
+    if (depositorFactory && sismoData && !depositorCtx) {
+      const result = await depositorFactory?.getDepositors(keccak256(sismoData?.auths[0]?.userId));
+      setDepositorCtx(result);
     }
   };
 
@@ -309,50 +229,36 @@ const Identity: NextPage = () => {
     setPageState("verified");
   }, [responseBytes]);
 
+  // useEffect per la chiamata periodica a getDepositor
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getDepositor();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [depositorFactory]);
+
   useEffect(() => {
     initializeState();
-  }, []);
-  useEffect(() => {
-    let isMounted = true; // flag to keep track of component mounted state
+    getDepositor();
+  }, [depositorCtx]);
 
-    // your async operations
+  useEffect(() => {
+    let isMounted = true;
     async function fetchData() {
       if (isMounted) {
-        // set state only if component is still mounted
-        const data = await initializeState();
+        await initializeState();
       }
     }
-
     fetchData();
-
     return () => {
-      isMounted = false; // cleanup toggles mounted flag
+      isMounted = false;
     };
-  }, []);
+  }, []); // Moved async operations outside useEffect
 
-  useEffect(() => {
-    // Esegui la chiamata API quando il componente viene montato
-    async function fetchWallets() {
-      try {
-        const res = await fetch("/api/read");
-        if (res.ok) {
-          const data = await res.json();
-          setWallets(data);
-        } else {
-          console.error("Errore durante il recupero dei dati.");
-        }
-      } catch (error) {
-        console.error("Si è verificato un errore:", error);
-      }
-    }
-
-    fetchWallets();
-  }, []);
-
-  const signMessage = () => {
+  const signMessage = useMemo(() => {
     if (!vaultAddress) return;
-    return encodeAbiParameters([{ type: "bytes32", name: "_to" }], [keccak256(String(vaultAddress)) as `0x${string}`]);
-  };
+    return ethers.utils.defaultAbiCoder.encode(["bytes32"], [keccak256(String(vaultCtx?.address)) as `0x${string}`]);
+  }, [vaultAddress, vaultCtx]);
 
   return (
     <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4 ">
@@ -370,9 +276,8 @@ const Identity: NextPage = () => {
                   <SismoConnectButton
                     config={CONFIG}
                     auths={AUTHS}
-                    signature={{ message: String(signMessage()) }}
+                    signature={{ message: String(signMessage) }}
                     text="Join With Sismo"
-                    disabled={!signer}
                     onResponse={async (response: SismoConnectResponse) => {
                       setSismoConnectResponse(response);
                       setPageState("verifying");
@@ -438,6 +343,29 @@ const Identity: NextPage = () => {
                             </button>
                           </div>
                           <div className="text-green-500 font-bold my-5 ">ZK Proofs verified!</div>
+
+                          <div className="font-semibold text-xl">⚠️ Deposit into vault before sign-in</div>
+                          <div>
+                            <p className="text-xl  mb-2">Create forwarder address used to deposit into vault</p>
+                            <button
+                              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
+                              onClick={async () => {
+                                await createDepositor();
+                              }}
+                            >
+                              Create
+                            </button>
+                            {depositorCtx ? (
+                              <p className="text-xl mb-10">
+                                Send ETH to deposit into vault at :{" "}
+                                <Address address={depositorCtx} format="long"></Address>{" "}
+                              </p>
+                            ) : (
+                              <div className="text-center w-fit items-center mx-auto my-5 mb-10">
+                                <Spinner></Spinner>
+                              </div>
+                            )}
+                          </div>
                           <div className="mt-10">
                             <input
                               className="input input-bordered my-5 w-full"
@@ -448,7 +376,7 @@ const Identity: NextPage = () => {
                             <button
                               className="btn btn-primary w-full py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                               onClick={signIn}
-                              /* disabled={userExists} */
+                              disabled={userExists}
                             >
                               Sign In{" "}
                             </button>

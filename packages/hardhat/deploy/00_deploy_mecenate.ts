@@ -4,6 +4,9 @@ import { ethers } from "hardhat";
 //import { ethers } from "ethers";
 import { Create2Factory } from "../scripts/Create2Factory";
 import { factories } from "../typechain-types";
+
+const relayer = "0x58dF4b1E490d0380Eb273f87D6f4eD8d4EA0E1A6";
+
 /**
  * Deploys a contract named "YourContract" using the deployer account and
  * constructor arguments set to the deployer address
@@ -117,7 +120,7 @@ const deployYourContract: DeployFunction = async function (
       feedFactory.address,
       ethers.constants.AddressZero,
       users.address,
-      "0x8aA5F726d9F868a21a8bd748E2f1E43bA31eb670",
+      relayer,
     ],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by

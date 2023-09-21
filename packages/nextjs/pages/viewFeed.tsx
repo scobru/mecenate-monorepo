@@ -298,8 +298,8 @@ const ViewFeed: NextPage = () => {
 
   async function acceptPost() {
     const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-    const data = iface.encodeFunctionData("acceptPost", [sismoResponse]);
-    txData(vaultCtx?.execute(feedCtx?.address, data, parseEther(postPayment), sismoResponse));
+    const data = iface.encodeFunctionData("acceptPost", [sismoResponse, keccak256(String(vaultCtx?.address))]);
+    txData(vaultCtx?.execute(feedCtx?.address, data, parseEther(postPayment), keccak256(sismoData.auths[0].userId)));
   }
 
   async function createPostData(RawData: any) {
@@ -648,7 +648,7 @@ const ViewFeed: NextPage = () => {
   async function renounce() {
     const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
     const data = iface.encodeFunctionData("renouncePost", [keccak256(sismoData.auths[0].userId)]);
-    txData(vaultCtx?.execute(feedCtx?.address, data, 0, sismoResponse));
+    txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
     notification.success("Refund successful");
   }
 
@@ -662,19 +662,27 @@ const ViewFeed: NextPage = () => {
 
   async function takeAll() {
     console.log("Take All Stake...");
-    txData(feedCtx?.takeFullStake(sismoResponse), receiver);
+    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+
+    const data = iface.encodeFunctionData("takeFullStake", [sismoResponse, keccak256(String(vaultCtx?.address))]);
+
+    txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
     await fetchData();
   }
 
   async function takeStake() {
     console.log("Take Stake...");
+
     const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+
     const data = iface.encodeFunctionData("takeStake", [
       parseEther(stakeAmount),
       sismoResponse,
       keccak256(String(vaultCtx?.address)),
     ]);
+
     txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
+
     await fetchData();
   }
 
@@ -970,7 +978,7 @@ const ViewFeed: NextPage = () => {
 
     // Cleanup function
     return () => clearInterval(interval);
-  }, [feedCtx, router.isReady, sismoData]);
+  }, [feedCtx, router.isReady, sismoData, feedData]);
 
   useEffect(() => {
     fetchData();

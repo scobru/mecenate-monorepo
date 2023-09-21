@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import { useAccountBalance } from "~~/hooks/scaffold-eth/useAccountBalance";
 import Address from "./Address";
 
-const WalletCard = ({ publicKey, privateKey }) => {
+const WalletCard = (publicKey: string | undefined, privateKey: any) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const balance = useAccountBalance(publicKey);
   const [destinationAddress, setDestinationAddress] = useState("");
@@ -14,7 +14,7 @@ const WalletCard = ({ publicKey, privateKey }) => {
 
   const sendETH = async () => {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const provider = new ethers.providers.Web3Provider(window.ethereum as any);
       const signer = provider.getSigner();
 
       // Convert amount to Wei

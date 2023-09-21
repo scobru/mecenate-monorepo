@@ -19,10 +19,6 @@ abstract contract Message is Events {
         return postSettingPrivate.vaultIdSeller;
     }
 
-    /**
-     * @dev Function to get the telegramIds.
-     * @return telegram ids.
-     */
     function getTelegramIds(
         bytes32 encryptedVaultId
     ) external view returns (uint256, uint256) {
@@ -48,14 +44,29 @@ abstract contract Message is Events {
         );
     }
 
-    /**
-     * @dev Function to get the last message for the buyer.
-     */
-
     function write(
-        bytes32 encryptedVaultId,
-        bytes memory encodeMessage
-    ) external {
+        bytes memory encodeMessage,
+        bytes memory sismoConnectResponse,
+        bytes32 _to
+    ) external virtual {
+        // verify user
+        (
+            bytes memory vaultId,
+            uint256 twitterId,
+            uint256 telegramId,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
+
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
         require(
             encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller) ||
                 encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer),
@@ -69,14 +80,28 @@ abstract contract Message is Events {
         }
     }
 
-    /**
-     *
-     * @dev Function to get the last message for the buyer.
-     * @return last message.
-     */
     function getMessage(
-        bytes32 encryptedVaultId
-    ) external view returns (bytes memory) {
+        bytes memory sismoConnectResponse,
+        bytes32 _to
+    ) external virtual returns (bytes memory) {
+        // verify user
+        (
+            bytes memory vaultId,
+            ,
+            ,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
+
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
         require(
             encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller) ||
                 encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer),
@@ -90,13 +115,28 @@ abstract contract Message is Events {
         }
     }
 
-    /**
-     * @dev Function to get the hashed vault id.
-     * @param encryptedVaultId The encrypted vault id.
-     */
     function getHashedVaultId(
-        bytes32 encryptedVaultId
-    ) external view returns (bytes32) {
+        bytes memory sismoConnectResponse,
+        bytes32 _to
+    ) external virtual returns (bytes32) {
+        // verify user
+        (
+            bytes memory vaultId,
+            ,
+            ,
+            bytes memory signedMessage
+        ) = IMecenateVerifier(verifierContract).sismoVerify(
+                sismoConnectResponse,
+                _to
+            );
+
+        require(
+            _to == abi.decode(signedMessage, (bytes32)),
+            "_to address does not match signed message"
+        );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
         require(
             encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller) ||
                 encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer),

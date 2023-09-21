@@ -43,16 +43,24 @@ export default function VerifiedBadge({ verified, encryptedVaultId }: TVerifiedP
     if (encryptedVaultId) {
       getDeposit();
     }
-  }, [verified, getDeposit, encryptedVaultId, depositedBalance]);
+
+    // use interval to check if the user has been verified
+    const interval = setInterval(async () => {
+      if (encryptedVaultId) {
+        const tx = await wallet?.getEthDeposit(encryptedVaultId);
+        if (tx) setDepositedBalance(Number(formatEther(tx)));
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [signer, verified, getDeposit, encryptedVaultId, depositedBalance]);
 
   return (
     <>
-      <div className="flex items-center hover:text-black">
-        <div className="font-base">Verified</div>
+      <div className="inline-flex items-end  min-w-fit ">
         {newVerified === "verified" ? (
-          <span className="font-semibold ml-2"> 🟩 {depositedBalance} ETH</span>
+          <span className="font-semibold ml-2">Smart Wallet 🟩 {depositedBalance.toFixed(3)} ETH</span>
         ) : (
-          <div className="verification-fail font-semibold ml-2">❌</div>
+          <p className="verification-fail font-semibold ml-2">❌</p>
         )}
       </div>
     </>

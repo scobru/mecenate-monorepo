@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, ethers } from "ethers";
@@ -19,8 +19,6 @@ const Feeds: NextPage = () => {
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
   const txData = useTransactor(signer as Signer);
-  const [ethWallet, setEthWallet] = React.useState<any>(null);
-  const [customSigner, setCustomSigner] = React.useState<any>(null);
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
@@ -79,54 +77,88 @@ const Feeds: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
+  const getFeeds = useCallback(async () => {
+    if (!factoryCtx || !sismoData) return;
+
+    let _feeds, _feedsInfo;
+
+    if (onlyYourFeeds) {
+      _feeds = await factoryCtx.getFeedsOwned(keccak256(sismoData.auths[0].userId));
+      _feedsInfo = await factoryCtx.getFeedsInfoOwned(keccak256(sismoData.auths[0].userId));
+    } else {
+      _feeds = await factoryCtx.getFeeds();
+      _feedsInfo = await factoryCtx.getFeedsInfo();
+    }
+
+    // Batch state updates
+    setFeeds(_feeds);
+    setFeedsInfos(_feedsInfo);
+  }, [onlyYourFeeds, factoryCtx]);
+
   useEffect(() => {
-    const getFeeds = async function getFeeds() {
-      if (onlyYourFeeds == false) {
-        const _feeds = await factoryCtx?.getFeeds();
-        const _feedsInfo = await factoryCtx?.getFeedsInfo();
-        setFeeds(_feeds);
-        setFeedsInfos(_feedsInfo);
-      } else {
-        const _feeds = await factoryCtx?.getFeedsOwned(keccak256(sismoData.auths[0].userId));
-        const _feedsInfo = await factoryCtx?.getFeedsInfoOwned(keccak256(sismoData.auths[0].userId));
-        setFeeds(_feeds);
-        setFeedsInfos(_feedsInfo);
-      }
-    };
     if (factoryCtx) {
       getFeeds();
-      setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
-      setVerified(localStorage.getItem("verified"));
-      setSismoResponse(localStorage.getItem("sismoResponse"));
-      const storedEthWallet = JSON.parse(String(localStorage.getItem("ethWallet")));
+      const storedData = localStorage.getItem("sismoData");
+      const storedVerified = localStorage.getItem("verified");
+      const storedSismoResponse = localStorage.getItem("sismoResponse");
 
-      setEthWallet(storedEthWallet);
-
-      console.log("Stored ethWallet: ", storedEthWallet);
-
-      // Check if storedEthWallet and its privateKey are not null or undefined
-      if (storedEthWallet && storedEthWallet?.key) {
+      if (storedData && storedVerified && storedSismoResponse) {
+        setSismoData(JSON.parse(storedData));
+        setVerified(storedVerified);
+        setSismoResponse(storedSismoResponse);
         // Create new ethers.Wallet instance
-        const instance = new ethers.Wallet(storedEthWallet?.key, customProvider);
-        console.log("Instance: ", instance);
-        setCustomSigner(instance);
       } else {
         console.warn("Stored ethWallet or its privateKey is undefined.");
       }
     }
-  }, [onlyYourFeeds]);
+  }, [onlyYourFeeds, getFeeds]);
 
-  async function buildFeed() {
-    //await factoryCtx?.buildFeed(String(sismoResponse), { value: treasuryCtx?.fixedFee() });
+  const buildFeed = useCallback(async () => {
+    if (!factoryCtx || !treasuryCtx || !txData || !vaultCtx || !sismoData) return;
 
     // encode abi call
     const abiCoder = new AbiCoder();
     // Encode the function call
-    const iface = new ethers.utils.Interface(deployedContractFactory?.abi as ContractInterface[]);
+    const iface = new ethers.utils.Interface(deployedContractFactory?.abi as any);
     const data = iface.encodeFunctionData("buildFeed", [sismoResponse, keccak256(String(vaultCtx?.address))]);
 
     txData(vaultCtx?.execute(factoryCtx?.address, data, treasuryCtx?.fixedFee(), keccak256(sismoData.auths[0].userId)));
-  }
+  }, [factoryCtx, treasuryCtx, txData, vaultCtx, sismoData]);
+
+  const formattedFeeds = useMemo(() => {
+    return (
+      feeds &&
+      feedsInfos &&
+      feeds.map((feed, i) => (
+        <div key={i}>
+          <Link href={`/viewFeed?addr=${feed}`} passHref>
+            <div className="grid grid-cols-12 gap-4 border rounded-xl p-4 hover:bg-base-200 transition-all duration-300 ease-in-out transform hover:scale-105 bg-base-300 text-base-content">
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Addr:</div>
+              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
+                {feed}
+              </div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Seller Stake:</div>
+              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
+                {formatEther(feedsInfos[i]?.sellerStake)} ETH
+              </div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Total Locked:</div>
+              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
+                {formatEther(String(feedsInfos[i].totalStake))} ETH
+              </div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Buyer Payment:</div>
+              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
+                {formatEther(String(feedsInfos[i].buyerPayment))} ETH
+              </div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Count:</div>
+              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
+                {String(feedsInfos[i].postCount)}
+              </div>
+            </div>
+          </Link>
+        </div>
+      ))
+    );
+  }, [feeds, feedsInfos]);
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10  min-w-fit">
@@ -156,41 +188,7 @@ const Feeds: NextPage = () => {
           <i className="fas fa-globe mr-2"></i> All Feeds
         </button>
       </div>
-      <div className="grid grid-cols-1 gap-4 my-10 p-5">
-        {feeds &&
-          feedsInfos &&
-          feeds.length > 0 &&
-          sismoData?.auths &&
-          sismoData?.auths?.length > 0 &&
-          feeds.map((feed, i) => (
-            <div key={i}>
-              <Link href={`/viewFeed?addr=${feed}`} passHref>
-                <div className="grid grid-cols-12 gap-4 border rounded-xl p-4 hover:bg-base-200 transition-all duration-300 ease-in-out transform hover:scale-105 bg-base-300 text-base-content">
-                  <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Addr:</div>
-                  <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
-                    {feed}
-                  </div>
-                  <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Seller Stake:</div>
-                  <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
-                    {formatEther(feedsInfos[i]?.sellerStake)} ETH
-                  </div>
-                  <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Total Locked:</div>
-                  <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
-                    {formatEther(String(feedsInfos[i].totalStake))} ETH
-                  </div>
-                  <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Buyer Payment:</div>
-                  <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
-                    {formatEther(String(feedsInfos[i].buyerPayment))} ETH
-                  </div>
-                  <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Count:</div>
-                  <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
-                    {String(feedsInfos[i].postCount)}
-                  </div>
-                </div>
-              </Link>
-            </div>
-          ))}
-      </div>
+      <div className="grid grid-cols-1 gap-4 my-10 p-5">{formattedFeeds}</div>
     </div>
   );
 };

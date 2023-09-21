@@ -37,10 +37,10 @@ module.exports = {
     extend: {
       fontFamily: {
         "bai-jamjuree": ["Bai Jamjuree", "sans-serif"],
-        "inter": ["Inter", "sans-serif"],
-        "roboto": ["Roboto", "sans-serif"],
-        "poppins": ["Poppins", "sans-serif"],
-        "opensans": ["Open Sans", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
+        roboto: ["Roboto", "sans-serif"],
+        poppins: ["Poppins", "sans-serif"],
+        opensans: ["Open Sans", "sans-serif"],
       },
       boxShadow: {
         center: "0 0 12px -2px rgb(0 0 0 / 0.05)",
@@ -65,18 +65,15 @@ module.exports = {
         zoom: "zoom 1s ease infinite",
       },
       backgroundImage: {
-        'bazaar': "url('/assets/bazaar.png')",
-        'sharding': "url('/assets/sharding.png')",
-        'dev': "url('/assets/dev.png')",
-        'cyborg': "url('/assets/cyborg.png')",
-        'doors': "url('/assets/doors.png')",
-        'landing': "url('/assets/landing.jpg')",
-        'city': "url('/assets/city.png')",
-        'union': "url('/assets/union.png')",
-
-
-
-      }
+        bazaar: "url('/assets/bazaar.png')",
+        sharding: "url('/assets/sharding.png')",
+        dev: "url('/assets/dev.png')",
+        cyborg: "url('/assets/cyborg.png')",
+        doors: "url('/assets/doors.png')",
+        landing: "url('/assets/landing.jpg')",
+        city: "url('/assets/city.png')",
+        union: "url('/assets/union.png')",
+      },
     },
   },
   variants: {

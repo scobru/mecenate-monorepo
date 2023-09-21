@@ -10,6 +10,17 @@ This project is dedicated to anyone who wishes to exchange information and data 
 
 [![Mecenate](https://cdn.loom.com/sessions/thumbnails/4c26b5547a8940ed856bd87e2f45d363-1694630925996-with-play.gif)](https://www.loom.com/share/Mecenate-An-Anonymous-Data-Marketplace-4c26b5547a8940ed856bd87e2f45d363?sid=5db72e72-7330-483c-af26-522bbeb415c2)
 
+## What's New ?
+
+In this latest version the user no longer needs to have an EVM (Ethereum Virtual Machine) account. All they need to do is log in with Sismo and share the selected data with the protocol. Once they obtain the zk-proof (Zero-Knowledge Proof) verified by Sismo, they can simply send their ETH, which will be used to pay the fees and interact with the protocol, to the address that will be created for free after verification.
+
+## Update 20/09/2023 v1.0.6
+
+- [x] Account Abstraction.
+- [x] Create "Mecenate Vault" smart contract and UI page.
+- [x] Create "Mecenate Depositor" that forward ETH to Vault with a commitment hash as data.
+- [x] Add new signature type into the sismoConnect request.
+
 ## Update 14/09/2023 v1.0.5
 
 - [x] add Telegram and Twitter auths in sismoConnect.

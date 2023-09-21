@@ -10,6 +10,8 @@ import { AuthType } from "../sismo.config";
 import { useAppStore } from "~~/services/store/store";
 import { useScaffoldContractRead, useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 import { Address } from "~~/components/scaffold-eth";
+import Spinner from "~~/components/Spinner";
+import { get } from "http";
 
 const DEBUG = true;
 
@@ -92,20 +94,12 @@ const Vault: NextPage = () => {
   const [tokenAddress, setTokenAddress] = React.useState<string>("");
   const [userCommitment, setUserCommitment] = React.useState<string>("");
   const [randomBytes32Hash, setRandomBytes32Hash] = React.useState<string>("");
-  const [depositorCtx, setDepositorCtx] = React.useState<string>("");
 
   let walletAddress!: string;
   let walletAbi: ContractInterface[] = [];
 
-  let depositorAddress: string;
-  let depositorAbi: ContractInterface[] = [];
-
   if (deployedContractWallet) {
     ({ address: walletAddress, abi: walletAbi } = deployedContractWallet);
-  }
-
-  if (deployedContractDepositorFactory) {
-    ({ address: depositorAddress, abi: depositorAbi } = deployedContractDepositorFactory);
   }
 
   const wallet = useContract({
@@ -114,36 +108,24 @@ const Vault: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
-  const depositorFactory = useContract({
-    address: deployedContractDepositorFactory?.address,
-    abi: depositorAbi,
-    signerOrProvider: signer || provider,
-  });
-
-  const getDeposit = useCallback(async () => {
-    const tx = await wallet?.getEthDeposit(keccak256(sismoData?.auths[0]?.userId));
-    if (tx) setDepositedBalance(Number(formatEther(tx)));
-  }, [wallet, depositedBalance]);
-
-  const createDepositor = async () => {
-    console.log(depositorFactory);
-    txData(depositorFactory?.createDepositor(keccak256(sismoData?.auths[0]?.userId), wallet?.address));
-  };
-
-  const getDepositor = async () => {
-    const result = await depositorFactory?.getDepositors(keccak256(sismoData?.auths[0]?.userId));
-    if (result) {
-      setDepositorCtx(result);
+  const getDeposit = async () => {
+    if (sismoData) {
+      const tx = await wallet?.getEthDeposit(keccak256(sismoData?.auths[0]?.userId));
+      if (tx) setDepositedBalance(Number(formatEther(tx)));
     }
   };
 
   useEffect(() => {
-    getDeposit();
-    getDepositor();
-    setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
-    setVerified(localStorage.getItem("verified"));
-    setSismoResponse(localStorage.getItem("sismoResponse"));
-  }, [getDeposit]);
+    if (!depositedBalance) getDeposit();
+    const interval = setInterval(async () => {
+      await getDeposit();
+      setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
+      setVerified(localStorage.getItem("verified"));
+      setSismoResponse(localStorage.getItem("sismoResponse"));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  });
 
   const deposit = async () => {
     const tx = await wallet?.depositETH(keccak256(sismoData.auths[0].userId), {
@@ -268,27 +250,10 @@ const Vault: NextPage = () => {
         <div className="flex flex-col min-w-fit mx-auto items-center mb-5">
           <div className="max-w-3xl text-center">
             <h1 className="text-6xl font-bold mb-8">Vault</h1>
-            <p className="text-xl  mb-10">Where Zero-Knowledge Proofs Meet Secure Deposits.</p>
+            <p className="text-2xl  mb-5">Where Zero-Knowledge Proofs Meet Secure Deposits.</p>
             <p className="text-xl  mb-10">{wallet?.address}</p>
           </div>
-          <div>
-            <button
-              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-1"
-              onClick={async () => {
-                const result = await createDepositor();
-                if (result) {
-                  notification.success("Depositor created!");
-                }
-              }}
-            >
-              Create Depositor
-            </button>
-            {depositorCtx && (
-              <p className="text-xl  mb-10">
-                Send ETH to deposit into vault at : <Address address={depositorCtx} format="long"></Address>{" "}
-              </p>
-            )}
-          </div>
+
           <div className="flex flex-col min-w-fit mx-auto items-center mb-5">
             <div className="max-w-3xl text-center">
               <button
@@ -304,22 +269,22 @@ const Vault: NextPage = () => {
           </div>
           <div className="p-4 ">
             <div className="w-full">
-              <div className="card card-bordered border-2 bg-secondary my-10 p-10 w-full mx-auto flex flex-col  text-left">
+              <div className="card card-bordered border-2 bg-secondary my-10 p-10 w-fit mx-auto flex flex-col  text-left">
                 {depositedBalance && wallet && (
                   <p className="text-left text-lg mb-5">Balance: {depositedBalance} ETH</p>
                 )}
                 <span className="text-base font-semibold my-5 ">Deposit</span>
 
                 <div className="w-full mb-5">
-                  <input
+                  {/* <input
                     type="text"
                     className="input input-bordered w-full"
                     placeholder="Token Address (Leave empty for ETH)"
                     onChange={e => setTokenAddress(e.target.value)}
-                  />
+                  /> */}
                   <input
                     type="text"
-                    className="input input-bordered w-full"
+                    className="input input-bordered w-80"
                     placeholder="Amount to Deposit"
                     onChange={e => setAmount(Number(e.target.value))}
                   />

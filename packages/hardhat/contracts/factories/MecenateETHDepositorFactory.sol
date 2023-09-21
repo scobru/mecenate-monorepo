@@ -13,6 +13,10 @@ contract MecenateETHDepositorFactory {
         bytes32 _encryptedVaultId,
         address _vaultContract
     ) public returns (address) {
+        require(
+            depositorsMapping[_encryptedVaultId] == address(0),
+            "Depositor already created"
+        );
         MecenateETHDepositor depositor = new MecenateETHDepositor(
             _encryptedVaultId,
             _vaultContract

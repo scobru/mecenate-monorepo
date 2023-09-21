@@ -220,6 +220,8 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         uint256 _value,
         bytes32 _encryptedVaultId
     ) external onlyRelayer validGasPrice nonReentrant returns (bool) {
+        uint256 initialGas = gasleft();
+
         require(
             IMecenateFeedFactory(factoryContract).isFeed(_target) == true ||
                 _target == mecenateBay ||
@@ -229,9 +231,13 @@ contract MecenateVault is Ownable, ReentrancyGuard {
             "Target is not a feed or a mecenate contract"
         );
 
-        uint256 initialGas = gasleft(); // Capture initial gas
+        uint256 totalRequired = _value; // Initialize with _value
+        totalRequired += tx.gasprice * initialGas; // Add maximum possible gas cost
 
-        require(ethDeposits[_encryptedVaultId] >= _value, "Not enough balance");
+        require(
+            ethDeposits[_encryptedVaultId] >= totalRequired,
+            "Not enough balance"
+        );
 
         if (_data.length == 0) {
             payable(_target).sendValue(_value);
@@ -245,24 +251,17 @@ contract MecenateVault is Ownable, ReentrancyGuard {
 
         ethDeposits[_encryptedVaultId] -= _value;
 
-        // Calculate tx gas used
         uint256 gasUsed = initialGas - gasleft();
-        uint256 gasPrice = tx.gasprice;
-        uint256 gasCost = gasUsed * gasPrice;
+        uint256 gasCost = gasUsed * tx.gasprice;
 
-        // Check enough balance
         require(
             ethDeposits[_encryptedVaultId] >= gasCost,
             "Not enough balance for gas"
         );
 
-        uint256 gasRefund = gasCost / 80;
+        ethDeposits[_encryptedVaultId] -= gasCost;
 
-        // Subtract gas cost from commitment balance
-        ethDeposits[_encryptedVaultId] -= gasCost + gasRefund;
-
-        // Send gas cost to msg.sender
-        payable(msg.sender).transfer(gasCost + gasRefund);
+        payable(msg.sender).transfer(gasCost);
 
         return true;
     }
