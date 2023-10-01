@@ -6,55 +6,42 @@
 
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
-import "../interfaces/IWETH.sol";
-import "../interfaces/IPancakeRouter.sol";
-import "../interfaces/IPancakePair.sol";
+import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
 
 abstract contract Swapper is Ownable {
-    using SafeMath for uint256;
-
-    using SafeERC20 for IERC20;
-
     bool public splitLiquidity;
 
+    ISwapRouter public swapRouter;
+    INonfungiblePositionManager public positionManager;
     address public native;
 
-    address public unirouter;
-
-    uint256 public slippage;
-
     function _giveAllowances() internal {
-        IERC20(address(native)).approve(unirouter, 0);
-        IERC20(address(native)).approve(unirouter, uint256(2 ** 256 - 1));
+        IERC20(address(native)).approve(address(swapRouter), 0);
+        IERC20(address(native)).approve(
+            address(swapRouter),
+            uint256(2 ** 256 - 1)
+        );
     }
 
     function customApprove(address _token, uint256 _amount) external onlyOwner {
-        IERC20(_token).approve(unirouter, _amount);
-        IERC20(address(_token)).approve(unirouter, uint256(2 ** 256 - 1));
+        IERC20(_token).approve(address(swapRouter), _amount);
+        IERC20(address(_token)).approve(
+            address(swapRouter),
+            uint256(2 ** 256 - 1)
+        );
     }
 
     function configLiquidityProvider(
         address _native,
-        address _unirouter
+        ISwapRouter _swapRouter
     ) external onlyOwner {
         native = _native;
-        unirouter = _unirouter;
+        swapRouter = _swapRouter;
         splitLiquidity = true;
-        slippage = 10;
         _giveAllowances();
-    }
-
-    function setSlippage(uint256 _slippage) external onlyOwner returns (bool) {
-        slippage = _slippage;
-        return true;
     }
 
     function setSplitLiqudity(
@@ -67,140 +54,116 @@ abstract contract Swapper is Ownable {
     function swapTokensForTokens(
         address token1,
         address token2,
-        uint256 amount
+        uint256 amount,
+        uint24 fee
     ) external onlyOwner returns (uint256) {
-        return _swapTokensforToken(token1, token2, amount);
+        return _swapTokenForToken(token1, token2, fee, amount);
     }
 
-    function addLiquidity(address token, uint256 _amount) public onlyOwner {
-        _addLiquidity(token, _amount);
+    function addLiquidity(
+        address tokenA,
+        address tokenB,
+        uint24 fee,
+        uint256 amountA,
+        uint256 amountB,
+        int24 tickLower,
+        int24 tickUpper
+    ) public onlyOwner {
+        _addLiquidity(
+            tokenA,
+            tokenB,
+            fee,
+            amountA,
+            amountB,
+            tickLower,
+            tickUpper
+        );
     }
 
     function _swapTokenToETH(
         address token,
-        uint256 _amount
+        uint256 amountIn,
+        uint24 fee
     ) private returns (uint256) {
-        address[] memory path = new address[](2);
-        path[0] = token;
-        path[1] = native;
+        // Approve tokens for the swap
+        IERC20(token).approve(address(swapRouter), amountIn);
 
-        uint256[] memory amounts = IPancakeRouter(unirouter).getAmountsOut(
-            _amount,
-            path
-        );
-
-        uint256 amountOut = amounts[amounts.length.sub(1)];
-
-        uint256[] memory received = IPancakeRouter(unirouter)
-            .swapExactTokensForETH(
-                amountOut.sub(amountOut.mul(slippage).div(10000)),
-                0,
-                path,
-                address(this),
-                block.timestamp + 10
+        // Params for the swap
+        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
+            .ExactInputSingleParams(
+                token, // tokenIn
+                native, // tokenOut
+                fee, // fee
+                address(this), // recipient
+                block.timestamp + 10, // deadline
+                amountIn, // amountIn
+                0, // amountOutMinimum
+                0 // sqrtPriceLimitX96
             );
 
-        return received[received.length.sub(1)];
+        // Perform the swap and return the amount received
+        uint256 amountOut = swapRouter.exactInputSingle(params);
+        return amountOut;
     }
 
-    function _addLiquidity(address token, uint256 _amount) private {
-        uint256 received = _amount;
+    function _addLiquidity(
+        address tokenA,
+        address tokenB,
+        uint24 fee,
+        uint256 amountA,
+        uint256 amountB,
+        int24 tickLower,
+        int24 tickUpper
+    ) internal {
+        // Approve amounts to positionManager
+        IERC20(tokenA).approve(address(positionManager), amountA);
+        IERC20(tokenB).approve(address(positionManager), amountB);
 
-        if (splitLiquidity == true) {
-            uint256 amountHalf = received.div(2);
-            uint256 otherHalf = amountHalf;
-
-            address[] memory path = new address[](2);
-            path[0] = address(native);
-            path[1] = address(token);
-
-            uint256 tokenBalanceB4 = IERC20(token).balanceOf(address(this));
-
-            IPancakeRouter(unirouter)
-                .swapExactETHForTokensSupportingFeeOnTransferTokens{
-                value: amountHalf
-            }(1, path, address(this), block.timestamp + 10);
-
-            uint256 tokenBalance = IERC20(token).balanceOf(address(this));
-
-            IERC20(token).approve(unirouter, tokenBalance.sub(tokenBalanceB4));
-
-            IWETH(native).deposit{value: otherHalf}();
-
-            IERC20(native).approve(unirouter, otherHalf);
-
-            IPancakeRouter(unirouter).addLiquidity(
-                token,
-                native,
-                tokenBalance.sub(tokenBalanceB4),
-                otherHalf,
-                1,
-                1,
+        // Parameters for adding liquidity
+        INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager
+            .MintParams(
+                tokenA,
+                tokenB,
+                fee,
+                tickLower,
+                tickUpper,
+                amountA,
+                amountB,
+                0, // amount0Min
+                0, // amount1Min
                 address(this),
-                block.timestamp + 30
-            );
-        } else if (splitLiquidity == false) {
-            address[] memory path = new address[](2);
-            path[0] = address(native);
-            path[1] = address(token);
-
-            uint256[] memory receivedtoken = IPancakeRouter(unirouter)
-                .getAmountsOut(received, path);
-
-            IERC20(token).approve(
-                unirouter,
-                receivedtoken[receivedtoken.length - 1]
+                block.timestamp // Deadline
             );
 
-            IWETH(native).deposit{value: received}();
-            IERC20(native).approve(unirouter, received);
-
-            IPancakeRouter(unirouter).addLiquidity(
-                token,
-                native,
-                receivedtoken[receivedtoken.length - 1].sub(
-                    receivedtoken[receivedtoken.length - 1].div(10)
-                ),
-                received,
-                1,
-                1,
-                address(this),
-                block.timestamp + 30
-            );
-        }
+        // Add liquidity
+        (uint256 tokenId, , , ) = positionManager.mint(params);
     }
 
-    function _swapTokensforToken(
-        address token1,
-        address token2,
-        uint256 amount
+    function _swapTokenForToken(
+        address tokenIn,
+        address tokenOut,
+        uint24 fee,
+        uint256 amountIn
     ) internal returns (uint256) {
-        address[] memory path = new address[](2);
-        path[0] = token1;
-        path[1] = token2;
+        // Approve amount to swapRouter
+        IERC20(tokenIn).approve(address(swapRouter), amountIn);
 
-        uint256[] memory amounts = IPancakeRouter(unirouter).getAmountsOut(
-            amount,
-            path
-        );
-
-        uint256 amountOut = amounts[amounts.length.sub(1)];
-
-        // check allowance
-        uint256 allowance = IERC20(token1).allowance(address(this), unirouter);
-        if (allowance < amount) {
-            IERC20(token1).approve(unirouter, uint256(2 ** 256 - 1));
-        }
-
-        IPancakeRouter(unirouter)
-            .swapExactTokensForTokensSupportingFeeOnTransferTokens(
-                amountOut.sub(amountOut.mul(slippage).div(10000)),
-                0,
-                path,
+        // Parameters for the swap
+        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
+            .ExactInputSingleParams(
+                tokenIn,
+                tokenOut,
+                fee,
                 address(this),
-                block.timestamp
+                block.timestamp + 10, // Deadline
+                amountIn, // amountIn
+                0, // amountOutMinimum
+                0 // sqrtPriceLimitX96
             );
 
-        return amounts[amounts.length.sub(1)];
+        // Perform the swap
+        uint256 amountOut = swapRouter.exactInputSingle(params);
+
+        return amountOut;
     }
 }

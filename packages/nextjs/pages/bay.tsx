@@ -30,6 +30,10 @@ const Bay: NextPage = () => {
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
+  const [tokenId, setTokenId] = React.useState<number>(0);
+
+  const [nonce, setNonce] = React.useState<number>(0);
+  const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
 
   type BayRequest = {
     request: string;
@@ -40,6 +44,7 @@ const Bay: NextPage = () => {
     postAddress: string;
     accepted: boolean;
     postCount: string;
+    tokenId: number;
   };
 
   let bayAddress!: string;
@@ -75,34 +80,23 @@ const Bay: NextPage = () => {
     signerOrProvider: customWallet || provider,
   });
 
-  const acceptBayRequest = useCallback(
-    async (index: number, address: string) => {
-      if (signer) {
-        const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
-        const data = iface.encodeFunctionData("acceptRequest", [
-          index,
-          address,
-          sismoResponse,
-          keccak256(String(vaultCtx?.address)),
-        ]);
-        txData(vaultCtx?.execute(bayCtx?.address, data, 0, keccak256(String(sismoData.auths[0].userId))));
-      }
-    },
-    [signer, txData, vaultCtx, bayCtx, sismoData],
-  );
-
-  const removeRequest = useCallback(
-    async (index: number) => {
+  const acceptBayRequest = async (index: number, address: string) => {
+    if (signer) {
       const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
-      const data = iface.encodeFunctionData("removeRequest", [
-        index,
-        sismoResponse,
-        keccak256(String(vaultCtx?.address)),
-      ]);
+      const data = iface.encodeFunctionData("acceptRequest", [index, address, sismoResponse, withdrawalAddress, nonce]);
       txData(vaultCtx?.execute(bayCtx?.address, data, 0, keccak256(String(sismoData.auths[0].userId))));
-    },
-    [txData, vaultCtx, bayCtx],
-  );
+    }
+  };
+
+  const removeRequest = async (index: number) => {
+    const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
+    const data = iface.encodeFunctionData("removeRequest", [
+      index,
+      sismoResponse,
+      keccak256(String(vaultCtx?.address)),
+    ]);
+    txData(vaultCtx?.execute(bayCtx?.address, data, 0, keccak256(String(sismoData.auths[0].userId))));
+  };
 
   const getAllRequest = useMemo(() => {
     return async () => {
@@ -111,9 +105,9 @@ const Bay: NextPage = () => {
         setRequests(_requests);
       }
     };
-  }, [deployedContractBay, customProvider, bayCtx]);
+  }, [deployedContractBay, bayCtx]);
 
-  const createBayContract = useCallback(async () => {
+  const createBayContract = async () => {
     const _request = ethers.utils.formatBytes32String(requestString);
 
     const request = {
@@ -123,14 +117,11 @@ const Bay: NextPage = () => {
       postAddress: "0x0000000000000000000000000000000000000000",
       accepted: false,
       postCount: 0,
+      tokenId: tokenId,
     };
 
     const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
-    const data = iface.encodeFunctionData("createRequest", [
-      request,
-      sismoResponse,
-      keccak256(String(vaultCtx?.address)),
-    ]);
+    const data = iface.encodeFunctionData("createRequest", [request, sismoResponse, withdrawalAddress, nonce]);
     txData(
       vaultCtx?.execute(
         bayCtx?.address,
@@ -140,29 +131,17 @@ const Bay: NextPage = () => {
       ),
     );
 
-    getAllRequest();
     await sendPublicTelegramMessage();
-  }, [requestString, requestPayment, requestStake, txData, vaultCtx, bayCtx, getAllRequest]);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       // Get and set data from localStorage
       setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
+      setNonce(String(localStorage.getItem("nonce")));
+      setWithdrawalAddress(String(localStorage.getItem("withdrawalAddress")));
       setVerified(localStorage.getItem("verified"));
       setSismoResponse(localStorage.getItem("sismoResponse"));
-      const storedEthWallet = await JSON.parse(String(localStorage.getItem("ethWallet")));
-
-      console.log("Stored ethWallet: ", storedEthWallet);
-
-      // Check if storedEthWallet and its privateKey are not null or undefined
-      if (storedEthWallet && storedEthWallet?.key) {
-        // Create new ethers.Wallet instance
-        const instance = new ethers.Wallet(storedEthWallet?.key, customProvider);
-        console.log("Instance: ", instance);
-        setCustomSigner(instance);
-      } else {
-        console.warn("Stored ethWallet or its privateKey is undefined.");
-      }
     };
 
     fetchData();
@@ -170,7 +149,7 @@ const Bay: NextPage = () => {
 
   useEffect(() => {
     getAllRequest();
-  }, [deployedContractBay, requests, getAllRequest]);
+  }, [deployedContractBay, getAllRequest]);
 
   const sendPublicTelegramMessage = async () => {
     const url = `https://api.telegram.org/bot${String(process.env.NEXT_PUBLIC_TELEGRAM_TOKEN)}/sendMessage`;
@@ -197,6 +176,17 @@ const Bay: NextPage = () => {
     notification.success("Message sent successfully");
   };
 
+  const handleSelectToken = async (e: any) => {
+    const token = e;
+    if (token === "ETH") {
+      setTokenId(0);
+    } else if (token === "DAI") {
+      setTokenId(1);
+    } else if (token === "MUSE") {
+      setTokenId(2);
+    }
+  };
+
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black min-w-fit">
       <div className="text-center my-2 text-base-content mx-auto">
@@ -218,6 +208,7 @@ const Bay: NextPage = () => {
             <label className="text-black font-semibold text-sm" htmlFor="request">
               What do you want?
             </label>
+
             <input
               className="border-2 border-gray-300  h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none my-2"
               type="text"
@@ -225,6 +216,21 @@ const Bay: NextPage = () => {
               placeholder="Enter Request"
               onChange={e => setRequestString(e.target.value)}
             />
+            <label className="text-black font-semibold text-sm" htmlFor="request">
+              Currency
+            </label>
+            <select
+              className="select select-text bg-transparent my-4"
+              name="tokens"
+              id="tokens"
+              onChange={e => handleSelectToken(e.target.value)}
+            >
+              <option value="Nan">Select Token</option>
+              <option value="ETH">ETH</option>
+              <option value="DAI">DAI</option>
+              <option value="MUSE">MUSE</option>
+            </select>
+
             <label className="text-black font-semibold text-sm" htmlFor="request">
               Reward
             </label>
@@ -280,11 +286,19 @@ const Bay: NextPage = () => {
                 <div className="bg-secondary">
                   <div className="text-left p-5 space-y-1">
                     <div className="font-medium">
-                      Fulfiller must stake <strong>{formatEther(request.stake)} ETH </strong>
+                      Fulfiller must stake{" "}
+                      <strong>
+                        {formatEther(request.stake)}{" "}
+                        {request.tokenId == 0 ? "ETH" : "DAI" ? request.tokenId == 2 : "MUSE"}{" "}
+                      </strong>
                     </div>
                     <div className="font-medium">
                       Requester can pay
-                      <strong> {formatEther(request.payment)} ETH </strong>
+                      <strong>
+                        {" "}
+                        {formatEther(request.payment)}{" "}
+                        {request.tokenId == 0 ? "ETH" : "DAI" ? request.tokenId == 2 : "MUSE"}{" "}
+                      </strong>
                       to destroy stake
                     </div>
                     <div className="font-medium">

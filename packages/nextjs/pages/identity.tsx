@@ -25,17 +25,16 @@ const Identity: NextPage = () => {
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
-
   const txData = useTransactor(signer as Signer);
   const [userExists, setUserExists] = React.useState<boolean>(false);
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
   const [userName, setUserName] = React.useState<any>(null);
-
-  const [depositorCtx, setDepositorCtx] = React.useState<string>("");
-  const deployedContractDepositorFactory = getDeployedContract(chain?.id.toString(), "MecenateETHDepositorFactory");
-
+  const [withdrawalAddress, setWithdrawalAddress] = React.useState<any>("");
+  const [nonce, setNonce] = React.useState<any>(null);
+  const [forwarderAddress, setForwarderAddress] = React.useState<string>("");
+  const deployedContractDepositorFactory = getDeployedContract(chain?.id.toString(), "MecenateForwarderFactory");
   const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
 
   let UsersAddress!: string;
@@ -85,12 +84,6 @@ const Identity: NextPage = () => {
     signerOrProvider: customWallet || provider,
   });
 
-  const identity = useContract({
-    address: identityAddress,
-    abi: identityAbi,
-    signerOrProvider: customWallet || provider,
-  });
-
   const treasury = useContract({
     address: treasuryAddress,
     abi: treasuryAbi,
@@ -103,19 +96,30 @@ const Identity: NextPage = () => {
     signerOrProvider: customWallet || provider,
   });
 
-  const signIn = useCallback(async () => {
+  const generateNonce = useCallback(async () => {
+    if (localStorage.getItem("nonce")) setNonce(localStorage.getItem("nonce"));
+    if (localStorage.getItem("withdrawalAddress")) setWithdrawalAddress(localStorage.getItem("withdrawalAddress"));
+    if (localStorage.getItem("nonce") && localStorage.getItem("withdrawalAddress")) return;
+
+    const nonce = keccak256(ethers.utils.randomBytes(32));
+    setNonce(nonce);
+
+    localStorage.setItem("nonce", nonce);
+  }, [nonce, withdrawalAddress]);
+
+  const signIn = async () => {
     const iface = new ethers.utils.Interface(deployedContractUser?.abi as any[]);
     const data = iface.encodeFunctionData("registerUser", [
       sismoResponse,
-      keccak256(String(vaultCtx?.address)),
+      String(localStorage.getItem("withdrawalAddress")),
+      String(localStorage.getItem("nonce")),
       userName,
     ]);
-    console.log(sismoData?.auths[0]?.userId);
     txData(vaultCtx?.execute(usersCtx?.address, data, 0, keccak256(String(sismoData?.auths[0]?.userId))));
-  }, [txData, vaultCtx, usersCtx, sismoData, userName]);
+  };
 
   const getContractData = async function getContractData() {
-    if (identity && signer) {
+    if (signer) {
       const fee = await treasury?.fixedFee();
       setFee(fee);
     }
@@ -145,10 +149,11 @@ const Identity: NextPage = () => {
     await getContractData();
     await checkIfUserExists();
 
-    console.log("pageState", pageState);
     const sismoDataFromLocalStorage = localStorage.getItem("sismoData");
     const verifiedFromLocalStorage = localStorage.getItem("verified");
     const sismoResponseFromLocalStorage = localStorage.getItem("sismoResponse");
+    const nonceFromLocalStorage = localStorage.getItem("nonce");
+    const withdrawalAddressFromLocalStorage = localStorage.getItem("withdrawalAddress");
 
     if (sismoDataFromLocalStorage) {
       setSismoData(JSON.parse(sismoDataFromLocalStorage));
@@ -159,6 +164,20 @@ const Identity: NextPage = () => {
     }
     if (sismoResponseFromLocalStorage) {
       setSismoResponse(sismoResponseFromLocalStorage);
+    }
+
+    if (nonceFromLocalStorage) {
+      setNonce(nonceFromLocalStorage);
+    } else {
+      const nonce = keccak256(ethers.utils.randomBytes(32));
+      setNonce(nonce);
+      localStorage.setItem("nonce", nonce);
+    }
+
+    if (withdrawalAddressFromLocalStorage) {
+      setWithdrawalAddress(withdrawalAddressFromLocalStorage);
+    } else {
+      setWithdrawalAddress("");
     }
 
     const pageStateToSet = verifiedFromLocalStorage === "verified" ? "verified" : "init";
@@ -175,47 +194,19 @@ const Identity: NextPage = () => {
     }
   };
 
-  /* *************************  Helpers *********************/
-  function encryptMessage(secretKey: string, message: string): string {
-    const algorithm = "aes-256-cbc"; // Algoritmo di cifratura
-    const key = crypto.createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
-    const iv = crypto.randomBytes(16); // Vettore di inizializzazione casuale
-
-    const cipher = crypto.createCipheriv(algorithm, key, iv);
-    let encrypted = cipher.update(message, "utf8", "hex");
-    encrypted += cipher.final("hex");
-
-    // Concatenare il vettore di inizializzazione e il messaggio cifrato
-    return iv.toString("hex") + encrypted;
-  }
-
-  function decryptMessage(secretKey: string, encryptedMessage: string): string {
-    const algorithm = "aes-256-cbc"; // Algoritmo di cifratura
-    const key = crypto.createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
-
-    // Separare il vettore di inizializzazione dal messaggio cifrato
-    const iv = Buffer.from(encryptedMessage.slice(0, 32), "hex");
-    const encrypted = encryptedMessage.slice(32);
-
-    const decipher = crypto.createDecipheriv(algorithm, key, iv);
-    let decrypted = decipher.update(encrypted, "hex", "utf8");
-    decrypted += decipher.final("utf8");
-
-    return decrypted;
-  }
   /* *************************  Account Abstraction *********************/
 
-  const createDepositor = async () => {
+  const createForwarder = async () => {
     if (sismoData) {
-      console.log(depositorFactory);
-      txData(depositorFactory?.createDepositor(keccak256(sismoData?.auths[0]?.userId), vaultCtx?.address));
+      txData(depositorFactory?.createforwarder(keccak256(sismoData?.auths[0]?.userId), vaultCtx?.address));
     }
   };
 
-  const getDepositor = async () => {
-    if (depositorFactory && sismoData && !depositorCtx) {
-      const result = await depositorFactory?.getDepositors(keccak256(sismoData?.auths[0]?.userId));
-      setDepositorCtx(result);
+  const getForwarder = async () => {
+    if (depositorFactory && sismoData) {
+      const result = await depositorFactory?.getforwarders(keccak256(sismoData?.auths[0]?.userId));
+      setForwarderAddress(result);
+      localStorage.setItem("forwarderAddress", result);
     }
   };
 
@@ -227,38 +218,31 @@ const Identity: NextPage = () => {
   useEffect(() => {
     initializeState();
     setPageState("verified");
-  }, [responseBytes]);
-
-  // useEffect per la chiamata periodica a getDepositor
-  useEffect(() => {
-    const interval = setInterval(() => {
-      getDepositor();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [depositorFactory]);
+  }, []);
 
   useEffect(() => {
-    initializeState();
-    getDepositor();
-  }, [depositorCtx]);
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchData() {
-      if (isMounted) {
-        await initializeState();
-      }
-    }
-    fetchData();
-    return () => {
-      isMounted = false;
+    const run = async () => {
+      initializeState();
+      generateNonce();
+      getForwarder();
     };
-  }, []); // Moved async operations outside useEffect
 
-  const signMessage = useMemo(() => {
-    if (!vaultAddress) return;
-    return ethers.utils.defaultAbiCoder.encode(["bytes32"], [keccak256(String(vaultCtx?.address)) as `0x${string}`]);
-  }, [vaultAddress, vaultCtx]);
+    // pooling run
+    const interval = setInterval(async () => {
+      await run();
+    }, Number(process.env.NEXT_PUBLIC_RPC_POLLING_INTERVAL));
+
+    return () => clearInterval(interval);
+  });
+
+  const signMessage = () => {
+    if (!withdrawalAddress || !nonce) return;
+    const result = ethers.utils.defaultAbiCoder.encode(
+      ["address", "bytes32"],
+      [String(withdrawalAddress), String(nonce)],
+    );
+    return result;
+  };
 
   return (
     <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4 ">
@@ -270,26 +254,45 @@ const Identity: NextPage = () => {
           </div>
           <div className="p-4 ">
             {!signer?.provider && <div className="text-center font-bold text-xl my-5">Please connect your wallet</div>}
+
             {pageState == "init" ? (
               <>
+                <div className="mt-10">
+                  <input
+                    className="input input-bordered my-5 w-full"
+                    type="text"
+                    placeholder="Set Withdrawal Address"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setWithdrawalAddress(e.target.value);
+                      localStorage.setItem("withdrawalAddress", e.target.value);
+                    }}
+                  />
+                </div>
                 <div className="text-center">
                   <SismoConnectButton
                     config={CONFIG}
                     auths={AUTHS}
-                    signature={{ message: String(signMessage) }}
+                    signature={{
+                      message: String(signMessage()),
+                    }}
+                    disabled={withdrawalAddress !== "" ? false : true}
                     text="Join With Sismo"
                     onResponse={async (response: SismoConnectResponse) => {
                       setSismoConnectResponse(response);
                       setPageState("verifying");
+                      getForwarder();
                       try {
                         const verifiedResult = await fetch("/api/verify", {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",
                           },
-                          body: JSON.stringify(response),
+                          body: JSON.stringify({
+                            ...response,
+                            address: localStorage.getItem("withdrawalAddress"),
+                            nonce: localStorage.getItem("nonce"),
+                          }),
                         });
-
                         const data = await verifiedResult.json();
 
                         if (verifiedResult.ok) {
@@ -297,6 +300,7 @@ const Identity: NextPage = () => {
                           localStorage.setItem("verified", "verified");
                           localStorage.setItem("sismoData", JSON.stringify(await data));
                           setPageState("verified");
+                          getForwarder();
                         } else {
                           setPageState("error");
                           setError(data.error.toString()); // or JSON.stringify(data.error)
@@ -331,7 +335,7 @@ const Identity: NextPage = () => {
                         <div className="flex flex-col">
                           <div className="status-wrapper">
                             <button
-                              className="btn btn-primary my-10 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                              className="btn btn-primary my-10 text-base-content border-2 border-secondary-focus rounded-xl  hover:bg-red-700  font-bold py-2 px-4 hover:text-white focus:outline-none focus:shadow-outline"
                               onClick={() => {
                                 window.location.href = "/identity";
                                 resetLocalStorage();
@@ -343,29 +347,29 @@ const Identity: NextPage = () => {
                             </button>
                           </div>
                           <div className="text-green-500 font-bold my-5 ">ZK Proofs verified!</div>
-
                           <div className="font-semibold text-xl">⚠️ Deposit into vault before sign-in</div>
                           <div>
                             <p className="text-xl  mb-2">Create forwarder address used to deposit into vault</p>
                             <button
                               className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
                               onClick={async () => {
-                                await createDepositor();
+                                await createForwarder();
                               }}
+                              disabled={Boolean(forwarderAddress != ethers.constants.AddressZero)}
                             >
                               Create
                             </button>
-                            {depositorCtx ? (
-                              <p className="text-xl mb-10">
-                                Send ETH to deposit into vault at :{" "}
-                                <Address address={depositorCtx} format="long"></Address>{" "}
-                              </p>
+                            {forwarderAddress == ethers.constants.AddressZero && forwarderAddress ? (
+                              <p className="text-xl mb-10">Create forwarder first</p>
                             ) : (
-                              <div className="text-center w-fit items-center mx-auto my-5 mb-10">
-                                <Spinner></Spinner>
+                              <div>
+                                {" "}
+                                <p className="text-xl mb-10">Send ETH to deposit at:</p>
+                                <Address address={forwarderAddress} format="long" />
                               </div>
                             )}
                           </div>
+
                           <div className="mt-10">
                             <input
                               className="input input-bordered my-5 w-full"
@@ -376,7 +380,7 @@ const Identity: NextPage = () => {
                             <button
                               className="btn btn-primary w-full py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                               onClick={signIn}
-                              disabled={userExists}
+                              disabled={userExists && withdrawalAddress != "" && userName != ""}
                             >
                               Sign In{" "}
                             </button>

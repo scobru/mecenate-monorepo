@@ -1,7 +1,3 @@
-/**
- * @title FeedViewer
- * @dev This contract provides functions to retrieve information about Mecenate feeds.
- */
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
@@ -13,24 +9,33 @@ contract FeedViewer {
         address feed
     ) internal view returns (Structures.Feed memory) {
         Structures.Feed memory f;
+
+        IMecenateFeed mecenateFeed = IMecenateFeed(feed);
+
         f.contractAddress = feed;
-        f.operator = IMecenateFeed(feed).owner();
-        f.sellerStake = IMecenateFeed(feed).getSellerStake();
-        f.buyerStake = IMecenateFeed(feed).getBuyerStake();
-        f.totalStake = IMecenateFeed(feed).getTotalStaked();
-        f.postCount = IMecenateFeed(feed).postCount();
-        f.buyerPayment = IMecenateFeed(feed).getBuyerPayment();
+        f.operator = mecenateFeed.owner();
+        f.sellerStake = mecenateFeed.getSellerStake();
+        f.buyerStake = mecenateFeed.getBuyerStake();
+        f.totalStake = mecenateFeed.getTotalStaked();
+        f.postCount = mecenateFeed.postCount();
+        f.paymentRequested = mecenateFeed.getPaymentRequested();
+        f.stakeRequested = mecenateFeed.getStakeRequested();
+        f.status = mecenateFeed.getStatus();
+        f.tokenId = mecenateFeed.getTokenId();
+
         return f;
     }
 
     function _getFeedsInfo(
         address[] memory _feeds
     ) internal view returns (Structures.Feed[] memory) {
-        Structures.Feed[] memory f = new Structures.Feed[](_feeds.length);
+        uint256 len = _feeds.length;
+        Structures.Feed[] memory f = new Structures.Feed[](len);
 
-        for (uint256 i = 0; i < _feeds.length; i++) {
+        for (uint256 i = 0; i < len; i++) {
             f[i] = _getFeedInfo(_feeds[i]);
         }
+
         return f;
     }
 }

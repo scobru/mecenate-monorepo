@@ -14,7 +14,7 @@ const signMessage = () => {
   // encode parameters with ethers encode
   return ethers.utils.defaultAbiCoder.encode(
     ["bytes32"],
-    [keccak256(String("0xCD8a34757C0FcF969390E87DBf1D6e11959DeFB9")) as `0x${string}`],
+    [keccak256(String(process.env.NEXT_PUBLIC_VAULT_ADDRESS)) as `0x${string}`],
   );
 };
 
@@ -36,6 +36,14 @@ export default async function verify(
 
   const sismoConnectResponse = req.body;
 
+  // Retrieve withdrawalAddress from request body
+  const withdrawalAddress = req.body.address;
+  const nonce = req.body.nonce;
+
+  const signMessage = () => {
+    return ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [String(withdrawalAddress), String(nonce)]);
+  };
+
   console.log("Received POST request.");
 
   try {
@@ -44,7 +52,7 @@ export default async function verify(
     const result: SismoConnectVerifiedResult = await Promise.race([
       sismoConnect.verify(sismoConnectResponse, {
         auths: AUTHS,
-        signature: { message: String(signMessage()) },
+        signature: { message: signMessage() }, // Use withdrawalAddress here
       }),
       timeout(TIMEOUT_DURATION).then(() => {
         throw new Error("Timeout");
@@ -59,7 +67,6 @@ export default async function verify(
 
     if (e.message === "Timeout") {
       console.error("Error during verification:", e);
-
       return res.status(408).json({ error: "Request timed out" });
     }
 

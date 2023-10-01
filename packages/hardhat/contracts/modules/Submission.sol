@@ -11,51 +11,38 @@ abstract contract Submission is Events {
     function submitHash(
         bytes memory encryptedKey,
         bytes memory sismoConnectResponse,
-        bytes32 _to
+        address _to,
+        bytes32 _nonce
     ) external virtual {
-        // verify user
-        (
-            bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
+        onlyVault();
 
+        Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
+            validStatuses[uint8(currentStatus)] &&
+                (currentStatus == Structures.PostStatus.Accepted ||
+                    currentStatus == Structures.PostStatus.Submitted),
+            "WRONG_STATUS"
         );
 
+        (bytes memory vaultId, , , ) = _verifyNonce(
+            sismoConnectResponse,
+            _to,
+            _nonce
+        );
         bytes32 encryptedVaultId = keccak256(vaultId);
 
         require(
-            post.postdata.settings.status == Structures.PostStatus.Accepted ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Submitted,
-            "Post is not Accepted or Submitted"
-        );
-
-        require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(
+            IMecenateUsers(settings.usersModuleContract).checkifUserExist(
                 encryptedVaultId
             ),
-            "user does not exist"
+            "User does not exist"
         );
+        require(post.creator.vaultId == encryptedVaultId, "NOT_SELLER");
 
-        require(
-            post.creator.vaultId == encryptedVaultId,
-            "You are not the creator"
-        );
+        _changeStatus(Structures.PostStatus.Submitted);
 
-        encodedSymKey = encryptedKey;
-
-        post.postdata.data.encryptedKey = encryptedKey;
-
+        settings.encodedSymKey = post.postdata.data.encryptedKey = encryptedKey;
         post.postdata.settings.status = Structures.PostStatus.Submitted;
-
         post.postdata.settings.endTimeStamp =
             block.timestamp +
             post.postdata.settings.duration;
@@ -66,34 +53,41 @@ abstract contract Submission is Events {
     function revealData(
         bytes memory decryptedData,
         bytes memory sismoConnectResponse,
-        bytes32 _to
+        address _to,
+        bytes32 _nonce
     ) external virtual returns (bytes memory) {
-        // verify user
-        (
-            bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
+        onlyVault();
 
+        Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
+            validStatuses[uint8(currentStatus)] &&
+                (currentStatus == Structures.PostStatus.Submitted ||
+                    currentStatus == Structures.PostStatus.Revealed ||
+                    currentStatus == Structures.PostStatus.Finalized),
+            "INVALID_STATUS"
         );
 
+        (bytes memory vaultId, , , ) = _verifyNonce(
+            sismoConnectResponse,
+            _to,
+            _nonce
+        );
         bytes32 encryptedVaultId = keccak256(vaultId);
 
         require(
-            post.postdata.settings.status == Structures.PostStatus.Finalized,
-            "Post is not Finalized"
+            encryptedVaultId != keccak256(postSettingPrivate.vaultIdSeller),
+            "YOU_ARE_THE_SELLER"
         );
-        post.postdata.data.decryptedData = decryptedData;
+        require(
+            currentStatus == Structures.PostStatus.Finalized,
+            "NOT_FINALIZED"
+        );
 
+        post.postdata.data.decryptedData = decryptedData;
         post.postdata.settings.status = Structures.PostStatus.Revealed;
 
-        return post.postdata.data.decryptedData;
+        emit MadePublic(post);
+
+        return decryptedData;
     }
 }

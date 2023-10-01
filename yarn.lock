@@ -474,6 +474,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.22.15":
+  version: 7.23.1
+  resolution: "@babel/runtime@npm:7.23.1"
+  dependencies:
+    regenerator-runtime: ^0.14.0
+  checksum: 0cd0d43e6e7dc7f9152fda8c8312b08321cda2f56ef53d6c22ebdd773abdc6f5d0a69008de90aa41908d00e2c1facb24715ff121274e689305c858355ff02c70
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.20.7":
   version: 7.20.7
   resolution: "@babel/template@npm:7.20.7"
@@ -1231,7 +1240,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/abi@npm:5.7.0, @ethersproject/abi@npm:^5.0.0-beta.146, @ethersproject/abi@npm:^5.0.9, @ethersproject/abi@npm:^5.1.2, @ethersproject/abi@npm:^5.7.0":
+"@ethersproject/abi@npm:5.7.0, @ethersproject/abi@npm:^5.0.0-beta.146, @ethersproject/abi@npm:^5.0.12, @ethersproject/abi@npm:^5.0.9, @ethersproject/abi@npm:^5.1.2, @ethersproject/abi@npm:^5.7.0":
   version: 5.7.0
   resolution: "@ethersproject/abi@npm:5.7.0"
   dependencies:
@@ -1551,7 +1560,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/solidity@npm:5.7.0, @ethersproject/solidity@npm:^5.7.0":
+"@ethersproject/solidity@npm:5.7.0, @ethersproject/solidity@npm:^5.0.9, @ethersproject/solidity@npm:^5.7.0":
   version: 5.7.0
   resolution: "@ethersproject/solidity@npm:5.7.0"
   dependencies:
@@ -4685,7 +4694,7 @@ __metadata:
     "@nomiclabs/hardhat-etherscan": ^3.1.0
     "@nomiclabs/hardhat-solhint": ^2.0.0
     "@nomiclabs/hardhat-waffle": ^2.0.1
-    "@openzeppelin/contracts": ^4.8.2
+    "@openzeppelin/contracts": ^4.9.3
     "@pinata/sdk": ^2.1.0
     "@polkadot/util": ^11.0.2
     "@typechain/ethers-v5": ^10.1.0
@@ -4696,8 +4705,11 @@ __metadata:
     "@types/qrcode": ^1
     "@typescript-eslint/eslint-plugin": latest
     "@typescript-eslint/parser": latest
+    "@uniswap/sdk-core": ^4.0.7
     "@uniswap/v2-periphery": ^1.1.0-beta.0
     "@uniswap/v3-periphery": ^1.4.3
+    "@uniswap/v3-sdk": ^3.10.0
+    bignumber.js: ^9.1.2
     bs58: ^4.0.1
     chai: ^4.3.6
     crypto: ^1.0.1
@@ -4721,6 +4733,7 @@ __metadata:
     it-all: ^1.0.6
     libp2p: ^0.35.8
     libp2p-crypto: ^0.21.2
+    mathjs: ^11.11.1
     node-gyp: ^9.3.1
     prettier: ^3.0.2
     prettier-plugin-solidity: ^1.1.3
@@ -5805,6 +5818,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/contracts@npm:3.4.1-solc-0.7-2":
+  version: 3.4.1-solc-0.7-2
+  resolution: "@openzeppelin/contracts@npm:3.4.1-solc-0.7-2"
+  checksum: 3608a4065f65946117caa543ef72477ce637bd5cc4f4853303b5f5b6c26516f8b50898ea3a8486e2877689cae81453ce22c72c8624c77c363c63f019b4086ffa
+  languageName: node
+  linkType: hard
+
 "@openzeppelin/contracts@npm:3.4.2-solc-0.7":
   version: 3.4.2-solc-0.7
   resolution: "@openzeppelin/contracts@npm:3.4.2-solc-0.7"
@@ -5812,10 +5832,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts@npm:^4.8.2":
-  version: 4.8.3
-  resolution: "@openzeppelin/contracts@npm:4.8.3"
-  checksum: aea130d38d46840c5cbe3adbaa9a7ac645e4bd66ad3f3baf2fa78588c408d1a686170b3408c9e2e5e05530fba22ecdc00d7efb6b27852a8b29f91accbc0af255
+"@openzeppelin/contracts@npm:^4.9.3":
+  version: 4.9.3
+  resolution: "@openzeppelin/contracts@npm:4.9.3"
+  checksum: 4932063e733b35fa7669b9fe2053f69b062366c5c208b0c6cfa1ac451712100c78acff98120c3a4b88d94154c802be05d160d71f37e7d74cadbe150964458838
   languageName: node
   linkType: hard
 
@@ -8032,6 +8052,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@uniswap/sdk-core@npm:^4, @uniswap/sdk-core@npm:^4.0.7":
+  version: 4.0.7
+  resolution: "@uniswap/sdk-core@npm:4.0.7"
+  dependencies:
+    "@ethersproject/address": ^5.0.2
+    big.js: ^5.2.2
+    decimal.js-light: ^2.5.0
+    jsbi: ^3.1.4
+    tiny-invariant: ^1.1.0
+    toformat: ^2.0.0
+  checksum: b89ce380206f14fef70fb233c34edb439e9602bc4c17c4801e3032ed6e4b932d71942f677535c996c55e724f9dd7fac42443e117f75bae9348300380e50d95a5
+  languageName: node
+  linkType: hard
+
 "@uniswap/sdk@npm:^3.0.3":
   version: 3.0.3
   resolution: "@uniswap/sdk@npm:3.0.3"
@@ -8050,6 +8084,20 @@ __metadata:
     "@ethersproject/providers": ^5.0.0-beta
     "@ethersproject/solidity": ^5.0.0-beta
   checksum: 7dcb9cfa95d86fd92db107388a945c635590b355c9932d863b58129ee942a283dbcb0f91bf43a954551c142ec02e69370dac4b2d89dc9e59db739feb2d6a0f8c
+  languageName: node
+  linkType: hard
+
+"@uniswap/swap-router-contracts@npm:^1.2.1":
+  version: 1.3.0
+  resolution: "@uniswap/swap-router-contracts@npm:1.3.0"
+  dependencies:
+    "@openzeppelin/contracts": 3.4.2-solc-0.7
+    "@uniswap/v2-core": 1.0.1
+    "@uniswap/v3-core": 1.0.0
+    "@uniswap/v3-periphery": 1.4.1
+    dotenv: ^14.2.0
+    hardhat-watcher: ^2.1.1
+  checksum: 66f853a4f04742bdfb4eb3fd6035aa7e3238cafec99609fcfb87b640953a6575152687bd6d0d14fe35440b339b7e3cc70dde237fb70703b3f49684c630a2d648
   languageName: node
   linkType: hard
 
@@ -8084,7 +8132,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uniswap/v3-periphery@npm:^1.4.3":
+"@uniswap/v3-periphery@npm:1.4.1":
+  version: 1.4.1
+  resolution: "@uniswap/v3-periphery@npm:1.4.1"
+  dependencies:
+    "@openzeppelin/contracts": 3.4.2-solc-0.7
+    "@uniswap/lib": ^4.0.1-alpha
+    "@uniswap/v2-core": 1.0.1
+    "@uniswap/v3-core": 1.0.0
+    base64-sol: 1.0.1
+    hardhat-watcher: ^2.1.1
+  checksum: a171332f1f1b89cde24d9962bdfc9742d9e6b102ea16815fa6997e0c812aa93a120752a6f497a5d5ab709f5c91ec7f18c2957fa5a8b9af57db3ff202ac8b7dc7
+  languageName: node
+  linkType: hard
+
+"@uniswap/v3-periphery@npm:^1.0.1, @uniswap/v3-periphery@npm:^1.1.1, @uniswap/v3-periphery@npm:^1.4.3":
   version: 1.4.3
   resolution: "@uniswap/v3-periphery@npm:1.4.3"
   dependencies:
@@ -8094,6 +8156,33 @@ __metadata:
     "@uniswap/v3-core": 1.0.0
     base64-sol: 1.0.1
   checksum: 50636951fc0a7737cfeef988ab38f4ddf26f6165a19df95b84294929088cc8b05fdbc7910168610ce9daebcce5d7a408fa5a02228ef9dfb73c23c695acc8b741
+  languageName: node
+  linkType: hard
+
+"@uniswap/v3-sdk@npm:^3.10.0":
+  version: 3.10.0
+  resolution: "@uniswap/v3-sdk@npm:3.10.0"
+  dependencies:
+    "@ethersproject/abi": ^5.0.12
+    "@ethersproject/solidity": ^5.0.9
+    "@uniswap/sdk-core": ^4
+    "@uniswap/swap-router-contracts": ^1.2.1
+    "@uniswap/v3-periphery": ^1.1.1
+    "@uniswap/v3-staker": 1.0.0
+    tiny-invariant: ^1.1.0
+    tiny-warning: ^1.0.3
+  checksum: 664d40550aa5c88b21bce3dc209746bc61490e4afaa5686d12d6a5839e26211ae5093d82eeff3e3ec80df5df3eb1d40f9a7510b61a389e2779a9b1e5eca9ed25
+  languageName: node
+  linkType: hard
+
+"@uniswap/v3-staker@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@uniswap/v3-staker@npm:1.0.0"
+  dependencies:
+    "@openzeppelin/contracts": 3.4.1-solc-0.7-2
+    "@uniswap/v3-core": 1.0.0
+    "@uniswap/v3-periphery": ^1.0.1
+  checksum: 5a68e59f33d4761956ad735c8ce5ea6e566076bd260ea0a0bb4b3a0db237719e39f21a22eb0a5a231141efdf0154bfe03f690612d632898f33192b4442c888b3
   languageName: node
   linkType: hard
 
@@ -11211,7 +11300,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bignumber.js@npm:^9.1.1":
+"bignumber.js@npm:^9.1.1, bignumber.js@npm:^9.1.2":
   version: 9.1.2
   resolution: "bignumber.js@npm:9.1.2"
   checksum: 582c03af77ec9cb0ebd682a373ee6c66475db94a4325f92299621d544aa4bd45cb45fd60001610e94aef8ae98a0905fa538241d9638d4422d57abbeeac6fadaf
@@ -13006,6 +13095,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"complex.js@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "complex.js@npm:2.1.1"
+  checksum: a0802cc3f0eb7703088edfc3fe209ae7be5ce93c0e710a0f288be2e29ee31b3530a8c0d3330d7c2a668410dfe4293a4038554d66c7f1f1165997941bdc1092aa
+  languageName: node
+  linkType: hard
+
 "component-bind@npm:1.0.0":
   version: 1.0.0
   resolution: "component-bind@npm:1.0.0"
@@ -14095,6 +14191,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"decimal.js@npm:^10.4.3":
+  version: 10.4.3
+  resolution: "decimal.js@npm:10.4.3"
+  checksum: 796404dcfa9d1dbfdc48870229d57f788b48c21c603c3f6554a1c17c10195fc1024de338b0cf9e1efe0c7c167eeb18f04548979bcc5fdfabebb7cc0ae3287bae
+  languageName: node
+  linkType: hard
+
 "decode-uri-component@npm:^0.2.0, decode-uri-component@npm:^0.2.2":
   version: 0.2.2
   resolution: "decode-uri-component@npm:0.2.2"
@@ -14696,6 +14799,13 @@ __metadata:
   dependencies:
     is-obj: ^2.0.0
   checksum: d5775790093c234ef4bfd5fbe40884ff7e6c87573e5339432870616331189f7f5d86575c5b5af2dcf0f61172990f4f734d07844b1f23482fff09e3c4bead05ea
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^14.2.0":
+  version: 14.3.2
+  resolution: "dotenv@npm:14.3.2"
+  checksum: 86c06758915d6facc35275f4a7fafc16705b6f3b44befaa8abca91367991efc8ff8db5437d3cc14778231d19fb97610fe82d60f8a53ba723cdb69fe4171439aa
   languageName: node
   linkType: hard
 
@@ -15645,6 +15755,13 @@ __metadata:
   version: 1.0.3
   resolution: "escape-html@npm:1.0.3"
   checksum: 6213ca9ae00d0ab8bccb6d8d4e0a98e76237b2410302cf7df70aaa6591d509a2a37ce8998008cbecae8fc8ffaadf3fb0229535e6a145f3ce0b211d060decbb24
+  languageName: node
+  linkType: hard
+
+"escape-latex@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "escape-latex@npm:1.2.0"
+  checksum: 73a787319f0965ecb8244bb38bf3a3cba872f0b9a5d3da8821140e9f39fe977045dc953a62b1a2bed4d12bfccbe75a7d8ec786412bf00739eaa2f627d0a8e0d6
   languageName: node
   linkType: hard
 
@@ -17296,6 +17413,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fraction.js@npm:4.3.4":
+  version: 4.3.4
+  resolution: "fraction.js@npm:4.3.4"
+  checksum: 26fdecf114e3b693c760d3b2d5447f8ba9e815991ca7c7cdb930156780793b87f10936979a890b389676d960d7cd026273da9a44a6e20c12e3c4fd282a026ed3
+  languageName: node
+  linkType: hard
+
 "fraction.js@npm:^4.2.0":
   version: 4.2.0
   resolution: "fraction.js@npm:4.2.0"
@@ -18312,6 +18436,17 @@ __metadata:
   peerDependencies:
     hardhat: ^2.0.2
   checksum: 77f8f8d085ff3d9d7787f0227e5355e1800f7d6707bc70171e0567bf69706703ae7f6f53dce1be1d409e7e71e3629a434c94b546bdbbc1e4c1af47cd5d0c6776
+  languageName: node
+  linkType: hard
+
+"hardhat-watcher@npm:^2.1.1":
+  version: 2.5.0
+  resolution: "hardhat-watcher@npm:2.5.0"
+  dependencies:
+    chokidar: ^3.5.3
+  peerDependencies:
+    hardhat: ^2.0.0
+  checksum: e6c0d52865529653733b3fed6887b41a676fc5185eb835909b360e8cc24223a2fc4c398e3874b234fa918ec59be9de86d7fe92963022139c05cf07f027377cbb
   languageName: node
   linkType: hard
 
@@ -22913,6 +23048,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"javascript-natural-sort@npm:^0.7.1":
+  version: 0.7.1
+  resolution: "javascript-natural-sort@npm:0.7.1"
+  checksum: 161e2c512cc7884bc055a582c6645d9032cab88497a76123d73cb23bfb03d97a04cf7772ecdb8bd3366fc07192c2f996366f479f725c23ef073fffe03d6a586a
+  languageName: node
+  linkType: hard
+
 "jayson@npm:^3.4.4":
   version: 3.7.0
   resolution: "jayson@npm:3.7.0"
@@ -23103,7 +23245,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsbi@npm:^3.1.1":
+"jsbi@npm:^3.1.1, jsbi@npm:^3.1.4":
   version: 3.2.5
   resolution: "jsbi@npm:3.2.5"
   checksum: 642d1bb139ad1c1e96c4907eb159565e980a0d168487626b493d0d0b7b341da0e43001089d3b21703fe17b18a7a6c0f42c92026f71d54471ed0a0d1b3015ec0f
@@ -25631,6 +25773,25 @@ __metadata:
   version: 1.2.6
   resolution: "match-all@npm:1.2.6"
   checksum: 3d4f16b8fd082f2fd10e362f4a8b71c62f8a767591b3db831ca2bdcf726337e9a64e4abc30e2ef053dc2bcfb875a9ed80bd78e006ad5ef11380a7158d0cb00e1
+  languageName: node
+  linkType: hard
+
+"mathjs@npm:^11.11.1":
+  version: 11.11.1
+  resolution: "mathjs@npm:11.11.1"
+  dependencies:
+    "@babel/runtime": ^7.22.15
+    complex.js: ^2.1.1
+    decimal.js: ^10.4.3
+    escape-latex: ^1.2.0
+    fraction.js: 4.3.4
+    javascript-natural-sort: ^0.7.1
+    seedrandom: ^3.0.5
+    tiny-emitter: ^2.1.0
+    typed-function: ^4.1.1
+  bin:
+    mathjs: bin/cli.js
+  checksum: b68b445f96a35d50adf3521b8dad2baa0112142d16cd839fccc6e7370476567e109bce37cca6feba54061fc4b22eae0869bb1541a7b53d8d9ceac09e451791d5
   languageName: node
   linkType: hard
 
@@ -32089,7 +32250,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"seedrandom@npm:3.0.5":
+"seedrandom@npm:3.0.5, seedrandom@npm:^3.0.5":
   version: 3.0.5
   resolution: "seedrandom@npm:3.0.5"
   checksum: 728b56bc3bc1b9ddeabd381e449b51cb31bdc0aa86e27fcd0190cea8c44613d5bcb2f6bb63ed79f78180cbe791c20b8ec31a9627f7b7fc7f476fd2bdb7e2da9f
@@ -34213,6 +34374,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tiny-emitter@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "tiny-emitter@npm:2.1.0"
+  checksum: fbcfb5145751a0e3b109507a828eb6d6d4501352ab7bb33eccef46e22e9d9ad3953158870a6966a59e57ab7c3f9cfac7cab8521db4de6a5e757012f4677df2dd
+  languageName: node
+  linkType: hard
+
 "tiny-glob@npm:^0.2.9":
   version: 0.2.9
   resolution: "tiny-glob@npm:0.2.9"
@@ -34730,6 +34898,13 @@ __metadata:
     for-each: ^0.3.3
     is-typed-array: ^1.1.9
   checksum: 2228febc93c7feff142b8c96a58d4a0d7623ecde6c7a24b2b98eb3170e99f7c7eff8c114f9b283085cd59dcd2bd43aadf20e25bba4b034a53c5bb292f71f8956
+  languageName: node
+  linkType: hard
+
+"typed-function@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "typed-function@npm:4.1.1"
+  checksum: ac9619d96c70f5023fee9fa393560ebc91080b0bbdd1e4ec5d924a56db77cee49b78d9e897c17935ed58000eee104bc9b59f29c1a5c86bcc2a3e58ff8449aff5
   languageName: node
   linkType: hard
 

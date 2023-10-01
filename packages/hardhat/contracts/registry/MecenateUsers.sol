@@ -46,7 +46,8 @@ contract MecenateUsers is Ownable {
 
     function registerUser(
         bytes memory sismoConnectResponse,
-        bytes32 _to,
+        address _to,
+        bytes32 _nonce,
         string memory _username
     ) public {
         (
@@ -56,20 +57,20 @@ contract MecenateUsers is Ownable {
             bytes memory signedMessage
         ) = IMecenateVerifier(verifierContract).sismoVerify(
                 sismoConnectResponse,
-                _to
+                _to,
+                _nonce
             );
 
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "To address does not match signed message"
-        );
+        (, bytes32 nonce) = abi.decode(signedMessage, (address, bytes32));
+
+        require(_nonce == nonce, "WRONG_NONCE");
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 
         userNames[encryptedVaultId] = _username;
 
         // check if user exists
-        require(!_users.contains(encryptedVaultId), "user already exists");
+        require(!_users.contains(encryptedVaultId), "USER_ALREADY_EXISTS");
 
         // add user
         _users.add(encryptedVaultId);
@@ -80,8 +81,9 @@ contract MecenateUsers is Ownable {
 
     function changeUserName(
         bytes memory sismoConnectResponse,
-        string memory _username,
-        bytes32 _to
+        address _to,
+        bytes32 _nonce,
+        string memory _username
     ) external {
         (
             bytes memory vaultId,
@@ -90,17 +92,17 @@ contract MecenateUsers is Ownable {
             bytes memory signedMessage
         ) = IMecenateVerifier(verifierContract).sismoVerify(
                 sismoConnectResponse,
-                _to
+                _to,
+                _nonce
             );
 
-        require(
-            _to == keccak256(signedMessage),
-            "_to address does not match signed message"
-        );
+        (, bytes32 nonce) = abi.decode(signedMessage, (address, bytes32));
+
+        require(_nonce == nonce, "WRONG_NONCE");
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 
-        require(_users.contains(encryptedVaultId), "user does not exist");
+        require(_users.contains(encryptedVaultId), "USER_ALREADY_EXISTS");
 
         userNames[encryptedVaultId] = _username;
     }
@@ -118,18 +120,15 @@ contract MecenateUsers is Ownable {
     }
 
     function getUserAt(uint256 index) public view returns (bytes32 user) {
-        require(index < _users.length(), "index out of range");
+        require(index < _users.length(), "OUT_OF_RANGE");
         user = _users.at(index);
     }
 
     function getUserVaultIdAt(
         uint256 index
     ) public view returns (bytes32 user) {
-        require(
-            msg.sender == treasuryContract,
-            "only treasury can call this function"
-        );
-        require(index < _users.length(), "index out of range");
+        require(msg.sender == treasuryContract, "ONLY_TREASURY");
+        require(index < _users.length(), "OUT_OF_RANGE");
         user = _users.at(index);
     }
 
@@ -142,8 +141,8 @@ contract MecenateUsers is Ownable {
         uint256 startIndex,
         uint256 endIndex
     ) public view returns (bytes32[] memory users) {
-        require(startIndex < endIndex, "startIndex must be less than endIndex");
-        require(endIndex <= _users.length(), "end index out of range");
+        require(startIndex < endIndex, "START_INDEX_GREATER_THAN_END_INDEX");
+        require(endIndex <= _users.length(), "OUT_OF_RANGE");
 
         // initialize fixed size memory array
         bytes32[] memory range = new bytes32[](endIndex - startIndex);

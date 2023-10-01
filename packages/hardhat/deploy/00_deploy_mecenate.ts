@@ -1,11 +1,12 @@
 import { EthereumProvider, HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers } from "hardhat";
-//import { ethers } from "ethers";
-import { Create2Factory } from "../scripts/Create2Factory";
-import { factories } from "../typechain-types";
+
+import { deployPool, encodePriceSqrt } from "../scripts/03_deployPools";
 
 const relayer = "0x58dF4b1E490d0380Eb273f87D6f4eD8d4EA0E1A6";
+const router = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d";
+const version = "v2";
 
 /**
  * Deploys a contract named "YourContract" using the deployer account and
@@ -30,7 +31,44 @@ const deployYourContract: DeployFunction = async function (
   const { deploy } = hre.deployments;
   const from = deployer;
 
-  //await new Create2Factory(ethers.provider).deployFactory();
+  const mockDai = await deploy("MockDai", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  mockDai.receipt &&
+    console.log("MockDai deployed at:", mockDai.receipt.contractAddress);
+
+  const mockWeth = await deploy("MockWeth", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  mockWeth.receipt &&
+    console.log("MockWeth deployed at:", mockWeth.receipt.contractAddress);
+
+  const muse = await deploy("MUSE", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  muse.receipt &&
+    console.log("MUSE deployed at:", muse.receipt.contractAddress);
 
   const treasury = await deploy("MecenateTreasury", {
     from: deployer,
@@ -89,11 +127,21 @@ const deployYourContract: DeployFunction = async function (
     feedFactory.address,
   );
 
+  const changeVersion = await feedFactoryInstance.changeVersion(version);
+
+  changeVersion.wait();
+
+  console.log("Version changed to v2");
+
   feedFactory.receipt &&
     console.log(
       "Feed Factory deployed at:",
       feedFactory.receipt.contractAddress,
     );
+
+  const gasPrice = await ethers.provider.getGasPrice();
+  const newGasPrice = gasPrice.mul(50).div(100); // Increase by 20%
+  console.log("Gas Price:", gasPrice.toString());
 
   const feed = await deploy("MecenateFeed", {
     from: deployer,
@@ -102,6 +150,8 @@ const deployYourContract: DeployFunction = async function (
       users.address,
       verifier.address,
       ethers.constants.AddressZero,
+      feedFactory.address,
+      version,
     ],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
@@ -133,11 +183,6 @@ const deployYourContract: DeployFunction = async function (
 
   console.log("Setting Vault...");
 
-  const setVault = await feedFactoryInstance.changeVault(vault.address);
-  console.log("Vault setted at:", vault.address);
-
-  setVault.wait();
-
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
     // Contract constructor arguments
@@ -155,7 +200,6 @@ const deployYourContract: DeployFunction = async function (
     );
 
   // wall setMecenateBay of instance of vault
-
   console.log("Setting Mecenate Bay...");
 
   const vaultInstance = await ethers.getContractAt(
@@ -168,7 +212,6 @@ const deployYourContract: DeployFunction = async function (
   );
 
   setMecenateBay.wait();
-
   console.log("Mecenate Bay setted at:", mecenateBay.address);
 
   const mecenateStats = await deploy("MecenateStats", {
@@ -192,24 +235,49 @@ const deployYourContract: DeployFunction = async function (
       mecenateStats.receipt.contractAddress,
     );
 
-  const mecenateEthDepositorFactory = await deploy(
-    "MecenateETHDepositorFactory",
-    {
-      from: deployer,
-      // Contract constructor arguments
-      args: [],
-      log: true,
-      // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-      // automatically mining the contract deployment transaction. There is no effect on live networks.
-      autoMine: true,
-    },
-  );
+  const mecenateForwarderFactory = await deploy("MecenateForwarderFactory", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [vault.address],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
 
-  mecenateEthDepositorFactory.receipt &&
+  mecenateForwarderFactory.receipt &&
     console.log(
       "Mecenate Stats Factory deployed at:",
-      mecenateEthDepositorFactory.receipt.contractAddress,
+      mecenateForwarderFactory.receipt.contractAddress,
     );
+
+  const setVault = await feedFactoryInstance.changeMultipleSettings(
+    treasury.address,
+    vault.address,
+    users.address,
+    mockWeth.address,
+    muse.address,
+    mockDai.address,
+    router,
+  );
+  console.log("Vault setted at:", vault.address);
+
+  setVault.wait();
+
+  const setByteCode = await feedFactoryInstance.setFeedByteCode(feed.bytecode);
+
+  setByteCode.wait();
+
+  console.log("Deploy pools...");
+
+  await deployPool(muse.address, mockWeth.address, 500, encodePriceSqrt(1, 1));
+
+  await deployPool(
+    mockDai.address,
+    mockWeth.address,
+    500,
+    encodePriceSqrt(1, 1),
+  );
 };
 
 export default deployYourContract;

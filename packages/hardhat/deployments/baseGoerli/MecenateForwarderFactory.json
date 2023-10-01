@@ -1,0 +1,300 @@
+{
+  "address": "0x07601C59e4F04bC71e22af2758eB203150858b51",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_mecenateVault",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "forwarder",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "encryptedVaultId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "vaultContract",
+          "type": "address"
+        }
+      ],
+      "name": "ForwarderCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_mecenateVault",
+          "type": "address"
+        }
+      ],
+      "name": "changeVault",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_encryptedVaultId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_vaultContract",
+          "type": "address"
+        }
+      ],
+      "name": "createforwarder",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "forwardersMapping",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getVault",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_user",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getforwarders",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mecenateVault",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x973a2e35000840d9711a1dff3ed99f1c57c5021d6536ec8928502b538ca6cf25",
+  "receipt": {
+    "to": null,
+    "from": "0x8aA5F726d9F868a21a8bd748E2f1E43bA31eb670",
+    "contractAddress": "0x07601C59e4F04bC71e22af2758eB203150858b51",
+    "transactionIndex": 1,
+    "gasUsed": "609530",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000100000000000000000000004000000000000000000000000000000000000000000000001000000000000000000000000000000000000020000000000000000000800000000000000000000000000000000400200000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000002000000000",
+    "blockHash": "0x528ac106d6fa01b854b439e93772293ea0142fbe02e5367f93f323e024ed0301",
+    "transactionHash": "0x973a2e35000840d9711a1dff3ed99f1c57c5021d6536ec8928502b538ca6cf25",
+    "logs": [
+      {
+        "transactionIndex": 1,
+        "blockNumber": 10346070,
+        "transactionHash": "0x973a2e35000840d9711a1dff3ed99f1c57c5021d6536ec8928502b538ca6cf25",
+        "address": "0x07601C59e4F04bC71e22af2758eB203150858b51",
+        "topics": [
+          "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000008aa5f726d9f868a21a8bd748e2f1e43ba31eb670"
+        ],
+        "data": "0x",
+        "logIndex": 0,
+        "blockHash": "0x528ac106d6fa01b854b439e93772293ea0142fbe02e5367f93f323e024ed0301"
+      }
+    ],
+    "blockNumber": 10346070,
+    "cumulativeGasUsed": "673483",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x4D2Deb933BeBA3887ab150F0ABDEE355a41e218b"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "1c44eacd89272d51fa104e5a7d17594c",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_mecenateVault\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"forwarder\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"encryptedVaultId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"vaultContract\",\"type\":\"address\"}],\"name\":\"ForwarderCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_mecenateVault\",\"type\":\"address\"}],\"name\":\"changeVault\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_encryptedVaultId\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"_vaultContract\",\"type\":\"address\"}],\"name\":\"createforwarder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"forwardersMapping\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVault\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_user\",\"type\":\"bytes32\"}],\"name\":\"getforwarders\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"mecenateVault\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/factories/MecenateForwarderFactory.sol\":\"MecenateForwarderFactory\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"@openzeppelin/contracts/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (access/Ownable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/Context.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract Ownable is Context {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    constructor() {\\n        _transferOwnership(_msgSender());\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        _checkOwner();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if the sender is not the owner.\\n     */\\n    function _checkOwner() internal view virtual {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby disabling any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        _transferOwnership(address(0));\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Internal function without access restriction.\\n     */\\n    function _transferOwnership(address newOwner) internal virtual {\\n        address oldOwner = _owner;\\n        _owner = newOwner;\\n        emit OwnershipTransferred(oldOwner, newOwner);\\n    }\\n}\\n\",\"keccak256\":\"0xba43b97fba0d32eb4254f6a5a297b39a19a247082a02d6e69349e071e2946218\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\"},\"contracts/MecenateForwarder.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface IMecenateETHForwarderFactory {\\n    function getVault() external view returns (address);\\n}\\n\\ncontract MecenateForwarder {\\n    bytes32 private encryptedVaultId;\\n    address public factory;\\n\\n    function depositToken(address token, uint256 amount) external {\\n        address vault = IMecenateETHForwarderFactory(factory).getVault();\\n\\n        // approve token\\n        (bool success, ) = token.delegatecall(\\n            abi.encodeWithSignature(\\\"approve(address,uint256)\\\", vault, amount)\\n        );\\n\\n        require(success, \\\"Approve failed\\\");\\n\\n        (bool success2, ) = vault.delegatecall(\\n            abi.encodeWithSignature(\\n                \\\"depositToken(address,uint256,bytes32)\\\",\\n                token,\\n                amount,\\n                encryptedVaultId\\n            )\\n        );\\n\\n        require(success2, \\\"Deposit failed\\\");\\n    }\\n\\n    constructor(bytes32 _encryptedVaultId) {\\n        encryptedVaultId = _encryptedVaultId;\\n        factory = msg.sender;\\n    }\\n\\n    receive() external payable {\\n        address vault = IMecenateETHForwarderFactory(factory).getVault();\\n        (bool success, ) = payable(vault).call{value: msg.value}(\\n            abi.encode(encryptedVaultId)\\n        );\\n        require(success, \\\"Deposit failed\\\");\\n    }\\n}\\n\",\"keccak256\":\"0xd0d36740079b5b1af2ed4c0bb3b1a886265a30503ce5063f5bce602ed00dd6bc\",\"license\":\"MIT\"},\"contracts/factories/MecenateForwarderFactory.sol\":{\"content\":\"import \\\"../MecenateForwarder.sol\\\";\\n\\n// import Ownable\\nimport \\\"@openzeppelin/contracts/access/Ownable.sol\\\";\\n\\ncontract MecenateForwarderFactory is Ownable {\\n    mapping(bytes32 => address) public forwardersMapping;\\n\\n    address public mecenateVault;\\n\\n    constructor(address _mecenateVault) {\\n        mecenateVault = _mecenateVault;\\n    }\\n\\n    function getVault() public view returns (address) {\\n        return mecenateVault;\\n    }\\n\\n    function changeVault(address _mecenateVault) public onlyOwner {\\n        require(\\n            msg.sender == _mecenateVault,\\n            \\\"Only the factory can change the factory\\\"\\n        );\\n        mecenateVault = _mecenateVault;\\n    }\\n\\n    event ForwarderCreated(\\n        address indexed forwarder,\\n        bytes32 encryptedVaultId,\\n        address vaultContract\\n    );\\n\\n    function createforwarder(\\n        bytes32 _encryptedVaultId,\\n        address _vaultContract\\n    ) public returns (address) {\\n        require(\\n            forwardersMapping[_encryptedVaultId] == address(0),\\n            \\\"forwarder already created\\\"\\n        );\\n        MecenateForwarder forwarder = new MecenateForwarder(_encryptedVaultId);\\n\\n        forwardersMapping[_encryptedVaultId] = address(forwarder);\\n\\n        emit ForwarderCreated(\\n            address(forwarder),\\n            _encryptedVaultId,\\n            _vaultContract\\n        );\\n\\n        return address(forwarder);\\n    }\\n\\n    function getforwarders(bytes32 _user) public view returns (address) {\\n        return forwardersMapping[_user];\\n    }\\n}\\n\",\"keccak256\":\"0x0567392d9078757a51e09bef7b7711b9a16832b829608a54a705efeb535442db\"}},\"version\":1}",
+  "bytecode": "0x6080346100a757601f6109f038819003918201601f19168301916001600160401b038311848410176100ac578084926020946040528339810103126100a757516001600160a01b0390818116908190036100a75760005460018060a01b0319903382821617600055604051933391167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0600080a3600254161760025561092d90816100c38239f35b600080fd5b634e487b7160e01b600052604160045260246000fdfe6080604081815260048036101561001557600080fd5b600092833560e01c90816305d45fad146104065750806307c0e602146103d457806348a7c45b146102a1578063541886b21461017757806360e232a9146101fd578063715018a6146101a05780638d928af8146101775780638da5cb5b1461014b5763f2fde38b1461008657600080fd5b346101475760203660031901126101475761009f610437565b906100a8610452565b6001600160a01b039182169283156100f557505082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b906020608492519162461bcd60e51b8352820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152fd5b8280fd5b505034610173578160031936011261017357905490516001600160a01b039091168152602090f35b5080fd5b50503461017357816003193601126101735760025490516001600160a01b039091168152602090f35b83346101fa57806003193601126101fa576101b9610452565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b80fd5b503461014757602036600319011261014757610217610437565b61021f610452565b6001600160a01b0316913383900361024e5750506bffffffffffffffffffffffff60a01b600254161760025580f35b906020608492519162461bcd60e51b8352820152602760248201527f4f6e6c792074686520666163746f72792063616e206368616e67652074686520604482015266666163746f727960c81b6064820152fd5b5091346101fa57816003193601126101fa5782356024356001600160a01b03818116918290036103d0578284526020956001875281868620541661038d5785519061044d8083019183831067ffffffffffffffff84111761037a5750889183916104ab833986815203019085f0801561037057927fd20b14a4eb13758b273b5380a229e4cbc58e9ccc277f94fc221c0578e0a7bcb9928695949286931696858389975260018a5220856bffffffffffffffffffffffff60a01b825416179055825191825287820152a251908152f35b85513d86823e3d90fd5b634e487b7160e01b885260419052602487fd5b855162461bcd60e51b8152908101879052601960248201527f666f7277617264657220616c72656164792063726561746564000000000000006044820152606490fd5b8380fd5b50346101475760203660031901126101475735825260016020908152918190205490516001600160a01b039091168152f35b9050838334610173576020366003190112610173579235815260016020908152929020546001600160a01b03168152f35b600435906001600160a01b038216820361044d57565b600080fd5b6000546001600160a01b0316330361046657565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fdfe60803461006357601f61044d38819003918201601f19168301916001600160401b03831184841017610068578084926020946040528339810103126100635751600055600180546001600160a01b031916331790556040516103ce908161007f8239f35b600080fd5b634e487b7160e01b600052604160045260246000fdfe6080604090808252600490813610156100f3575b50361561001f57600080fd5b60015482516311b2515f60e31b81526001600160a01b0393909160209083908590829088165afa9182156100e8576000926100b8575b506000549281519160208301948552602083528083019183831067ffffffffffffffff8411176100a3576100a16000808989898989895251923491165af161009b61031b565b5061035b565b005b604190634e487b7160e01b6000525260246000fd5b6100da91925060203d81116100e1575b6100d281836102bf565b8101906102f7565b9038610055565b503d6100c8565b50513d6000823e3d90fd5b600090813560e01c908163338b5dea1461013e575063c45a01550361001357823461013a578160031936011261013a5760015490516001600160a01b039091168152602090f35b5080fd5b929390503461013a578060031936011261013a576001600160a01b03843581811692908381036102bb57859660249695969182359085600154166311b2515f60e31b8952888460209c8d935afa9788156102b1578998610292575b50845163095ea7b360e01b8b8201908152968916858201526044808201849052815267ffffffffffffffff96906080810188811182821017610280578752518a928392905af46101e761031b565b501561024e578754908451998a01966384abac9560e01b8852848b015260448a015260648901526064885260a08801938885109085111761023d578661023a818089898d8a8a5251915af461009b61031b565b80f35b634e487b7160e01b87526041905285fd5b50600e6064928985519362461bcd60e51b85528401528201526d105c1c1c9bdd994819985a5b195960921b6044820152fd5b634e487b7160e01b8c5260418652868cfd5b6102aa9198508a3d8c116100e1576100d281836102bf565b9638610199565b85513d8b823e3d90fd5b8480fd5b90601f8019910116810190811067ffffffffffffffff8211176102e157604052565b634e487b7160e01b600052604160045260246000fd5b9081602091031261031657516001600160a01b03811681036103165790565b600080fd5b3d15610356573d9067ffffffffffffffff82116102e1576040519161034a601f8201601f1916602001846102bf565b82523d6000602084013e565b606090565b1561036257565b60405162461bcd60e51b815260206004820152600e60248201526d11195c1bdcda5d0819985a5b195960921b6044820152606490fdfea26469706673582212202fbb1e078edf95a96b1721af583695028afdaf4df22ef98e9c15dc735c07091f64736f6c63430008130033a2646970667358221220337567082eb812f9e762b5fddb2f4bad5fae31da671ec3ed1d4f02f129f6b9af64736f6c63430008130033",
+  "deployedBytecode": "0x6080604081815260048036101561001557600080fd5b600092833560e01c90816305d45fad146104065750806307c0e602146103d457806348a7c45b146102a1578063541886b21461017757806360e232a9146101fd578063715018a6146101a05780638d928af8146101775780638da5cb5b1461014b5763f2fde38b1461008657600080fd5b346101475760203660031901126101475761009f610437565b906100a8610452565b6001600160a01b039182169283156100f557505082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b906020608492519162461bcd60e51b8352820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152fd5b8280fd5b505034610173578160031936011261017357905490516001600160a01b039091168152602090f35b5080fd5b50503461017357816003193601126101735760025490516001600160a01b039091168152602090f35b83346101fa57806003193601126101fa576101b9610452565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b80fd5b503461014757602036600319011261014757610217610437565b61021f610452565b6001600160a01b0316913383900361024e5750506bffffffffffffffffffffffff60a01b600254161760025580f35b906020608492519162461bcd60e51b8352820152602760248201527f4f6e6c792074686520666163746f72792063616e206368616e67652074686520604482015266666163746f727960c81b6064820152fd5b5091346101fa57816003193601126101fa5782356024356001600160a01b03818116918290036103d0578284526020956001875281868620541661038d5785519061044d8083019183831067ffffffffffffffff84111761037a5750889183916104ab833986815203019085f0801561037057927fd20b14a4eb13758b273b5380a229e4cbc58e9ccc277f94fc221c0578e0a7bcb9928695949286931696858389975260018a5220856bffffffffffffffffffffffff60a01b825416179055825191825287820152a251908152f35b85513d86823e3d90fd5b634e487b7160e01b885260419052602487fd5b855162461bcd60e51b8152908101879052601960248201527f666f7277617264657220616c72656164792063726561746564000000000000006044820152606490fd5b8380fd5b50346101475760203660031901126101475735825260016020908152918190205490516001600160a01b039091168152f35b9050838334610173576020366003190112610173579235815260016020908152929020546001600160a01b03168152f35b600435906001600160a01b038216820361044d57565b600080fd5b6000546001600160a01b0316330361046657565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fdfe60803461006357601f61044d38819003918201601f19168301916001600160401b03831184841017610068578084926020946040528339810103126100635751600055600180546001600160a01b031916331790556040516103ce908161007f8239f35b600080fd5b634e487b7160e01b600052604160045260246000fdfe6080604090808252600490813610156100f3575b50361561001f57600080fd5b60015482516311b2515f60e31b81526001600160a01b0393909160209083908590829088165afa9182156100e8576000926100b8575b506000549281519160208301948552602083528083019183831067ffffffffffffffff8411176100a3576100a16000808989898989895251923491165af161009b61031b565b5061035b565b005b604190634e487b7160e01b6000525260246000fd5b6100da91925060203d81116100e1575b6100d281836102bf565b8101906102f7565b9038610055565b503d6100c8565b50513d6000823e3d90fd5b600090813560e01c908163338b5dea1461013e575063c45a01550361001357823461013a578160031936011261013a5760015490516001600160a01b039091168152602090f35b5080fd5b929390503461013a578060031936011261013a576001600160a01b03843581811692908381036102bb57859660249695969182359085600154166311b2515f60e31b8952888460209c8d935afa9788156102b1578998610292575b50845163095ea7b360e01b8b8201908152968916858201526044808201849052815267ffffffffffffffff96906080810188811182821017610280578752518a928392905af46101e761031b565b501561024e578754908451998a01966384abac9560e01b8852848b015260448a015260648901526064885260a08801938885109085111761023d578661023a818089898d8a8a5251915af461009b61031b565b80f35b634e487b7160e01b87526041905285fd5b50600e6064928985519362461bcd60e51b85528401528201526d105c1c1c9bdd994819985a5b195960921b6044820152fd5b634e487b7160e01b8c5260418652868cfd5b6102aa9198508a3d8c116100e1576100d281836102bf565b9638610199565b85513d8b823e3d90fd5b8480fd5b90601f8019910116810190811067ffffffffffffffff8211176102e157604052565b634e487b7160e01b600052604160045260246000fd5b9081602091031261031657516001600160a01b03811681036103165790565b600080fd5b3d15610356573d9067ffffffffffffffff82116102e1576040519161034a601f8201601f1916602001846102bf565b82523d6000602084013e565b606090565b1561036257565b60405162461bcd60e51b815260206004820152600e60248201526d11195c1bdcda5d0819985a5b195960921b6044820152606490fdfea26469706673582212202fbb1e078edf95a96b1721af583695028afdaf4df22ef98e9c15dc735c07091f64736f6c63430008130033a2646970667358221220337567082eb812f9e762b5fddb2f4bad5fae31da671ec3ed1d4f02f129f6b9af64736f6c63430008130033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 291,
+        "contract": "contracts/factories/MecenateForwarderFactory.sol:MecenateForwarderFactory",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 11719,
+        "contract": "contracts/factories/MecenateForwarderFactory.sol:MecenateForwarderFactory",
+        "label": "forwardersMapping",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_address)"
+      },
+      {
+        "astId": 11721,
+        "contract": "contracts/factories/MecenateForwarderFactory.sol:MecenateForwarderFactory",
+        "label": "mecenateVault",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_address)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => address)",
+        "numberOfBytes": "32",
+        "value": "t_address"
+      }
+    }
+  }
+}

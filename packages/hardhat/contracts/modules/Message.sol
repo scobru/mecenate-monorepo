@@ -1,21 +1,22 @@
-/**
- * @title Submission
- * @dev This contract is an abstract contract that defines the functions for submitting and revealing data for a post. It inherits from the Events contract.
- */
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
 import "./Events.sol";
 
 abstract contract Message is Events {
+    function _isSellerOrBuyer(
+        bytes32 encryptedVaultId
+    ) internal view returns (bool) {
+        bytes32 sellerVaultIdHash = keccak256(postSettingPrivate.vaultIdSeller);
+        bytes32 buyerVaultIdHash = keccak256(postSettingPrivate.vaultIdBuyer);
+        return (encryptedVaultId == sellerVaultIdHash ||
+            encryptedVaultId == buyerVaultIdHash);
+    }
+
     function getVaultIdSecret(
         bytes32 encryptedVaultId
     ) external view virtual returns (bytes memory) {
-        require(
-            keccak256(postSettingPrivate.vaultIdBuyer) == encryptedVaultId,
-            "VaultId does not match"
-        );
-
+        require(_isSellerOrBuyer(encryptedVaultId), "NOT_THE_SELLER_OR_BUYER");
         return postSettingPrivate.vaultIdSeller;
     }
 
@@ -24,18 +25,18 @@ abstract contract Message is Events {
     ) external view returns (uint256, uint256) {
         require(
             postSettingPrivate.buyerTelegramId != 0,
-            "FEEDS: No telegram id for Buyer"
+            "NO_TELEGRAM_ID_FOR_BUYER"
         );
 
         require(
             postSettingPrivate.sellerTelegramId != 0,
-            "FEEDS: No telegram id for Seller"
+            "NO_TELEGRAM_ID_FOR_SELLER"
         );
 
         require(
             encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller) ||
                 encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer),
-            "FEEDS: You are not the seller or the buyer"
+            "NOT_THE_SELLER_OR_BUYER"
         );
 
         return (
@@ -44,95 +45,15 @@ abstract contract Message is Events {
         );
     }
 
-    function write(
-        bytes memory encodeMessage,
-        bytes memory sismoConnectResponse,
-        bytes32 _to
-    ) external virtual {
-        // verify user
-        (
-            bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
-
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
-        );
-
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
-        require(
-            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller) ||
-                encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer),
-            "FEEDS: You are not the seller or the buyer"
-        );
-
-        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)) {
-            lastMessageForBuyer = encodeMessage;
-        } else {
-            lastMessageForSeller = encodeMessage;
-        }
-    }
-
-    function getMessage(
-        bytes memory sismoConnectResponse,
-        bytes32 _to
-    ) external virtual returns (bytes memory) {
-        // verify user
-        (
-            bytes memory vaultId,
-            ,
-            ,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
-
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
-        );
-
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
-        require(
-            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller) ||
-                encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer),
-            "FEEDS: You are not the seller or the buyer"
-        );
-
-        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)) {
-            return lastMessageForBuyer;
-        } else {
-            return lastMessageForSeller;
-        }
-    }
-
     function getHashedVaultId(
         bytes memory sismoConnectResponse,
-        bytes32 _to
+        address _to,
+        bytes32 _nonce
     ) external virtual returns (bytes32) {
-        // verify user
-        (
-            bytes memory vaultId,
-            ,
-            ,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
-
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
+        (bytes memory vaultId, , , ) = _verifyNonce(
+            sismoConnectResponse,
+            _to,
+            _nonce
         );
 
         bytes32 encryptedVaultId = keccak256(vaultId);
@@ -140,7 +61,7 @@ abstract contract Message is Events {
         require(
             encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller) ||
                 encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer),
-            "FEEDS: You are not the seller or the buyer"
+            "NOT_SELLER_OR_BUYER"
         );
 
         if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)) {
@@ -148,5 +69,62 @@ abstract contract Message is Events {
         } else {
             return keccak256(postSettingPrivate.vaultIdBuyer);
         }
+    }
+
+    function write(
+        bytes memory encodeMessage,
+        bytes32 encryptedVaultId
+    ) external virtual {
+        onlyVault();
+        require(_isSellerOrBuyer(encryptedVaultId), "NOT_THE_SELLER_OR_BUYER");
+        _writeMessage(encodeMessage, encryptedVaultId);
+    }
+
+    function _writeMessage(
+        bytes memory encodeMessage,
+        bytes32 encryptedVaultId
+    ) internal {
+        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)) {
+            settings.lastMessageForBuyer = encodeMessage;
+        } else {
+            settings.lastMessageForSeller = encodeMessage;
+        }
+    }
+
+    function getMessage(
+        bytes memory sismoConnectResponse,
+        address _to,
+        bytes32 _nonce
+    ) external virtual returns (bytes memory) {
+        bytes32 encryptedVaultId = _getEncryptedVaultId(
+            sismoConnectResponse,
+            _to,
+            _nonce
+        );
+        require(_isSellerOrBuyer(encryptedVaultId), "NOT_THE_SELLER_OR_BUYER");
+        return _getMessage(encryptedVaultId);
+    }
+
+    function _getMessage(
+        bytes32 encryptedVaultId
+    ) internal view returns (bytes memory) {
+        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)) {
+            return settings.lastMessageForBuyer;
+        } else {
+            return settings.lastMessageForSeller;
+        }
+    }
+
+    function _getEncryptedVaultId(
+        bytes memory sismoConnectResponse,
+        address _to,
+        bytes32 _nonce
+    ) internal virtual returns (bytes32) {
+        (bytes memory vaultId, , , ) = _verifyNonce(
+            sismoConnectResponse,
+            _to,
+            _nonce
+        );
+        return keccak256(vaultId);
     }
 }

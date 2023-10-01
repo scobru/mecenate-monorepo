@@ -13,7 +13,6 @@ import "../modules/Acceptance.sol";
 import "../modules/Submission.sol";
 import "../modules/Finalization.sol";
 import "../modules/Renounce.sol";
-
 import "../modules/Message.sol";
 
 contract MecenateFeed is
@@ -25,56 +24,22 @@ contract MecenateFeed is
     Submission,
     Finalization
 {
-    using Structures for Structures.Post;
-
     constructor(
         bytes32 _owner,
         address _usersModuleContract,
         address _verifierContract,
-        address _vaultContract
-    ) Data(_usersModuleContract, _verifierContract, _vaultContract) {
+        address _vaultContract,
+        address _factoryContract,
+        string memory _version
+    )
+        Data(
+            _usersModuleContract,
+            _verifierContract,
+            _vaultContract,
+            _factoryContract,
+            _version
+        )
+    {
         owner = _owner;
-    }
-
-    function getBuyerPayment() external view returns (uint256) {
-        return post.postdata.escrow.payment;
-    }
-
-    function getSellerDeposit() external view returns (uint256) {
-        return post.postdata.escrow.stake;
-    }
-
-    function getSellerStake() external view returns (uint256 amount) {
-        // get deposit
-        amount = Deposit._getDeposit(
-            keccak256(postSettingPrivate.vaultIdSeller)
-        );
-        // explicit return
-        return amount;
-    }
-
-    function getBuyerStake() external view returns (uint256 amount) {
-        // get deposit
-        amount = Deposit._getDeposit(
-            keccak256(postSettingPrivate.vaultIdBuyer)
-        );
-        // explicit return
-        return amount;
-    }
-
-    function getPaymentRequested() external view returns (uint256) {
-        return post.postdata.escrow.payment;
-    }
-
-    function getStakeRequested() external view returns (uint256) {
-        return post.postdata.escrow.stake;
-    }
-
-    function getPostStatus() external view returns (Structures.PostStatus) {
-        return post.postdata.settings.status;
-    }
-
-    function getPostCount() external view returns (uint256) {
-        return postCount;
     }
 }

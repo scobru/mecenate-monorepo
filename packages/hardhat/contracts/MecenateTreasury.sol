@@ -89,29 +89,35 @@ contract MecenateTreasury is Ownable, Swapper {
         address _receiver,
         address _verifierContract,
         bytes memory sismoConnectResponse,
-        bytes32 _to
+        address _to,
+        bytes32 _nonce
     ) external returns (uint256) {
         (
             bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId,
+            ,
+            ,
             bytes memory signedMessage
         ) = IMecenateVerifier(_verifierContract).sismoVerify(
                 sismoConnectResponse,
-                _to
+                _to,
+                _nonce
             );
 
-        require(
-            _to == keccak256(signedMessage),
-            "FEEDS:_to address does not match signed message"
+        (address to, bytes32 nonce) = abi.decode(
+            signedMessage,
+            (address, bytes32)
         );
 
+        require(_nonce == nonce, "Not Same Nonce");
+
         bytes32 _user = keccak256(vaultId);
+
         uint256 amountToSend = userReward[_user];
+
         userReward[_user] = 0;
 
         // send eth weith data
-        (bool success, ) = _receiver.call{value: amountToSend}(
+        (bool success, ) = payable(to).call{value: amountToSend}(
             sismoConnectResponse
         );
 
@@ -120,26 +126,9 @@ contract MecenateTreasury is Ownable, Swapper {
 
     function getReward(
         address _verifierContract,
-        bytes memory sismoConnectResponse,
-        bytes32 _to
+        bytes32 encryptedVaultId
     ) external view returns (uint256) {
-        (
-            bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(_verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
-
-        require(
-            _to == keccak256(signedMessage),
-            "FEEDS:_to address does not match signed message"
-        );
-
-        bytes32 _user = keccak256(vaultId);
-        return userReward[_user];
+        return userReward[encryptedVaultId];
     }
 
     receive() external payable {

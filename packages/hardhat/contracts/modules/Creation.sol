@@ -13,138 +13,86 @@ abstract contract Creation is Staking {
         Structures.PostType postType,
         Structures.PostDuration postDuration,
         uint256 payment,
+        uint256 stakeAmount,
+        Structures.Tokens tokenId,
         bytes memory sismoConnectResponse,
-        bytes32 _to
-    ) external payable returns (Structures.Post memory) {
-        // verify user
+        address _to,
+        bytes32 _nonce
+    )
+        external
+        payable
+        onlyValidTokenID(tokenId)
+        returns (Structures.Post memory)
+    {
         (
             bytes memory vaultId,
             uint256 twitterId,
             uint256 telegramId,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
 
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
-        );
-
-        // get encrypted vault id
+        ) = _verifyNonce(sismoConnectResponse, _to, _nonce);
         bytes32 encryptedVaultId = keccak256(vaultId);
 
-        require(encryptedVaultId == owner, "Not owner");
+        // Early exit conditions
+        require(encryptedVaultId == owner, "NOT_OWNER");
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(
+            IMecenateUsers(settings.usersModuleContract).checkifUserExist(
                 encryptedVaultId
             ),
-            "User does not exist"
+            "USER_NOT_EXIST"
         );
-
-        // check if user has stake
-        if (post.postdata.escrow.stake == 0) {
-            require(msg.value > 0, "Stake is required");
-        }
-
-        // check if post is in waiting status
         require(
-            post.postdata.settings.status == Structures.PostStatus.Waiting ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Finalized ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Revealed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Punished ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Proposed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Renounced,
-            "Wrong Status"
+            validStatuses[uint8(post.postdata.settings.status)],
+            "INVALID_STATUS"
+        );
+        require(stakeAmount > 0, "STAKE_AMOUNT_ZERO");
+
+        uint256 duration = postDurationToDays[uint8(postDuration)];
+        uint256 stake = _addStake(
+            tokenId,
+            encryptedVaultId,
+            msg.sender,
+            stakeAmount
         );
 
-        // set post settings
-        postSettingPrivate = Structures.postSettingPrivate({
-            vaultIdSeller: vaultId,
-            sellerTwitterId: twitterId,
-            sellerTelegramId: telegramId,
-            vaultIdBuyer: ZEROHASH,
-            buyerTwitterId: 0,
-            buyerTelegramId: 0
-        });
+        // Change status to Proposed
+        _changeStatus(Structures.PostStatus.Proposed);
 
-        // set post escrow
-        uint256 stake = _addStake(encryptedVaultId, msg.value);
-        uint256 duration;
-
-        // set post duration
-        if (
-            Structures.PostDuration(postDuration) ==
-            Structures.PostDuration.OneDay
-        ) {
-            duration = 1 days;
-        } else if (
-            Structures.PostDuration(postDuration) ==
-            Structures.PostDuration.ThreeDays
-        ) {
-            duration = 3 days;
-        } else if (
-            Structures.PostDuration(postDuration) ==
-            Structures.PostDuration.OneWeek
-        ) {
-            duration = 7 days;
-        } else if (
-            Structures.PostDuration(postDuration) ==
-            Structures.PostDuration.TwoWeeks
-        ) {
-            duration = 14 days;
-        } else if (
-            Structures.PostDuration(postDuration) ==
-            Structures.PostDuration.OneMonth
-        ) {
-            duration = 30 days;
-        }
-
-        // set post data
-        Structures.User memory creator = Structures.User({
-            vaultId: encryptedVaultId
-        });
-
-        Structures.PostData memory postdata = Structures.PostData({
-            settings: Structures.PostSettings({
-                postType: Structures.PostType(postType),
-                status: Structures.PostStatus.Proposed,
-                creationTimeStamp: block.timestamp,
-                endTimeStamp: 0,
-                duration: duration
-            }),
-            escrow: Structures.PostEscrow({
-                stake: stake,
-                payment: payment,
-                punishment: 0,
-                penality: 0
-            }),
-            data: Structures.PostEncryptedData({
-                encryptedData: encryptedHash,
-                encryptedKey: ZEROHASH,
-                decryptedData: ZEROHASH
+        // Initialize the new Post struct with named arguments for clarity
+        Structures.Post memory newPost = Structures.Post({
+            creator: Structures.User({vaultId: encryptedVaultId}),
+            postdata: Structures.PostData({
+                settings: Structures.PostSettings({
+                    postType: postType,
+                    status: Structures.PostStatus.Proposed,
+                    creationTimeStamp: block.timestamp,
+                    endTimeStamp: 0,
+                    duration: duration,
+                    tokenId: tokenId
+                }),
+                escrow: Structures.PostEscrow({
+                    stake: stake,
+                    payment: payment,
+                    punishment: 0,
+                    penalty: 0
+                }),
+                data: Structures.PostEncryptedData({
+                    encryptedData: encryptedHash,
+                    encryptedKey: ZEROHASH,
+                    decryptedData: ZEROHASH
+                })
             })
         });
 
-        // set post
-        Structures.Post memory _post = Structures.Post({
-            creator: creator,
-            postdata: postdata
-        });
+        // Update storage and emit event
+        post = newPost;
+        settings.postCount++;
 
-        post = _post;
+        postSettingPrivate.vaultIdSeller = vaultId;
+        postSettingPrivate.sellerTwitterId = twitterId;
+        postSettingPrivate.sellerTelegramId = telegramId;
 
-        // increment post count
-        postCount++;
+        emit Created(newPost);
 
-        emit Created(post);
-
-        return Structures.Post({creator: creator, postdata: postdata});
+        return newPost;
     }
 }

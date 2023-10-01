@@ -14,7 +14,8 @@ contract MecenateVerifier is SismoConnect {
 
     function sismoVerify(
         bytes memory sismoConnectResponse,
-        bytes32 _to
+        address _to,
+        bytes32 _nonce
     ) external view returns (bytes memory, uint256, uint256, bytes memory) {
         require(sismoConnectResponse.length > 0, "empty response");
 
@@ -39,7 +40,7 @@ contract MecenateVerifier is SismoConnect {
         SismoConnectVerifiedResult memory result = verify({
             responseBytes: sismoConnectResponse,
             auths: auths,
-            signature: buildSignature({message: abi.encode(_to)})
+            signature: buildSignature({message: abi.encode(_to, _nonce)})
         });
 
         bytes memory signedMessage = SismoConnectHelper.getSignedMessage(

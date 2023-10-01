@@ -5,9 +5,6 @@
 pragma solidity 0.8.19;
 
 library Structures {
-    /**
-     * @dev Enum representing the status of a post.
-     */
     enum PostStatus {
         Waiting,
         Proposed,
@@ -18,10 +15,11 @@ library Structures {
         Revealed,
         Renounced
     }
-
-    /**
-     * @dev Enum representing the type of a post.
-     */
+    enum Tokens {
+        NaN,
+        MUSE,
+        DAI
+    }
     enum PostType {
         Text,
         Image,
@@ -29,16 +27,37 @@ library Structures {
         Audio,
         File
     }
-
-    /**
-     * @dev Enum representing the duration of a post.
-     */
     enum PostDuration {
         OneDay,
         ThreeDays,
         OneWeek,
         TwoWeeks,
         OneMonth
+    }
+
+    struct FeedSettings {
+        uint256 punishmentRatio;
+        uint256 postCount;
+        address usersModuleContract;
+        address factoryContract;
+        address verifierContract;
+        address vaultContract;
+        address router;
+        bytes encodedSymKey;
+        bytes lastMessageForBuyer;
+        bytes lastMessageForSeller;
+        string version;
+    }
+
+    struct FactorySettings {
+        address treasuryContract;
+        address usersModuleContract;
+        address verifierContract;
+        address vaultContract;
+        address museToken;
+        address daiToken;
+        address wethToken;
+        address router;
     }
 
     /**
@@ -76,12 +95,13 @@ library Structures {
         uint256 creationTimeStamp;
         uint256 endTimeStamp;
         uint256 duration;
+        Tokens tokenId;
     }
 
     /**
      * @dev Struct representing the private settings of a post on the Mecenate platform.
      */
-    struct postSettingPrivate {
+    struct PostSettingPrivate {
         bytes vaultIdSeller;
         uint256 sellerTwitterId;
         uint256 sellerTelegramId;
@@ -97,7 +117,7 @@ library Structures {
         uint256 stake;
         uint256 payment;
         uint256 punishment;
-        uint256 penality;
+        uint256 penalty;
     }
 
     /**
@@ -117,7 +137,10 @@ library Structures {
         uint256 buyerStake;
         uint256 totalStake;
         uint256 postCount;
-        uint256 buyerPayment;
+        uint256 paymentRequested;
+        uint256 stakeRequested;
+        PostStatus status;
+        Tokens tokenId;
     }
 
     /**
@@ -130,6 +153,7 @@ library Structures {
         address postAddress;
         bool accepted;
         uint256 postCount;
+        Tokens tokenId;
     }
 
     /**
@@ -140,5 +164,7 @@ library Structures {
         bytes sellerResponse;
         bytes vaultIdBuyer;
         bytes buyerResponse;
+        address buyerTo;
+        bytes32 buyerNonce;
     }
 }

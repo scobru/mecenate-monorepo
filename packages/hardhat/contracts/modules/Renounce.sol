@@ -12,45 +12,63 @@ pragma solidity 0.8.19;
 import "./Staking.sol";
 
 abstract contract Renounce is Staking {
-    function renouncePost(bytes32 encryptedVaultId) external virtual {
-        require(
-            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller),
-            "You are not the seller"
+    function renouncePost(
+        bytes memory sismoConnectResponse,
+        address _to,
+        bytes32 _nonce
+    ) external {
+        onlyVault();
+
+        // Validate the post status
+        Structures.PostStatus currentStatus = post.postdata.settings.status;
+        require(validStatuses[uint8(currentStatus)], "INVALID_STATUS");
+
+        // Verify the nonce and get the vault ID
+        (bytes memory vaultId, , , ) = _verifyNonce(
+            sismoConnectResponse,
+            _to,
+            _nonce
+        );
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
+        // Confirm that the caller is the seller
+        bytes32 sellerVaultId = keccak256(postSettingPrivate.vaultIdSeller);
+        require(encryptedVaultId == sellerVaultId, "NOT_SELLER");
+
+        // Reset post and post settings
+        post = Structures.Post(
+            Structures.User({vaultId: bytes32(0)}),
+            Structures.PostData({
+                settings: Structures.PostSettings({
+                    status: Structures.PostStatus.Renounced,
+                    postType: Structures.PostType.Text,
+                    creationTimeStamp: 0,
+                    endTimeStamp: 0,
+                    duration: 0,
+                    tokenId: Structures.Tokens.NaN
+                }),
+                escrow: Structures.PostEscrow({
+                    stake: 0,
+                    payment: 0,
+                    punishment: 0,
+                    penalty: 0
+                }),
+                data: Structures.PostEncryptedData({
+                    encryptedData: "",
+                    encryptedKey: "",
+                    decryptedData: ""
+                })
+            })
         );
 
-        require(
-            post.postdata.settings.status == Structures.PostStatus.Accepted ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Submitted,
-            "Post is not Accepted or Submitted"
-        );
+        postSettingPrivate.vaultIdBuyer = ZEROHASH;
+        postSettingPrivate.buyerTwitterId = 0;
+        postSettingPrivate.buyerTelegramId = 0;
+        postSettingPrivate.vaultIdSeller = ZEROHASH;
+        postSettingPrivate.sellerTwitterId = 0;
+        postSettingPrivate.sellerTelegramId = 0;
 
-        // Reset the post struct
-        post.creator = Structures.User(bytes32(0));
-        post.postdata = Structures.PostData(
-            Structures.PostSettings(
-                Structures.PostStatus.Waiting,
-                Structures.PostType.Text,
-                0,
-                0,
-                0
-            ),
-            Structures.PostEscrow(0, 0, 0, 0),
-            Structures.PostEncryptedData("", "", "")
-        );
-
-        // Update the post status and emit an event
-        post.postdata.settings.status = Structures.PostStatus.Renounced;
-
-        postSettingPrivate = Structures.postSettingPrivate({
-            vaultIdBuyer: ZEROHASH,
-            buyerTwitterId: 0,
-            buyerTelegramId: 0,
-            vaultIdSeller: ZEROHASH,
-            sellerTwitterId: 0,
-            sellerTelegramId: 0
-        });
-
+        // Emit event
         emit Renounced(post);
     }
 }

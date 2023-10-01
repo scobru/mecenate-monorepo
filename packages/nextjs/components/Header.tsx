@@ -29,7 +29,7 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
       passHref
       className={`${
         isActive ? "bg-secondary shadow-md" : ""
-      } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm rounded-full gap-2`}
+      } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-base font-semibold rounded-full gap-2`}
     >
       {children}
     </Link>
@@ -51,6 +51,8 @@ export default function Header() {
   const [isLocalStorage, setIsLocalStorage] = useState(false);
   const [verified, setVerified] = useState("");
   const [encryptedVaultId, setEncryptedVaultId] = useState("");
+  const [withrawalAddress, setWithdrawalAddress] = useState("");
+  const [forwarderAddress, setForwarderAddress] = useState("");
   useOutsideClick(
     burgerMenuRef,
     useCallback(() => setIsDrawerOpen(false), []),
@@ -63,6 +65,12 @@ export default function Header() {
       setIsLocalStorage(true);
       setVerified(String(verified));
       setEncryptedVaultId(keccak256(String(sismoData?.auths[0]?.userId)));
+      if (localStorage.getItem("withdrawalAddress")) {
+        setWithdrawalAddress(String(localStorage.getItem("withdrawalAddress")));
+      }
+      if (localStorage.getItem("forwarderAddress")) {
+        setForwarderAddress(String(localStorage.getItem("forwarderAddress")));
+      }
     }
   }, [encryptedVaultId]);
 
@@ -162,9 +170,7 @@ export default function Header() {
 
       <div className="navbar-end flex-grow mr-4">
         <div>
-          {verified == "verified" ? (
-            <VerifiedBadge verified={String(verified)} encryptedVaultId={encryptedVaultId} />
-          ) : null}
+          <VerifiedBadge verified={String(verified)} encryptedVaultId={encryptedVaultId} address={forwarderAddress} />
         </div>
         <RainbowKitCustomConnectButton />
         <FaucetButton />

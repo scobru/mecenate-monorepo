@@ -1,37 +1,30 @@
-/**
- * @title MecenateFeedFactory
- * @dev A factory contract for creating MecenateFeed contracts.
- */
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {MecenateFeed} from "../features/MecenateFeed.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
 import "../interfaces/IMecenateVerifier.sol";
 import "../modules/FeedViewer.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MecenateFeedFactory is Ownable, FeedViewer {
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    string public version;
+
+    bytes internal feedByteCode;
+
     uint256 public contractCounter;
-
-    address[] public feeds;
-
-    address public treasuryContract;
-
-    address public usersModuleContract;
-
-    address public verifierContract;
-
-    address public vaultContract;
-
-    mapping(bytes32 => address[]) internal feedStore;
-
-    mapping(address => bool) public createdContracts;
-
-    mapping(address => bool) public authorized;
+    EnumerableSet.AddressSet internal feeds;
+    Structures.FactorySettings internal settings;
+    mapping(uint8 => uint24) internal routerFee;
+    mapping(bytes32 => EnumerableSet.AddressSet) internal feedStore;
+    mapping(address => bool) internal createdContracts;
 
     event FeedCreated(address indexed addr);
+
+    bool public burnEnabled = false;
 
     constructor(
         address _usersModuleContract,
@@ -39,79 +32,157 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         address _verifierContract,
         address _vaultContract
     ) {
-        usersModuleContract = _usersModuleContract;
-        treasuryContract = _treasuryContract;
-        verifierContract = _verifierContract;
-        vaultContract = _vaultContract;
+        settings.usersModuleContract = _usersModuleContract;
+        settings.treasuryContract = _treasuryContract;
+        settings.verifierContract = _verifierContract;
+        settings.vaultContract = _vaultContract;
+    }
+
+    function changeVersion(string memory _version) external onlyOwner {
+        version = _version;
+    }
+
+    function treasuryContract() external view returns (address) {
+        return settings.treasuryContract;
+    }
+
+    function identityContract() external view returns (address) {
+        return settings.verifierContract;
+    }
+
+    function daiToken() external view returns (address) {
+        return settings.daiToken;
+    }
+
+    function wethToken() external view returns (address) {
+        return settings.wethToken;
+    }
+
+    function museToken() external view returns (address) {
+        return settings.museToken;
+    }
+
+    function router() external view returns (address) {
+        return settings.router;
+    }
+
+    function getRouterFee(uint8 tokenId) external view returns (uint24) {
+        return routerFee[tokenId];
+    }
+
+    function setRouterFee(uint8 tokenId, uint24 fee) external onlyOwner {
+        routerFee[tokenId] = fee;
+    }
+
+    function setBurnEnabled(bool _burnEnabled) external onlyOwner {
+        burnEnabled = _burnEnabled;
     }
 
     function isFeed(address _feed) external view returns (bool) {
         return createdContracts[_feed];
     }
 
-    function setAuthorized(address _addr) external onlyOwner {
-        authorized[_addr] = true;
+    function changeMultipleSettings(
+        address _treasury,
+        address _vault,
+        address _usersModule,
+        address _wethToken,
+        address _museToken,
+        address _daiToken,
+        address _router
+    ) external onlyOwner {
+        settings.treasuryContract = _treasury;
+        settings.vaultContract = _vault;
+        settings.usersModuleContract = _usersModule;
+        settings.wethToken = _wethToken;
+        settings.museToken = _museToken;
+        settings.daiToken = _daiToken;
+        settings.router = _router;
     }
 
-    function removeAuthorized(address _addr) external onlyOwner {
-        authorized[_addr] = false;
-    }
-
-    function changeTreasury(address _treasury) external onlyOwner {
-        treasuryContract = _treasury;
-    }
-
-    function changeVault(address _vault) external onlyOwner {
-        vaultContract = _vault;
+    function setFeedByteCode(bytes memory _byteCode) external onlyOwner {
+        feedByteCode = _byteCode;
     }
 
     function buildFeed(
         bytes memory sismoConnectResponse,
-        bytes32 _to
+        address _to,
+        bytes32 _nonce
     ) external payable returns (address) {
+        require(msg.sender == settings.vaultContract, "ONLY_VAULT");
         (
             bytes memory vaultId,
             ,
             ,
             bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
+        ) = IMecenateVerifier(settings.verifierContract).sismoVerify(
                 sismoConnectResponse,
-                _to
+                _to,
+                _nonce
             );
 
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
+        (address to, bytes32 nonce) = abi.decode(
+            signedMessage,
+            (address, bytes32)
         );
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 
+        bytes memory constructorArguments = abi.encode(
+            encryptedVaultId,
+            settings.usersModuleContract,
+            settings.verifierContract,
+            settings.vaultContract,
+            address(this),
+            version
+        );
+
+        require(_nonce == nonce, "WRONG_NONCE");
+        require(_to == to, "WRONG_TO");
+
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(
+            IMecenateUsers(settings.usersModuleContract).checkifUserExist(
                 encryptedVaultId
             ),
             "user does not exist"
         );
 
-        require(msg.value >= getCreationFee(), "Not enough payment");
+        require(msg.value >= getCreationFee(), "NOT_ENOUGH_FEE");
 
-        (bool _result, ) = payable(treasuryContract).call{value: msg.value}("");
+        (bool _result, ) = payable(settings.treasuryContract).call{
+            value: msg.value
+        }("");
 
-        require(_result, "Treasury call failed");
+        require(_result, "CALL_FAILED");
 
         contractCounter++;
 
-        MecenateFeed feed = new MecenateFeed(
-            encryptedVaultId,
-            usersModuleContract,
-            verifierContract,
-            vaultContract
+        address addr;
+
+        bytes memory tempByteCode = feedByteCode; // Carico la variabile di storage in una variabile locale
+
+        // Concatena il bytecode e gli argomenti del costruttore
+        bytes memory bytecodeWithConstructor = abi.encodePacked(
+            tempByteCode,
+            constructorArguments
         );
 
-        feeds.push(address(feed));
+        // Deploy del contratto con gli argomenti del costruttore
+        assembly {
+            addr := create(
+                0,
+                add(bytecodeWithConstructor, 0x20),
+                mload(bytecodeWithConstructor)
+            )
+            if iszero(extcodesize(addr)) {
+                revert(0, 0)
+            }
+        }
 
-        feedStore[encryptedVaultId].push(address(feed));
+        address feed = addr;
 
+        feeds.add(address(feed));
+        feedStore[encryptedVaultId].add(address(feed));
         createdContracts[address(feed)] = true;
 
         emit FeedCreated(address(feed));
@@ -120,19 +191,19 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     }
 
     function getFeeds() external view returns (address[] memory) {
-        return feeds;
+        return feeds.values();
     }
 
     function getFeedsOwned(
         bytes32 vaultId
     ) external view returns (address[] memory) {
-        return feedStore[vaultId];
+        return feedStore[vaultId].values();
     }
 
     function getFeedsInfoOwned(
         bytes32 vaultId
     ) external view returns (Structures.Feed[] memory) {
-        return _getFeedsInfo(feedStore[vaultId]);
+        return _getFeedsInfo(feedStore[vaultId].values());
     }
 
     function getFeedInfo(
@@ -142,7 +213,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     }
 
     function getFeedsInfo() external view returns (Structures.Feed[] memory) {
-        return _getFeedsInfo(feeds);
+        return _getFeedsInfo(feeds.values());
     }
 
     function isContractCreated(
@@ -152,7 +223,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     }
 
     function getCreationFee() internal view returns (uint256) {
-        return IMecenateTreasury(treasuryContract).fixedFee();
+        return IMecenateTreasury(settings.treasuryContract).fixedFee();
     }
 
     receive() external payable {}

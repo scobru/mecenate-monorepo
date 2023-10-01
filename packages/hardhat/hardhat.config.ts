@@ -20,6 +20,16 @@ const deployerPrivateKey =
 const etherscanApiKey =
   process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
 
+const UNISWAP_SETTING = {
+  version: "0.8.6",
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 2_000,
+    },
+  },
+};
+
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
@@ -28,12 +38,19 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: 10000,
           },
           viaIR: true,
         },
       },
+      UNISWAP_SETTING,
     ],
+    overrides: {
+      "@uniswap/v3-core/contracts/libraries/FullMath.sol": UNISWAP_SETTING,
+      "@uniswap/v3-core/contracts/libraries/TickMath.sol": UNISWAP_SETTING,
+      "@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol":
+        UNISWAP_SETTING,
+    },
   },
   defaultNetwork: "localhost",
   namedAccounts: {
@@ -111,7 +128,7 @@ const config: HardhatUserConfig = {
     alphaSort: true,
     disambiguatePaths: false,
     runOnCompile: true,
-    strict: true,
+    strict: false,
   },
   docgen: {
     path: "./docs",

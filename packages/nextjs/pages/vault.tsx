@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import React, { useCallback, useEffect } from "react";
 import { useContract, useProvider, useNetwork, useSigner, useTransaction } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface } from "ethers";
+import { ContractInterface, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { formatEther, keccak256, parseEther } from "ethers/lib/utils.js";
 import { SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
@@ -80,6 +80,7 @@ const Vault: NextPage = () => {
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
   const deployedContractWallet = getDeployedContract(chain?.id.toString(), "MecenateVault");
   const deployedContractDepositorFactory = getDeployedContract(chain?.id.toString(), "MecenateETHDepositorFactory");
+  const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
 
   const txData = useTransactor();
 
@@ -94,6 +95,8 @@ const Vault: NextPage = () => {
   const [tokenAddress, setTokenAddress] = React.useState<string>("");
   const [userCommitment, setUserCommitment] = React.useState<string>("");
   const [randomBytes32Hash, setRandomBytes32Hash] = React.useState<string>("");
+  const [nonce, setNonce] = React.useState<number>(0);
+  const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
 
   let walletAddress!: string;
   let walletAbi: ContractInterface[] = [];
@@ -108,6 +111,12 @@ const Vault: NextPage = () => {
     signerOrProvider: signer || provider,
   });
 
+  const walletRelayer = useContract({
+    address: walletAddress,
+    abi: walletAbi,
+    signerOrProvider: customWallet,
+  });
+
   const getDeposit = async () => {
     if (sismoData) {
       const tx = await wallet?.getEthDeposit(keccak256(sismoData?.auths[0]?.userId));
@@ -120,9 +129,11 @@ const Vault: NextPage = () => {
     const interval = setInterval(async () => {
       await getDeposit();
       setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
+      setNonce(localStorage.getItem("nonce"));
+      setWithdrawalAddress(localStorage.getItem("withdrawalAddress"));
       setVerified(localStorage.getItem("verified"));
       setSismoResponse(localStorage.getItem("sismoResponse"));
-    }, 5000);
+    }, Number(process.env.NEXT_PUBLIC_RPC_POLLING_INTERVAL));
 
     return () => clearInterval(interval);
   });
@@ -137,15 +148,9 @@ const Vault: NextPage = () => {
   };
 
   const withdraw = async () => {
-    const tx = await wallet?.withdrawETH(
-      to,
-      parseEther(String(amount)),
-      sismoResponse,
-      keccak256(String(wallet?.address)),
-    );
-    if (tx?.hash) {
-      notification.success("Withdrawal successful!");
-    }
+    const iface = new ethers.utils.Interface(deployedContractWallet?.abi as any[]);
+
+    txData(walletRelayer?.withdrawETH(parseEther(String(amount)), sismoResponse, withdrawalAddress, nonce));
   };
 
   // Nuove funzioni per gestire i token ERC20
@@ -313,14 +318,6 @@ const Vault: NextPage = () => {
                     onChange={e => setAmount(Number(e.target.value))}
                   />
                 </div>
-                <div className="w-full mb-5">
-                  <input
-                    type="text"
-                    className="input input-bordered w-full"
-                    placeholder="To"
-                    onChange={e => setTo(e.target.value)}
-                  />
-                </div>
                 <div className="w-full">
                   <button
                     className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700"
@@ -331,7 +328,7 @@ const Vault: NextPage = () => {
                         await withdraw();
                       }
                     }}
-                    disabled={sismoResponse != null ? false : true}
+                    disabled={sismoResponse != null ? false : true && !withdrawalAddress && !nonce}
                   >
                     Withdraw
                   </button>

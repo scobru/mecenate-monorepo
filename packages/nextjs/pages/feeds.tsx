@@ -23,8 +23,10 @@ const Feeds: NextPage = () => {
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
-
+  const [nonce, setNonce] = React.useState<number>(0);
+  const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
   const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
 
   type Feed = {
     operator: string;
@@ -34,8 +36,9 @@ const Feeds: NextPage = () => {
     sellerStake: string;
     totalStake: string;
     postCount: string;
-    buyerPayment: string;
+    paymentRequested: string;
     sellerPayment: string;
+    status: string;
   };
 
   let factoryAddress!: string;
@@ -55,13 +58,13 @@ const Feeds: NextPage = () => {
   const treasuryCtx = useContract({
     address: deployedContractTreasury?.address,
     abi: treasuryAbi,
-    signerOrProvider: signer || provider,
+    signerOrProvider: customWallet,
   });
 
   const factoryCtx = useContract({
     address: deployedContractFactory?.address,
     abi: factoryAbi,
-    signerOrProvider: signer || provider,
+    signerOrProvider: customWallet,
   });
 
   let vaultAddress!: string;
@@ -74,7 +77,7 @@ const Feeds: NextPage = () => {
   const vaultCtx = useContract({
     address: vaultAddress,
     abi: vaultAbi,
-    signerOrProvider: signer || provider,
+    signerOrProvider: customWallet,
   });
 
   const getFeeds = useCallback(async () => {
@@ -84,7 +87,9 @@ const Feeds: NextPage = () => {
 
     if (onlyYourFeeds) {
       _feeds = await factoryCtx.getFeedsOwned(keccak256(sismoData.auths[0].userId));
+      console.log(_feeds);
       _feedsInfo = await factoryCtx.getFeedsInfoOwned(keccak256(sismoData.auths[0].userId));
+      console.log(_feedsInfo);
     } else {
       _feeds = await factoryCtx.getFeeds();
       _feedsInfo = await factoryCtx.getFeedsInfo();
@@ -101,29 +106,33 @@ const Feeds: NextPage = () => {
       const storedData = localStorage.getItem("sismoData");
       const storedVerified = localStorage.getItem("verified");
       const storedSismoResponse = localStorage.getItem("sismoResponse");
+      const nonce = localStorage.getItem("nonce");
+      const withdrawalAddress = localStorage.getItem("withdrawalAddress");
 
       if (storedData && storedVerified && storedSismoResponse) {
         setSismoData(JSON.parse(storedData));
         setVerified(storedVerified);
         setSismoResponse(storedSismoResponse);
+        setNonce(String(nonce));
+        setWithdrawalAddress(withdrawalAddress as string);
         // Create new ethers.Wallet instance
       } else {
         console.warn("Stored ethWallet or its privateKey is undefined.");
       }
     }
-  }, [onlyYourFeeds, getFeeds]);
+  }, [onlyYourFeeds]);
 
-  const buildFeed = useCallback(async () => {
+  const buildFeed = async () => {
     if (!factoryCtx || !treasuryCtx || !txData || !vaultCtx || !sismoData) return;
 
     // encode abi call
     const abiCoder = new AbiCoder();
     // Encode the function call
     const iface = new ethers.utils.Interface(deployedContractFactory?.abi as any);
-    const data = iface.encodeFunctionData("buildFeed", [sismoResponse, keccak256(String(vaultCtx?.address))]);
+    const data = iface.encodeFunctionData("buildFeed", [sismoResponse, withdrawalAddress, nonce]);
 
     txData(vaultCtx?.execute(factoryCtx?.address, data, treasuryCtx?.fixedFee(), keccak256(sismoData.auths[0].userId)));
-  }, [factoryCtx, treasuryCtx, txData, vaultCtx, sismoData]);
+  };
 
   const formattedFeeds = useMemo(() => {
     return (
@@ -147,11 +156,15 @@ const Feeds: NextPage = () => {
               </div>
               <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Buyer Payment:</div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
-                {formatEther(String(feedsInfos[i].buyerPayment))} ETH
+                {formatEther(String(feedsInfos[i].paymentRequested))} ETH
               </div>
               <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Count:</div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {String(feedsInfos[i].postCount)}
+              </div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Status:</div>
+              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
+                {String(feedsInfos[i].status)}
               </div>
             </div>
           </Link>

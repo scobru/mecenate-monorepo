@@ -43,6 +43,9 @@ const ViewFeed: NextPage = () => {
   const pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
   const pinataApiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY;
   const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
+  const [nonce, setNonce] = React.useState<string>("0");
+  const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
+  const [tokenId, setTokenId] = React.useState<string>("");
 
   const { chain } = useNetwork();
 
@@ -55,7 +58,7 @@ const ViewFeed: NextPage = () => {
   const [postRawData, setPostRawData] = useState<any>([]);
   const [postPayment, setPostPayment] = useState<any>([]);
   const [symmetricKey, setSymmetricKey] = useState<any>([]);
-  const [valid, setValid] = useState<boolean>();
+  const [valid, setValid] = useState<boolean>(false);
   const [punishment, setPunishment] = useState<any>(0);
   const [buyerPayment, setBuyerPayment] = useState<any>("");
   const [stakeAmount, setStakeAmount] = useState<any>(0);
@@ -188,10 +191,11 @@ const ViewFeed: NextPage = () => {
       feedData.postdata.settings.status != 1 &&
       feedData.postdata.settings.status != 2
     ) {
-      const _secretMessage = await feedCtx?.getMessage(keccak256(sismoData.auths[0].userId));
+      const _secretMessage = await feedCtx?.getMessage(sismoResponse, withdrawalAddress, nonce);
+
       console.log("Secret Message: ", _secretMessage);
 
-      const encryptedVaultId = await getHashedVaultId();
+      const encryptedVaultId = await getHashedVaultId(sismoResponse, withdrawalAddress, nonce);
       console.log("Encrypted Vault Id: ", encryptedVaultId);
 
       const decryptedMessage = decryptMessage(encryptedVaultId, toUtf8String(_secretMessage));
@@ -202,12 +206,45 @@ const ViewFeed: NextPage = () => {
 
   //******************** Feed Operation *********************//
 
+  async function storePrivateKey(privateKey: any, contractAddress: any, sismoData: any) {
+    try {
+      const encryptedKey = await encryptMessage(String(sismoData?.auths[0]?.userId), String(privateKey));
+      console.log("Encrypted Key: ", encryptedKey);
+      console.log("Contract Address: ", contractAddress);
+      const response = await fetch("/api/storeKey", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          encryptedPrivateKey: encryptedKey,
+          contractAddress: contractAddress,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Success:", data);
+        return data;
+      } else {
+        const errorData = await response.json();
+        console.error("Error:", errorData);
+        throw new Error("Failed to store the private key");
+      }
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+      throw error;
+    } finally {
+      console.log("Store private key operation completed.");
+    }
+  }
+
   const createPost = async function createPost() {
     await fetchData();
 
     const dataSaved = await savePost(postRawData);
 
-    notification.warning(
+    /* notification.warning(
       <div
         id="alert-additional-content-3"
         className="p-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
@@ -263,7 +300,16 @@ const ViewFeed: NextPage = () => {
       data: JSON.stringify(dataSaved),
       fileName: String(postCount) + "_" + feedCtx?.address + "_sellData.json",
       fileType: "text/json",
-    });
+    }); */
+
+    const response = await storePrivateKey(dataSaved?.symmetricKey, feedCtx?.address, sismoData);
+
+    if (response.message == "Key stored successfully") {
+      notification.success("Symmetric key saved successfully");
+    } else {
+      notification.error("Symmetric key failed to save");
+      return;
+    }
 
     const proofOfHashEncode = await ErasureHelper.multihash({
       input: dataSaved?.proofhash,
@@ -290,15 +336,24 @@ const ViewFeed: NextPage = () => {
       Number(postType),
       Number(postDuration),
       parseEther(await buyerPayment),
+      parseEther(postStake),
+      tokenId,
       sismoResponse,
-      keccak256(String(vaultCtx?.address)),
+      localStorage.getItem("withdrawalAddress"),
+      localStorage.getItem("nonce"),
     ]);
     txData(vaultCtx?.execute(feedCtx?.address, data, parseEther(postStake), keccak256(sismoData?.auths[0]?.userId)));
   };
 
   async function acceptPost() {
     const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-    const data = iface.encodeFunctionData("acceptPost", [sismoResponse, keccak256(String(vaultCtx?.address))]);
+    const data = iface.encodeFunctionData("acceptPost", [
+      sismoResponse,
+      withdrawalAddress,
+      nonce,
+      feedData?.postdata?.settings?.tokenId,
+      parseEther(postPayment)
+    ]);
     txData(vaultCtx?.execute(feedCtx?.address, data, parseEther(postPayment), keccak256(sismoData.auths[0].userId)));
   }
 
@@ -365,9 +420,44 @@ const ViewFeed: NextPage = () => {
     }
   }
 
+  async function fetchPrivateKey(contractAddress: string | undefined) {
+    if (!contractAddress) {
+      console.error("Contract address is undefined");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/storeKey?contractAddress=${contractAddress}`, {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.encryptedPrivateKey;
+      } else {
+        const errorData = await response.json();
+        throw new Error(`Failed to fetch the private key: ${errorData.message || ""}`);
+      }
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+      throw error;
+    } finally {
+      console.log("Fetch private key operation completed.");
+    }
+  }
+
   async function submitData() {
     const abiCoder = new ethers.utils.AbiCoder();
     const proofhash = abiCoder.decode(["bytes32"], feedData[1][2].encryptedData);
+    const encryptedSymKeyStored = await fetchPrivateKey(feedCtx?.address);
+
+    if (encryptedSymKeyStored == undefined) {
+      notification.error("Symmetric key not found");
+      return;
+    }
+
+    console.log("Encrypted Symmetric Key Stored: ", encryptedSymKeyStored);
+    const symKey = await decryptMessage(String(sismoData?.auths[0].userId), String(encryptedSymKeyStored));
 
     /* const symmetricKeyHash = await ErasureHelper.multihash({
       input: symmetricKey,
@@ -386,7 +476,7 @@ const ViewFeed: NextPage = () => {
       esp_version: "v1.2.0",
       proofhash: proofhash,
       sender: signer?.getAddress(),
-      encryptedSymKey: symmetricKey,
+      encryptedSymKey: await symKey,
     };
 
     const pinata = await new pinataSDK(pinataApiKey, pinataApiSecret);
@@ -442,11 +532,7 @@ const ViewFeed: NextPage = () => {
     console.log("Proof Hash Digest: ", proofHash58Digest);
 
     const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-    const data = iface.encodeFunctionData("submitHash", [
-      proofHash58Digest,
-      sismoResponse,
-      keccak256(String(vaultCtx?.address)),
-    ]);
+    const data = iface.encodeFunctionData("submitHash", [proofHash58Digest, sismoResponse, withdrawalAddress, nonce]);
     txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
 
     return {
@@ -647,7 +733,7 @@ const ViewFeed: NextPage = () => {
 
   async function renounce() {
     const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-    const data = iface.encodeFunctionData("renouncePost", [keccak256(sismoData.auths[0].userId)]);
+    const data = iface.encodeFunctionData("renouncePost", [sismoResponse, withdrawalAddress, nonce]);
     txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
     notification.success("Refund successful");
   }
@@ -664,7 +750,12 @@ const ViewFeed: NextPage = () => {
     console.log("Take All Stake...");
     const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
 
-    const data = iface.encodeFunctionData("takeFullStake", [sismoResponse, keccak256(String(vaultCtx?.address))]);
+    const data = iface.encodeFunctionData("takeFullStake", [
+      feedData?.postdata?.settings?.tokenId,
+      sismoResponse,
+      withdrawalAddress,
+      nonce,
+    ]);
 
     txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
     await fetchData();
@@ -676,9 +767,11 @@ const ViewFeed: NextPage = () => {
     const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
 
     const data = iface.encodeFunctionData("takeStake", [
+      feedData?.postdata?.settings?.tokenId,
       parseEther(stakeAmount),
       sismoResponse,
-      keccak256(String(vaultCtx?.address)),
+      withdrawalAddress,
+      nonce,
     ]);
 
     txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
@@ -943,22 +1036,8 @@ const ViewFeed: NextPage = () => {
         setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
         setVerified(localStorage.getItem("verified"));
         setSismoResponse(localStorage.getItem("sismoResponse"));
-
-        const storedEthWallet = await JSON.parse(String(localStorage.getItem("ethWallet")));
-
-        setEthWallet(storedEthWallet);
-
-        console.log("Stored ethWallet: ", storedEthWallet);
-
-        // Check if storedEthWallet and its privateKey are not null or undefined
-        if (storedEthWallet && storedEthWallet?.key) {
-          // Create new ethers.Wallet instance
-          const instance = new ethers.Wallet(storedEthWallet?.key, customProvider);
-          console.log("Instance: ", instance);
-          setCustomSigner(instance);
-        } else {
-          console.warn("Stored ethWallet or its privateKey is undefined.");
-        }
+        setNonce(String(localStorage.getItem("nonce")));
+        setWithdrawalAddress(String(localStorage.getItem("withdrawalAddress")));
 
         if (sismoData) {
           const _message = await getSecretMessage();
@@ -974,30 +1053,45 @@ const ViewFeed: NextPage = () => {
       if (signer && provider && feedCtx && router.isReady) {
         fetchDataAsync();
       }
-    }, 5000);
+    }, Number(process.env.NEXT_PUBLIC_RPC_POLLING_INTERVAL));
 
     // Cleanup function
     return () => clearInterval(interval);
-  }, [feedCtx, router.isReady, sismoData, feedData]);
+  });
 
   useEffect(() => {
     fetchData();
-  }, [customSigner]);
+  }, []);
 
   useEffect(() => {
     const run = async () => {
-      const yourStake = await feedCtx?.getStake(keccak256(sismoData.auths[0].userId));
+      const yourStake = await feedCtx?.getStake(
+        feedData?.postdata?.settings?.tokenId,
+        keccak256(sismoData.auths[0].userId),
+      );
       setYourStake(yourStake);
     };
     if (sismoData) {
       run();
     }
-  }, [feedCtx, sismoData]);
+  }, [feedCtx]);
 
   type ModalProps = {
     title: string;
     modalId: string;
     children: React.ReactNode;
+  };
+
+  const handleSelectToken = async (e: any) => {
+    const token = e;
+    if (token === "ETH") {
+      setTokenId(0);
+    } else if (token === "DAI") {
+      setTokenId(1);
+    } else if (token === "MUSE") {
+      setTokenId(2);
+    }
+    console.log("Token ID: ", tokenId);
   };
 
   return (
@@ -1189,6 +1283,7 @@ const ViewFeed: NextPage = () => {
                 <div className="modal-body w-auto space-y-6 text-left">
                   <label className="block text-base-500">Duration</label>
                   <select
+                    key={5}
                     className="form-select w-full mb-8"
                     value={postDuration}
                     onChange={e => setPostDuration(e.target.value)}
@@ -1208,6 +1303,21 @@ const ViewFeed: NextPage = () => {
                     value={postStake}
                     onChange={e => setPostStake(e.target.value)}
                   />
+
+                  <label className="text-black font-semibold text-sm" htmlFor="request">
+                    Currency
+                  </label>
+                  <select
+                    className="select select-text bg-transparent my-4"
+                    name="tokens"
+                    id="tokens"
+                    onChange={e => handleSelectToken(e.target.value)}
+                  >
+                    <option value="Nan">Select Token</option>
+                    <option value="ETH">ETH</option>
+                    <option value="DAI">DAI</option>
+                    <option value="MUSE">MUSE</option>
+                  </select>
                   <label className="block text-base-500 mt-8">Buyer Payment </label>
 
                   <input
@@ -1217,14 +1327,7 @@ const ViewFeed: NextPage = () => {
                     value={buyerPayment}
                     onChange={e => setBuyerPayment(e.target.value)}
                   />
-                  <label className="block text-base-500">Buyer Addreess </label>
-                  <input
-                    type="text"
-                    className="input w-full"
-                    placeholder="Leave blank  to make this public for  anyone who wants to buy"
-                    value={buyer}
-                    onChange={e => setBuyer(e.target.value)}
-                  />
+
                   <label className="block text-base-500">Type</label>
                   <select className="form-select w-full" value={postType} onChange={e => setPostType(e.target.value)}>
                     <option>Select Type</option>
@@ -1335,7 +1438,12 @@ const ViewFeed: NextPage = () => {
                   />
                   <br />
                   <label className="block text-base-500">Type</label>
-                  <select className="form-select w-full" value={postType} onChange={e => setPostType(e.target.value)}>
+                  <select
+                    key={5}
+                    className="form-select w-full"
+                    value={postType}
+                    onChange={e => setPostType(e.target.value)}
+                  >
                     <option value="0">Text</option>
                     <option value="1">Image</option>
                     <option value="2">Video</option>
@@ -1477,7 +1585,9 @@ const ViewFeed: NextPage = () => {
                     type="checkbox"
                     className="form-checkbox"
                     checked={valid}
-                    onChange={e => setValid(e.target.checked)}
+                    onChange={e => {
+                      setValid(e.target.checked);
+                    }}
                   />
                   <label className="ml-2">Valid</label>
                   <br />
@@ -1516,14 +1626,7 @@ const ViewFeed: NextPage = () => {
                     value={stakeAmount}
                     onChange={e => setStakeAmount(e.target.value)}
                   />
-                  <br />
-                  <input
-                    type="text"
-                    className="input w-full"
-                    placeholder="Receiver Address"
-                    value={receiver}
-                    onChange={e => setReceiver(e.target.value)}
-                  />
+
                   <button
                     className="btn  w-full"
                     onClick={async () => {
@@ -1652,8 +1755,8 @@ const ViewFeed: NextPage = () => {
                 <h2 className="text-2xl font-bold">Punishment</h2>
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <p>
-                    <span className="font-bold">Buyer Penality</span> <br />{" "}
-                    {formatEther(feedData[1][1].penality.toString())}
+                    <span className="font-bold">Buyer Penalty</span> <br />{" "}
+                    {formatEther(feedData[1][1].penalty.toString())}
                   </p>
                   <p>
                     <span className="font-bold">Seller Punishment</span> <br />{" "}

@@ -32,14 +32,11 @@ contract MecenateStats {
     ) {
         mecenateUsers = IMecenateUsers(_mecenateUsers);
         mecenateFeedFactory = IMecenateFeedFactory(_mecenateFeedFactory);
-
         mecenateBay = IMecenateBay(_mecenateBay);
         mecenateTreasury = IMecenateTreasury(_mecenateTreasury);
     }
 
     function getStats() public view returns (Stats memory) {
-        // sanitizé reverted
-
         uint256 totalBayRequests = mecenateBay.contractCounter();
         uint256 totalFeeds = mecenateFeedFactory.contractCounter();
 

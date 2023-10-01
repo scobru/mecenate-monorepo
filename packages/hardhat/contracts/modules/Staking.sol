@@ -9,103 +9,145 @@ pragma solidity 0.8.19;
 import "./Deposit.sol";
 import "./Events.sol";
 
-abstract contract Staking is Events, Deposit {
+abstract contract Staking is Events, Deposit, TokenManager {
     using SafeMath for uint256;
 
     event StakeBurned(bytes32 staker, uint256 amount);
-
-    // create modifier
-    modifier checkStatus() {
-        require(
-            post.postdata.settings.status == Structures.PostStatus.Waiting ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Finalized ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Revealed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Punished ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Proposed ||
-                post.postdata.settings.status ==
-                Structures.PostStatus.Renounced,
-            "Wrong Status"
-        );
-        _;
-    }
+    event StakeTaken(bytes32 staker, uint256 amount, Structures.Tokens tokenId);
+    event StakeAdded(bytes32 staker, uint256 amount, Structures.Tokens tokenId);
 
     function _addStake(
+        Structures.Tokens tokenId,
         bytes32 staker,
+        address funder,
         uint256 amountToAdd
     ) internal returns (uint256 newStake) {
-        // update deposit
-        newStake = Deposit._increaseDeposit(staker, amountToAdd);
-        // explicit return
+        Structures.PostStatus currentStatus = post.postdata.settings.status;
+        require(
+            currentStatus != Structures.PostStatus.Accepted &&
+                currentStatus != Structures.PostStatus.Submitted,
+            "INVALID_STATUS"
+        );
+
+        require(amountToAdd > 0, "STAKE_REQUIRED");
+
+        if (tokenId != Structures.Tokens.NaN) {
+            TokenManager._transferFrom(
+                tokenId,
+                funder,
+                address(this),
+                amountToAdd
+            );
+        }
+
+        newStake = Deposit._increaseDeposit(tokenId, staker, amountToAdd);
+
+        emit StakeAdded(staker, amountToAdd, tokenId);
+
         return newStake;
     }
 
     function _takeStake(
+        Structures.Tokens tokenId,
         bytes32 staker,
+        address _to,
         uint256 amountToTake
     ) internal returns (uint256 newStake) {
-        // update deposit
-        newStake = Deposit._decreaseDeposit(staker, amountToTake);
-        // explicit return
+        // Memorizza lo status del post in una variabile per evitare accessi ridondanti allo storage
+        Structures.PostStatus currentStatus = post.postdata.settings.status;
+
+        // Verifica che lo status del post sia valido per procedere
+        require(
+            currentStatus != Structures.PostStatus.Accepted &&
+                currentStatus != Structures.PostStatus.Submitted,
+            "INVALID_STATUS"
+        );
+
+        // Effettua il trasferimento del token o dell'Ether
+        if (tokenId == Structures.Tokens.NaN) {
+            //(bool result, ) = payable(_to).call{value: amountToTake}("");
+            //require(result, "CALL_FAILED");
+            payable(_to).transfer(amountToTake);
+        } else {
+            TokenManager._transfer(tokenId, _to, amountToTake);
+        }
+
+        // Aggiorna il deposito e emette un evento
+        newStake = Deposit._decreaseDeposit(tokenId, staker, amountToTake);
+        emit StakeTaken(staker, amountToTake, tokenId);
+
         return newStake;
     }
 
     function _takeFullStake(
+        Structures.Tokens tokenId,
+        address _to,
         bytes32 staker
     ) internal returns (uint256 amountTaken) {
-        // get deposit
-        uint256 currentDeposit = Deposit._getDeposit(staker);
+        uint256 currentDeposit = Deposit._getDeposit(tokenId, staker);
 
-        // take full stake
-        currentDeposit = _takeStake(staker, currentDeposit);
+        uint256 newStake = _takeStake(tokenId, staker, _to, currentDeposit);
 
-        // return
-        return currentDeposit;
+        return newStake;
     }
 
     function _burnStake(
+        Structures.Tokens tokenId,
         bytes32 staker,
         uint256 amountToBurn
     ) internal returns (uint256 newStake) {
-        // update deposit
-        uint256 newDeposit = Deposit._decreaseDeposit(staker, amountToBurn);
+        uint256 newDeposit = Deposit._decreaseDeposit(
+            tokenId,
+            staker,
+            amountToBurn
+        );
 
-        // emit event
+        if (tokenId == Structures.Tokens.NaN) {
+            (bool result, ) = payable(
+                IMecenateFeedFactory(settings.factoryContract)
+                    .treasuryContract()
+            ).call{value: amountToBurn}("");
+            require(result, "CALL_FAILED");
+        } else if (tokenId == Structures.Tokens.DAI) {
+            BurnDAI._burnDai(amountToBurn);
+        } else if (tokenId == Structures.Tokens.MUSE) {
+            BurnMUSE._burn(amountToBurn);
+        }
+
         emit StakeBurned(staker, amountToBurn);
 
-        // return
         return newDeposit;
     }
 
     function _burnFullStake(
+        Structures.Tokens tokenId,
         bytes32 staker
     ) internal returns (uint256 amountBurned) {
-        // get deposit
-        uint256 currentDeposit = Deposit._getDeposit(staker);
+        uint256 currentDeposit = Deposit._getDeposit(tokenId, staker);
 
-        // burn full stake
-        _burnStake(staker, currentDeposit);
+        _burnStake(tokenId, staker, currentDeposit);
 
-        // return
         return currentDeposit;
     }
 
-    function getStake(bytes32 staker) external view returns (uint256 amount) {
+    function getStake(
+        Structures.Tokens tokenId,
+        bytes32 staker
+    ) external view returns (uint256 amount) {
         // get deposit
-        amount = Deposit._getDeposit(staker);
+        amount = Deposit._getDeposit(tokenId, staker);
         // explicit return
         return amount;
     }
 
     function getTotalStaked() external view returns (uint256) {
         uint256 amountSeller = Deposit._getDeposit(
+            post.postdata.settings.tokenId,
             keccak256(postSettingPrivate.vaultIdSeller)
         );
 
         uint256 amountBuyer = Deposit._getDeposit(
+            post.postdata.settings.tokenId,
             keccak256(postSettingPrivate.vaultIdBuyer)
         );
 
@@ -113,162 +155,144 @@ abstract contract Staking is Events, Deposit {
     }
 
     function addStake(
-        bytes memory sismoConnectResponse,
-        bytes32 _to
-    ) external payable checkStatus returns (uint256) {
-        // verify user
-        (
-            bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
+        Structures.Tokens tokenId,
+        uint256 amountToAdd,
+        bytes32 encryptedVaultId
+    ) external payable returns (uint256) {
+        require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
 
+        // Check if the encryptedVaultId matches with either the buyer or the seller
         require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
+            encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer) ||
+                encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller),
+            "VAULTID_MISMATCH"
         );
 
+        // Determine the amount to add based on the role (buyer or seller)
+        uint256 actualAmountToAdd = (encryptedVaultId ==
+            keccak256(postSettingPrivate.vaultIdSeller))
+            ? msg.value
+            : amountToAdd;
+
+        // Update the stake
+        uint256 newStake = _addStake(
+            tokenId,
+            encryptedVaultId,
+            msg.sender,
+            actualAmountToAdd
+        );
+
+        // Update the corresponding escrow value based on the role
+        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
+            post.postdata.escrow.payment = newStake;
+        } else {
+            post.postdata.escrow.stake = newStake;
+        }
+
+        return newStake;
+    }
+
+    function takeStake(
+        Structures.Tokens tokenId,
+        uint256 amountToTake,
+        bytes memory sismoConnectResponse,
+        address _to,
+        bytes32 _nonce
+    ) external returns (uint256) {
+        onlyVault();
+
+        require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
+
+        bytes32 encryptedVaultId = _commonTakeStake(
+            sismoConnectResponse,
+            _to,
+            _nonce
+        );
+
+        uint256 currentDeposit = Deposit._getDeposit(tokenId, encryptedVaultId);
+        require(currentDeposit >= amountToTake, "NOT_ENOUGH_STAKE");
+
+        uint256 newBalance = _takeStake(
+            tokenId,
+            encryptedVaultId,
+            _to,
+            amountToTake
+        );
+
+        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
+            post.postdata.escrow.payment = newBalance;
+        } else {
+            post.postdata.escrow.stake = newBalance;
+        }
+
+        return newBalance;
+    }
+
+    function takeFullStake(
+        Structures.Tokens tokenId,
+        bytes memory sismoConnectResponse,
+        address _to,
+        bytes32 _nonce
+    ) external returns (uint256) {
+        onlyVault();
+
+        require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
+
+        bytes32 encryptedVaultId = _commonTakeStake(
+            sismoConnectResponse,
+            _to,
+            _nonce
+        );
+
+        uint256 newBalance = _takeFullStake(tokenId, _to, encryptedVaultId);
+
+        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
+            post.postdata.escrow.payment = newBalance;
+        } else {
+            post.postdata.escrow.stake = newBalance;
+        }
+
+        return newBalance;
+    }
+
+    function getSellerStake() external view returns (uint256 amount) {
+        // get deposit
+        amount = Deposit._getDeposit(
+            post.postdata.settings.tokenId,
+            keccak256(postSettingPrivate.vaultIdSeller)
+        );
+        // explicit return
+        return amount;
+    }
+
+    function getBuyerStake() external view returns (uint256 amount) {
+        // get deposit
+        amount = Deposit._getDeposit(
+            post.postdata.settings.tokenId,
+            keccak256(postSettingPrivate.vaultIdBuyer)
+        );
+        // explicit return
+        return amount;
+    }
+
+    function _commonTakeStake(
+        bytes memory sismoConnectResponse,
+        address _to,
+        bytes32 _nonce
+    ) internal view returns (bytes32) {
+        (bytes memory vaultId, , , ) = _verifyNonce(
+            sismoConnectResponse,
+            _to,
+            _nonce
+        );
         bytes32 encryptedVaultId = keccak256(vaultId);
-        uint256 stakerBalance;
 
         require(
             encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer) ||
                 encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller),
-            "VaultId does not match"
+            "UNAUTHORIZED"
         );
 
-        // check if user
-
-        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
-            stakerBalance = _addStake(encryptedVaultId, msg.value);
-            post.postdata.escrow.payment = stakerBalance;
-        } else if (
-            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)
-        ) {
-            stakerBalance = _addStake(encryptedVaultId, msg.value);
-            post.postdata.escrow.stake = stakerBalance;
-        }
-
-        return stakerBalance;
-    }
-
-    function takeStake(
-        uint256 amountToTake,
-        bytes memory sismoConnectResponse,
-        bytes32 _to
-    ) external checkStatus returns (uint256) {
-        // verify user
-        (
-            bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
-
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
-        );
-
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
-        uint256 currentDeposit = Deposit._getDeposit(encryptedVaultId);
-
-        uint256 stakerBalance;
-
-        require(currentDeposit >= amountToTake, "Not enough deposit");
-
-        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
-            stakerBalance = _takeStake(encryptedVaultId, amountToTake);
-
-            post.postdata.escrow.payment = stakerBalance;
-
-            //send to vault instead
-
-            (bool result, ) = vaultContract.call{value: amountToTake}(
-                abi.encode(encryptedVaultId)
-            );
-            require(result, "Vault call failed");
-        } else if (
-            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)
-        ) {
-            stakerBalance = _takeStake(encryptedVaultId, amountToTake);
-
-            post.postdata.escrow.stake = stakerBalance;
-
-            (bool result, ) = vaultContract.call{value: amountToTake}(
-                abi.encode(encryptedVaultId)
-            );
-            require(result, "Vault call failed");
-        }
-
-        return stakerBalance;
-    }
-
-    function takeFullStake(
-        bytes memory sismoConnectResponse,
-        bytes32 _to
-    ) external checkStatus returns (uint256) {
-        // verify user
-        (
-            bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
-
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
-        );
-
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
-        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
-            require(
-                twitterId == postSettingPrivate.buyerTwitterId,
-                "Not the buyer"
-            );
-        } else if (
-            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)
-        ) {
-            require(
-                twitterId == postSettingPrivate.sellerTwitterId,
-                "Not the seller"
-            );
-        }
-
-        uint256 stakerBalance;
-
-        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
-            stakerBalance = _takeFullStake(encryptedVaultId);
-            post.postdata.escrow.payment = stakerBalance;
-
-            (bool result, ) = vaultContract.call{value: stakerBalance}(
-                abi.encode(encryptedVaultId)
-            );
-            require(result, "Vault call failed");
-        } else if (
-            encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller)
-        ) {
-            stakerBalance = _takeFullStake(encryptedVaultId);
-            post.postdata.escrow.stake = stakerBalance;
-            (bool result, ) = vaultContract.call{value: stakerBalance}(
-                abi.encode(encryptedVaultId)
-            );
-            require(result, "Vault call failed");
-        }
-
-        return stakerBalance;
+        return encryptedVaultId;
     }
 }

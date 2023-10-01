@@ -4,7 +4,7 @@
       "path": "."
     },
     {
-      "path": "../mecenate-v1"
+      "path": "../../utility/UniV3LP-Backend"
     }
   ],
   "settings": {

@@ -13,6 +13,5 @@ abstract contract Events is Data {
     event Invalid(Structures.Post post);
     event Finalized(Structures.Post post);
     event MadePublic(Structures.Post post);
-    event Refunded(Structures.Post post);
     event Renounced(Structures.Post post);
 }

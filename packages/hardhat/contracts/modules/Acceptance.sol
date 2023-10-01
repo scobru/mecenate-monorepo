@@ -11,69 +11,69 @@ import "./Staking.sol";
 abstract contract Acceptance is Events, Staking {
     function acceptPost(
         bytes memory sismoConnectResponse,
-        bytes32 _to
+        address _to,
+        bytes32 _nonce,
+        Structures.Tokens tokenId,
+        uint256 _paymentAmount
     ) external payable virtual {
-        // verify user
+        require(
+            validStatuses[uint8(Structures.PostStatus.Proposed)],
+            "INVALID_STATUS"
+        );
+        _checkToken(tokenId);
+
+        uint256 amountToAdd = tokenId == Structures.Tokens.NaN
+            ? msg.value
+            : _paymentAmount;
+        bytes32 sellerVaultIdHash = keccak256(postSettingPrivate.vaultIdSeller);
+
+        // Get encryptedVaultId only once
         (
             bytes memory vaultId,
             uint256 twitterId,
             uint256 telegramId,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to
-            );
 
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "_to address does not match signed message"
-        );
-
+        ) = _verifyNonce(sismoConnectResponse, _to, _nonce);
         bytes32 encryptedVaultId = keccak256(vaultId);
 
+        // Use local variable for repeated calls
+        uint256 sellerStake = Deposit._getDeposit(tokenId, sellerVaultIdHash);
+
+        require(sellerStake >= post.postdata.escrow.stake, "STAKE_INCORRECT");
         require(
-            IMecenateUsers(usersModuleContract).checkifUserExist(
+            IMecenateUsers(settings.usersModuleContract).checkifUserExist(
                 encryptedVaultId
             ),
-            "FEEDS:user does not exist"
+            "USERT_NOT_EXIST"
         );
-        require(
-            encryptedVaultId != keccak256(postSettingPrivate.vaultIdSeller),
-            "FEEDS: You are the seller"
-        );
-
-        // add stake
-        uint256 payment;
+        require(encryptedVaultId != sellerVaultIdHash, "YOU_ARE_THE_SELLER");
 
         if (post.postdata.escrow.payment > 0) {
-            payment = _addStake(encryptedVaultId, msg.value);
             require(
-                payment >= post.postdata.escrow.payment,
-                "FEEDS: Payment is not enough"
+                _paymentAmount >= post.postdata.escrow.payment,
+                "NOT_ENOUGH_PAYMENT"
             );
         } else {
-            require(msg.value > 0, "FEEDS: Payment is zero");
-            payment = _addStake(encryptedVaultId, msg.value);
+            require(msg.value > 0, "ZERO_MSGVALUE");
+            require(_paymentAmount > 0, "ZERO_PAYMENT");
         }
-        require(
-            post.postdata.settings.status == Structures.PostStatus.Proposed,
-            "FEEDS: Post is not Proposed"
+
+        uint256 payment = _addStake(
+            tokenId,
+            encryptedVaultId,
+            msg.sender,
+            amountToAdd
         );
 
-        // update post status
-
+        // Update all at once
         post.postdata.escrow.payment = payment;
-
         post.postdata.settings.status = Structures.PostStatus.Accepted;
+        _changeStatus(Structures.PostStatus.Accepted);
 
-        postSettingPrivate = Structures.postSettingPrivate({
-            vaultIdBuyer: vaultId,
-            buyerTwitterId: twitterId,
-            buyerTelegramId: telegramId,
-            vaultIdSeller: postSettingPrivate.vaultIdSeller,
-            sellerTwitterId: postSettingPrivate.sellerTwitterId,
-            sellerTelegramId: postSettingPrivate.sellerTelegramId
-        });
+        // Update private settings
+        postSettingPrivate.vaultIdBuyer = vaultId;
+        postSettingPrivate.buyerTwitterId = twitterId;
+        postSettingPrivate.buyerTelegramId = telegramId;
 
         emit Accepted(post);
     }

@@ -9,8 +9,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./interfaces/IMecenateVerifier.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "./interfaces/IMecenateVerifier.sol";
 import "./interfaces/IMecenateFeedFactory.sol";
 
 contract MecenateVault is Ownable, ReentrancyGuard {
@@ -20,17 +20,18 @@ contract MecenateVault is Ownable, ReentrancyGuard {
     mapping(bytes32 => uint256) private ethDeposits;
     mapping(bytes32 => mapping(address => uint256)) private tokenDeposits;
 
+    address public WETH;
+    address public DAI;
+    address public USDC;
+    address public MUSE;
     address public verifierContract;
-
     address public factoryContract;
-
     address public mecenateBay;
-
     address public mecenateUsers;
-
     address private relayer;
 
-    uint256 public maxGasPrice = 100 * 10 ** 9; // 50 Gwei in Wei
+    uint256 public relayerFeePercentage = 200;
+    uint256 public constant MAX_RELAYER_FEE_PERCENTAGE = 500;
 
     event MetaTransactionExecuted(
         address userAddress,
@@ -44,11 +45,6 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         string secret,
         address token
     );
-
-    modifier validGasPrice() {
-        require(tx.gasprice <= maxGasPrice, "Gas price too high");
-        _;
-    }
 
     modifier onlyRelayer() {
         require(msg.sender == relayer, "Not relayer");
@@ -69,6 +65,28 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         relayer = _relayer;
     }
 
+    function setTokens(
+        address _WETH,
+        address _DAI,
+        address _USDC,
+        address _MUSE
+    ) external onlyOwner {
+        WETH = _WETH;
+        DAI = _DAI;
+        USDC = _USDC;
+        MUSE = _MUSE;
+    }
+
+    function changeRelayerFee(
+        uint256 _newRelayerFeePercentage
+    ) external onlyOwner {
+        require(
+            _newRelayerFeePercentage <= MAX_RELAYER_FEE_PERCENTAGE,
+            "New relayer fee percentage is too high"
+        );
+        relayerFeePercentage = _newRelayerFeePercentage;
+    }
+
     function depositETH(bytes32 encryptedVaultId) public payable nonReentrant {
         // 1. Add the deposit to the correct deposit mapping
         ethDeposits[encryptedVaultId] += msg.value;
@@ -77,9 +95,17 @@ contract MecenateVault is Ownable, ReentrancyGuard {
     function depositToken(
         address _token,
         uint256 _amount,
-        bytes32 encryptedVaultId,
-        address _to
+        bytes32 encryptedVaultId
     ) public nonReentrant {
+        require(_token != address(0), "Token address cannot be 0");
+
+        require(_amount > 0, "Amount must be greater than zero");
+
+        require(
+            _token == WETH || _token == DAI || _token == USDC || _token == MUSE,
+            "Token not supported"
+        );
+
         // The user must first approve the token transfer
         // to this contract
         IERC20 token = IERC20(_token);
@@ -94,11 +120,13 @@ contract MecenateVault is Ownable, ReentrancyGuard {
     }
 
     function withdrawETH(
-        address _receiver,
         uint256 _amount,
         bytes memory sismoConnectResponse,
-        bytes32 _to
-    ) public {
+        address _to,
+        bytes32 _nonce
+    ) public onlyRelayer nonReentrant {
+        uint256 initialGas = gasleft();
+
         (
             bytes memory vaultId,
             ,
@@ -106,18 +134,33 @@ contract MecenateVault is Ownable, ReentrancyGuard {
             bytes memory signedMessage
         ) = IMecenateVerifier(verifierContract).sismoVerify(
                 sismoConnectResponse,
-                _to
+                _to,
+                _nonce
             );
 
-        require(
-            _to == abi.decode(signedMessage, (bytes32)),
-            "FEEDS:_to address does not match signed message"
+        (address to, bytes32 nonce) = abi.decode(
+            signedMessage,
+            (address, bytes32)
         );
+
+        require(to == _to, "Not Same Address");
+
+        require(nonce == _nonce, "Not Same Nonce");
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 
+        uint256 totalRequired = _amount; // Initialize with _value
+
+        totalRequired -= tx.gasprice * initialGas; // Add maximum possible gas cost
+
+        require(
+            ethDeposits[encryptedVaultId] >= totalRequired,
+            "Not enough balance"
+        );
+
         // 1. Verify that the commitment exists and the amount is not zero
         require(ethDeposits[encryptedVaultId] > 0, "Commitment does not exist");
+
         require(_amount > 0, "Amount must be greater than zero");
 
         // 2. Verify that the commitment has enough balance to withdraw from
@@ -126,11 +169,33 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         //decode signedMessage as address
         ethDeposits[encryptedVaultId] -= _amount;
 
-        (bool result, ) = payable(_receiver).call{value: _amount}("");
+        uint256 gasUsed = initialGas - gasleft();
+
+        uint256 gasCost = gasUsed * tx.gasprice;
+
+        uint256 relayerFee = (gasCost * relayerFeePercentage) / 10000;
+
+        require(_amount >= gasCost + relayerFee, "Not enough balance for gas");
+
+        uint256 newAmount = _amount - gasCost - relayerFee;
+
+        (bool result, ) = payable(to).call{value: newAmount}("");
         require(result, "ETH transfer failed");
+
+        (bool result2, ) = payable(msg.sender).call{
+            value: gasCost + relayerFee
+        }("");
+
+        require(result2, "ETH transfer failed with gas");
     }
 
-    function withdrawWithSecret(string memory _secret, address _token) public {
+    function withdrawWithSecret(
+        string memory _secret,
+        address _token,
+        bytes memory sismoConnectResponse,
+        address _to,
+        bytes32 _nonce
+    ) public onlyRelayer nonReentrant {
         bytes32 commitment = keccak256(abi.encodePacked(_secret));
         uint256 amount;
 
@@ -138,38 +203,52 @@ contract MecenateVault is Ownable, ReentrancyGuard {
             amount = ethDeposits[commitment];
             require(amount > 0, "No ETH deposit for this secret");
             ethDeposits[commitment] = 0;
-            payable(msg.sender).transfer(amount);
+            payable(_to).transfer(amount);
         } else {
             amount = tokenDeposits[commitment][_token];
             require(amount > 0, "No Token deposit for this secret");
             tokenDeposits[commitment][_token] = 0;
-            IERC20(_token).transfer(msg.sender, amount);
+            IERC20(_token).transfer(_to, amount);
         }
 
         emit Withdrawn(commitment, amount, _secret, _token);
     }
 
     function withdrawToken(
-        address _receiver,
         address _token,
         uint256 _amount,
         bytes memory sismoConnectResponse,
-        bytes32 _to
-    ) public {
+        address _to,
+        bytes32 _nonce
+    ) public onlyRelayer nonReentrant {
+        uint256 initialGas = gasleft();
+
+        uint256 totalRequired = tx.gasprice * initialGas;
+
         (
             bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId,
+            ,
+            ,
             bytes memory signedMessage
         ) = IMecenateVerifier(verifierContract).sismoVerify(
                 sismoConnectResponse,
-                _to
+                _to,
+                _nonce
             );
 
-        require(
-            _to == keccak256(signedMessage),
-            "FEEDS:_to address does not match signed message"
+        (address to, bytes32 nonce) = abi.decode(
+            signedMessage,
+            (address, bytes32)
         );
+
+        require(
+            ethDeposits[keccak256(vaultId)] >= totalRequired,
+            "Not enough ETH for gas required"
+        );
+
+        require(to == _to, "Not Same Address");
+
+        require(nonce == _nonce, "Not Same Nonce");
 
         // Check if the commitment exists
         // and the amount is greater than the deposit.
@@ -182,7 +261,26 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         tokenDeposits[keccak256(vaultId)][_token] -= _amount;
 
         // Transfer the tokens to msg.sender or operator.
-        IERC20(_token).transfer(_receiver, _amount);
+        IERC20(_token).transfer(to, _amount);
+
+        uint256 gasUsed = initialGas - gasleft();
+
+        uint256 gasCost = gasUsed * tx.gasprice;
+
+        uint256 relayerFee = (gasCost * relayerFeePercentage) / 10000;
+
+        require(
+            ethDeposits[keccak256(vaultId)] >= gasCost + relayerFee,
+            "Not enough balance for gas used"
+        );
+
+        ethDeposits[keccak256(vaultId)] -= gasCost + relayerFee;
+
+        (bool result, ) = payable(msg.sender).call{value: gasCost + relayerFee}(
+            ""
+        );
+
+        require(result, "ETH transfer failed with gas");
     }
 
     function getEthDeposit(
@@ -197,9 +295,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
 
     fallback() external payable {
         require(msg.data.length > 0, "Data required for Sismo verification.");
-
         bytes32 encryptedVaultId = abi.decode(msg.data, (bytes32));
-
         ethDeposits[encryptedVaultId] += msg.value;
     }
 
@@ -210,35 +306,32 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         return tokenDeposits[encryptedVaultId][_token];
     }
 
-    function setMaxGasPrice(uint256 _newMaxGasPrice) external onlyOwner {
-        maxGasPrice = _newMaxGasPrice;
-    }
-
     function execute(
         address _target,
         bytes calldata _data,
         uint256 _value,
         bytes32 _encryptedVaultId
-    ) external onlyRelayer validGasPrice nonReentrant returns (bool) {
-        uint256 initialGas = gasleft();
+    ) external onlyRelayer nonReentrant returns (bool) {
+        // Reduce storage reads by using a memory variable
+        uint256 availableBalance = ethDeposits[_encryptedVaultId];
 
+        // Validate the target contract
         require(
-            IMecenateFeedFactory(factoryContract).isFeed(_target) == true ||
+            IMecenateFeedFactory(factoryContract).isFeed(_target) ||
                 _target == mecenateBay ||
                 _target == mecenateUsers ||
                 _target == verifierContract ||
                 _target == factoryContract,
-            "Target is not a feed or a mecenate contract"
+            "Invalid target"
         );
 
-        uint256 totalRequired = _value; // Initialize with _value
-        totalRequired += tx.gasprice * initialGas; // Add maximum possible gas cost
+        // Estimate total required balance
+        uint256 totalRequired = _value + (tx.gasprice * gasleft());
 
-        require(
-            ethDeposits[_encryptedVaultId] >= totalRequired,
-            "Not enough balance"
-        );
+        // Check if the vault has enough balance
+        require(availableBalance >= totalRequired, "Insufficient balance");
 
+        // Execute the call
         if (_data.length == 0) {
             payable(_target).sendValue(_value);
         } else {
@@ -249,19 +342,30 @@ contract MecenateVault is Ownable, ReentrancyGuard {
             }
         }
 
-        ethDeposits[_encryptedVaultId] -= _value;
+        // Update available balance
+        availableBalance -= _value;
 
-        uint256 gasUsed = initialGas - gasleft();
-        uint256 gasCost = gasUsed * tx.gasprice;
+        // Calculate gas costs and relayer fee
+        uint256 gasUsed = totalRequired - _value - (tx.gasprice * gasleft());
+        uint256 relayerFee = (gasUsed * relayerFeePercentage) / 10000;
 
+        // Check again if the vault has enough balance to cover the gas and relayer fee
         require(
-            ethDeposits[_encryptedVaultId] >= gasCost,
-            "Not enough balance for gas"
+            availableBalance >= gasUsed + relayerFee,
+            "Insufficient balance for gas and fee"
         );
 
-        ethDeposits[_encryptedVaultId] -= gasCost;
+        // Update storage only once to reflect all changes
+        ethDeposits[_encryptedVaultId] =
+            availableBalance -
+            gasUsed -
+            relayerFee;
 
-        payable(msg.sender).transfer(gasCost);
+        // Transfer fee to the relayer
+        (bool result, ) = payable(msg.sender).call{value: gasUsed + relayerFee}(
+            ""
+        );
+        require(result, "ETH transfer failed");
 
         return true;
     }

@@ -1,0 +1,223 @@
+{
+  "address": "0x7b6667074F2E3704DF7B56fd91315c7C4a6dA12f",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_mecenateUsers",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_mecenateFeedFactory",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_mecenateBay",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_mecenateTreasury",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "getStats",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "totalUsers",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalBayRequests",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalFeeds",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "globalFee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "fixedFee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "treasuryBalance",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct MecenateStats.Stats",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mecenateBay",
+      "outputs": [
+        {
+          "internalType": "contract IMecenateBay",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mecenateFeedFactory",
+      "outputs": [
+        {
+          "internalType": "contract IMecenateFeedFactory",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mecenateTreasury",
+      "outputs": [
+        {
+          "internalType": "contract IMecenateTreasury",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mecenateUsers",
+      "outputs": [
+        {
+          "internalType": "contract IMecenateUsers",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x6d38fe1f99d0912ce9984b2a4084fb3416f82f6d995b46289de07f8bafe0df0b",
+  "receipt": {
+    "to": null,
+    "from": "0x8aA5F726d9F868a21a8bd748E2f1E43bA31eb670",
+    "contractAddress": "0x7b6667074F2E3704DF7B56fd91315c7C4a6dA12f",
+    "transactionIndex": 4,
+    "gasUsed": "368716",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x555a61c268bf754c7cd16da2773647d28c9f465223696f1783ea8113abe36cc3",
+    "transactionHash": "0x6d38fe1f99d0912ce9984b2a4084fb3416f82f6d995b46289de07f8bafe0df0b",
+    "logs": [],
+    "blockNumber": 10346067,
+    "cumulativeGasUsed": "532415",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x0CC0fD8e82eB9ea3b292082901cDe04195634D1b",
+    "0x7A4b27C69cD58596046D667B0e1DC547311edC77",
+    "0x9c773746F55B14beeCcbf44a3EEa8C90aE5955eB",
+    "0xb679FdcaC090FFC4848d9709C705241867B0d78A"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "1c44eacd89272d51fa104e5a7d17594c",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_mecenateUsers\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_mecenateFeedFactory\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_mecenateBay\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_mecenateTreasury\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"getStats\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"totalUsers\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalBayRequests\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalFeeds\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"globalFee\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"fixedFee\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"treasuryBalance\",\"type\":\"uint256\"}],\"internalType\":\"struct MecenateStats.Stats\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"mecenateBay\",\"outputs\":[{\"internalType\":\"contract IMecenateBay\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"mecenateFeedFactory\",\"outputs\":[{\"internalType\":\"contract IMecenateFeedFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"mecenateTreasury\",\"outputs\":[{\"internalType\":\"contract IMecenateTreasury\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"mecenateUsers\",\"outputs\":[{\"internalType\":\"contract IMecenateUsers\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/MecenateStats.sol\":\"MecenateStats\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"contracts/MecenateStats.sol\":{\"content\":\"/**\\n * @title MecenateStats\\n * @dev This contract provides statistics about the Mecenate platform, including the total number of users, bay requests, feeds, global fee, fixed fee, and treasury balance.\\n */\\npragma solidity 0.8.19;\\n\\nimport \\\"./interfaces/IMecenateUsers.sol\\\";\\nimport \\\"./interfaces/IMecenateFeedFactory.sol\\\";\\nimport \\\"./interfaces/IMecenateBay.sol\\\";\\nimport \\\"./interfaces/IMecenateTreasury.sol\\\";\\n\\ncontract MecenateStats {\\n    struct Stats {\\n        uint256 totalUsers;\\n        uint256 totalBayRequests;\\n        uint256 totalFeeds;\\n        uint256 globalFee;\\n        uint256 fixedFee;\\n        uint256 treasuryBalance;\\n    }\\n\\n    IMecenateUsers public mecenateUsers;\\n    IMecenateFeedFactory public mecenateFeedFactory;\\n    IMecenateBay public mecenateBay;\\n    IMecenateTreasury public mecenateTreasury;\\n\\n    constructor(\\n        address _mecenateUsers,\\n        address _mecenateFeedFactory,\\n        address _mecenateBay,\\n        address _mecenateTreasury\\n    ) {\\n        mecenateUsers = IMecenateUsers(_mecenateUsers);\\n        mecenateFeedFactory = IMecenateFeedFactory(_mecenateFeedFactory);\\n        mecenateBay = IMecenateBay(_mecenateBay);\\n        mecenateTreasury = IMecenateTreasury(_mecenateTreasury);\\n    }\\n\\n    function getStats() public view returns (Stats memory) {\\n        uint256 totalBayRequests = mecenateBay.contractCounter();\\n        uint256 totalFeeds = mecenateFeedFactory.contractCounter();\\n\\n        return\\n            Stats(\\n                mecenateUsers.getUserCount(),\\n                totalBayRequests,\\n                totalFeeds,\\n                mecenateTreasury.globalFee(),\\n                mecenateTreasury.fixedFee(),\\n                address(mecenateTreasury).balance\\n            );\\n    }\\n}\\n\",\"keccak256\":\"0x7168e8ae97d90857b9923a9e899e3302dcb6970d91e8511bc632f9f4d94c2a10\"},\"contracts/interfaces/IMecenateBay.sol\":{\"content\":\"pragma solidity 0.8.19;\\nimport \\\"../library/Structures.sol\\\";\\n\\ninterface IMecenateBay {\\n    function allRequests()\\n        external\\n        view\\n        returns (Structures.BayRequest[] memory);\\n\\n    function contractCounter() external view returns (uint256);\\n}\\n\",\"keccak256\":\"0x2360f82f352128e3e3783aca35ced8578a8d05533fcc5a21af66b69f71d11119\"},\"contracts/interfaces/IMecenateFeedFactory.sol\":{\"content\":\"pragma solidity 0.8.19;\\n\\ninterface IMecenateFeedFactory {\\n    function owner() external view returns (address payable);\\n\\n    function treasuryContract() external view returns (address payable);\\n\\n    function identityContract() external view returns (address);\\n\\n    function feeds() external view returns (address[] memory);\\n\\n    function contractCounter() external view returns (uint256);\\n\\n    function isFeed(address _feed) external view returns (bool);\\n\\n    function museToken() external view returns (address);\\n\\n    function wethToken() external view returns (address);\\n\\n    function daiToken() external view returns (address);\\n\\n    function router() external view returns (address);\\n\\n    function getRouterFee(uint8 tokenId) external view returns (uint256);\\n\\n    function burnEnabled() external view returns (bool);\\n}\\n\",\"keccak256\":\"0x74d8cde749b17ace9473a06f8e8ca757864f05799f1ed131847a53f260e15319\"},\"contracts/interfaces/IMecenateTreasury.sol\":{\"content\":\"pragma solidity 0.8.19;\\n\\ninterface IMecenateTreasury {\\n    function globalFee() external view returns (uint256);\\n\\n    function fixedFee() external view returns (uint256);\\n}\\n\",\"keccak256\":\"0xade0e46553c55f99f424d2a5919ae62ab8f2b0829b0713aa539c2bf27850ed27\"},\"contracts/interfaces/IMecenateUsers.sol\":{\"content\":\"pragma solidity 0.8.19;\\r\\nimport \\\"../library/Structures.sol\\\";\\r\\n\\r\\ninterface IMecenateUsers {\\r\\n    function checkifUserExist(bytes32 vaultId) external view returns (bool);\\r\\n\\r\\n    function getUserData(\\r\\n        address user\\r\\n    ) external view returns (Structures.User memory);\\r\\n\\r\\n    function getUserCount() external view returns (uint256);\\r\\n\\r\\n    function getUserAt(uint256 index) external view returns (address);\\r\\n\\r\\n    function getUserVaultIdAt(uint256 index) external view returns (bytes32);\\r\\n}\\r\\n\",\"keccak256\":\"0xcd2b91f5bebd5c880ac937b181771a0a722a9a71ff93c783da3c63137179a042\"},\"contracts/library/Structures.sol\":{\"content\":\"/**\\n * @title Structures\\n * @dev This library defines various data structures used in the Mecenate platform.\\n */\\npragma solidity 0.8.19;\\n\\nlibrary Structures {\\n    enum PostStatus {\\n        Waiting,\\n        Proposed,\\n        Accepted,\\n        Submitted,\\n        Finalized,\\n        Punished,\\n        Revealed,\\n        Renounced\\n    }\\n    enum Tokens {\\n        NaN,\\n        MUSE,\\n        DAI\\n    }\\n    enum PostType {\\n        Text,\\n        Image,\\n        Video,\\n        Audio,\\n        File\\n    }\\n    enum PostDuration {\\n        OneDay,\\n        ThreeDays,\\n        OneWeek,\\n        TwoWeeks,\\n        OneMonth\\n    }\\n\\n    struct FeedSettings {\\n        uint256 punishmentRatio;\\n        uint256 postCount;\\n        address usersModuleContract;\\n        address factoryContract;\\n        address verifierContract;\\n        address vaultContract;\\n        address router;\\n        bytes encodedSymKey;\\n        bytes lastMessageForBuyer;\\n        bytes lastMessageForSeller;\\n        string version;\\n    }\\n\\n    struct FactorySettings {\\n        address treasuryContract;\\n        address usersModuleContract;\\n        address verifierContract;\\n        address vaultContract;\\n        address museToken;\\n        address daiToken;\\n        address wethToken;\\n        address router;\\n    }\\n\\n    /**\\n     * @dev Struct representing a post on the Mecenate platform.\\n     */\\n    struct Post {\\n        User creator;\\n        PostData postdata;\\n    }\\n\\n    /**\\n     * @dev Struct representing the data of a post on the Mecenate platform.\\n     */\\n    struct PostData {\\n        PostSettings settings;\\n        PostEscrow escrow;\\n        PostEncryptedData data;\\n    }\\n\\n    /**\\n     * @dev Struct representing the encrypted data of a post on the Mecenate platform.\\n     */\\n    struct PostEncryptedData {\\n        bytes encryptedData;\\n        bytes encryptedKey;\\n        bytes decryptedData;\\n    }\\n\\n    /**\\n     * @dev Struct representing the settings of a post on the Mecenate platform.\\n     */\\n    struct PostSettings {\\n        PostStatus status;\\n        PostType postType;\\n        uint256 creationTimeStamp;\\n        uint256 endTimeStamp;\\n        uint256 duration;\\n        Tokens tokenId;\\n    }\\n\\n    /**\\n     * @dev Struct representing the private settings of a post on the Mecenate platform.\\n     */\\n    struct PostSettingPrivate {\\n        bytes vaultIdSeller;\\n        uint256 sellerTwitterId;\\n        uint256 sellerTelegramId;\\n        bytes vaultIdBuyer;\\n        uint256 buyerTwitterId;\\n        uint256 buyerTelegramId;\\n    }\\n\\n    /**\\n     * @dev Struct representing the escrow of a post on the Mecenate platform.\\n     */\\n    struct PostEscrow {\\n        uint256 stake;\\n        uint256 payment;\\n        uint256 punishment;\\n        uint256 penalty;\\n    }\\n\\n    /**\\n     * @dev Struct representing a user on the Mecenate platform.\\n     */\\n    struct User {\\n        bytes32 vaultId;\\n    }\\n\\n    /**\\n     * @dev Struct representing a feed on the Mecenate platform.\\n     */\\n    struct Feed {\\n        address contractAddress;\\n        bytes32 operator;\\n        uint256 sellerStake;\\n        uint256 buyerStake;\\n        uint256 totalStake;\\n        uint256 postCount;\\n        uint256 paymentRequested;\\n        uint256 stakeRequested;\\n        PostStatus status;\\n        Tokens tokenId;\\n    }\\n\\n    /**\\n     * @dev Struct representing a bay request on the Mecenate platform.\\n     */\\n    struct BayRequest {\\n        bytes32 request;\\n        uint256 payment;\\n        uint256 stake;\\n        address postAddress;\\n        bool accepted;\\n        uint256 postCount;\\n        Tokens tokenId;\\n    }\\n\\n    /**\\n     * @dev Struct representing the private settings of a bay request on the Mecenate platform.\\n     */\\n    struct BayRequestPrivate {\\n        bytes vaultIdSeller;\\n        bytes sellerResponse;\\n        bytes vaultIdBuyer;\\n        bytes buyerResponse;\\n        address buyerTo;\\n        bytes32 buyerNonce;\\n    }\\n}\\n\",\"keccak256\":\"0x98e685eac4c2cf3f590a6b0433ff0ae3c31c6a307e8b6f4d6cd6edea02550c4b\"}},\"version\":1}",
+  "bytecode": "0x6080346100b957601f6104eb38819003918201601f19168301916001600160401b038311848410176100be578084926080946040528339810103126100b957610047816100d4565b90610054602082016100d4565b61006c6060610065604085016100d4565b93016100d4565b9060018060a01b03928380928160018060a01b0319971687600054161760005516856001541617600155168360025416176002551690600354161760035560405161040290816100e98239f35b600080fd5b634e487b7160e01b600052604160045260246000fd5b51906001600160a01b03821682036100b95756fe6080604081815260048036101561001557600080fd5b600092833560e01c908163139e3c541461035457508063295b7b9a1461032b5780633f16a3bb1461030257806377260151146102d55763c59d48471461005a57600080fd5b346102d157826003193601126102d157815161007581610378565b8381528360a060209282848201528286820152826060820152826080820152015260018060a01b03908160025416938051928284868163019ef4ed60e21b998a82525afa9384156102985787946102a2575b50828160015416968684518099819382525afa9081156102985785968896959692610262575b50838189541684519889809263b5cb15f760e01b82525afa968715610258578897610225575b506003548351634047e10360e11b815294911681858781845afa9485156101ec5789956101f6575b5081845180976391792d5b60e01b825281845afa9586156101ec5789966101b5575b5060c09850319560a0845161017181610378565b8981528381019283528581019485526060810196875260808101978852019687528351978852519087015251908501525160608401525160808301525160a0820152f35b9095508181813d83116101e5575b6101cd81836103aa565b810103126101e15760c0985051943861015d565b8880fd5b503d6101c3565b84513d8b823e3d90fd5b9094508181813d831161021e575b61020e81836103aa565b810103126101e15751933861013b565b503d610204565b9096508381813d8311610251575b61023d81836103aa565b8101031261024d57519538610113565b8780fd5b503d610233565b83513d8a823e3d90fd5b945090508284813d8111610291575b61027b81836103aa565b8101031261028d5785935190386100ed565b8680fd5b503d610271565b82513d89823e3d90fd5b9093508281813d83116102ca575b6102ba81836103aa565b8101031261028d575192386100c7565b503d6102b0565b8280fd5b5050346102fe57816003193601126102fe5760015490516001600160a01b039091168152602090f35b5080fd5b5050346102fe57816003193601126102fe5760025490516001600160a01b039091168152602090f35b5050346102fe57816003193601126102fe5760035490516001600160a01b039091168152602090f35b8490346102fe57816003193601126102fe5790546001600160a01b03168152602090f35b60c0810190811067ffffffffffffffff82111761039457604052565b634e487b7160e01b600052604160045260246000fd5b90601f8019910116810190811067ffffffffffffffff8211176103945760405256fea26469706673582212208a5a76204c410fe042f6d16aa5ecfa603d43817fba7982d01242317b458dbb0c64736f6c63430008130033",
+  "deployedBytecode": "0x6080604081815260048036101561001557600080fd5b600092833560e01c908163139e3c541461035457508063295b7b9a1461032b5780633f16a3bb1461030257806377260151146102d55763c59d48471461005a57600080fd5b346102d157826003193601126102d157815161007581610378565b8381528360a060209282848201528286820152826060820152826080820152015260018060a01b03908160025416938051928284868163019ef4ed60e21b998a82525afa9384156102985787946102a2575b50828160015416968684518099819382525afa9081156102985785968896959692610262575b50838189541684519889809263b5cb15f760e01b82525afa968715610258578897610225575b506003548351634047e10360e11b815294911681858781845afa9485156101ec5789956101f6575b5081845180976391792d5b60e01b825281845afa9586156101ec5789966101b5575b5060c09850319560a0845161017181610378565b8981528381019283528581019485526060810196875260808101978852019687528351978852519087015251908501525160608401525160808301525160a0820152f35b9095508181813d83116101e5575b6101cd81836103aa565b810103126101e15760c0985051943861015d565b8880fd5b503d6101c3565b84513d8b823e3d90fd5b9094508181813d831161021e575b61020e81836103aa565b810103126101e15751933861013b565b503d610204565b9096508381813d8311610251575b61023d81836103aa565b8101031261024d57519538610113565b8780fd5b503d610233565b83513d8a823e3d90fd5b945090508284813d8111610291575b61027b81836103aa565b8101031261028d5785935190386100ed565b8680fd5b503d610271565b82513d89823e3d90fd5b9093508281813d83116102ca575b6102ba81836103aa565b8101031261028d575192386100c7565b503d6102b0565b8280fd5b5050346102fe57816003193601126102fe5760015490516001600160a01b039091168152602090f35b5080fd5b5050346102fe57816003193601126102fe5760025490516001600160a01b039091168152602090f35b5050346102fe57816003193601126102fe5760035490516001600160a01b039091168152602090f35b8490346102fe57816003193601126102fe5790546001600160a01b03168152602090f35b60c0810190811067ffffffffffffffff82111761039457604052565b634e487b7160e01b600052604160045260246000fd5b90601f8019910116810190811067ffffffffffffffff8211176103945760405256fea26469706673582212208a5a76204c410fe042f6d16aa5ecfa603d43817fba7982d01242317b458dbb0c64736f6c63430008130033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 9491,
+        "contract": "contracts/MecenateStats.sol:MecenateStats",
+        "label": "mecenateUsers",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(IMecenateUsers)16822"
+      },
+      {
+        "astId": 9494,
+        "contract": "contracts/MecenateStats.sol:MecenateStats",
+        "label": "mecenateFeedFactory",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_contract(IMecenateFeedFactory)16771"
+      },
+      {
+        "astId": 9497,
+        "contract": "contracts/MecenateStats.sol:MecenateStats",
+        "label": "mecenateBay",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_contract(IMecenateBay)16638"
+      },
+      {
+        "astId": 9500,
+        "contract": "contracts/MecenateStats.sol:MecenateStats",
+        "label": "mecenateTreasury",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_contract(IMecenateTreasury)16784"
+      }
+    ],
+    "types": {
+      "t_contract(IMecenateBay)16638": {
+        "encoding": "inplace",
+        "label": "contract IMecenateBay",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IMecenateFeedFactory)16771": {
+        "encoding": "inplace",
+        "label": "contract IMecenateFeedFactory",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IMecenateTreasury)16784": {
+        "encoding": "inplace",
+        "label": "contract IMecenateTreasury",
+        "numberOfBytes": "20"
+      },
+      "t_contract(IMecenateUsers)16822": {
+        "encoding": "inplace",
+        "label": "contract IMecenateUsers",
+        "numberOfBytes": "20"
+      }
+    }
+  }
+}
