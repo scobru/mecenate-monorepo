@@ -13,7 +13,7 @@ export type ScaffoldConfig = {
 
 const scaffoldConfig = {
   // The network where your DApp lives in
-  targetNetwork: chains.sepolia,
+  targetNetwork: chains.baseGoerli,
   // The interval at which your front-end polls the RPC servers for new data
   // it has no effect on the local network
   pollingInterval: Number(process.env.NEXT_PUBLIC_RPC_POLLING_INTERVAL),

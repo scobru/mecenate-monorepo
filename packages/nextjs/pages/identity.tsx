@@ -6,10 +6,11 @@ import { ContractInterface, Signer, ethers } from "ethers";
 import { keccak256 } from "ethers/lib/utils.js";
 import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
 import { CONFIG, AUTHS, SIGNATURE_REQUEST, AuthType } from "./../sismo.config";
-import { useTransactor } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 import Spinner from "~~/components/Spinner";
 import crypto from "crypto";
 import { Address } from "~~/components/scaffold-eth";
+import { TokenAmount } from "@uniswap/sdk";
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
@@ -35,7 +36,11 @@ const Identity: NextPage = () => {
   const [nonce, setNonce] = React.useState<any>(null);
   const [forwarderAddress, setForwarderAddress] = React.useState<string>("");
   const deployedContractDepositorFactory = getDeployedContract(chain?.id.toString(), "MecenateForwarderFactory");
+  const deployedContractForwarder = getDeployedContract(chain?.id.toString(), "MecenateForwarder");
+
   const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
+  const [tokenAddress, setTokenAddress] = React.useState<string>("");
+  const [tokenAmount, setTokenAmount] = React.useState<string>("");
 
   let UsersAddress!: string;
   let UsersAbi: ContractInterface[] = [];
@@ -51,6 +56,13 @@ const Identity: NextPage = () => {
 
   let vaultAddress!: string;
   let vaultAbi: ContractInterface[] = [];
+
+  let forwarderAddressOriginal!: string;
+  let forwarderAbi: ContractInterface[] = [];
+
+  if (deployedContractForwarder) {
+    ({ address: forwarderAddressOriginal, abi: forwarderAbi } = deployedContractForwarder);
+  }
 
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
@@ -71,6 +83,20 @@ const Identity: NextPage = () => {
   if (deployedContractDepositorFactory) {
     ({ address: depositorAddress, abi: depositorAbi } = deployedContractDepositorFactory);
   }
+
+  const { writeAsync: mintDai } = useScaffoldContractWrite(
+    "MockDai",
+    "mint",
+    [forwarderAddress, ethers.utils.parseEther("1")],
+    0,
+  );
+
+  const { writeAsync: mintMuse } = useScaffoldContractWrite(
+    "MUSE",
+    "mint",
+    [forwarderAddress, ethers.utils.parseEther("1")],
+    0,
+  );
 
   const vaultCtx = useContract({
     address: vaultAddress,
@@ -93,6 +119,12 @@ const Identity: NextPage = () => {
   const depositorFactory = useContract({
     address: deployedContractDepositorFactory?.address,
     abi: depositorAbi,
+    signerOrProvider: customWallet || provider,
+  });
+
+  const forwarder = useContract({
+    address: forwarderAddress,
+    abi: forwarderAddressOriginal?.abi,
     signerOrProvider: customWallet || provider,
   });
 
@@ -244,6 +276,13 @@ const Identity: NextPage = () => {
     return result;
   };
 
+  const handleDepositToken = async () => {
+    if (!forwarder) return;
+    const iface = new ethers.utils.Interface(deployedContractUser?.abi as any[]);
+    const data = iface.encodeFunctionData("depositToken", [tokenAddress, ethers.utils.parseEther(tokenAmount)]);
+    await forwarder?.depositToken(tokenAddress);
+  };
+
   return (
     <div className="flex min-w-fit flex-col mx-auto flex-grow pt-10 text-base-content p-4 m-4 ">
       <div className="max-w-3xl text-center my-2 text-base-content">
@@ -254,7 +293,6 @@ const Identity: NextPage = () => {
           </div>
           <div className="p-4 ">
             {!signer?.provider && <div className="text-center font-bold text-xl my-5">Please connect your wallet</div>}
-
             {pageState == "init" ? (
               <>
                 <div className="mt-10">
@@ -347,6 +385,27 @@ const Identity: NextPage = () => {
                             </button>
                           </div>
                           <div className="text-green-500 font-bold my-5 ">ZK Proofs verified!</div>
+                          <div>
+                            <button
+                              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
+                              onClick={async () => {
+                                await mintDai();
+                              }}
+                              disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
+                            >
+                              Mint Dai
+                            </button>
+
+                            <button
+                              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
+                              onClick={async () => {
+                                await mintMuse();
+                              }}
+                              disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
+                            >
+                              Mint Muse
+                            </button>
+                          </div>
                           <div className="font-semibold text-xl">⚠️ Deposit into vault before sign-in</div>
                           <div>
                             <p className="text-xl  mb-2">Create forwarder address used to deposit into vault</p>
@@ -363,13 +422,45 @@ const Identity: NextPage = () => {
                               <p className="text-xl mb-10">Create forwarder first</p>
                             ) : (
                               <div>
-                                {" "}
-                                <p className="text-xl mb-10">Send ETH to deposit at:</p>
-                                <Address address={forwarderAddress} format="long" />
+                                <div>
+                                  {" "}
+                                  <p className="text-xl mb-10">Send ETH to deposit at:</p>
+                                  <Address address={forwarderAddress} format="long" />
+                                </div>
+                                <div>
+                                  {" "}
+                                  <p className="text-xl mb-10">Send Token and after click to deposit:</p>
+                                  <Address address={forwarderAddress} format="long" />
+                                  <select
+                                    name="tokens"
+                                    id="tokens"
+                                    onChange={async e => {
+                                      setTokenAddress(e.target.value);
+                                    }}
+                                  >
+                                    <option value={process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE}>DAI</option>
+                                    <option value={process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE}>MUSE</option>
+                                  </select>
+                                  <input
+                                    type="text"
+                                    className="input input-primary"
+                                    onChange={async e => {
+                                      setTokenAmount(e.target.value);
+                                    }}
+                                  />
+                                  <button
+                                    className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
+                                    onClick={async () => {
+                                      await forwarder?.depositToken(tokenAddress, ethers.utils.parseEther(tokenAmount));
+                                    }}
+                                    disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
+                                  >
+                                    Deposit Token
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
-
                           <div className="mt-10">
                             <input
                               className="input input-bordered my-5 w-full"
