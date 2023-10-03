@@ -268,6 +268,21 @@ const deployYourContract: DeployFunction = async function (
 
   setByteCode.wait();
 
+  const mecenateForwarder = await deploy("MecenateForwarder", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [ethers.constants.HashZero],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  mecenateForwarder.receipt &&
+    console.log(
+      "Mecenate Stats Factory deployed at:",
+      mecenateForwarder.receipt.contractAddress,
+    );
 };
 
 export default deployYourContract;

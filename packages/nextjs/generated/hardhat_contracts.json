@@ -4141,8 +4141,59 @@
             }
           ]
         },
+        "MecenateForwarder": {
+          "address": "0xd930f83B478d1b2480B4aC7b95212382A2E968eA",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "_encryptedVaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                }
+              ],
+              "name": "depositToken",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "factory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            }
+          ]
+        },
         "MecenateForwarderFactory": {
-          "address": "0xcEcBA5A5FC5b5C077c6bd9D8f4f2d25EC9A0EfbE",
+          "address": "0x2caDf7b7C779C1866Ed89BC74C81b9Fb0A488bf6",
           "abi": [
             {
               "inputs": [
