@@ -1,0 +1,472 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ISismoConnectVerifier",
+  "sourceName": "contracts/helpers/interfaces/ISismoConnectVerifier.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "receivedAppId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "expectedAppId",
+          "type": "bytes16"
+        }
+      ],
+      "name": "AppIdMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "receivedNamespace",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "expectedNamespace",
+          "type": "bytes16"
+        }
+      ],
+      "name": "NamespaceMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "requestMessageSignature",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "responseMessageSignature",
+          "type": "bytes"
+        }
+      ],
+      "name": "SignatureMessageMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestVersion",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "responseVersion",
+          "type": "bytes32"
+        }
+      ],
+      "name": "VersionMismatch",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "VerifierSet",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "SISMO_CONNECT_VERSION",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes16",
+              "name": "appId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "namespace",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "version",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signedMessage",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "enum AuthType",
+                      "name": "authType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "isAnon",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "isSelectableByUser",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "userId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "extraData",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct Auth[]",
+                  "name": "auths",
+                  "type": "tuple[]"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "enum ClaimType",
+                      "name": "claimType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes16",
+                      "name": "groupId",
+                      "type": "bytes16"
+                    },
+                    {
+                      "internalType": "bytes16",
+                      "name": "groupTimestamp",
+                      "type": "bytes16"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "isSelectableByUser",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "value",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "extraData",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct Claim[]",
+                  "name": "claims",
+                  "type": "tuple[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "provingScheme",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "proofData",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "extraData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct SismoConnectProof[]",
+              "name": "proofs",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct SismoConnectResponse",
+          "name": "response",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes16",
+              "name": "namespace",
+              "type": "bytes16"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum AuthType",
+                  "name": "authType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "userId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isAnon",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isOptional",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isSelectableByUser",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "extraData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct AuthRequest[]",
+              "name": "auths",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum ClaimType",
+                  "name": "claimType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes16",
+                  "name": "groupId",
+                  "type": "bytes16"
+                },
+                {
+                  "internalType": "bytes16",
+                  "name": "groupTimestamp",
+                  "type": "bytes16"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isOptional",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isSelectableByUser",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "extraData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct ClaimRequest[]",
+              "name": "claims",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bytes",
+                  "name": "message",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isSelectableByUser",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "extraData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct SignatureRequest",
+              "name": "signature",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct SismoConnectRequest",
+          "name": "request",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes16",
+              "name": "appId",
+              "type": "bytes16"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "isImpersonationMode",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct VaultConfig",
+              "name": "vault",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct SismoConnectConfig",
+          "name": "config",
+          "type": "tuple"
+        }
+      ],
+      "name": "verify",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes16",
+              "name": "appId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "namespace",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "version",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum AuthType",
+                  "name": "authType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "isAnon",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "userId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "extraData",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "proofData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct VerifiedAuth[]",
+              "name": "auths",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum ClaimType",
+                  "name": "claimType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes16",
+                  "name": "groupId",
+                  "type": "bytes16"
+                },
+                {
+                  "internalType": "bytes16",
+                  "name": "groupTimestamp",
+                  "type": "bytes16"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "extraData",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "proofId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "proofData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct VerifiedClaim[]",
+              "name": "claims",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signedMessage",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SismoConnectVerifiedResult",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

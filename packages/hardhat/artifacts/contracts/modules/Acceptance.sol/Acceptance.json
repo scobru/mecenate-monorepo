@@ -1,0 +1,1401 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Acceptance",
+  "sourceName": "contracts/modules/Acceptance.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct Structures.User",
+              "name": "creator",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "enum Structures.PostStatus",
+                      "name": "status",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "enum Structures.PostType",
+                      "name": "postType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "creationTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "endTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "duration",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum Structures.Tokens",
+                      "name": "tokenId",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostSettings",
+                  "name": "settings",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "punishment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "penalty",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEscrow",
+                  "name": "escrow",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedData",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedKey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "decryptedData",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEncryptedData",
+                  "name": "data",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct Structures.PostData",
+              "name": "postdata",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct Structures.Post",
+          "name": "post",
+          "type": "tuple"
+        }
+      ],
+      "name": "Accepted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct Structures.User",
+              "name": "creator",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "enum Structures.PostStatus",
+                      "name": "status",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "enum Structures.PostType",
+                      "name": "postType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "creationTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "endTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "duration",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum Structures.Tokens",
+                      "name": "tokenId",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostSettings",
+                  "name": "settings",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "punishment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "penalty",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEscrow",
+                  "name": "escrow",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedData",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedKey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "decryptedData",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEncryptedData",
+                  "name": "data",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct Structures.PostData",
+              "name": "postdata",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct Structures.Post",
+          "name": "post",
+          "type": "tuple"
+        }
+      ],
+      "name": "Created",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenID",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "user",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newDeposit",
+          "type": "uint256"
+        }
+      ],
+      "name": "DepositDecreased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenID",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "user",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newDeposit",
+          "type": "uint256"
+        }
+      ],
+      "name": "DepositIncreased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct Structures.User",
+              "name": "creator",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "enum Structures.PostStatus",
+                      "name": "status",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "enum Structures.PostType",
+                      "name": "postType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "creationTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "endTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "duration",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum Structures.Tokens",
+                      "name": "tokenId",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostSettings",
+                  "name": "settings",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "punishment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "penalty",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEscrow",
+                  "name": "escrow",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedData",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedKey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "decryptedData",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEncryptedData",
+                  "name": "data",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct Structures.PostData",
+              "name": "postdata",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct Structures.Post",
+          "name": "post",
+          "type": "tuple"
+        }
+      ],
+      "name": "Finalized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct Structures.User",
+              "name": "creator",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "enum Structures.PostStatus",
+                      "name": "status",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "enum Structures.PostType",
+                      "name": "postType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "creationTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "endTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "duration",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum Structures.Tokens",
+                      "name": "tokenId",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostSettings",
+                  "name": "settings",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "punishment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "penalty",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEscrow",
+                  "name": "escrow",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedData",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedKey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "decryptedData",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEncryptedData",
+                  "name": "data",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct Structures.PostData",
+              "name": "postdata",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct Structures.Post",
+          "name": "post",
+          "type": "tuple"
+        }
+      ],
+      "name": "Invalid",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct Structures.User",
+              "name": "creator",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "enum Structures.PostStatus",
+                      "name": "status",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "enum Structures.PostType",
+                      "name": "postType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "creationTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "endTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "duration",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum Structures.Tokens",
+                      "name": "tokenId",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostSettings",
+                  "name": "settings",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "punishment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "penalty",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEscrow",
+                  "name": "escrow",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedData",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedKey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "decryptedData",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEncryptedData",
+                  "name": "data",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct Structures.PostData",
+              "name": "postdata",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct Structures.Post",
+          "name": "post",
+          "type": "tuple"
+        }
+      ],
+      "name": "MadePublic",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct Structures.User",
+              "name": "creator",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "enum Structures.PostStatus",
+                      "name": "status",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "enum Structures.PostType",
+                      "name": "postType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "creationTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "endTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "duration",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum Structures.Tokens",
+                      "name": "tokenId",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostSettings",
+                  "name": "settings",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "punishment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "penalty",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEscrow",
+                  "name": "escrow",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedData",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedKey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "decryptedData",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEncryptedData",
+                  "name": "data",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct Structures.PostData",
+              "name": "postdata",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct Structures.Post",
+          "name": "post",
+          "type": "tuple"
+        }
+      ],
+      "name": "Renounced",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "staker",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenId",
+          "type": "uint8"
+        }
+      ],
+      "name": "StakeAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "staker",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakeBurned",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "staker",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenId",
+          "type": "uint8"
+        }
+      ],
+      "name": "StakeTaken",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "vaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct Structures.User",
+              "name": "creator",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "enum Structures.PostStatus",
+                      "name": "status",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "enum Structures.PostType",
+                      "name": "postType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "creationTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "endTimeStamp",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "duration",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "enum Structures.Tokens",
+                      "name": "tokenId",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostSettings",
+                  "name": "settings",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "punishment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "penalty",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEscrow",
+                  "name": "escrow",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedData",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "encryptedKey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "decryptedData",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct Structures.PostEncryptedData",
+                  "name": "data",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct Structures.PostData",
+              "name": "postdata",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct Structures.Post",
+          "name": "post",
+          "type": "tuple"
+        }
+      ],
+      "name": "Valid",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "sismoConnectResponse",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_nonce",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenId",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_paymentAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "acceptPost",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenId",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountToAdd",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "encryptedVaultId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "addStake",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getBuyerStake",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPaymentRequested",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getSellerStake",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenId",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "staker",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getStake",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStakeRequested",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStatus",
+      "outputs": [
+        {
+          "internalType": "enum Structures.PostStatus",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTokenId",
+      "outputs": [
+        {
+          "internalType": "enum Structures.Tokens",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTokenIdAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTotalStaked",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "post",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "vaultId",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct Structures.User",
+          "name": "creator",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "enum Structures.PostStatus",
+                  "name": "status",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum Structures.PostType",
+                  "name": "postType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "creationTimeStamp",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "endTimeStamp",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "duration",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "enum Structures.Tokens",
+                  "name": "tokenId",
+                  "type": "uint8"
+                }
+              ],
+              "internalType": "struct Structures.PostSettings",
+              "name": "settings",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "stake",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "payment",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "punishment",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "penalty",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct Structures.PostEscrow",
+              "name": "escrow",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bytes",
+                  "name": "encryptedData",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "encryptedKey",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "decryptedData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct Structures.PostEncryptedData",
+              "name": "data",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct Structures.PostData",
+          "name": "postdata",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "postCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenId",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes",
+          "name": "sismoConnectResponse",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_nonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "takeFullStake",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenId",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountToTake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "sismoConnectResponse",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_nonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "takeStake",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

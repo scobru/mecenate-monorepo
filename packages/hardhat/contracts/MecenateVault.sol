@@ -315,16 +315,6 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         // Reduce storage reads by using a memory variable
         uint256 availableBalance = ethDeposits[_encryptedVaultId];
 
-        // Validate the target contract
-        require(
-            IMecenateFeedFactory(factoryContract).isFeed(_target) ||
-                _target == mecenateBay ||
-                _target == mecenateUsers ||
-                _target == verifierContract ||
-                _target == factoryContract,
-            "Invalid target"
-        );
-
         // Estimate total required balance
         uint256 totalRequired = _value + (tx.gasprice * gasleft());
 

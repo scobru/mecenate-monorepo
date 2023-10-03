@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Arrays",
+  "sourceName": "@openzeppelin/contracts/utils/Arrays.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea26469706673582212208e23dc51552c0e0504ea238c037048acbc5b0cc1a0557902ece4b56ff31c971e64736f6c63430008130033",
+  "deployedBytecode": "0x600080fdfea26469706673582212208e23dc51552c0e0504ea238c037048acbc5b0cc1a0557902ece4b56ff31c971e64736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

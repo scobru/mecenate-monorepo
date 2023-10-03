@@ -4,7 +4,6 @@ import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, ethers } from "ethers";
 import { formatEther, keccak256, parseEther } from "ethers/lib/utils.js";
-import { useAppStore } from "~~/services/store/store";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 import axios from "axios";
@@ -15,23 +14,20 @@ const Bay: NextPage = () => {
   const { data: signer } = useSigner();
   const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
   const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
-
   const deployedContractBay = getDeployedContract(chain?.id.toString(), "MecenateBay");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
-
   const [requests, setRequests] = React.useState<BayRequest[]>([]);
   const [requestString, setRequestString] = React.useState<string>("");
   const [requestPayment, setRequestPayment] = React.useState<string>("");
   const [requestStake, setRequestStake] = React.useState<string>("");
   const [requestAddress, setRequestAddress] = React.useState<string>("");
-  const [customSigner, setCustomSigner] = React.useState<any>();
+  const [, setCustomSigner] = React.useState<any>();
   const txData = useTransactor(signer as Signer);
   const [sismoData, setSismoData] = React.useState<any>(null);
-  const [verified, setVerified] = React.useState<any>(null);
+  const [, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
   const [tokenId, setTokenId] = React.useState<number>(0);
-
   const [nonce, setNonce] = React.useState<number>(0);
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
 

@@ -12,17 +12,12 @@ const Home: NextPage = () => {
   const provider = useProvider();
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractStats = getDeployedContract(chain?.id.toString(), "MecenateStats");
-
-  const [globalFee, setGlobalFee] = React.useState<string>("");
-  const [fixedFee, setFixedFee] = React.useState<string>("");
+  const [stats, setStats] = React.useState<any>([]);
 
   let identityAddress = "";
   let identityAbi: ContractInterface[] = [];
-
   let statsAddress = "";
   let statsAbi: ContractInterface[] = [];
-
-  const [stats, setStats] = React.useState<any>([]);
 
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);

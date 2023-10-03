@@ -268,16 +268,6 @@ const deployYourContract: DeployFunction = async function (
 
   setByteCode.wait();
 
-  console.log("Deploy pools...");
-
-  await deployPool(muse.address, mockWeth.address, 500, encodePriceSqrt(1, 1));
-
-  await deployPool(
-    mockDai.address,
-    mockWeth.address,
-    500,
-    encodePriceSqrt(1, 1),
-  );
 };
 
 export default deployYourContract;
