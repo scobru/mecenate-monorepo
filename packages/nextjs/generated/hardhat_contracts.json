@@ -905,7 +905,7 @@
           ]
         },
         "MecenateBay": {
-          "address": "0xF5Ee0CcE5334630501a5301EEf4CAE5E92a6b3cA",
+          "address": "0xa58bC1aAD647C104fA5DFE51d0397a21e1627fC2",
           "abi": [
             {
               "inputs": [
@@ -1676,7 +1676,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0x18264340E374d8511A8be385c07F5a09d5683791",
+          "address": "0xB5b95A098760b097c3D9e0BD461c478F12FBd364",
           "abi": [
             {
               "inputs": [
@@ -3500,7 +3500,7 @@
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0x037004a68D7b8fd5470FdAeB536D45492a294954",
+          "address": "0x8B90376A65C507F8aAEBd3ac40fFE588592A2d8C",
           "abi": [
             {
               "inputs": [
@@ -4142,7 +4142,7 @@
           ]
         },
         "MecenateForwarder": {
-          "address": "0xd930f83B478d1b2480B4aC7b95212382A2E968eA",
+          "address": "0xefFa99E70E99DA970687Cb7e8B83bDCAAB12660A",
           "abi": [
             {
               "inputs": [
@@ -4193,7 +4193,7 @@
           ]
         },
         "MecenateForwarderFactory": {
-          "address": "0x2caDf7b7C779C1866Ed89BC74C81b9Fb0A488bf6",
+          "address": "0x548161693FC48f7263dC5A1574f6fE4777fc2D9c",
           "abi": [
             {
               "inputs": [
@@ -4387,7 +4387,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0xAAC63CdF6Cb8a98354355CF53E93dB1AdE843ceD",
+          "address": "0x3c72Ea202B8883528eFE2f0cDC7B0A5ee85826A9",
           "abi": [
             {
               "inputs": [
@@ -4515,7 +4515,7 @@
           ]
         },
         "MecenateTreasury": {
-          "address": "0x567E83AAA2C1cDB7E00Ffa4D7C61Df65FC938Df4",
+          "address": "0x27115aAa74b296D2461958498B5b4C99b8E10afA",
           "abi": [
             {
               "anonymous": false,
@@ -4994,7 +4994,7 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0x7134198231fF3525526915ead6FB186C26Afb5dB",
+          "address": "0x7E8664B5BA54AD234d62A5Af7197999181Ca3dC6",
           "abi": [
             {
               "inputs": [
@@ -5333,7 +5333,7 @@
           ]
         },
         "MecenateVault": {
-          "address": "0x5ad2ad2981488ebbF58F23edA27bF520883530E1",
+          "address": "0xB90C61307d449D813E9038dC6a72A7aE4D158971",
           "abi": [
             {
               "inputs": [

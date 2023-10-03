@@ -124,7 +124,7 @@ const Identity: NextPage = () => {
 
   const forwarder = useContract({
     address: forwarderAddress,
-    abi: forwarderAddressOriginal?.abi,
+    abi: forwarderAbi,
     signerOrProvider: customWallet || provider,
   });
 
@@ -277,11 +277,10 @@ const Identity: NextPage = () => {
   };
 
   const handleDepositToken = async () => {
-    const iface = new ethers.utils.Interface(forwarderAbi as any[]);
-    console.log(tokenAddress, tokenAmount);
-    console.log(forwarderAbi);
+    if (!forwarder) return;
+    const iface = new ethers.utils.Interface(deployedContractUser?.abi as any[]);
     const data = iface.encodeFunctionData("depositToken", [tokenAddress, ethers.utils.parseEther(tokenAmount)]);
-    txData(vaultCtx?.execute(forwarderAddress, data, 0, keccak256(String(sismoData?.auths[0]?.userId))));
+    txData(vaultCtx?.execute(vaultCtx?.address, data, 0));
   };
 
   return (
@@ -452,7 +451,7 @@ const Identity: NextPage = () => {
                                   <button
                                     className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
                                     onClick={async () => {
-                                      handleDepositToken();
+                                      await forwarder?.depositToken(tokenAddress, ethers.utils.parseEther(tokenAmount));
                                     }}
                                     disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
                                   >

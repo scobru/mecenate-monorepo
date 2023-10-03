@@ -96,7 +96,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         address _token,
         uint256 _amount,
         bytes32 encryptedVaultId
-    ) public nonReentrant {
+    ) external {
         require(_token != address(0), "Token address cannot be 0");
 
         require(_amount > 0, "Amount must be greater than zero");
