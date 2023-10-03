@@ -13,6 +13,9 @@ type TVerifiedProps = {
 
 export default function VerifiedBadge({ verified, encryptedVaultId, address }: TVerifiedProps) {
   const [depositedBalance, setDepositedBalance] = useState<number>(0);
+  const [depositedMuse, setDepositedMuse] = useState<number>(0);
+  const [depositedDai, setDepositedDai] = useState<number>(0);
+
   const { chain } = useNetwork();
   const deployedContractWallet = getDeployedContract(chain?.id.toString(), "MecenateVault");
 
@@ -37,6 +40,10 @@ export default function VerifiedBadge({ verified, encryptedVaultId, address }: T
       if (encryptedVaultId) {
         const tx = await wallet?.getEthDeposit(encryptedVaultId);
         if (tx) setDepositedBalance(Number(formatEther(tx)));
+        const tx2 = await wallet?.getTokenDeposit(process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE, encryptedVaultId);
+        if (tx2) setDepositedMuse(Number(formatEther(tx2)));
+        const tx3 = await wallet?.getTokenDeposit(process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE, encryptedVaultId);
+        if (tx3) setDepositedDai(Number(formatEther(tx3)));
       }
     } catch (error) {
       console.error("Failed to get deposit:", error);
@@ -55,10 +62,26 @@ export default function VerifiedBadge({ verified, encryptedVaultId, address }: T
 
   return (
     <>
-      <div className="inline-flex items-start max-w-fit border-1 p-1 rounded-lg bg-gradient-to-t border-slate-700 shadow-md shadow-slate-600">
-        <span className="font-semibold ml-2">
-          <Address address={address} format="short" /> {depositedBalance.toFixed(3)} ETH
+      <div className="relative group inline-block">
+        <span className="font-semibold ml-2 cursor-pointer">
+          <Address address={address} format="short" />
         </span>
+        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg text-black bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block">
+          <div className="p-4">
+            <div className="flex justify-between">
+              <span>ETH:</span>
+              <span>{depositedBalance.toFixed(3)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>MUSE:</span>
+              <span>{depositedMuse.toFixed(3)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>DAI:</span>
+              <span>{depositedDai.toFixed(3)}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

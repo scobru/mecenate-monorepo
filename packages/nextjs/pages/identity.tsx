@@ -278,9 +278,11 @@ const Identity: NextPage = () => {
 
   const handleDepositToken = async () => {
     if (!forwarder) return;
-    const iface = new ethers.utils.Interface(deployedContractUser?.abi as any[]);
+    const iface = new ethers.utils.Interface(deployedContractForwarder?.abi as any[]);
+
     const data = iface.encodeFunctionData("depositToken", [tokenAddress, ethers.utils.parseEther(tokenAmount)]);
-    txData(vaultCtx?.execute(vaultCtx?.address, data, 0));
+
+    txData(vaultCtx?.execute(forwarderAddress, data, 0, keccak256(String(sismoData?.auths[0]?.userId))));
   };
 
   return (
@@ -451,7 +453,7 @@ const Identity: NextPage = () => {
                                   <button
                                     className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
                                     onClick={async () => {
-                                      await forwarder?.depositToken(tokenAddress, ethers.utils.parseEther(tokenAmount));
+                                      await handleDepositToken();
                                     }}
                                     disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
                                   >

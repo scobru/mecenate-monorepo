@@ -92,13 +92,40 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         ethDeposits[encryptedVaultId] += msg.value;
     }
 
+    function approveTokenToFeed(
+        address _token,
+        uint256 _amount,
+        address _feed,
+        bytes32 encryptedVaultId
+    ) public nonReentrant {
+        require(_token != address(0), "Token address cannot be 0");
+        require(_amount > 0, "Amount must be greater than zero");
+        require(
+            _token == WETH || _token == DAI || _token == USDC || _token == MUSE,
+            "Token not supported"
+        );
+        require(
+            tokenDeposits[encryptedVaultId][_token] >= _amount,
+            "Not enough balance"
+        );
+        require(
+            IMecenateFeedFactory(factoryContract).isFeed(_feed),
+            "Not a feed"
+        );
+
+        // The user must first approve the token transfer
+        // to this contract
+        IERC20 token = IERC20(_token);
+        // Approve the token to the feed
+        token.approve(mecenateBay, _amount);
+    }
+
     function depositToken(
         address _token,
         uint256 _amount,
         bytes32 encryptedVaultId
     ) external {
         require(_token != address(0), "Token address cannot be 0");
-
         require(_amount > 0, "Amount must be greater than zero");
 
         require(
