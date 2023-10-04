@@ -27,7 +27,7 @@ const scaffoldConfig = {
     // Set it to false to completely remove burner wallet from all networks
     enabled: true,
     // Only show the Burner Wallet when running on hardhat network
-    onlyLocal: true,
+    onlyLocal: false,
   },
   /**
    * Auto connect:

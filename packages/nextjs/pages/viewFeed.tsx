@@ -1110,9 +1110,9 @@ const ViewFeed: NextPage = () => {
     const token = e;
     if (token === "ETH") {
       setTokenId("0");
-    } else if (token === "DAI") {
-      setTokenId("1");
     } else if (token === "MUSE") {
+      setTokenId("1");
+    } else if (token === "DAI") {
       setTokenId("2");
     }
     console.log("Token ID: ", tokenId);
@@ -1336,8 +1336,8 @@ const ViewFeed: NextPage = () => {
                   >
                     <option value="Nan">Select Token</option>
                     <option value="ETH">ETH</option>
-                    <option value="DAI">DAI</option>
                     <option value="MUSE">MUSE</option>
+                    <option value="DAI">DAI</option>
                   </select>
 
                   {tokenId == "1" || tokenId == "2" ? (

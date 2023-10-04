@@ -56,7 +56,7 @@ export const appChains = configureChains(
  * list of burner wallet compatable chains
  */
 export const burnerChains = configureChains(
-  [chains.hardhat],
+  [chains.baseGoerli],
   [
     alchemyProvider({
       // ToDo. Move to .env || scaffold config
