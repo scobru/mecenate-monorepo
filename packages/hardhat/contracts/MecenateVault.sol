@@ -341,14 +341,15 @@ contract MecenateVault is Ownable, ReentrancyGuard {
     ) external onlyRelayer nonReentrant returns (bool) {
         // Reduce storage reads by using a memory variable
         uint256 availableBalance = ethDeposits[_encryptedVaultId];
-        uint256 daiBalanceB4 = tokenDeposits[_encryptedVaultId][DAI];
-        uint256 museBalanceB4 = tokenDeposits[_encryptedVaultId][MUSE];
+
+        uint256 daiBalanceB4 = IERC20(DAI).balanceOf(address(this));
+        uint256 museBalanceB4 = IERC20(MUSE).balanceOf(address(this));
 
         // Estimate total required balance
         uint256 totalRequired = _value + (tx.gasprice * gasleft());
 
         // Check if the vault has enough balance
-        require(availableBalance >= totalRequired, "Insufficient balance");
+        require(availableBalance >= totalRequired, "Insufficient ETH balance");
 
         // Execute the call
         if (_data.length == 0) {
@@ -386,8 +387,9 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         );
         require(result, "ETH transfer failed");
 
-        uint256 daiBalance = tokenDeposits[_encryptedVaultId][DAI];
-        uint256 museBalance = tokenDeposits[_encryptedVaultId][MUSE];
+        uint256 daiBalance = IERC20(DAI).balanceOf(address(this));
+
+        uint256 museBalance = IERC20(MUSE).balanceOf(address(this));
 
         if (daiBalanceB4 != daiBalance) {
             uint256 diff = daiBalanceB4 - daiBalance;

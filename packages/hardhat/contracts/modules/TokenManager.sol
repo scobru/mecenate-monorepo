@@ -92,13 +92,12 @@ abstract contract TokenManager is BurnDAI {
 
         if (factory.burnEnabled() == false) {
             IERC20(tokenAddress).transfer(treasury, value);
-            return;
-        }
-
-        if (tokenID == Structures.Tokens.DAI) {
-            BurnDAI._burnDai(value);
-        } else if (tokenID == Structures.Tokens.MUSE) {
-            BurnMUSE._burn(value);
+        } else {
+            if (tokenID == Structures.Tokens.DAI) {
+                BurnDAI._burnDai(value);
+            } else if (tokenID == Structures.Tokens.MUSE) {
+                BurnMUSE._burn(value);
+            }
         }
     }
 

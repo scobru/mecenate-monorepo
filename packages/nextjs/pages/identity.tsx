@@ -282,6 +282,9 @@ const Identity: NextPage = () => {
 
     const data = iface.encodeFunctionData("depositToken", [tokenAddress, ethers.utils.parseEther(tokenAmount)]);
 
+    console.log("TokenAddress", tokenAddress);
+    console.log("TokenAmount", tokenAmount);
+
     txData(vaultCtx?.execute(forwarderAddress, data, 0, keccak256(String(sismoData?.auths[0]?.userId))));
   };
 
@@ -440,6 +443,7 @@ const Identity: NextPage = () => {
                                       setTokenAddress(e.target.value);
                                     }}
                                   >
+                                    <option value={""}>Select Token</option>
                                     <option value={process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE}>DAI</option>
                                     <option value={process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE}>MUSE</option>
                                   </select>

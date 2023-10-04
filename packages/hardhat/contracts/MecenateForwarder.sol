@@ -29,7 +29,6 @@ contract MecenateForwarder {
 
     function depositToken(address token, uint256 amount) external {
         address vault = IMecenateETHForwarderFactory(factory).getVault();
-
         // Approva il token
         require(IERC20(token).approve(vault, amount), "Approve failed");
 

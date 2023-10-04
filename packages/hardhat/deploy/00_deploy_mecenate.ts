@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { deployPool, encodePriceSqrt } from "../scripts/03_deployPools";
 
-const relayer = "0x58dF4b1E490d0380Eb273f87D6f4eD8d4EA0E1A6";
+const relayer = "0x3db5E84e0eBBEa945a0a82E879DcB7E1D1a587B4";
 const router = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d";
 const version = "v2";
 

@@ -34,19 +34,23 @@ abstract contract Creation is Staking {
 
         // Early exit conditions
         require(encryptedVaultId == owner, "NOT_OWNER");
+
         require(
             IMecenateUsers(settings.usersModuleContract).checkifUserExist(
                 encryptedVaultId
             ),
             "USER_NOT_EXIST"
         );
+
         require(
             validStatuses[uint8(post.postdata.settings.status)],
             "INVALID_STATUS"
         );
+
         require(stakeAmount > 0, "STAKE_AMOUNT_ZERO");
 
         uint256 duration = postDurationToDays[uint8(postDuration)];
+
         uint256 stake = _addStake(
             tokenId,
             encryptedVaultId,

@@ -103,17 +103,34 @@ const ViewFeed: NextPage = () => {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
   }
 
-  const handleApproveToken = async () => {
+  const handleApproveTokenSeller = async () => {
     let _tokenAddress;
     if (tokenId == "1") {
-      _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
-    } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
+    } else if (tokenId == "2") {
+      _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
     }
     const iface = new ethers.utils.Interface(deployedContractVault?.abi as any[]);
     const data = iface.encodeFunctionData("approveTokenToFeed", [
       _tokenAddress,
       parseEther(postStake),
+      feedCtx?.address,
+      keccak256(sismoData.auths[0].userId),
+    ]);
+    txData(vaultCtx?.execute(vaultCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
+  };
+
+  const handleApproveTokenBuyer = async () => {
+    let _tokenAddress;
+    if (feedData.postdata.settings.tokenId == 1) {
+      _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
+    } else if (feedData.postdata.settings.tokenId == 2) {
+      _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
+    }
+    const iface = new ethers.utils.Interface(deployedContractVault?.abi as any[]);
+    const data = iface.encodeFunctionData("approveTokenToFeed", [
+      _tokenAddress,
+      feedData.postdata.escrow.stake,
       feedCtx?.address,
       keccak256(sismoData.auths[0].userId),
     ]);
@@ -787,9 +804,7 @@ const ViewFeed: NextPage = () => {
 
   async function takeStake() {
     console.log("Take Stake...");
-
     const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-
     const data = iface.encodeFunctionData("takeStake", [
       feedData?.postdata?.settings?.tokenId,
       parseEther(stakeAmount),
@@ -1068,6 +1083,7 @@ const ViewFeed: NextPage = () => {
           console.log("Message: ", _message);
           setMessage(_message);
         }
+        console.log(feedData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -1345,7 +1361,7 @@ const ViewFeed: NextPage = () => {
                       <button
                         className="btn btn-primary w-full mt-4"
                         onClick={async () => {
-                          await handleApproveToken();
+                          await handleApproveTokenSeller();
                         }}
                       >
                         Approve
@@ -1540,6 +1556,18 @@ const ViewFeed: NextPage = () => {
                     <i className="fas fa-times"></i>
                   </label>
                 </div>
+                {feedData.postdata.settings.tokenId == 1 || feedData.postdata.settings.tokenId == 2 ? (
+                  <div>
+                    <button
+                      className="btn btn-primary w-full mt-4 my-2"
+                      onClick={async () => {
+                        await handleApproveTokenBuyer();
+                      }}
+                    >
+                      Approve
+                    </button>
+                  </div>
+                ) : null}
                 <div className="modal-body space-y-4 text-left">
                   Amount to Pay for Data {""}
                   <input
@@ -1553,8 +1581,7 @@ const ViewFeed: NextPage = () => {
                   <button
                     className="btn  w-full"
                     onClick={async () => {
-                      const postData = await acceptPost();
-                      console.log(postData);
+                      await acceptPost();
                     }}
                   >
                     Accept Post
