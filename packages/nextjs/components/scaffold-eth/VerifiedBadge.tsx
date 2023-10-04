@@ -66,18 +66,24 @@ export default function VerifiedBadge({ verified, encryptedVaultId, address }: T
         <span className="font-semibold ml-2 cursor-pointer">
           <Address address={address} format="short" />
         </span>
-        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg text-black bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block">
+        <div className="origin-top-right font-medium absolute right-0 mt-2 w-36 rounded-md shadow-lg text-black bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block">
           <div className="p-4">
-            <div className="flex justify-between">
-              <span>ETH:</span>
+            <div className="flex justify-between ">
+              <span>
+                <strong>ETH</strong>
+              </span>
               <span>{depositedBalance.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
-              <span>MUSE:</span>
+              <span>
+                <strong>MUSE</strong>
+              </span>
               <span>{depositedMuse.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
-              <span>DAI:</span>
+              <span>
+                <strong>DAI</strong>
+              </span>
               <span>{depositedDai.toFixed(3)}</span>
             </div>
           </div>

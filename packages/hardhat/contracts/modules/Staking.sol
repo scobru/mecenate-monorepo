@@ -178,7 +178,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
         uint256 newStake = _addStake(
             tokenId,
             encryptedVaultId,
-            msg.sender,
+            settings.vaultContract,
             actualAmountToAdd
         );
 

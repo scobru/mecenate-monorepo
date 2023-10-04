@@ -50,7 +50,7 @@ abstract contract Creation is Staking {
         uint256 stake = _addStake(
             tokenId,
             encryptedVaultId,
-            msg.sender,
+            settings.vaultContract,
             stakeAmount
         );
 

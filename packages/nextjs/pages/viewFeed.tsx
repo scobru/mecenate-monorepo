@@ -103,6 +103,23 @@ const ViewFeed: NextPage = () => {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
   }
 
+  const handleApproveToken = async () => {
+    let _tokenAddress;
+    if (tokenId == "1") {
+      _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
+    } else if (tokenId == "2") {
+      _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
+    }
+    const iface = new ethers.utils.Interface(deployedContractVault?.abi as any[]);
+    const data = iface.encodeFunctionData("approveTokenToFeed", [
+      _tokenAddress,
+      parseEther(postStake),
+      feedCtx?.address,
+      keccak256(sismoData.auths[0].userId),
+    ]);
+    txData(vaultCtx?.execute(vaultCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
+  };
+
   const vaultCtx = useContract({
     address: vaultAddress,
     abi: vaultAbi,
@@ -337,12 +354,19 @@ const ViewFeed: NextPage = () => {
       Number(postDuration),
       parseEther(await buyerPayment),
       parseEther(postStake),
-      tokenId,
+      Number(tokenId),
       sismoResponse,
       localStorage.getItem("withdrawalAddress"),
       localStorage.getItem("nonce"),
     ]);
-    txData(vaultCtx?.execute(feedCtx?.address, data, parseEther(postStake), keccak256(sismoData?.auths[0]?.userId)));
+    txData(
+      vaultCtx?.execute(
+        feedCtx?.address,
+        data,
+        tokenId == "0" ? parseEther(postStake) : 0,
+        keccak256(sismoData?.auths[0]?.userId),
+      ),
+    );
   };
 
   async function acceptPost() {
@@ -352,7 +376,7 @@ const ViewFeed: NextPage = () => {
       withdrawalAddress,
       nonce,
       feedData?.postdata?.settings?.tokenId,
-      parseEther(postPayment)
+      parseEther(postPayment),
     ]);
     txData(vaultCtx?.execute(feedCtx?.address, data, parseEther(postPayment), keccak256(sismoData.auths[0].userId)));
   }
@@ -1085,11 +1109,11 @@ const ViewFeed: NextPage = () => {
   const handleSelectToken = async (e: any) => {
     const token = e;
     if (token === "ETH") {
-      setTokenId(0);
+      setTokenId("0");
     } else if (token === "DAI") {
-      setTokenId(1);
+      setTokenId("1");
     } else if (token === "MUSE") {
-      setTokenId(2);
+      setTokenId("2");
     }
     console.log("Token ID: ", tokenId);
   };
@@ -1304,9 +1328,6 @@ const ViewFeed: NextPage = () => {
                     onChange={e => setPostStake(e.target.value)}
                   />
 
-                  <label className="text-black font-semibold text-sm" htmlFor="request">
-                    Currency
-                  </label>
                   <select
                     className="select select-text bg-transparent my-4"
                     name="tokens"
@@ -1318,6 +1339,19 @@ const ViewFeed: NextPage = () => {
                     <option value="DAI">DAI</option>
                     <option value="MUSE">MUSE</option>
                   </select>
+
+                  {tokenId == "1" || tokenId == "2" ? (
+                    <div>
+                      <button
+                        className="btn btn-primary w-full mt-4"
+                        onClick={async () => {
+                          await handleApproveToken();
+                        }}
+                      >
+                        Approve
+                      </button>
+                    </div>
+                  ) : null}
                   <label className="block text-base-500 mt-8">Buyer Payment </label>
 
                   <input

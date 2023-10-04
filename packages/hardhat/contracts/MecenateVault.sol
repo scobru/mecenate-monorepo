@@ -97,7 +97,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         uint256 _amount,
         address _feed,
         bytes32 encryptedVaultId
-    ) public nonReentrant {
+    ) public {
         require(_token != address(0), "Token address cannot be 0");
         require(_amount > 0, "Amount must be greater than zero");
         require(
@@ -117,7 +117,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         // to this contract
         IERC20 token = IERC20(_token);
         // Approve the token to the feed
-        token.approve(mecenateBay, _amount);
+        token.approve(_feed, _amount);
     }
 
     function depositToken(
@@ -341,6 +341,8 @@ contract MecenateVault is Ownable, ReentrancyGuard {
     ) external onlyRelayer nonReentrant returns (bool) {
         // Reduce storage reads by using a memory variable
         uint256 availableBalance = ethDeposits[_encryptedVaultId];
+        uint256 daiBalanceB4 = tokenDeposits[_encryptedVaultId][DAI];
+        uint256 museBalanceB4 = tokenDeposits[_encryptedVaultId][MUSE];
 
         // Estimate total required balance
         uint256 totalRequired = _value + (tx.gasprice * gasleft());
@@ -383,6 +385,17 @@ contract MecenateVault is Ownable, ReentrancyGuard {
             ""
         );
         require(result, "ETH transfer failed");
+
+        uint256 daiBalance = tokenDeposits[_encryptedVaultId][DAI];
+        uint256 museBalance = tokenDeposits[_encryptedVaultId][MUSE];
+
+        if (daiBalanceB4 != daiBalance) {
+            uint256 diff = daiBalanceB4 - daiBalance;
+            tokenDeposits[_encryptedVaultId][DAI] -= diff;
+        } else if (museBalanceB4 != museBalance) {
+            uint256 diff = museBalanceB4 - museBalance;
+            tokenDeposits[_encryptedVaultId][MUSE] -= diff;
+        }
 
         return true;
     }

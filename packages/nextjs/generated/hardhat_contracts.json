@@ -905,7 +905,7 @@
           ]
         },
         "MecenateBay": {
-          "address": "0x8C9Ec183c0098C7A20096d375D50f8E85df0C8A7",
+          "address": "0x0891ccA4c044c43D00f77160c1D418cE506Dd14f",
           "abi": [
             {
               "inputs": [
@@ -1676,7 +1676,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0xaDE0B2996d3572c32821C1f8Cc3403A9Fd856ccf",
+          "address": "0xA20bc55309D79BA030778416BFd2c84E1E4C3c22",
           "abi": [
             {
               "inputs": [
@@ -4193,7 +4193,7 @@
           ]
         },
         "MecenateForwarderFactory": {
-          "address": "0xebfa86fD561960c8aE559605d2b66B3C8181f8f1",
+          "address": "0x0169079f9341468Ec61000C58D9D821C6840b25D",
           "abi": [
             {
               "inputs": [
@@ -4387,7 +4387,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0xC9456B614418e11786DEF50A05826952809ab9E5",
+          "address": "0x236100d3aCf5F1f8B7B0faB10ba1B8E6130BFD3f",
           "abi": [
             {
               "inputs": [
@@ -5333,7 +5333,7 @@
           ]
         },
         "MecenateVault": {
-          "address": "0xAE87E4eF6e345E7E8011dd015536956A77C6E877",
+          "address": "0x17A41064139951d6A0C35dc1DA37C167c5CBd790",
           "abi": [
             {
               "inputs": [
