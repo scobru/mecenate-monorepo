@@ -102,16 +102,39 @@ abstract contract Staking is Events, Deposit, TokenManager {
             amountToBurn
         );
 
-        if (tokenId == Structures.Tokens.NaN) {
-            (bool result, ) = payable(
-                IMecenateFeedFactory(settings.factoryContract)
-                    .treasuryContract()
-            ).call{value: amountToBurn}("");
-            require(result, "CALL_FAILED");
-        } else if (tokenId == Structures.Tokens.DAI) {
-            BurnDAI._burnDai(amountToBurn);
-        } else if (tokenId == Structures.Tokens.MUSE) {
-            BurnMUSE._burn(amountToBurn);
+        if (
+            IMecenateFeedFactory(settings.factoryContract).burnEnabled() ==
+            false
+        ) {
+            if (tokenId == Structures.Tokens.NaN) {
+                (bool result, ) = payable(
+                    IMecenateFeedFactory(settings.factoryContract)
+                        .treasuryContract()
+                ).call{value: amountToBurn}("");
+
+                require(result, "CALL_FAILED");
+            }
+
+            if (tokenId == Structures.Tokens.DAI) {
+                IERC20(DAI).transfer(
+                    IMecenateFeedFactory(settings.factoryContract)
+                        .treasuryContract(),
+                    amountToBurn
+                );
+            } else if (tokenId == Structures.Tokens.MUSE) {
+                IERC20(MUSE).transfer(
+                    IMecenateFeedFactory(settings.factoryContract)
+                        .treasuryContract(),
+                    amountToBurn
+                );
+                BurnMUSE._burn(amountToBurn);
+            }
+        } else {
+            if (tokenId == Structures.Tokens.DAI) {
+                BurnDAI._burn(amountToBurn);
+            } else if (tokenId == Structures.Tokens.MUSE) {
+                BurnMUSE._burn(amountToBurn);
+            }
         }
 
         emit StakeBurned(staker, amountToBurn);

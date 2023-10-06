@@ -19,6 +19,10 @@ contract Data {
 
     bytes32 public owner;
 
+    address public WETH;
+    address public MUSE;
+    address public DAI;
+
     Structures.Post public post;
     Structures.PostSettingPrivate internal postSettingPrivate;
     Structures.FeedSettings internal settings;
@@ -55,6 +59,10 @@ contract Data {
         postDurationToDays[uint8(Structures.PostDuration.TwoWeeks)] = 14 days;
         postDurationToDays[uint8(Structures.PostDuration.OneMonth)] = 30 days;
         validStatuses[uint8(Structures.PostStatus.Waiting)] = true;
+
+        WETH = IMecenateFeedFactory(_factoryContract).wethToken();
+        MUSE = IMecenateFeedFactory(_factoryContract).museToken();
+        DAI = IMecenateFeedFactory(_factoryContract).daiToken();
 
         settings.version = _version;
     }

@@ -3,8 +3,8 @@ import { config } from "hardhat";
 import hre from "hardhat";
 
 // Token addresses
-const DAI_ADDRESS = "0xd2c9a6323EBAab2939228B8bcE11d338599472D3";
-const MUSE_ADDRESS = "0x2DE564D6090A66dd1F6818BDFC7C7f25C1aeCc78";
+const DAI_ADDRESS = "0xa37d5A81EC490AFDBC582C96AE10d845F734C1c4";
+const MUSE_ADDRESS = "0xb5FEEC079919CAE69223a29866CB626D781Ba871";
 
 // Uniswap contract address
 const WETH_ADDRESS = "0x4200000000000000000000000000000000000006";
@@ -55,7 +55,6 @@ export async function deployPool(
   fee: number,
   price: any,
 ): Promise<string> {
-
   console.log(
     "Deploying pool for",
     token0,
@@ -91,8 +90,8 @@ export async function deployPool(
 
 async function main(): Promise<void> {
   const pool = await deployPool(
+    MUSE_ADDRESS,
     WETH_ADDRESS,
-    DAI_ADDRESS,
     500,
     encodePriceSqrt(1, 1),
   );

@@ -126,6 +126,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         bytes32 encryptedVaultId
     ) external {
         require(_token != address(0), "Token address cannot be 0");
+
         require(_amount > 0, "Amount must be greater than zero");
 
         require(
@@ -339,64 +340,66 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         uint256 _value,
         bytes32 _encryptedVaultId
     ) external onlyRelayer nonReentrant returns (bool) {
-        // Reduce storage reads by using a memory variable
         uint256 availableBalance = ethDeposits[_encryptedVaultId];
 
         uint256 daiBalanceB4 = IERC20(DAI).balanceOf(address(this));
         uint256 museBalanceB4 = IERC20(MUSE).balanceOf(address(this));
 
-        // Estimate total required balance
         uint256 totalRequired = _value + (tx.gasprice * gasleft());
 
-        // Check if the vault has enough balance
         require(availableBalance >= totalRequired, "Insufficient ETH balance");
 
-        // Execute the call
+        bool success; // variabile per verificare il successo delle transazioni
+        bytes memory retData; // dati di ritorno dalle transazioni
+
         if (_data.length == 0) {
-            payable(_target).sendValue(_value);
+            (success, ) = payable(_target).call{value: _value}("");
         } else {
             if (_value == 0) {
-                _target.functionCall(_data);
+                (success, retData) = _target.call(_data);
             } else {
-                _target.functionCallWithValue(_data, _value);
+                (success, retData) = _target.call{value: _value}(_data);
             }
         }
 
-        // Update available balance
-        availableBalance -= _value;
+        require(success, "Transaction failed");
 
-        // Calculate gas costs and relayer fee
         uint256 gasUsed = totalRequired - _value - (tx.gasprice * gasleft());
         uint256 relayerFee = (gasUsed * relayerFeePercentage) / 10000;
 
-        // Check again if the vault has enough balance to cover the gas and relayer fee
         require(
             availableBalance >= gasUsed + relayerFee,
             "Insufficient balance for gas and fee"
         );
 
-        // Update storage only once to reflect all changes
         ethDeposits[_encryptedVaultId] =
             availableBalance -
             gasUsed -
             relayerFee;
 
-        // Transfer fee to the relayer
-        (bool result, ) = payable(msg.sender).call{value: gasUsed + relayerFee}(
-            ""
-        );
-        require(result, "ETH transfer failed");
+        (success, ) = payable(msg.sender).call{value: gasUsed + relayerFee}("");
+        require(success, "ETH transfer failed");
 
         uint256 daiBalance = IERC20(DAI).balanceOf(address(this));
-
         uint256 museBalance = IERC20(MUSE).balanceOf(address(this));
 
-        if (daiBalanceB4 != daiBalance) {
-            uint256 diff = daiBalanceB4 - daiBalance;
-            tokenDeposits[_encryptedVaultId][DAI] -= diff;
-        } else if (museBalanceB4 != museBalance) {
-            uint256 diff = museBalanceB4 - museBalance;
-            tokenDeposits[_encryptedVaultId][MUSE] -= diff;
+        uint256 diffDai;
+        uint256 diffMuse;
+
+        if (daiBalanceB4 > daiBalance) {
+            diffDai = daiBalanceB4 - daiBalance;
+
+            if (diffDai > 0 && daiBalanceB4 != 0) {
+                tokenDeposits[_encryptedVaultId][DAI] -= diffDai;
+            }
+        }
+
+        if (museBalanceB4 > museBalance) {
+            diffMuse = museBalanceB4 - museBalance;
+
+            if (diffMuse > 0 && museBalanceB4 != 0) {
+                tokenDeposits[_encryptedVaultId][MUSE] -= diffMuse;
+            }
         }
 
         return true;

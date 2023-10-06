@@ -6,29 +6,31 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IMecenateVault {
     function depositToken(
-        address token,
-        uint256 amount,
+        address _token,
+        uint256 _amount,
         bytes32 encryptedVaultId
     ) external;
 
     function depositETH(bytes32 encryptedVaultId) external payable;
 }
 
-interface IMecenateETHForwarderFactory {
+interface IMecenateForwarderFactory {
     function getVault() external view returns (address);
 }
 
 contract MecenateForwarder {
-    bytes32 private encryptedVaultId;
+    bytes32 public encryptedVaultId;
+
     address public factory;
 
-    constructor(bytes32 _encryptedVaultId) {
+    constructor(bytes32 _encryptedVaultId, address _factory) {
         encryptedVaultId = _encryptedVaultId;
-        factory = msg.sender;
+        factory = _factory;
     }
 
     function depositToken(address token, uint256 amount) external {
-        address vault = IMecenateETHForwarderFactory(factory).getVault();
+        address vault = IMecenateForwarderFactory(factory).getVault();
+
         // Approva il token
         require(IERC20(token).approve(vault, amount), "Approve failed");
 
@@ -36,12 +38,13 @@ contract MecenateForwarder {
     }
 
     receive() external payable {
-        address vault = IMecenateETHForwarderFactory(factory).getVault();
+        address vault = IMecenateForwarderFactory(factory).getVault();
 
         // Esegui il deposito in ETH
         (bool success, ) = payable(vault).call{value: msg.value}(
             abi.encodeWithSignature("depositETH(bytes32)", encryptedVaultId)
         );
+
         require(success, "Deposit failed");
     }
 }

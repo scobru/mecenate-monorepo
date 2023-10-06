@@ -3,19 +3,20 @@ import { AUTHS, CONFIG, SIGNATURE_REQUEST } from "../../sismo.config";
 import { keccak256 } from "ethers/lib/utils.js";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { ethers } from "ethers";
+import contracts from "~~/generated/hardhat_contracts.json";
 
 const sismoConnect = SismoConnect({ config: CONFIG });
 const TIMEOUT_DURATION = 150000; // 9 seconds
+const chainId = 84531;
+
+const vaultAddress = contracts[84531][0].contracts.MecenateVault.address;
 
 // Promise that resolves after a set time
 const timeout = (ms: number | undefined) => new Promise(resolve => setTimeout(resolve, ms));
 
 const signMessage = () => {
   // encode parameters with ethers encode
-  return ethers.utils.defaultAbiCoder.encode(
-    ["bytes32"],
-    [keccak256(String(process.env.NEXT_PUBLIC_VAULT_ADDRESS)) as `0x${string}`],
-  );
+  return ethers.utils.defaultAbiCoder.encode(["bytes32"], [keccak256(String(vaultAddress)) as `0x${string}`]);
 };
 
 export default async function verify(

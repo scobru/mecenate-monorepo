@@ -20,12 +20,12 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "token",
+          "name": "_token",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "amount",
+          "name": "_amount",
           "type": "uint256"
         },
         {

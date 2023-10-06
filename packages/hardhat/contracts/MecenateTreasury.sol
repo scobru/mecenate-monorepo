@@ -14,6 +14,7 @@ import "./modules/Swapper.sol";
 import "./interfaces/IMecenateUsers.sol";
 
 import "./interfaces/IMecenateVerifier.sol";
+import "./interfaces/IMUSE.sol";
 
 contract MecenateTreasury is Ownable, Swapper {
     using SafeERC20 for IERC20;
@@ -85,6 +86,10 @@ contract MecenateTreasury is Ownable, Swapper {
         distributableBalance = 0; // Azzera il saldo distribuibile
     }
 
+    function setSwapRouter(ISwapRouter _swapRouter) external onlyOwner {
+        swapRouter = _swapRouter;
+    }
+
     function takeReward(
         address _receiver,
         address _verifierContract,
@@ -129,6 +134,48 @@ contract MecenateTreasury is Ownable, Swapper {
         bytes32 encryptedVaultId
     ) external view returns (uint256) {
         return userReward[encryptedVaultId];
+    }
+
+    // swap token0 to token1 and burn token1
+    function swapAndBurn(
+        address _token0,
+        address _token1,
+        address _token2,
+        uint24 _fee,
+        uint24 _fee2
+    ) external onlyOwner {
+        uint256 _amount = IERC20(_token0).balanceOf(address(this));
+        // Approva il token
+        require(
+            IERC20(_token0).approve(address(swapRouter), _amount),
+            "Approve failed"
+        );
+
+        // swap token0 to token1
+        uint256 tokens_bought = _swapTokensForTokens(
+            _token0,
+            _token1,
+            _fee,
+            _amount
+        );
+
+        require(tokens_bought > 0, "No tokens bought");
+
+        // swap token1 to token2
+
+        require(
+            IERC20(_token1).approve(address(swapRouter), tokens_bought),
+            "Approve failed"
+        );
+
+        uint256 tokens_sold_to_muse = _swapTokensForTokens(
+            _token1,
+            _token2,
+            _fee2,
+            tokens_bought
+        );
+
+        IMUSE(_token2).burn(tokens_sold_to_muse);
     }
 
     receive() external payable {

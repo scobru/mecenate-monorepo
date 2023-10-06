@@ -6,9 +6,8 @@ abstract contract TokenManager is BurnDAI {
     function _getTokenAddress(
         Structures.Tokens tokenID
     ) internal view returns (address) {
-        if (tokenID == Structures.Tokens.DAI) return BurnDAI.getTokenAddress();
-        if (tokenID == Structures.Tokens.MUSE)
-            return BurnMUSE.getTokenAddress();
+        if (tokenID == Structures.Tokens.DAI) return DAI;
+        if (tokenID == Structures.Tokens.MUSE) return MUSE;
         return address(0);
     }
 
@@ -86,9 +85,7 @@ abstract contract TokenManager is BurnDAI {
             return;
         }
 
-        address tokenAddress = (tokenID == Structures.Tokens.DAI)
-            ? BurnDAI.getTokenAddress()
-            : BurnMUSE.getTokenAddress();
+        address tokenAddress = (tokenID == Structures.Tokens.DAI) ? DAI : MUSE;
 
         if (factory.burnEnabled() == false) {
             IERC20(tokenAddress).transfer(treasury, value);
@@ -106,8 +103,11 @@ abstract contract TokenManager is BurnDAI {
         address from,
         uint256 value
     ) internal onlyValidTokenID(tokenID) {
+        address treasury = IMecenateFeedFactory(settings.factoryContract)
+            .treasuryContract();
+
         if (tokenID == Structures.Tokens.DAI) {
-            BurnDAI._burnFrom(from, value);
+            IERC20(DAI).transferFrom(from, treasury, value);
         } else if (tokenID == Structures.Tokens.MUSE) {
             BurnMUSE._burnFrom(from, value);
         }
@@ -119,12 +119,8 @@ abstract contract TokenManager is BurnDAI {
         uint256 value
     ) internal onlyValidTokenID(tokenID) {
         if (tokenID == Structures.Tokens.DAI) {
-            require(
-                IERC20(BurnDAI.getTokenAddress()).approve(spender, value),
-                "APPROVE_FAILED"
-            );
+            require(IERC20(DAI).approve(spender, value), "APPROVE_FAILED");
         } else if (tokenID == Structures.Tokens.MUSE) {
-            address MUSE = BurnMUSE.getTokenAddress();
             uint256 currentAllowance = IMUSE(MUSE).allowance(
                 msg.sender,
                 spender

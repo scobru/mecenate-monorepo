@@ -31,22 +31,18 @@ contract MecenateForwarderFactory is Ownable {
     );
 
     function createforwarder(
-        bytes32 _encryptedVaultId,
-        address _vaultContract
+        bytes32 _encryptedVaultId
     ) public returns (address) {
         require(
             forwardersMapping[_encryptedVaultId] == address(0),
             "forwarder already created"
         );
-        MecenateForwarder forwarder = new MecenateForwarder(_encryptedVaultId);
+        MecenateForwarder forwarder = new MecenateForwarder(
+            _encryptedVaultId,
+            address(this)
+        );
 
         forwardersMapping[_encryptedVaultId] = address(forwarder);
-
-        emit ForwarderCreated(
-            address(forwarder),
-            _encryptedVaultId,
-            _vaultContract
-        );
 
         return address(forwarder);
     }

@@ -57,7 +57,7 @@ abstract contract Swapper is Ownable {
         uint256 amount,
         uint24 fee
     ) external onlyOwner returns (uint256) {
-        return _swapTokenForToken(token1, token2, fee, amount);
+        return _swapTokensForTokens(token1, token2, fee, amount);
     }
 
     function addLiquidity(
@@ -120,8 +120,8 @@ abstract contract Swapper is Ownable {
         IERC20(tokenB).approve(address(positionManager), amountB);
 
         // Parameters for adding liquidity
-        INonfungiblePositionManager.MintParams
-            memory params = INonfungiblePositionManager.MintParams(
+        INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager
+            .MintParams(
                 tokenA,
                 tokenB,
                 fee,
@@ -139,7 +139,7 @@ abstract contract Swapper is Ownable {
         (uint256 tokenId, , , ) = positionManager.mint(params);
     }
 
-    function _swapTokenForToken(
+    function _swapTokensForTokens(
         address tokenIn,
         address tokenOut,
         uint24 fee,
@@ -147,6 +147,9 @@ abstract contract Swapper is Ownable {
     ) internal returns (uint256) {
         // Approve amount to swapRouter
         IERC20(tokenIn).approve(address(swapRouter), amountIn);
+
+        uint256 estimatedAmountOut = amountIn;
+        uint256 amountOutMinimum = (estimatedAmountOut * 95) / 100; // accetta fino al 1% di slippage
 
         // Parameters for the swap
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
@@ -157,7 +160,7 @@ abstract contract Swapper is Ownable {
                 address(this),
                 block.timestamp + 10, // Deadline
                 amountIn, // amountIn
-                0, // amountOutMinimum
+                amountOutMinimum, // amountOutMinimum
                 0 // sqrtPriceLimitX96
             );
 

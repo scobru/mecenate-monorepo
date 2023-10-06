@@ -7,12 +7,12 @@ import hre from "hardhat";
 const bn = require("bignumber.js");
 
 // Uniswap contract addresses
-const DAI_ADDRESS = "0xd2c9a6323EBAab2939228B8bcE11d338599472D3";
-const MUSE_ADDRESS = "0x2DE564D6090A66dd1F6818BDFC7C7f25C1aeCc78";
+const DAI_ADDRESS = "0xa37d5A81EC490AFDBC582C96AE10d845F734C1c4";
+const MUSE_ADDRESS = "0xb5FEEC079919CAE69223a29866CB626D781Ba871";
 const WETH_ADDRESS = "0x4200000000000000000000000000000000000006";
 const POSITION_MANAGER_ADDRESS = "0x3c61369ef0D1D2AFa70d8feC2F31C5D6Ce134F30";
-const MUSE_WETH_POOL = "0x2fc184fCCEf27093B618bd722aDfc35dFD68cE08";
-const DAI_WETH_POOL = "0x1d0BF192A5624f8f71f3FcbfE14239995121F644";
+const MUSE_WETH_POOL = "";
+const DAI_WETH_POOL = "0x7d2521ed3A26bFA247803D6D8095c0Ac345206b0";
 
 // Import ABIs
 const NonfungiblePositionManagerABI =
@@ -75,7 +75,7 @@ async function main() {
   const wethCtx = new Contract(WETH_ADDRESS, artifacts.Weth.abi, owner);
   const museCtx = new Contract(MUSE_ADDRESS, artifacts.Muse.abi, owner);
 
-  /* await daiCtx
+  await daiCtx
     .connect(owner)
     .approve(POSITION_MANAGER_ADDRESS, ethers.utils.parseEther("10000"));
   await wethCtx
@@ -83,7 +83,7 @@ async function main() {
     .approve(POSITION_MANAGER_ADDRESS, ethers.utils.parseEther("10000"));
   await museCtx
     .connect(owner)
-    .approve(POSITION_MANAGER_ADDRESS, ethers.utils.parseEther("10000")); */
+    .approve(POSITION_MANAGER_ADDRESS, ethers.utils.parseEther("10000"));
 
   const daiBalance = await daiCtx.balanceOf(owner.address);
   console.log(`DAI Balance: ${ethers.utils.formatEther(daiBalance)}`);
@@ -94,7 +94,7 @@ async function main() {
   const wethBalance = await wethCtx.balanceOf(owner.address);
   console.log(`WETH Balance: ${ethers.utils.formatEther(wethBalance)}`);
 
-  const poolContract = new Contract(MUSE_WETH_POOL, UniswapV3PoolABI, owner);
+  const poolContract = new Contract(DAI_WETH_POOL, UniswapV3PoolABI, owner);
   const poolData = await getPoolData(poolContract);
   if (!poolData) {
     throw new Error("Failed to get pool data");
@@ -112,7 +112,7 @@ async function main() {
 
   const position = new Position({
     pool,
-    liquidity: ethers.utils.parseEther("10"),
+    liquidity: ethers.utils.parseEther("1"),
     tickLower:
       nearestUsableTick(poolData.tick, poolData.tickSpacing) -
       poolData.tickSpacing * 2,
@@ -131,8 +131,8 @@ async function main() {
 
   // Minting parameters
   const params = {
-    token0: MUSE_ADDRESS,
-    token1: WETH_ADDRESS,
+    token0: WETH_ADDRESS,
+    token1: DAI_ADDRESS,
     fee: poolData?.fee,
     tickLower:
       nearestUsableTick(poolData?.tick, poolData?.tickSpacing) -

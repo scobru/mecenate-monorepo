@@ -230,7 +230,7 @@ const Identity: NextPage = () => {
 
   const createForwarder = async () => {
     if (sismoData) {
-      txData(depositorFactory?.createforwarder(keccak256(sismoData?.auths[0]?.userId), vaultCtx?.address));
+      txData(depositorFactory?.createforwarder(keccak256(sismoData?.auths[0]?.userId)));
     }
   };
 
