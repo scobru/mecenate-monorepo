@@ -4,7 +4,7 @@ import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, ethers } from "ethers";
 import { formatEther, keccak256, parseEther } from "ethers/lib/utils.js";
-import { useTransactor } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 import axios from "axios";
 
@@ -17,6 +17,8 @@ const Bay: NextPage = () => {
   const deployedContractBay = getDeployedContract(chain?.id.toString(), "MecenateBay");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
+  const deployedContractDai = getDeployedContract(chain?.id.toString(), "MockDai");
+  const deployedContractMUSE = getDeployedContract(chain?.id.toString(), "MUSE");
   const [requests, setRequests] = React.useState<BayRequest[]>([]);
   const [requestString, setRequestString] = React.useState<string>("");
   const [requestPayment, setRequestPayment] = React.useState<string>("");
@@ -64,16 +66,42 @@ const Bay: NextPage = () => {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
   }
 
+  let daiAddress!: string;
+  let daiAbi: ContractInterface[] = [];
+
+  if (deployedContractDai) {
+    ({ address: daiAddress, abi: daiAbi } = deployedContractDai);
+  }
+
+  let museAddress!: string;
+  let museAbi: ContractInterface[] = [];
+
+  if (deployedContractMUSE) {
+    ({ address: museAddress, abi: museAbi } = deployedContractMUSE);
+  }
+
   const vaultCtx = useContract({
     address: vaultAddress,
     abi: vaultAbi,
-    signerOrProvider: customWallet || provider,
+    signerOrProvider: customWallet,
   });
 
   const bayCtx = useContract({
     address: bayAddress,
     abi: bayAbi,
-    signerOrProvider: customWallet || provider,
+    signerOrProvider: customWallet,
+  });
+
+  const daiCtx = useContract({
+    address: daiAddress,
+    abi: daiAbi,
+    signerOrProvider: customWallet,
+  });
+
+  const museCtx = useContract({
+    address: museAddress,
+    abi: museAbi,
+    signerOrProvider: customWallet,
   });
 
   const acceptBayRequest = async (index: number, address: string) => {
@@ -122,7 +150,7 @@ const Bay: NextPage = () => {
       vaultCtx?.execute(
         bayCtx?.address,
         data,
-        parseEther(requestPayment),
+        tokenId == 0 ? parseEther(requestPayment) : 0,
         keccak256(String(sismoData.auths[0].userId)),
       ),
     );
@@ -176,11 +204,28 @@ const Bay: NextPage = () => {
     const token = e;
     if (token === "ETH") {
       setTokenId(0);
-    } else if (token === "DAI") {
-      setTokenId(1);
     } else if (token === "MUSE") {
+      setTokenId(1);
+    } else if (token === "DAI") {
       setTokenId(2);
     }
+  };
+
+  const handleApproveToken = async () => {
+    let _tokenAddress;
+    if (tokenId == 1) {
+      _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
+    } else if (tokenId == 2) {
+      _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
+    }
+    const iface = new ethers.utils.Interface(deployedContractVault?.abi as any[]);
+    const data = iface.encodeFunctionData("approveTokenToFeed", [
+      _tokenAddress,
+      parseEther(requestPayment),
+      bayCtx?.address,
+      keccak256(sismoData.auths[0].userId),
+    ]);
+    txData(vaultCtx?.execute(vaultCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
   };
 
   return (
@@ -237,6 +282,15 @@ const Bay: NextPage = () => {
               placeholder="Enter Amount"
               onChange={e => setRequestPayment(e.target.value)}
             />
+
+            <button
+              className="btn btn-large hover:bg-accent  font-bold py-2 px-4 rounded my-5"
+              onClick={async () => {
+                await handleApproveToken();
+              }}
+            >
+              Approve
+            </button>
             <label className="text-black font-semibold text-sm" htmlFor="request">
               Staker Fullfill
             </label>

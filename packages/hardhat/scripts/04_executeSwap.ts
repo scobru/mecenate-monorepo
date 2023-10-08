@@ -41,11 +41,7 @@ async function main() {
   log(`Executing swap as ${owner.address}`);
   log("SwapRouter address:", SWAP_ROUTER_ADDRESS);
 
-  const poolContract = new Contract(
-    DAI_WETH_POOL_3000,
-    UniswapV3PoolABI,
-    owner,
-  );
+  const poolContract = new Contract(DAI_WETH_POOL_500, UniswapV3PoolABI, owner);
 
   const poolData = await getPoolData(poolContract);
 
@@ -114,7 +110,7 @@ async function main() {
     fee: pool.fee,
     recipient: owner.address,
     deadline: deadline,
-    amountIn: ethers.utils.parseEther("0.0001"),
+    amountIn: ethers.utils.parseEther("0.001"),
     amountOutMinimum: 0,
     sqrtPriceLimitX96: 0,
   };

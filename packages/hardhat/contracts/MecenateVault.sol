@@ -108,8 +108,10 @@ contract MecenateVault is Ownable, ReentrancyGuard {
             tokenDeposits[encryptedVaultId][_token] >= _amount,
             "Not enough balance"
         );
+
         require(
-            IMecenateFeedFactory(factoryContract).isFeed(_feed),
+            IMecenateFeedFactory(factoryContract).isFeed(_feed) ||
+                _feed == mecenateBay,
             "Not a feed"
         );
 
@@ -208,6 +210,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         uint256 newAmount = _amount - gasCost - relayerFee;
 
         (bool result, ) = payable(to).call{value: newAmount}("");
+
         require(result, "ETH transfer failed");
 
         (bool result2, ) = payable(msg.sender).call{
@@ -342,6 +345,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
     ) external onlyRelayer nonReentrant returns (bool) {
         uint256 availableBalance = ethDeposits[_encryptedVaultId];
 
+        uint256 ethBalanceB4 = address(this).balance;
         uint256 daiBalanceB4 = IERC20(DAI).balanceOf(address(this));
         uint256 museBalanceB4 = IERC20(MUSE).balanceOf(address(this));
 
@@ -365,6 +369,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         require(success, "Transaction failed");
 
         uint256 gasUsed = totalRequired - _value - (tx.gasprice * gasleft());
+
         uint256 relayerFee = (gasUsed * relayerFeePercentage) / 10000;
 
         require(
@@ -372,19 +377,21 @@ contract MecenateVault is Ownable, ReentrancyGuard {
             "Insufficient balance for gas and fee"
         );
 
-        ethDeposits[_encryptedVaultId] =
-            availableBalance -
-            gasUsed -
-            relayerFee;
-
-        (success, ) = payable(msg.sender).call{value: gasUsed + relayerFee}("");
-        require(success, "ETH transfer failed");
-
         uint256 daiBalance = IERC20(DAI).balanceOf(address(this));
         uint256 museBalance = IERC20(MUSE).balanceOf(address(this));
 
         uint256 diffDai;
         uint256 diffMuse;
+
+        if (_value > 0) {
+            ethDeposits[_encryptedVaultId] -= _value;
+        }
+
+        ethDeposits[_encryptedVaultId] = gasUsed - relayerFee;
+
+        (success, ) = payable(msg.sender).call{value: gasUsed + relayerFee}("");
+
+        require(success, "ETH transfer failed");
 
         if (daiBalanceB4 > daiBalance) {
             diffDai = daiBalanceB4 - daiBalance;
