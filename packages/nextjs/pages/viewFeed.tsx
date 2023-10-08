@@ -1137,14 +1137,14 @@ const ViewFeed: NextPage = () => {
   return (
     <div className="flex flex-col items-center pt-2 p-2 w-10/12 mx-auto ">
       {feedData[0] != null ? (
-        <div className="flex flex-col text-left bg-primary rounded-lg">
+        <div className="flex flex-col text-left bg-primary rounded-lg card card-shadow">
           <div className="flex flex-col mb-5  min-w-fit items-left justify-center w-full">
             <div className="flex flex-row gap-5 mx-10 my-5">
-              <div className="dropdown dropdown-bottom">
-                <label tabIndex={0} className="hover:bg-secondary-focus btn btn-ghost bg-inherit">
+              <div className="dropdown dropdown-bottom ">
+                <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
                   <DocumentCheckIcon className="h-8 w-8 mx-2" /> Seller
                 </label>
-                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow  rounded-box w-52  bg-primary ">
                   <li>
                     {" "}
                     <label htmlFor="modal-create" className="feedData.postData font-semibold">
@@ -1173,11 +1173,11 @@ const ViewFeed: NextPage = () => {
                   </li>
                 </ul>
               </div>
-              <div className="dropdown dropdown-bottom">
-                <label tabIndex={0} className="hover:bg-secondary-focus btn btn-ghost bg-inherit">
+              <div className="dropdown dropdown-bottom ">
+                <label tabIndex={0} className="hover:bg-secondary-focus  btn btn-custom bg-inherit">
                   <MegaphoneIcon className="h-8 w-8 mx-2" /> Buyer
                 </label>
-                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-primary rounded-box w-52">
                   <li>
                     {" "}
                     <label htmlFor="modal-accept" className=" font-semibold">
@@ -1197,7 +1197,7 @@ const ViewFeed: NextPage = () => {
                 </ul>
               </div>
               <div className="dropdown dropdown-bottom">
-                <label tabIndex={0} className="hover:bg-secondary-focus btn btn-ghost bg-inherit">
+                <label tabIndex={0} className="hover:bg-secondary-focus btn btn btn-custom bg-inherit">
                   <ScaleIcon className="h-8 w-8 mx-2" /> Stake
                 </label>
                 <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
@@ -1241,9 +1241,19 @@ const ViewFeed: NextPage = () => {
             Smart Contract address is <strong>{addr}</strong>{" "}
           </div>
           <div className="mx-10  mb-5 font-base text-lg">
-            Your current deposit is <strong>{formatEther(yourStake)} ETH</strong>
+            Your current deposit is{" "}
+            <strong>
+              {formatEther(yourStake)}{" "}
+              {feedData?.postdata?.settings?.tokenId == 0
+                ? "ETH"
+                : feedData?.postdata?.settings?.tokenId == 1
+                ? "MUSE"
+                : feedData?.postdata?.settings?.tokenId == 2
+                ? "DAI"
+                : "ETH"}
+            </strong>
           </div>
-          <div className="flex flex-col  mb-16  min-w-fit items-left justify-center w-full">
+          <div className="flex flex-col  my-20  min-w-fit items-left justify-center w-full">
             <ul className="steps">
               {allStatuses.map((statusText, index) => {
                 const currentStatus = feedData?.postdata?.settings?.status;
@@ -1258,9 +1268,9 @@ const ViewFeed: NextPage = () => {
             </ul>
           </div>
 
-          <div className="flex flex-col mt-5 mb-16 min-w-fit items-left justify-center w-full border-2 p-10 border-primary-focus rounded-xl">
+          <div className="flex flex-col mt-5 mb-16 min-w-fit items-left justify-center w-full border-2 p-10 bg-primary border-secondary rounded-2xl">
             <div className="text-2xl font-bold mx-10">Messenger</div>
-            <div className="text-base font-light mx-10">Comunicate with buyer/seller or mecenate community</div>s
+            <div className="text-base font-light mx-10">Comunicate with buyer/seller or mecenate community</div>
             <a href="https://t.me/mecenate_message_bot" className="link-hover mx-10">
               Telegram Bot
             </a>
@@ -1443,14 +1453,14 @@ const ViewFeed: NextPage = () => {
                   </label>
                 </div>
                 <div className="modal-body space-y-4 text-left">
-                  <input
+                  {/* <input
                     type="password"
                     className="input w-full"
                     placeholder="Symmetric Key"
                     value={symmetricKey}
                     onChange={e => setSymmetricKey(e.target.value)}
                   />
-                  <br />
+                  <br /> */}
                   <button
                     className="btn  w-full"
                     onClick={async () => {
@@ -1568,8 +1578,9 @@ const ViewFeed: NextPage = () => {
                     </button>
                   </div>
                 ) : null}
-                <div className="modal-body space-y-4 text-left">
-                  Amount to Pay for Data {""}
+                <div className="modal-body space-y-4 my-2 text-left">
+                  min required: {""}
+                  {formatEther(feedData[1][1].payment.toString())} {""}
                   <input
                     type="text"
                     className="input w-full mt-8"
@@ -1721,7 +1732,7 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col mb-16  min-w-fit items-left justify-center w-full border-2 p-10 rounded-xl border-primary-focus">
+          <div className="flex flex-col mb-16  min-w-fit items-left justify-center w-full border-2 p-10 bg-primary border-secondary rounded-2xl">
             <div className="card w-fit">
               <div className="card-body">
                 <h2 className="text-2xl font-bold">Feed Info</h2>

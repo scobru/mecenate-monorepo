@@ -21,7 +21,7 @@ interface IMecenateFeedFactory {
 
     function router() external view returns (address);
 
-    function getRouterFee(uint8 tokenId) external view returns (uint256);
+    function getRouterFee(uint8 tokenId) external view returns (uint24);
 
     function burnEnabled() external view returns (bool);
 }

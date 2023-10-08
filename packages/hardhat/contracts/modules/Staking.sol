@@ -32,12 +32,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
         require(amountToAdd > 0, "STAKE_REQUIRED");
 
         if (tokenId != Structures.Tokens.NaN) {
-            TokenManager._transferFrom(
-                tokenId,
-                funder,
-                address(this),
-                amountToAdd
-            );
+            _transferFrom(tokenId, funder, address(this), amountToAdd);
         }
 
         newStake = Deposit._increaseDeposit(tokenId, staker, amountToAdd);
@@ -69,7 +64,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
             //require(result, "CALL_FAILED");
             payable(_to).transfer(amountToTake);
         } else {
-            TokenManager._transfer(tokenId, _to, amountToTake);
+            _transfer(tokenId, _to, amountToTake);
         }
 
         // Aggiorna il deposito e emette un evento
@@ -102,38 +97,29 @@ abstract contract Staking is Events, Deposit, TokenManager {
             amountToBurn
         );
 
-        if (
-            IMecenateFeedFactory(settings.factoryContract).burnEnabled() ==
-            false
-        ) {
+        bool burnEnabled = IMecenateFeedFactory(settings.factoryContract)
+            .burnEnabled();
+
+        address treasuryContract = IMecenateFeedFactory(
+            settings.factoryContract
+        ).treasuryContract();
+
+        if (burnEnabled == false) {
             if (tokenId == Structures.Tokens.NaN) {
-                (bool result, ) = payable(
-                    IMecenateFeedFactory(settings.factoryContract)
-                        .treasuryContract()
-                ).call{value: amountToBurn}("");
-
+                (bool result, ) = payable(treasuryContract).call{
+                    value: amountToBurn
+                }("");
                 require(result, "CALL_FAILED");
-            }
-
-            if (tokenId == Structures.Tokens.DAI) {
-                IERC20(DAI).transfer(
-                    IMecenateFeedFactory(settings.factoryContract)
-                        .treasuryContract(),
-                    amountToBurn
-                );
-            } else if (tokenId == Structures.Tokens.MUSE) {
-                IERC20(MUSE).transfer(
-                    IMecenateFeedFactory(settings.factoryContract)
-                        .treasuryContract(),
-                    amountToBurn
-                );
-                BurnMUSE._burn(amountToBurn);
+            } else {
+                _transfer(tokenId, treasuryContract, amountToBurn);
             }
         } else {
             if (tokenId == Structures.Tokens.DAI) {
-                BurnDAI._burn(amountToBurn);
+                _burnDai(amountToBurn);
             } else if (tokenId == Structures.Tokens.MUSE) {
-                BurnMUSE._burn(amountToBurn);
+                _burn(amountToBurn);
+            } else if (tokenId == Structures.Tokens.NaN) {
+                _burnWeth(amountToBurn);
             }
         }
 

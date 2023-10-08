@@ -30,6 +30,7 @@ abstract contract Creation is Staking {
             uint256 telegramId,
 
         ) = _verifyNonce(sismoConnectResponse, _to, _nonce);
+
         bytes32 encryptedVaultId = keccak256(vaultId);
 
         // Early exit conditions

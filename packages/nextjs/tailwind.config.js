@@ -8,26 +8,26 @@ module.exports = {
     themes: [
       {
         light: {
-          primary: "#ffffff",
-          secondary: "#f6f6f8",
-          accent: "#007aff",
-          neutral: "#8e8e93",
-          "base-100": "#f4f4f7",
-          info: "#0a84ff",
-          success: "#30d158",
-          warning: "#ff9f0a",
-          error: "#ff453a",
+          primary: "#F9F9F9", // Più vicino al bianco pulito
+          secondary: "#EFEFEF", // Grigio molto chiaro
+          accent: "#00A3FF", // Accento blu
+          neutral: "#A9A9A9", // Grigio neutro
+          "base-100": "#F4F4F7", // Base per background, ecc.
+          info: "#007BFF", // Blu per informazioni
+          success: "#28A745", // Verde per successo
+          warning: "#FFC107", // Giallo per avvisi
+          error: "#DC3545", // Rosso per errori
         },
         dark: {
-          primary: "#121212",
-          secondary: "#1e1e1e",
-          accent: "#0c66ff",
-          neutral: "#646464",
-          "base-100": "#282828",
-          info: "#0c8dff",
-          success: "#2fdd31",
-          warning: "#ff7f0b",
-          error: "#ff3a2f",
+          primary: "#1F1F1F", // Quasi nero
+          secondary: "#000000", // Grigio scuro
+          accent: "#00A3FF", // Accento blu
+          neutral: "#767676", // Grigio neutro
+          "base-100": "#353535", // Base per background, ecc.
+          info: "#007BFF", // Blu per informazioni
+          success: "#28A745", // Verde per successo
+          warning: "#FFC107", // Giallo per avvisi
+          error: "#DC3545", // Rosso per errori
         },
       },
     ],
@@ -39,12 +39,10 @@ module.exports = {
         "bai-jamjuree": ["Bai Jamjuree", "sans-serif"],
         inter: ["Inter", "sans-serif"],
         roboto: ["Roboto", "sans-serif"],
-        poppins: ["Poppins", "sans-serif"],
         opensans: ["Open Sans", "sans-serif"],
-        proxima: ["Proxima Nova", "sans-serif"],
       },
       boxShadow: {
-        center: "0 0 12px -2px rgb(0 0 0 / 0.05)",
+        center: "0 0 12px -2px rgb(0 0 0 / 0.05)",      
       },
       keyframes: {
         grow: {

@@ -4,18 +4,21 @@ import "../interfaces/IMecenateFeedFactory.sol";
 import "./Events.sol";
 
 abstract contract BurnMUSE is Events {
-    function _burn(uint256 value) internal virtual {
-        require(
-            IMUSE(IMecenateFeedFactory(settings.factoryContract).museToken())
-                .burn(value),
-            "muse burn failed"
+    function _burn(uint256 value) internal virtual returns (bool success) {
+        IMUSE(IMecenateFeedFactory(settings.factoryContract).museToken()).burn(
+            value
         );
+        return true;
     }
 
-    function _burnFrom(address from, uint256 value) internal virtual {
+    function _burnFrom(
+        address from,
+        uint256 value
+    ) internal virtual returns (bool success) {
         IMUSE(IMecenateFeedFactory(settings.factoryContract).museToken())
             .transferFrom(from, address(this), value);
         _burn(value);
+        return true;
     }
 
     function getTokenAddress() internal view virtual returns (address token) {

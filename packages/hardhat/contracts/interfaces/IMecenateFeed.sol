@@ -28,4 +28,6 @@ interface IMecenateFeed {
     function getTokenId() external view returns (Structures.Tokens tokenId);
 
     function owner() external view returns (bytes32);
+
+    function version() external view returns (string memory);
 }

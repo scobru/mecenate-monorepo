@@ -102,6 +102,8 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     function setFeedByteCode(bytes memory _byteCode) external onlyOwner {
         feedByteCode = _byteCode;
+        // add version incremental to the current string
+        version = string(abi.encodePacked("v2.0.1"));
     }
 
     function buildFeed(

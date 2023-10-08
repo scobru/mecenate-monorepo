@@ -39,6 +39,8 @@ const Feeds: NextPage = () => {
     paymentRequested: string;
     sellerPayment: string;
     status: string;
+    tokenId: string;
+    version: string;
   };
 
   let factoryAddress!: string;
@@ -141,7 +143,11 @@ const Feeds: NextPage = () => {
       feeds.map((feed, i) => (
         <div key={i}>
           <Link href={`/viewFeed?addr=${feed}`} passHref>
-            <div className="grid grid-cols-12 gap-4 border rounded-xl p-4 hover:bg-base-200 transition-all duration-300 ease-in-out transform hover:scale-105 bg-base-300 text-base-content">
+            <div className="card card-shadow grid grid-cols-12 gap-4 border rounded-xl p-4 hover:bg-opacity-10 transition-all duration-300 ease-in-out transform hover:scale-105 bg-base-300 text-base-content ">
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Currency:</div>
+              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
+                {Number(feedsInfos[i].tokenId) == 0 ? "ETH" : Number(feedsInfos[i].tokenId) == 1 ? "MUSE" : "DAI"}{" "}
+              </div>
               <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Addr:</div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {feed}
@@ -164,7 +170,23 @@ const Feeds: NextPage = () => {
               </div>
               <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Status:</div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
-                {String(feedsInfos[i].status)}
+                {Number(feedsInfos[i].status) === 6
+                  ? "Revealed"
+                  : Number(feedsInfos[i].status) === 5
+                  ? "Punished"
+                  : Number(feedsInfos[i].status) === 4
+                  ? "Finalized"
+                  : Number(feedsInfos[i].status) === 3
+                  ? "Submitted"
+                  : Number(feedsInfos[i].status) === 2
+                  ? "Accepted"
+                  : Number(feedsInfos[i].status) === 1
+                  ? "Proposed"
+                  : "Waiting for Creator"}
+              </div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Version:</div>
+              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
+                {String(feedsInfos[i].version)}
               </div>
             </div>
           </Link>

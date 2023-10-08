@@ -22,8 +22,10 @@ abstract contract Finalization is Staking {
         address treasuryContract = IMecenateFeedFactory(
             settings.factoryContract
         ).treasuryContract();
+
         uint256 buyerFee = (post.postdata.escrow.payment *
             IMecenateTreasury(treasuryContract).globalFee()) / 10000;
+
         uint256 amountToAdd = post.postdata.escrow.payment - buyerFee;
 
         // Variables for stake changes
@@ -44,15 +46,13 @@ abstract contract Finalization is Staking {
                 amountToAdd
             );
 
-            TokenManager._burn(
-                post.postdata.settings.tokenId,
-                treasuryContract,
-                buyerFee
-            );
+            _burn(post.postdata.settings.tokenId, treasuryContract, buyerFee);
 
             // Update status and stakes
             post.postdata.escrow.stake = sellerStake;
+
             post.postdata.escrow.payment = buyerStake;
+
             _changeStatus(
                 valid
                     ? Structures.PostStatus.Finalized
@@ -68,13 +68,6 @@ abstract contract Finalization is Staking {
             require(settings.punishmentRatio < 1e18, "PUNISHMENT_RATIO_HIGH");
 
             uint256 penalty = (punishment * settings.punishmentRatio) / 1e18;
-            uint256 totalPunishmentFee = penalty + punishment;
-
-            TokenManager._burn(
-                post.postdata.settings.tokenId,
-                treasuryContract,
-                totalPunishmentFee
-            );
 
             post.postdata.escrow.payment = _burnStake(
                 post.postdata.settings.tokenId,
@@ -90,7 +83,9 @@ abstract contract Finalization is Staking {
 
             // Update status and penalties
             post.postdata.settings.status = Structures.PostStatus.Punished;
+
             post.postdata.escrow.punishment = punishment;
+
             post.postdata.escrow.penalty = penalty;
 
             _changeStatus(Structures.PostStatus.Punished);

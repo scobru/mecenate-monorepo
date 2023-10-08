@@ -66,9 +66,9 @@
       "name": "getRouterFee",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "uint24",
           "name": "",
-          "type": "uint256"
+          "type": "uint24"
         }
       ],
       "stateMutability": "view",

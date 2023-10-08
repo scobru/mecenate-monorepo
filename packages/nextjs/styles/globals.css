@@ -1,5 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300&family=Poppins:ital,wght@1,300&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
 @import url("https://use.typekit.net/abd7ahl.css");
 @import "tailwindcss/base";
@@ -30,8 +29,52 @@ p {
 .btn {
   @apply shadow-md;
   @apply capitalize;
+  
 }
 
 .btn.btn-ghost {
   @apply shadow-none;
+}
+
+.btn.btn-large {
+  @apply shadow-md;
+  @apply capitalize;
+  @apply text-lg;
+  @apply rounded-lg;
+  @apply my-5;
+  @apply border-0;
+  @apply hover:bg-slate-800;
+  @apply w-full;
+  @apply text-white;
+  @apply disabled:bg-slate-800;
+  @apply disabled:cursor-not-allowed;
+  @apply disabled:opacity-50;
+  background-color: #311c31;
+}
+
+.btn.btn-custom {
+  @apply shadow-md;
+  @apply capitalize;
+  @apply rounded-lg;
+  @apply my-5;
+  @apply border-0;
+  @apply hover:bg-slate-800;
+  @apply w-full;
+  @apply text-white;
+  @apply disabled:bg-slate-800;
+  @apply disabled:cursor-not-allowed;
+  @apply disabled:opacity-50;
+  background-color: #311c31;
+}
+
+.card.card-shadow {
+  @apply shadow-center;
+  @apply rounded-xl;
+  @apply p-10;
+  @apply bg-secondary;
+  @apply border-gray-800;
+  @apply shadow-2xl;
+  @apply shadow-blue-950;
+  @apply border;
+  @apply my-5;
 }

@@ -20,6 +20,7 @@ abstract contract Acceptance is Events, Staking {
             validStatuses[uint8(Structures.PostStatus.Proposed)],
             "INVALID_STATUS"
         );
+
         _checkToken(tokenId);
 
         uint256 amountToAdd = tokenId == Structures.Tokens.NaN

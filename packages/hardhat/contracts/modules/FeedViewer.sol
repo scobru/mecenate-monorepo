@@ -22,6 +22,7 @@ contract FeedViewer {
         f.stakeRequested = mecenateFeed.getStakeRequested();
         f.status = mecenateFeed.getStatus();
         f.tokenId = mecenateFeed.getTokenId();
+        f.version = mecenateFeed.version();
 
         return f;
     }

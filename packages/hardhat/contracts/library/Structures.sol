@@ -141,6 +141,7 @@ library Structures {
         uint256 stakeRequested;
         PostStatus status;
         Tokens tokenId;
+        string version;
     }
 
     /**

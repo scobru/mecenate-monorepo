@@ -14,7 +14,7 @@ interface IMUSE is IERC20 {
         uint256 subtractedValue
     ) external returns (bool);
 
-    function mint(uint256 amount) external returns (bool);
+    function mint(uint256 amount) external;
 
-    function burn(uint256 amount) external returns (bool);
+    function burn(uint256 amount) external;
 }

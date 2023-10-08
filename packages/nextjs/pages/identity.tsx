@@ -279,7 +279,6 @@ const Identity: NextPage = () => {
   const handleDepositToken = async () => {
     if (!forwarder) return;
     const iface = new ethers.utils.Interface(deployedContractForwarder?.abi as any[]);
-
     const data = iface.encodeFunctionData("depositToken", [tokenAddress, ethers.utils.parseEther(tokenAmount)]);
 
     console.log("TokenAddress", tokenAddress);
@@ -364,7 +363,6 @@ const Identity: NextPage = () => {
             ) : (
               <>
                 <div className="text-center">
-                  <br></br>
                   {pageState == "verifying" ? (
                     <div className="text-center items-center flex flex-row gap-3">
                       <Spinner></Spinner>{" "}
@@ -390,84 +388,93 @@ const Identity: NextPage = () => {
                             </button>
                           </div>
                           <div className="text-green-500 font-bold my-5 ">ZK Proofs verified!</div>
-                          <div>
+                          <div className="card  card-shadow ">
+                            <div className="text-center font-semibold text-xl">Faucet mDAI/MUSE</div>
                             <button
-                              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
+                              className="btn btn-large"
                               onClick={async () => {
                                 await mintDai();
                               }}
-                              disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
+                              disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero && forwarderAddress)}
                             >
-                              Mint Dai
+                              Mint mDAI
                             </button>
 
                             <button
-                              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
+                              className="btn btn-large"
                               onClick={async () => {
                                 await mintMuse();
                               }}
-                              disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
+                              disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero && forwarderAddress)}
                             >
-                              Mint Muse
+                              Mint MUSE
                             </button>
                           </div>
-                          <div className="font-semibold text-xl">⚠️ Deposit into vault before sign-in</div>
-                          <div>
-                            <p className="text-xl  mb-2">Create forwarder address used to deposit into vault</p>
-                            <button
-                              className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
-                              onClick={async () => {
-                                await createForwarder();
-                              }}
-                              disabled={Boolean(forwarderAddress != ethers.constants.AddressZero)}
-                            >
-                              Create
-                            </button>
-                            {forwarderAddress == ethers.constants.AddressZero && forwarderAddress ? (
-                              <p className="text-xl mb-10">Create forwarder first</p>
-                            ) : (
-                              <div>
+                          <div className="card  card-shadow ">
+                            <div className="font-semibold text-xl">Deposit</div>
+                            <div>
+                              <button
+                                className="btn btn-large"
+                                onClick={async () => {
+                                  await createForwarder();
+                                }}
+                                disabled={Boolean(forwarderAddress != ethers.constants.AddressZero)}
+                              >
+                                Create
+                              </button>
+                              {forwarderAddress == ethers.constants.AddressZero && forwarderAddress ? (
+                                <p className="text-lg mb-10">Create forwarder address</p>
+                              ) : (
                                 <div>
-                                  {" "}
-                                  <p className="text-xl mb-10">Send ETH to deposit at:</p>
-                                  <Address address={forwarderAddress} format="long" />
+                                  <div>
+                                    {" "}
+                                    <p className="text-lg mb-10"> [1] Send ETH or ERC20 at this forwarder address</p>
+                                    <Address address={forwarderAddress} format="long" />
+                                    <br />
+                                  </div>
+                                  <div>
+                                    {" "}
+                                    <p className="text-lg mb-10">
+                                      [2] Select ERC20 you want transfer into Mecenate Vault.
+                                    </p>
+                                    <select
+                                      className="select select-bordered w-full max-w-xs mb-5"
+                                      name="tokens"
+                                      id="tokens"
+                                      onChange={async e => {
+                                        setTokenAddress(e.target.value);
+                                      }}
+                                    >
+                                      <option value={""}>Select Token</option>
+                                      <option value={process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE}>DAI</option>
+                                      <option value={process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE}>MUSE</option>
+                                    </select>
+                                    <input
+                                      type="text"
+                                      className="input input-primary"
+                                      onChange={async e => {
+                                        setTokenAmount(e.target.value);
+                                      }}
+                                      placeholder="Amount sent"
+                                    />
+                                    <button
+                                      className="btn btn-large"
+                                      onClick={async () => {
+                                        await handleDepositToken();
+                                      }}
+                                      disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
+                                    >
+                                      Deposit Token
+                                    </button>
+                                  </div>
                                 </div>
-                                <div>
-                                  {" "}
-                                  <p className="text-xl mb-10">Send Token and after click to deposit:</p>
-                                  <Address address={forwarderAddress} format="long" />
-                                  <select
-                                    name="tokens"
-                                    id="tokens"
-                                    onChange={async e => {
-                                      setTokenAddress(e.target.value);
-                                    }}
-                                  >
-                                    <option value={""}>Select Token</option>
-                                    <option value={process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE}>DAI</option>
-                                    <option value={process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE}>MUSE</option>
-                                  </select>
-                                  <input
-                                    type="text"
-                                    className="input input-primary"
-                                    onChange={async e => {
-                                      setTokenAmount(e.target.value);
-                                    }}
-                                  />
-                                  <button
-                                    className="btn w-full p-2 border rounded-md shadow-sm bg-primary-500 hover:bg-primary-700 my-5"
-                                    onClick={async () => {
-                                      await handleDepositToken();
-                                    }}
-                                    disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
-                                  >
-                                    Deposit Token
-                                  </button>
-                                </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
-                          <div className="mt-10">
+
+                          <div className="card  card-shadow ">
+                            <div className="card card-title">Sign in</div>
+
                             <input
                               className="input input-bordered my-5 w-full"
                               type="text"
@@ -475,7 +482,7 @@ const Identity: NextPage = () => {
                               onInput={(e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)}
                             />
                             <button
-                              className="btn btn-primary w-full py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                              className="btn btn-large"
                               onClick={signIn}
                               disabled={userExists && withdrawalAddress != "" && userName != ""}
                             >

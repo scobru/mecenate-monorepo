@@ -2,7 +2,7 @@ import { EthereumProvider, HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers } from "hardhat";
 
-import { deployPool, encodePriceSqrt } from "../scripts/03_deployPools";
+import { deployPool, encodePriceSqrt } from "../scripts/01_deployPools";
 
 const relayer = "0x3db5E84e0eBBEa945a0a82E879DcB7E1D1a587B4";
 const router = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d";
@@ -42,6 +42,18 @@ const deployYourContract: DeployFunction = async function (
 
   mockDai.receipt &&
     console.log("MockDai deployed at:", mockDai.receipt.contractAddress);
+
+  const mockWeth = await deploy("MockWeth", {
+    from: deployer,
+
+    args: [],
+    log: true,
+
+    autoMine: true,
+  });
+
+  mockWeth.receipt &&
+    console.log("mockWeth deployed at:", mockWeth.receipt.contractAddress);
 
   const muse = await deploy("MUSE", {
     from: deployer,
@@ -194,7 +206,7 @@ const deployYourContract: DeployFunction = async function (
   console.log("Mecenate Bay setted at:", mecenateBay.address);
 
   const setTokens = await vaultInstance.setTokens(
-    "0x4200000000000000000000000000000000000006",
+    mockWeth.address,
     mockDai.address,
     ethers.constants.AddressZero,
     muse.address,
@@ -204,10 +216,7 @@ const deployYourContract: DeployFunction = async function (
 
   console.log("Tokens setted at:", mockDai.address);
   console.log("Tokens setted at:", muse.address);
-  console.log(
-    "Tokens setted at:",
-    "0x4200000000000000000000000000000000000006",
-  );
+  console.log("Tokens setted at:", mockWeth.address);
 
   const mecenateStats = await deploy("MecenateStats", {
     from: deployer,
@@ -248,7 +257,7 @@ const deployYourContract: DeployFunction = async function (
     treasury.address,
     vault.address,
     users.address,
-    "0x4200000000000000000000000000000000000006",
+    mockWeth.address,
     muse.address,
     mockDai.address,
     router,
@@ -260,6 +269,8 @@ const deployYourContract: DeployFunction = async function (
   const setByteCode = await feedFactoryInstance.setFeedByteCode(feed.bytecode);
 
   setByteCode.wait();
+
+  console.log("Feed Bytecode setted");
 
   const mecenateForwarder = await deploy("MecenateForwarder", {
     from: deployer,

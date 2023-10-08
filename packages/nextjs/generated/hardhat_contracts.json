@@ -5,7 +5,7 @@
       "chainId": "84531",
       "contracts": {
         "MUSE": {
-          "address": "0xb5FEEC079919CAE69223a29866CB626D781Ba871",
+          "address": "0x100d7c197a9EF83258C888cb0Fb2d8e0Be2A0584",
           "abi": [
             {
               "inputs": [],
@@ -905,7 +905,7 @@
           ]
         },
         "MecenateBay": {
-          "address": "0xb75767b9D037A392e2B29f1C4139B54fa1A26e97",
+          "address": "0x2a0e212caE830A7d1808BdBA5dee4E0611f6C972",
           "abi": [
             {
               "inputs": [
@@ -1676,7 +1676,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0xBba4C7caC23179ee89E6d41DB8ACEd8d40245dbD",
+          "address": "0xC7da9C8C8e76010fbD6d717CFf6b050CA913104c",
           "abi": [
             {
               "inputs": [
@@ -2686,45 +2686,6 @@
               "type": "event"
             },
             {
-              "inputs": [],
-              "name": "DAI",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "MUSE",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "WETH",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
               "inputs": [
                 {
                   "internalType": "bytes",
@@ -3539,7 +3500,7 @@
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0xcB76cb094dE5c19e728ab996d619a841e2D227d6",
+          "address": "0x604346aC71597A9F2d3906A1708bcA50Cd66d275",
           "abi": [
             {
               "inputs": [
@@ -3784,6 +3745,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "version",
+                      "type": "string"
                     }
                   ],
                   "internalType": "struct Structures.Feed",
@@ -3862,6 +3828,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "version",
+                      "type": "string"
                     }
                   ],
                   "internalType": "struct Structures.Feed[]",
@@ -3933,6 +3904,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "version",
+                      "type": "string"
                     }
                   ],
                   "internalType": "struct Structures.Feed[]",
@@ -4181,7 +4157,7 @@
           ]
         },
         "MecenateForwarder": {
-          "address": "0x0027Ae655c49b5B3366dFDA94ea63Bb894411E1d",
+          "address": "0xf2ed946165e44D6DE248D25C5C76078310Ca36ab",
           "abi": [
             {
               "inputs": [
@@ -4250,7 +4226,7 @@
           ]
         },
         "MecenateForwarderFactory": {
-          "address": "0x9A27306175abB6a0799ff7B7A0E02d1987C16046",
+          "address": "0x3C04d0efB13cEFA36cC8BeE04f2f00Ed8F66De58",
           "abi": [
             {
               "inputs": [
@@ -4439,7 +4415,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0x81bC9876af58Eb4D07f02B0B00f3829D74469D63",
+          "address": "0xb1226004aa1C09c86a158Fb0A86219992c3634E5",
           "abi": [
             {
               "inputs": [
@@ -4567,7 +4543,7 @@
           ]
         },
         "MecenateTreasury": {
-          "address": "0x31B428542C7197062EDe6CD2Fd30fC9dD6FA22F2",
+          "address": "0x1a05842Aa1750C136D43545CB7ab94cC96F8d0b2",
           "abi": [
             {
               "anonymous": false,
@@ -4587,6 +4563,24 @@
               ],
               "name": "OwnershipTransferred",
               "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                }
+              ],
+              "name": "addERC20Funds",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
             },
             {
               "inputs": [],
@@ -4691,6 +4685,25 @@
               "inputs": [
                 {
                   "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "distributableERC20Balance",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
                   "name": "_usersContract",
                   "type": "address"
                 }
@@ -4701,8 +4714,58 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_usersContract",
+                  "type": "address"
+                }
+              ],
+              "name": "distributeERC20",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "fixedFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getDistributionBalance",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                }
+              ],
+              "name": "getDistributionERC20Balance",
               "outputs": [
                 {
                   "internalType": "uint256",
@@ -4727,6 +4790,35 @@
                 }
               ],
               "name": "getReward",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_verifierContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "encryptedVaultId",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "getRewardERC20",
               "outputs": [
                 {
                   "internalType": "uint256",
@@ -5016,6 +5108,50 @@
               "inputs": [
                 {
                   "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_receiver",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_verifierContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_to",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "_nonce",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "takeRewardERC20",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
                   "name": "newOwner",
                   "type": "address"
                 }
@@ -5047,42 +5183,25 @@
             {
               "inputs": [
                 {
-                  "internalType": "address payable",
-                  "name": "_to",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_amount",
-                  "type": "uint256"
-                }
-              ],
-              "name": "withdrawNative",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_token",
-                  "type": "address"
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
                 },
                 {
                   "internalType": "address",
-                  "name": "_to",
+                  "name": "",
                   "type": "address"
-                },
+                }
+              ],
+              "name": "userRewardERC20",
+              "outputs": [
                 {
                   "internalType": "uint256",
-                  "name": "_amount",
+                  "name": "",
                   "type": "uint256"
                 }
               ],
-              "name": "withdrawTokens",
-              "outputs": [],
-              "stateMutability": "nonpayable",
+              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -5092,7 +5211,7 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0x78329Ef4bEda65c8d54cD551Bc87F7d1AB6a20D9",
+          "address": "0x805E6e2887C62B86aD3B667F68DC6c0EFa9A91d4",
           "abi": [
             {
               "inputs": [
@@ -5431,7 +5550,7 @@
           ]
         },
         "MecenateVault": {
-          "address": "0xb13351abaE0b4b0C7b9C7E909020Fba9dAb11b0d",
+          "address": "0xd5c945D42b76890A66B68ae220e5F07a9F1892EE",
           "abi": [
             {
               "inputs": [
@@ -6054,7 +6173,7 @@
           ]
         },
         "MecenateVerifier": {
-          "address": "0xA3Aa50BC3980B5a05dAe85C2A11f657d0c52Fb2f",
+          "address": "0x8CFb40101Fbd1a04b8F460CC5d419E94eFe0c74D",
           "abi": [
             {
               "inputs": [
@@ -6222,7 +6341,7 @@
           ]
         },
         "MockDai": {
-          "address": "0xa37d5A81EC490AFDBC582C96AE10d845F734C1c4",
+          "address": "0xCFA79Ce44e410a05c6C271bb2F95084Db6D52b33",
           "abi": [
             {
               "inputs": [],
@@ -6590,7 +6709,7 @@
           ]
         },
         "MockWeth": {
-          "address": "0x601E0cbFd8961FF898ff32eC82EA4747ed5d5F08",
+          "address": "0xa3a0460606Bb07A44Ff47fB90f2532F99de99534",
           "abi": [
             {
               "inputs": [],
