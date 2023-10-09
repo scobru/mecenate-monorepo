@@ -50,7 +50,6 @@ const ViewFeed: NextPage = () => {
   const { chain } = useNetwork();
 
   const { addr } = router?.query;
-  const [ethWallet, setEthWallet] = useState<any>(null);
   const [customSigner, setCustomSigner] = useState<any>(null);
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
@@ -103,50 +102,27 @@ const ViewFeed: NextPage = () => {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
   }
 
-  const handleApproveTokenSeller = async () => {
+  const handleApprove = async () => {
     let _tokenAddress;
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
     } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
     }
-    const iface = new ethers.utils.Interface(deployedContractVault?.abi as any[]);
-    const data = iface.encodeFunctionData("approveTokenToFeed", [
-      _tokenAddress,
-      parseEther(postStake),
-      feedCtx?.address,
-      keccak256(sismoData.auths[0].userId),
-    ]);
-    txData(vaultCtx?.execute(vaultCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
-  };
 
-  const handleApproveTokenBuyer = async () => {
-    let _tokenAddress;
-    if (feedData.postdata.settings.tokenId == 1) {
-      _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
-    } else if (feedData.postdata.settings.tokenId == 2) {
-      _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
-    }
-    const iface = new ethers.utils.Interface(deployedContractVault?.abi as any[]);
-    const data = iface.encodeFunctionData("approveTokenToFeed", [
-      _tokenAddress,
-      feedData.postdata.escrow.stake,
-      feedCtx?.address,
-      keccak256(sismoData.auths[0].userId),
-    ]);
-    txData(vaultCtx?.execute(vaultCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
+    // Write Approval
   };
 
   const vaultCtx = useContract({
     address: vaultAddress,
     abi: vaultAbi,
-    signerOrProvider: customWallet,
+    signerOrProvider: customSigner,
   });
 
   const feedCtx = useContract({
     address: addr as string,
     abi: feedAbi,
-    signerOrProvider: customWallet,
+    signerOrProvider: customSigner,
   });
 
   //******************** Messenger *********************//
@@ -363,39 +339,40 @@ const ViewFeed: NextPage = () => {
       _buyer = buyer;
     }
 
-    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
+    feedCtx?.connect(customSigner);
 
-    const data = iface.encodeFunctionData("createPost", [
-      proofOfHashEncode,
-      Number(postType),
-      Number(postDuration),
-      parseEther(await buyerPayment),
-      parseEther(postStake),
-      Number(tokenId),
-      sismoResponse,
-      localStorage.getItem("withdrawalAddress"),
-      localStorage.getItem("nonce"),
-    ]);
     txData(
-      vaultCtx?.execute(
-        feedCtx?.address,
-        data,
-        tokenId == "0" ? parseEther(postStake) : 0,
-        keccak256(sismoData?.auths[0]?.userId),
+      feedCtx?.createPost(
+        proofOfHashEncode,
+        Number(postType),
+        Number(postDuration),
+        parseEther(await buyerPayment),
+        parseEther(postStake),
+        Number(tokenId),
+        sismoResponse,
+        localStorage.getItem("withdrawalAddress"),
+        localStorage.getItem("nonce"),
+        {
+          value: tokenId == "0" ? parseEther(postStake) : 0,
+        },
       ),
     );
   };
 
   async function acceptPost() {
-    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-    const data = iface.encodeFunctionData("acceptPost", [
-      sismoResponse,
-      withdrawalAddress,
-      nonce,
-      feedData?.postdata?.settings?.tokenId,
-      parseEther(postPayment),
-    ]);
-    txData(vaultCtx?.execute(feedCtx?.address, data, parseEther(postPayment), keccak256(sismoData.auths[0].userId)));
+    feedCtx?.connect(customSigner);
+    txData(
+      feedCtx?.acceptPost(
+        sismoResponse,
+        withdrawalAddress,
+        nonce,
+        feedData?.postdata?.settings?.tokenId,
+        parseEther(postPayment),
+        {
+          value: tokenId == "0" ? parseEther(postPayment) : 0,
+        },
+      ),
+    );
   }
 
   async function createPostData(RawData: any) {
@@ -572,9 +549,9 @@ const ViewFeed: NextPage = () => {
     console.log("Data Retrieved.");
     console.log("Proof Hash Digest: ", proofHash58Digest);
 
-    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-    const data = iface.encodeFunctionData("submitHash", [proofHash58Digest, sismoResponse, withdrawalAddress, nonce]);
-    txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
+    feedCtx?.connect(customSigner);
+
+    txData(feedCtx?.submitHash(proofHash58Digest, sismoResponse, withdrawalAddress, nonce));
 
     return {
       proofJson: json_selldata_v120,
@@ -742,40 +719,29 @@ const ViewFeed: NextPage = () => {
     const AbiCoder = new ethers.utils.AbiCoder();
     const dataEncoded = AbiCoder.encode(["string", "string"], [symKeyHash, rawDataHash]);
 
-    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-    const data = iface.encodeFunctionData("revealData", [dataEncoded, keccak256(sismoData.auths[0].userId)]);
-    txData(vaultCtx?.execute(feedCtx?.address, data, 0, sismoResponse));
+    feedCtx?.connect(customSigner);
+
+    txData(feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)));
 
     await fetchData();
   }
 
   async function finalizePost() {
     console.log("Finalizing Data...");
+    feedCtx?.connect(customSigner);
     if (valid == true) {
-      const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-      const data = iface.encodeFunctionData("finalizePost", [
-        valid,
-        parseEther("0"),
-        keccak256(sismoData.auths[0].userId),
-      ]);
-      txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
+      txData(feedCtx?.finalizePost(valid, parseEther("0"), keccak256(sismoData.auths[0].userId)));
     } else {
-      const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-      const data = iface.encodeFunctionData("finalizePost", [
-        valid,
-        parseEther(punishment),
-        keccak256(sismoData.auths[0].userId),
-      ]);
-      txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
+      txData(feedCtx?.finalizePost(valid, parseEther(punishment), keccak256(sismoData.auths[0].userId)));
     }
 
     await fetchData();
   }
 
   async function renounce() {
-    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-    const data = iface.encodeFunctionData("renouncePost", [sismoResponse, withdrawalAddress, nonce]);
-    txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
+    feedCtx?.connect(customSigner);
+    txData(feedCtx?.renouncePost(sismoResponse, withdrawalAddress, nonce));
+
     notification.success("Refund successful");
   }
 
@@ -783,37 +749,36 @@ const ViewFeed: NextPage = () => {
 
   async function addStake() {
     console.log("Adding Stake...");
-    txData(feedCtx?.addStake(sismoResponse, { value: parseEther(stakeAmount) }));
+    feedCtx?.connect(customSigner);
+    txData(
+      feedCtx?.addStake(feedData?.postdata?.settings?.tokenId, parseEther(stakeAmount), sismoResponse, {
+        value: feedData?.postdata?.settings?.tokenId == 0 ? parseEther(stakeAmount) : 0,
+      }),
+    );
     await fetchData();
   }
 
   async function takeAll() {
+    feedCtx?.connect(customSigner);
+    txData(feedCtx?.takeFullStake(feedData?.postdata?.settings?.tokenId, sismoResponse, withdrawalAddress, nonce));
     console.log("Take All Stake...");
-    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-
-    const data = iface.encodeFunctionData("takeFullStake", [
-      feedData?.postdata?.settings?.tokenId,
-      sismoResponse,
-      withdrawalAddress,
-      nonce,
-    ]);
-
-    txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
     await fetchData();
   }
 
   async function takeStake() {
-    console.log("Take Stake...");
-    const iface = new ethers.utils.Interface(deployedContractFeed?.abi as any[]);
-    const data = iface.encodeFunctionData("takeStake", [
-      feedData?.postdata?.settings?.tokenId,
-      parseEther(stakeAmount),
-      sismoResponse,
-      withdrawalAddress,
-      nonce,
-    ]);
+    feedCtx?.connect(customSigner);
 
-    txData(vaultCtx?.execute(feedCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
+    console.log("Take Stake...");
+
+    txData(
+      feedCtx?.takeStake(
+        feedData?.postdata?.settings?.tokenId,
+        parseEther(stakeAmount),
+        sismoResponse,
+        withdrawalAddress,
+        nonce,
+      ),
+    );
 
     await fetchData();
   }
@@ -1065,6 +1030,9 @@ const ViewFeed: NextPage = () => {
 
   useEffect(() => {
     setUserName(localStorage.getItem("userName") || "");
+    const pk = localStorage.getItem("pk");
+    const newWallet = new ethers.Wallet(String(pk), provider);
+    setCustomSigner(newWallet);
   }, []);
 
   useEffect(() => {

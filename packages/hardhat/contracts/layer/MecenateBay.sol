@@ -75,15 +75,16 @@ contract MecenateBay is Ownable, FeedViewer {
     ) public payable returns (Structures.BayRequest memory) {
         if (request.tokenId == Structures.Tokens.NaN) {
             require(msg.value > 0, "BAY:payment is not enough");
+            require(request.payment == msg.value, "BAY:payment is not enough");
         } else if (request.tokenId == Structures.Tokens.DAI) {
             IERC20(daiToken).safeTransferFrom(
-                msg.sender,
+                vaultContract,
                 address(this),
                 request.payment
             );
         } else if (request.tokenId == Structures.Tokens.MUSE) {
             IERC20(museToken).safeTransferFrom(
-                msg.sender,
+                vaultContract,
                 address(this),
                 request.payment
             );
@@ -105,11 +106,7 @@ contract MecenateBay is Ownable, FeedViewer {
             ),
             "user does not exist"
         );
-
         require(request.stake > 0, "BAY:stake is not enough");
-
-        require(request.payment == msg.value, "BAY:payment is not enough");
-
         require(request.payment > 0, "BAY:payment is not enough");
 
         requests[encryptedVaultId].push(request);

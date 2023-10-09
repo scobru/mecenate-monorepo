@@ -28,14 +28,12 @@ contract MecenateFeed is
         bytes32 _owner,
         address _usersModuleContract,
         address _verifierContract,
-        address _vaultContract,
         address _factoryContract,
         string memory _version
     )
         Data(
             _usersModuleContract,
             _verifierContract,
-            _vaultContract,
             _factoryContract,
             _version
         )

@@ -218,6 +218,11 @@ const Bay: NextPage = () => {
     } else if (tokenId == 2) {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
     }
+
+    console.log(_tokenAddress);
+    console.log(parseEther(requestPayment));
+    console.log(bayCtx?.address);
+
     const iface = new ethers.utils.Interface(deployedContractVault?.abi as any[]);
     const data = iface.encodeFunctionData("approveTokenToFeed", [
       _tokenAddress,

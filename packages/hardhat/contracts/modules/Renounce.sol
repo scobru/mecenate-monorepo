@@ -17,8 +17,6 @@ abstract contract Renounce is Staking {
         address _to,
         bytes32 _nonce
     ) external {
-        onlyVault();
-
         // Validate the post status
         Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(validStatuses[uint8(currentStatus)], "INVALID_STATUS");

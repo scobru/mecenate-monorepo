@@ -53,7 +53,6 @@ library Structures {
         address treasuryContract;
         address usersModuleContract;
         address verifierContract;
-        address vaultContract;
         address museToken;
         address daiToken;
         address wethToken;

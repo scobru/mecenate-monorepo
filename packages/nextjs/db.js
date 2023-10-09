@@ -4,7 +4,7 @@ const db = new sqlite3.Database('./userKeys.db');
 
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS userKeys (
-    contractAddress TEXT PRIMARY KEY,
+    wallet TEXT PRIMARY KEY,
     encryptedPrivateKey TEXT NOT NULL
   )`);
 });

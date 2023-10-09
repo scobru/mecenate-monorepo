@@ -75,7 +75,6 @@ abstract contract Message is Events {
         bytes memory encodeMessage,
         bytes32 encryptedVaultId
     ) external virtual {
-        onlyVault();
         require(_isSellerOrBuyer(encryptedVaultId), "NOT_THE_SELLER_OR_BUYER");
         _writeMessage(encodeMessage, encryptedVaultId);
     }

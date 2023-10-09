@@ -14,8 +14,6 @@ abstract contract Submission is Events {
         address _to,
         bytes32 _nonce
     ) external virtual {
-        onlyVault();
-
         Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(
             validStatuses[uint8(currentStatus)] &&
@@ -56,8 +54,6 @@ abstract contract Submission is Events {
         address _to,
         bytes32 _nonce
     ) external virtual returns (bytes memory) {
-        onlyVault();
-
         Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(
             validStatuses[uint8(currentStatus)] &&

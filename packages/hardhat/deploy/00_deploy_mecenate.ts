@@ -104,12 +104,7 @@ const deployYourContract: DeployFunction = async function (
   const feedFactory = await deploy("MecenateFeedFactory", {
     from: deployer,
 
-    args: [
-      users.address,
-      treasury.address,
-      verifier.address,
-      ethers.constants.AddressZero,
-    ],
+    args: [users.address, treasury.address, verifier.address],
     log: true,
 
     autoMine: true,
@@ -134,7 +129,6 @@ const deployYourContract: DeployFunction = async function (
     );
 
   const gasPrice = await ethers.provider.getGasPrice();
-  const newGasPrice = gasPrice.mul(50).div(100); // Increase by 20%
   console.log("Gas Price:", gasPrice.toString());
 
   const feed = await deploy("MecenateFeed", {
@@ -143,7 +137,6 @@ const deployYourContract: DeployFunction = async function (
       ethers.constants.HashZero,
       users.address,
       verifier.address,
-      ethers.constants.AddressZero,
       feedFactory.address,
       version,
     ],
@@ -158,13 +151,7 @@ const deployYourContract: DeployFunction = async function (
   const vault = await deploy("MecenateVault", {
     from: deployer,
 
-    args: [
-      verifier.address,
-      feedFactory.address,
-      ethers.constants.AddressZero,
-      users.address,
-      relayer,
-    ],
+    args: [verifier.address],
     log: true,
 
     autoMine: true,
@@ -193,31 +180,6 @@ const deployYourContract: DeployFunction = async function (
   // wall setMecenateBay of instance of vault
   console.log("Setting Mecenate Bay...");
 
-  const vaultInstance = await ethers.getContractAt(
-    "MecenateVault",
-    vault.address,
-  );
-
-  const setMecenateBay = await vaultInstance.setMecenateBay(
-    mecenateBay.address,
-  );
-
-  setMecenateBay.wait();
-  console.log("Mecenate Bay setted at:", mecenateBay.address);
-
-  const setTokens = await vaultInstance.setTokens(
-    mockWeth.address,
-    mockDai.address,
-    ethers.constants.AddressZero,
-    muse.address,
-  );
-
-  setTokens.wait();
-
-  console.log("Tokens setted at:", mockDai.address);
-  console.log("Tokens setted at:", muse.address);
-  console.log("Tokens setted at:", mockWeth.address);
-
   const mecenateStats = await deploy("MecenateStats", {
     from: deployer,
 
@@ -238,24 +200,8 @@ const deployYourContract: DeployFunction = async function (
       mecenateStats.receipt.contractAddress,
     );
 
-  const mecenateForwarderFactory = await deploy("MecenateForwarderFactory", {
-    from: deployer,
-
-    args: [vault.address],
-    log: true,
-
-    autoMine: true,
-  });
-
-  mecenateForwarderFactory.receipt &&
-    console.log(
-      "Mecenate Stats Factory deployed at:",
-      mecenateForwarderFactory.receipt.contractAddress,
-    );
-
   const setVault = await feedFactoryInstance.changeMultipleSettings(
     treasury.address,
-    vault.address,
     users.address,
     mockWeth.address,
     muse.address,
@@ -271,21 +217,6 @@ const deployYourContract: DeployFunction = async function (
   setByteCode.wait();
 
   console.log("Feed Bytecode setted");
-
-  const mecenateForwarder = await deploy("MecenateForwarder", {
-    from: deployer,
-
-    args: [ethers.constants.HashZero, mecenateForwarderFactory.address],
-    log: true,
-
-    autoMine: true,
-  });
-
-  mecenateForwarder.receipt &&
-    console.log(
-      "Mecenate Stats Factory deployed at:",
-      mecenateForwarder.receipt.contractAddress,
-    );
 };
 
 export default deployYourContract;

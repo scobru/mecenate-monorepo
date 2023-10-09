@@ -187,7 +187,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
         uint256 newStake = _addStake(
             tokenId,
             encryptedVaultId,
-            settings.vaultContract,
+            msg.sender,
             actualAmountToAdd
         );
 
@@ -208,8 +208,6 @@ abstract contract Staking is Events, Deposit, TokenManager {
         address _to,
         bytes32 _nonce
     ) external returns (uint256) {
-        onlyVault();
-
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
 
         bytes32 encryptedVaultId = _commonTakeStake(
@@ -243,8 +241,6 @@ abstract contract Staking is Events, Deposit, TokenManager {
         address _to,
         bytes32 _nonce
     ) external returns (uint256) {
-        onlyVault();
-
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
 
         bytes32 encryptedVaultId = _commonTakeStake(

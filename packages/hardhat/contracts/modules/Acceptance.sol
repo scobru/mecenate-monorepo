@@ -62,7 +62,7 @@ abstract contract Acceptance is Events, Staking {
         uint256 payment = _addStake(
             tokenId,
             encryptedVaultId,
-            settings.vaultContract,
+            msg.sender,
             amountToAdd
         );
 

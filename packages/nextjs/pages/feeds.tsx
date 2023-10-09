@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, Signer, ethers } from "ethers";
+import { ContractInterface, Signer, Wallet, ethers } from "ethers";
 import { AbiCoder, formatEther, keccak256 } from "ethers/lib/utils.js";
 import Link from "next/link";
 import { useTransactor } from "~~/hooks/scaffold-eth";
@@ -18,7 +18,6 @@ const Feeds: NextPage = () => {
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
-  const txData = useTransactor(signer as Signer);
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
@@ -27,6 +26,8 @@ const Feeds: NextPage = () => {
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
   const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
   const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
+  const [customSigner, setCustomSigner] = React.useState<Signer>(customWallet);
+  const txData = useTransactor(customSigner as Signer);
 
   type Feed = {
     operator: string;
@@ -60,13 +61,13 @@ const Feeds: NextPage = () => {
   const treasuryCtx = useContract({
     address: deployedContractTreasury?.address,
     abi: treasuryAbi,
-    signerOrProvider: customWallet,
+    signerOrProvider: customSigner,
   });
 
   const factoryCtx = useContract({
     address: deployedContractFactory?.address,
     abi: factoryAbi,
-    signerOrProvider: customWallet,
+    signerOrProvider: (customSigner as Signer) || provider,
   });
 
   let vaultAddress!: string;
@@ -110,6 +111,8 @@ const Feeds: NextPage = () => {
       const storedSismoResponse = localStorage.getItem("sismoResponse");
       const nonce = localStorage.getItem("nonce");
       const withdrawalAddress = localStorage.getItem("withdrawalAddress");
+      const customSigner = localStorage.getItem("customSigner");
+      const pk = localStorage.getItem("pk");
 
       if (storedData && storedVerified && storedSismoResponse) {
         setSismoData(JSON.parse(storedData));
@@ -117,7 +120,8 @@ const Feeds: NextPage = () => {
         setSismoResponse(storedSismoResponse);
         setNonce(String(nonce));
         setWithdrawalAddress(withdrawalAddress as string);
-        // Create new ethers.Wallet instance
+        const newWallet = new ethers.Wallet(String(pk), provider);
+        setCustomSigner(newWallet);
       } else {
         console.warn("Stored ethWallet or its privateKey is undefined.");
       }
@@ -126,14 +130,20 @@ const Feeds: NextPage = () => {
 
   const buildFeed = async () => {
     if (!factoryCtx || !treasuryCtx || !txData || !vaultCtx || !sismoData) return;
+    //factoryCtx?.connect(customSigner as Signer);
 
-    // encode abi call
-    const abiCoder = new AbiCoder();
-    // Encode the function call
-    const iface = new ethers.utils.Interface(deployedContractFactory?.abi as any);
-    const data = iface.encodeFunctionData("buildFeed", [sismoResponse, withdrawalAddress, nonce]);
+    console.log(factoryCtx);
 
-    txData(vaultCtx?.execute(factoryCtx?.address, data, treasuryCtx?.fixedFee(), keccak256(sismoData.auths[0].userId)));
+    console.log("customSigner", customSigner as Signer);
+    console.log("customWallet", customWallet);
+    console.log("signer", signer);
+    const fee = await treasuryCtx?.fixedFee();
+
+    txData(
+      factoryCtx?.buildFeed(sismoResponse, withdrawalAddress, nonce, {
+        value: fee,
+      }),
+    );
   };
 
   const formattedFeeds = useMemo(() => {

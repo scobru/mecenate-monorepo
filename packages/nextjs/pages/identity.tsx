@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import React, { use, useCallback, useEffect, useMemo } from "react";
 import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, Signer, ethers } from "ethers";
+import { ContractInterface, Signer, Wallet, ethers } from "ethers";
 import { keccak256 } from "ethers/lib/utils.js";
 import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
 import { CONFIG, AUTHS, SIGNATURE_REQUEST, AuthType } from "./../sismo.config";
@@ -11,11 +11,13 @@ import Spinner from "~~/components/Spinner";
 import crypto from "crypto";
 import { Address } from "~~/components/scaffold-eth";
 import { TokenAmount } from "@uniswap/sdk";
+import SismoPKP from "../helpers/SismoPKP";
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
   const provider = useProvider();
+
   const [sismoConnectVerifiedResult, setSismoConnectVerifiedResult] = React.useState<SismoConnectVerifiedResult>();
   const [sismoConnectResponse, setSismoConnectResponse] = React.useState<SismoConnectResponse>();
   const [pageState, setPageState] = React.useState<string>("");
@@ -35,10 +37,11 @@ const Identity: NextPage = () => {
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<any>("");
   const [nonce, setNonce] = React.useState<any>(null);
   const [forwarderAddress, setForwarderAddress] = React.useState<string>("");
-  const deployedContractDepositorFactory = getDeployedContract(chain?.id.toString(), "MecenateForwarderFactory");
-  const deployedContractForwarder = getDeployedContract(chain?.id.toString(), "MecenateForwarder");
+  const [customSigner, setCustomSigner] = React.useState<any>(null);
+  const customRelayer = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
 
-  const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
+  const sismoPKP = new SismoPKP(signer);
+
   const [tokenAddress, setTokenAddress] = React.useState<string>("");
   const [tokenAmount, setTokenAmount] = React.useState<string>("");
 
@@ -57,13 +60,6 @@ const Identity: NextPage = () => {
   let vaultAddress!: string;
   let vaultAbi: ContractInterface[] = [];
 
-  let forwarderAddressOriginal!: string;
-  let forwarderAbi: ContractInterface[] = [];
-
-  if (deployedContractForwarder) {
-    ({ address: forwarderAddressOriginal, abi: forwarderAbi } = deployedContractForwarder);
-  }
-
   if (deployedContractIdentity) {
     ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
   }
@@ -78,10 +74,6 @@ const Identity: NextPage = () => {
 
   if (deployedContractVault) {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
-  }
-
-  if (deployedContractDepositorFactory) {
-    ({ address: depositorAddress, abi: depositorAbi } = deployedContractDepositorFactory);
   }
 
   const { writeAsync: mintDai } = useScaffoldContractWrite(
@@ -101,31 +93,19 @@ const Identity: NextPage = () => {
   const vaultCtx = useContract({
     address: vaultAddress,
     abi: vaultAbi,
-    signerOrProvider: customWallet || provider,
+    signerOrProvider: customSigner || provider,
   });
 
   const usersCtx = useContract({
     address: UsersAddress,
     abi: UsersAbi,
-    signerOrProvider: customWallet || provider,
+    signerOrProvider: customSigner || provider,
   });
 
   const treasury = useContract({
     address: treasuryAddress,
     abi: treasuryAbi,
-    signerOrProvider: customWallet || provider,
-  });
-
-  const depositorFactory = useContract({
-    address: deployedContractDepositorFactory?.address,
-    abi: depositorAbi,
-    signerOrProvider: customWallet || provider,
-  });
-
-  const forwarder = useContract({
-    address: forwarderAddress,
-    abi: forwarderAbi,
-    signerOrProvider: customWallet || provider,
+    signerOrProvider: customSigner || provider,
   });
 
   const generateNonce = useCallback(async () => {
@@ -140,14 +120,17 @@ const Identity: NextPage = () => {
   }, [nonce, withdrawalAddress]);
 
   const signIn = async () => {
-    const iface = new ethers.utils.Interface(deployedContractUser?.abi as any[]);
-    const data = iface.encodeFunctionData("registerUser", [
-      sismoResponse,
-      String(localStorage.getItem("withdrawalAddress")),
-      String(localStorage.getItem("nonce")),
-      userName,
-    ]);
-    txData(vaultCtx?.execute(usersCtx?.address, data, 0, keccak256(String(sismoData?.auths[0]?.userId))));
+    console.log(provider);
+    console.log(customSigner);
+    usersCtx?.connect(customSigner);
+    txData(
+      usersCtx?.registerUser(
+        sismoResponse,
+        String(localStorage.getItem("withdrawalAddress")),
+        String(localStorage.getItem("nonce")),
+        userName,
+      ),
+    );
   };
 
   const getContractData = async function getContractData() {
@@ -228,17 +211,32 @@ const Identity: NextPage = () => {
 
   /* *************************  Account Abstraction *********************/
 
-  const createForwarder = async () => {
-    if (sismoData) {
-      txData(depositorFactory?.createforwarder(keccak256(sismoData?.auths[0]?.userId)));
-    }
+  const createNewPKP = async () => {
+    console.log("Create new PKP");
+    const newEncryptedPK = await sismoPKP.createPKP(sismoData?.auths[0]?.userId);
+    console.log("newEncryptedPK", newEncryptedPK);
+    const result = await sismoPKP.getPKP(sismoData?.auths[0]?.userId);
+    console.log("result", result);
+    setForwarderAddress(result.address);
+    const wallet = await sismoPKP.getPKP(sismoData?.auths[0]?.userId);
+    const walletWithProvider = wallet.connect(provider);
+    localStorage.setItem("forwarderAddress", result.address);
+    localStorage.setItem("pk", wallet.privateKey);
+    setCustomSigner(walletWithProvider as Wallet);
   };
 
   const getForwarder = async () => {
-    if (depositorFactory && sismoData) {
-      const result = await depositorFactory?.getforwarders(keccak256(sismoData?.auths[0]?.userId));
-      setForwarderAddress(result);
-      localStorage.setItem("forwarderAddress", result);
+    if (sismoPKP && sismoData && !forwarderAddress) {
+      const wallet: Wallet = await sismoPKP.getPKP(sismoData?.auths[0]?.userId);
+      setForwarderAddress(wallet.address);
+      localStorage.setItem("forwarderAddress", wallet.address);
+      localStorage.setItem("customSigner", JSON.stringify(wallet));
+      localStorage.setItem("pk", wallet.privateKey);
+      // connect wallet to provider
+      const walletWithProvider = wallet.connect(provider);
+      console.log("walletWithProvider", walletWithProvider);
+      localStorage.setItem("customSigner", JSON.stringify(walletWithProvider));
+      setCustomSigner(walletWithProvider);
     }
   };
 
@@ -274,17 +272,6 @@ const Identity: NextPage = () => {
       [String(withdrawalAddress), String(nonce)],
     );
     return result;
-  };
-
-  const handleDepositToken = async () => {
-    if (!forwarder) return;
-    const iface = new ethers.utils.Interface(deployedContractForwarder?.abi as any[]);
-    const data = iface.encodeFunctionData("depositToken", [tokenAddress, ethers.utils.parseEther(tokenAmount)]);
-
-    console.log("TokenAddress", tokenAddress);
-    console.log("TokenAmount", tokenAmount);
-
-    txData(vaultCtx?.execute(forwarderAddress, data, 0, keccak256(String(sismoData?.auths[0]?.userId))));
   };
 
   return (
@@ -416,7 +403,7 @@ const Identity: NextPage = () => {
                               <button
                                 className="btn btn-large"
                                 onClick={async () => {
-                                  await createForwarder();
+                                  await createNewPKP;
                                 }}
                                 disabled={Boolean(forwarderAddress != ethers.constants.AddressZero)}
                               >
@@ -431,41 +418,6 @@ const Identity: NextPage = () => {
                                     <p className="text-lg mb-10"> [1] Send ETH or ERC20 at this forwarder address</p>
                                     <Address address={forwarderAddress} format="long" />
                                     <br />
-                                  </div>
-                                  <div>
-                                    {" "}
-                                    <p className="text-lg mb-10">
-                                      [2] Select ERC20 you want transfer into Mecenate Vault.
-                                    </p>
-                                    <select
-                                      className="select select-bordered w-full max-w-xs mb-5"
-                                      name="tokens"
-                                      id="tokens"
-                                      onChange={async e => {
-                                        setTokenAddress(e.target.value);
-                                      }}
-                                    >
-                                      <option value={""}>Select Token</option>
-                                      <option value={process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE}>DAI</option>
-                                      <option value={process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE}>MUSE</option>
-                                    </select>
-                                    <input
-                                      type="text"
-                                      className="input input-primary"
-                                      onChange={async e => {
-                                        setTokenAmount(e.target.value);
-                                      }}
-                                      placeholder="Amount sent"
-                                    />
-                                    <button
-                                      className="btn btn-large"
-                                      onClick={async () => {
-                                        await handleDepositToken();
-                                      }}
-                                      disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero)}
-                                    >
-                                      Deposit Token
-                                    </button>
                                   </div>
                                 </div>
                               )}
@@ -487,6 +439,10 @@ const Identity: NextPage = () => {
                               disabled={userExists && withdrawalAddress != "" && userName != ""}
                             >
                               Sign In{" "}
+                            </button>
+
+                            <button className="btn btn-large" onClick={createNewPKP}>
+                              Create{" "}
                             </button>
                           </div>
                         </div>

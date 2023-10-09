@@ -8,7 +8,6 @@ abstract contract Finalization is Staking {
         uint256 punishment,
         bytes32 encryptedVaultId
     ) external virtual {
-        onlyVault();
         require(
             post.postdata.settings.status == Structures.PostStatus.Submitted,
             "NOT_SUBMITTED"

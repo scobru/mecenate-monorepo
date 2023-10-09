@@ -26,14 +26,9 @@ contract Data {
     mapping(uint8 => uint256) internal postDurationToDays;
     mapping(uint8 => bool) internal validStatuses;
 
-    function onlyVault() internal view {
-        require(msg.sender == settings.vaultContract, "ONLY_VAULT");
-    }
-
     constructor(
         address _usersModuleContract,
         address _verifierContract,
-        address _vaultContract,
         address _factoryContract,
         string memory _version
     ) {
@@ -41,7 +36,6 @@ contract Data {
         settings.postCount = 0; // Initialize postCount to 0
         settings.usersModuleContract = _usersModuleContract;
         settings.verifierContract = _verifierContract;
-        settings.vaultContract = _vaultContract;
         settings.factoryContract = msg.sender;
         settings.router = IMecenateFeedFactory(_factoryContract).router();
         settings.encodedSymKey = ZEROHASH;

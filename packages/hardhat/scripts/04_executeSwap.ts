@@ -72,19 +72,6 @@ async function main() {
   // get blocktimestamp
   const block = await hre.ethers.provider.getBlock("latest");
 
-  const deadline = block.timestamp + 1000 * 20;
-
-  // Approve the router to spend WETH on your behalf
-
-  const approveTx = await wethCtx.approve(
-    SWAP_ROUTER_ADDRESS,
-    ethers.utils.parseEther("0.01"),
-  );
-
-  await approveTx.wait();
-
-  log(`Approved mWETH transfer to ${SWAP_ROUTER_ADDRESS}.`);
-
   const balance = await wethCtx.balanceOf(owner.address);
 
   log(`mWETH Balance: ${ethers.utils.formatEther(balance)}`);
@@ -103,7 +90,7 @@ async function main() {
   log(`mDAI Balance: ${ethers.utils.formatEther(balanceDai)}`);
 
   // Use ExactInputSingleParams to swap 0.001 WETH for DAI
-
+  const deadline = block.timestamp + 1000 * 20;
   const exactInputSingleParams = {
     tokenIn: WETH_ADDRESS,
     tokenOut: DAI_ADDRESS,

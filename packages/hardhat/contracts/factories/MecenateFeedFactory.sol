@@ -29,13 +29,11 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     constructor(
         address _usersModuleContract,
         address _treasuryContract,
-        address _verifierContract,
-        address _vaultContract
+        address _verifierContract
     ) {
         settings.usersModuleContract = _usersModuleContract;
         settings.treasuryContract = _treasuryContract;
         settings.verifierContract = _verifierContract;
-        settings.vaultContract = _vaultContract;
     }
 
     function changeVersion(string memory _version) external onlyOwner {
@@ -84,7 +82,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     function changeMultipleSettings(
         address _treasury,
-        address _vault,
         address _usersModule,
         address _wethToken,
         address _museToken,
@@ -92,7 +89,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         address _router
     ) external onlyOwner {
         settings.treasuryContract = _treasury;
-        settings.vaultContract = _vault;
         settings.usersModuleContract = _usersModule;
         settings.wethToken = _wethToken;
         settings.museToken = _museToken;
@@ -111,7 +107,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         address _to,
         bytes32 _nonce
     ) external payable returns (address) {
-        require(msg.sender == settings.vaultContract, "ONLY_VAULT");
         (
             bytes memory vaultId,
             ,
@@ -134,7 +129,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
             encryptedVaultId,
             settings.usersModuleContract,
             settings.verifierContract,
-            settings.vaultContract,
             address(this),
             version
         );
