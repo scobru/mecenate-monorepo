@@ -1,49 +1,13 @@
-import { Contract, ethers, providers } from "ethers";
+import { Contract, Signer, ethers, providers } from "ethers";
 import dotenv from "dotenv";
 import { ExternallyOwnedAccount } from "@ethersproject/abstract-signer";
 import { keccak256 } from "ethers/lib/utils.js";
 
 dotenv.config();
 
-const contractAddress = "0x740CFC3c391d41d8762450833e9f6b40Fd6FAA94"; // goerliBase
+const contractAddress = "0x34a428Afee5241f3861DB9Fa5067cfD919f9b6a9"; // goerliBase
 
 const contractABI: any[] = [
-  {
-    inputs: [
-      {
-        internalType: "bytes32[]",
-        name: "importedVaultIds",
-        type: "bytes32[]",
-      },
-      {
-        internalType: "bytes[]",
-        name: "importedWalletInfos",
-        type: "bytes[]",
-      },
-    ],
-    name: "importAllData",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "encryptedVaultId",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes",
-        name: "walletInfo",
-        type: "bytes",
-      },
-    ],
-    name: "setWalletInfo",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
   {
     inputs: [],
     stateMutability: "nonpayable",
@@ -69,28 +33,15 @@ const contractABI: any[] = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "exportAllData",
-    outputs: [
-      {
-        internalType: "bytes32[]",
-        name: "",
-        type: "bytes32[]",
-      },
-      {
-        internalType: "bytes[]",
-        name: "",
-        type: "bytes[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "bytes32",
         name: "encryptedVaultId",
+        type: "bytes32",
+      },
+      {
+        internalType: "bytes32",
+        name: "appId",
         type: "bytes32",
       },
     ],
@@ -122,49 +73,57 @@ const contractABI: any[] = [
     inputs: [
       {
         internalType: "bytes32",
-        name: "",
+        name: "encryptedVaultId",
         type: "bytes32",
       },
-    ],
-    name: "vaults",
-    outputs: [
+      {
+        internalType: "bytes32",
+        name: "appId",
+        type: "bytes32",
+      },
       {
         internalType: "bytes",
-        name: "",
+        name: "walletInfo",
         type: "bytes",
       },
     ],
-    stateMutability: "view",
+    name: "setWalletInfo",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
 ];
 
 class SismoPKP {
   private contractAddress: string;
-  private externalProvider: providers.JsonRpcProvider;
+  private externalProvider: providers.JsonRpcProvider | Signer;
   private contract: Contract;
+  private appId: string;
 
-  constructor(externalProvider: providers.JsonRpcProvider) {
+  constructor(externalProvider: providers.JsonRpcProvider | Signer, appId: string) {
     this.contractAddress = contractAddress;
     this.externalProvider = externalProvider;
     this.contract = new Contract(this.contractAddress, contractABI, this.externalProvider);
+    this.appId = appId;
   }
 
   async createPKP(vaultId: any) {
+    const signer = this.externalProvider;
+    console.log("signer", signer);
+    const contractWithSigner = this.contract.connect(signer);
+    console.log("contractWithSigner", contractWithSigner);
+
     const wallet = ethers.Wallet.createRandom();
+    console.log("wallet.address", wallet.address);
+
     const privateKey = wallet.privateKey;
     const publicKey = wallet.publicKey;
-    const encryptedPK = await this.encrypt(privateKey, vaultId);
-
-    const signer = this.externalProvider;
-    const contractWithSigner = this.contract.connect(signer);
-
-    console.log("wallet.address", wallet.address);
     console.log("publicKey", publicKey);
+
+    const encryptedPK = await this.encrypt(privateKey, vaultId);
     console.log("encryptedPK", encryptedPK);
+
     console.log("keccak256(vaultId)", keccak256(vaultId));
-    console.log("signer", signer);
-    console.log("contractWithSigner", contractWithSigner);
 
     const encryptedPKJson = JSON.stringify(encryptedPK);
     console.log("Encrypted PK JSON:", encryptedPKJson);
@@ -172,20 +131,25 @@ class SismoPKP {
     const encryptedPKBytes = ethers.utils.toUtf8Bytes(encryptedPKJson);
     console.log("Encrypted PK Bytes:", encryptedPKBytes);
 
-    const tx = await contractWithSigner.setWalletInfo(keccak256(vaultId), encryptedPKBytes);
+    const tx = await contractWithSigner.setWalletInfo(keccak256(vaultId), keccak256(this.appId), encryptedPKBytes);
     await tx.wait();
-    console.log(tx);
+
+    console.log("Transaction mined!", tx.hash);
 
     return encryptedPK;
   }
 
   async getPKP(vaultId: any) {
     const signer = this.externalProvider;
+
     const contractWithSigner = this.contract.connect(signer);
-    const encryptedPKBytes = await contractWithSigner.getWalletInfo(keccak256(vaultId));
+    const encryptedPKBytes = await contractWithSigner.getWalletInfo(keccak256(vaultId), keccak256(this.appId));
+
     console.log("Retrieved Encrypted PK Bytes:", encryptedPKBytes);
+
     const encryptedPKJson = ethers.utils.toUtf8String(encryptedPKBytes);
     console.log("Retrieved Encrypted PK JSON:", encryptedPKJson);
+
     return this.decrypt(JSON.parse(encryptedPKJson), vaultId);
   }
 

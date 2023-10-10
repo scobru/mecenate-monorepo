@@ -11,7 +11,7 @@ import Spinner from "~~/components/Spinner";
 import crypto from "crypto";
 import { Address } from "~~/components/scaffold-eth";
 import { TokenAmount } from "@uniswap/sdk";
-import SismoPKP from "../helpers/SismoPKP";
+import SismoPKP from "../helpers/sismoPKP";
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
@@ -37,10 +37,10 @@ const Identity: NextPage = () => {
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<any>("");
   const [nonce, setNonce] = React.useState<any>(null);
   const [forwarderAddress, setForwarderAddress] = React.useState<string>("");
+
   const [customSigner, setCustomSigner] = React.useState<any>(null);
   const customRelayer = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
-
-  const sismoPKP = new SismoPKP(signer);
+  const sismoPKP = new SismoPKP(customRelayer as Signer, keccak256(String(process.env.NEXT_PUBLIC_SISMO_APPID)));
 
   const [tokenAddress, setTokenAddress] = React.useState<string>("");
   const [tokenAmount, setTokenAmount] = React.useState<string>("");
@@ -99,7 +99,7 @@ const Identity: NextPage = () => {
   const usersCtx = useContract({
     address: UsersAddress,
     abi: UsersAbi,
-    signerOrProvider: customSigner || provider,
+    signerOrProvider: customSigner || provider || customRelayer,
   });
 
   const treasury = useContract({
@@ -213,15 +213,22 @@ const Identity: NextPage = () => {
 
   const createNewPKP = async () => {
     console.log("Create new PKP");
-    const newEncryptedPK = await sismoPKP.createPKP(sismoData?.auths[0]?.userId);
+
+    const newEncryptedPK = await sismoPKP?.createPKP(sismoData?.auths[0]?.userId);
+
     console.log("newEncryptedPK", newEncryptedPK);
+
     const result = await sismoPKP.getPKP(sismoData?.auths[0]?.userId);
     console.log("result", result);
+
     setForwarderAddress(result.address);
+
     const wallet = await sismoPKP.getPKP(sismoData?.auths[0]?.userId);
     const walletWithProvider = wallet.connect(provider);
+
     localStorage.setItem("forwarderAddress", result.address);
     localStorage.setItem("pk", wallet.privateKey);
+
     setCustomSigner(walletWithProvider as Wallet);
   };
 
@@ -400,14 +407,8 @@ const Identity: NextPage = () => {
                           <div className="card  card-shadow ">
                             <div className="font-semibold text-xl">Deposit</div>
                             <div>
-                              <button
-                                className="btn btn-large"
-                                onClick={async () => {
-                                  await createNewPKP;
-                                }}
-                                disabled={Boolean(forwarderAddress != ethers.constants.AddressZero)}
-                              >
-                                Create
+                              <button className="btn btn-large" onClick={createNewPKP}>
+                                Create{" "}
                               </button>
                               {forwarderAddress == ethers.constants.AddressZero && forwarderAddress ? (
                                 <p className="text-lg mb-10">Create forwarder address</p>
@@ -439,10 +440,6 @@ const Identity: NextPage = () => {
                               disabled={userExists && withdrawalAddress != "" && userName != ""}
                             >
                               Sign In{" "}
-                            </button>
-
-                            <button className="btn btn-large" onClick={createNewPKP}>
-                              Create{" "}
                             </button>
                           </div>
                         </div>
