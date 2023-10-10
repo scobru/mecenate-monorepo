@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import React, { useEffect, useState } from "react";
 import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { BigNumber, ContractInterface, FixedNumber, Signer, ethers } from "ethers";
+import { BigNumber, Contract, ContractInterface, FixedNumber, Signer, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { useRouter } from "next/router";
 import {
@@ -29,13 +29,12 @@ import {
   InboxArrowDownIcon,
 } from "@heroicons/react/20/solid";
 import crypto from "crypto";
-import { useTransactor } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 
 const ViewFeed: NextPage = () => {
   const { data: signer } = useSigner();
   const provider = useProvider();
   const router = useRouter();
-  const txData = useTransactor(signer as Signer);
   const AbiCoder = new ethers.utils.AbiCoder();
   const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
 
@@ -51,6 +50,8 @@ const ViewFeed: NextPage = () => {
 
   const { addr } = router?.query;
   const [customSigner, setCustomSigner] = useState<any>(null);
+  const txData = useTransactor(customSigner);
+
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
   const [postStake, setPostStake] = useState<any>([]);
@@ -77,6 +78,8 @@ const ViewFeed: NextPage = () => {
   const deployedContractFeed = getDeployedContract(chain?.id.toString(), "MecenateFeed");
   const deployedContractUsers = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
+  const deployedContractMUSE = getDeployedContract(chain?.id.toString(), "MUSE");
+  const deployedContractMockDai = getDeployedContract(chain?.id.toString(), "MockDai");
 
   const [receiver, setReceiver] = useState<any>("");
   const allStatuses = ["Waiting for Creator", "Proposed", "Accepted", "Submitted", "Finalized", "Punished", "Revealed"];
@@ -87,12 +90,26 @@ const ViewFeed: NextPage = () => {
   let usersAddress!: string;
   let usersAbi: ContractInterface[] = [];
 
+  let museAddress!: string;
+  let museAbi: ContractInterface[] = [];
+
+  let daiAddress!: string;
+  let daiAbi: ContractInterface[] = [];
+
   if (deployedContractUsers) {
     ({ address: usersAddress, abi: usersAbi } = deployedContractUsers);
   }
 
   if (deployedContractFeed) {
     ({ address: feedAddress, abi: feedAbi } = deployedContractFeed);
+  }
+
+  if (deployedContractMUSE) {
+    ({ address: museAddress, abi: museAbi } = deployedContractMUSE);
+  }
+
+  if (deployedContractMockDai) {
+    ({ address: daiAddress, abi: daiAbi } = deployedContractMockDai);
   }
 
   let vaultAddress!: string;
@@ -102,15 +119,39 @@ const ViewFeed: NextPage = () => {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
   }
 
-  const handleApprove = async () => {
+  const handleApproveSeller = async () => {
     let _tokenAddress;
+    let token;
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
+      token = new Contract(String(_tokenAddress), museAbi, provider);
     } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
+      token = new Contract(String(_tokenAddress), daiAbi, provider);
     }
 
     // Write Approval
+    token?.connect(customSigner);
+    console.log(customSigner);
+    console.log(token);
+    txData(token?.approve(feedCtx?.address, parseEther(postStake)));
+  };
+
+  const handleApproveBuyer = async () => {
+    let _tokenAddress;
+    let token;
+    if (tokenId == "1") {
+      _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
+      token = new Contract(String(_tokenAddress), museAbi, customProvider);
+    } else if (tokenId == "2") {
+      _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
+      token = new Contract(String(_tokenAddress), daiAbi, customProvider);
+    }
+
+    // Write Approval
+    token?.connect(customSigner);
+
+    txData(token?.approve(feedCtx?.address, parseEther(postPayment)));
   };
 
   const vaultCtx = useContract({
@@ -1339,7 +1380,7 @@ const ViewFeed: NextPage = () => {
                       <button
                         className="btn btn-primary w-full mt-4"
                         onClick={async () => {
-                          await handleApproveTokenSeller();
+                          await handleApproveSeller();
                         }}
                       >
                         Approve
@@ -1539,7 +1580,7 @@ const ViewFeed: NextPage = () => {
                     <button
                       className="btn btn-primary w-full mt-4 my-2"
                       onClick={async () => {
-                        await handleApproveTokenBuyer();
+                        await handleApproveBuyer();
                       }}
                     >
                       Approve
