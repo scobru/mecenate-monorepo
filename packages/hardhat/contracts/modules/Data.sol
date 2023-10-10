@@ -79,9 +79,14 @@ contract Data {
                 _nonce
             );
 
-        (, bytes32 nonce) = abi.decode(signedMessage, (address, bytes32));
+        (address to, bytes32 nonce) = abi.decode(
+            signedMessage,
+            (address, bytes32)
+        );
 
         require(_nonce == nonce, "WRONG_NONCE");
+
+        require(to == _to, "WRONG_ADDRESS");
 
         return (vaultId, twitterId, telegramId, signedMessage);
     }

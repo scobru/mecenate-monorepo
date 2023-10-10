@@ -12,6 +12,7 @@ import crypto from "crypto";
 import { Address } from "~~/components/scaffold-eth";
 import { TokenAmount } from "@uniswap/sdk";
 import SismoPKP from "../helpers/sismoPKP";
+import { notification } from "~~/utils/scaffold-eth";
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
@@ -20,6 +21,10 @@ const Identity: NextPage = () => {
 
   const [sismoConnectVerifiedResult, setSismoConnectVerifiedResult] = React.useState<SismoConnectVerifiedResult>();
   const [sismoConnectResponse, setSismoConnectResponse] = React.useState<SismoConnectResponse>();
+  const [sismoConnectVerifiedResult2, setSismoConnectVerifiedResult2] = React.useState<SismoConnectVerifiedResult>();
+  const [sismoConnectResponse2, setSismoConnectResponse2] = React.useState<SismoConnectResponse>();
+  const [responseBytes2, setResponseBytes2] = React.useState<string>();
+
   const [pageState, setPageState] = React.useState<string>("");
   const [error, setError] = React.useState<string>();
   const [fee, setFee] = React.useState(0);
@@ -37,6 +42,8 @@ const Identity: NextPage = () => {
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<any>("");
   const [nonce, setNonce] = React.useState<any>(null);
   const [forwarderAddress, setForwarderAddress] = React.useState<string>("");
+  const [password, setPassword] = React.useState<string>("");
+  const [sismoPKPData, setSismoPKPData] = React.useState<any>(null);
 
   const [customSigner, setCustomSigner] = React.useState<any>(null);
   const customRelayer = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
@@ -169,6 +176,11 @@ const Identity: NextPage = () => {
     const sismoResponseFromLocalStorage = localStorage.getItem("sismoResponse");
     const nonceFromLocalStorage = localStorage.getItem("nonce");
     const withdrawalAddressFromLocalStorage = localStorage.getItem("withdrawalAddress");
+    const passwordFromLocalStorage = localStorage.getItem("password");
+
+    if (passwordFromLocalStorage) {
+      setPassword(passwordFromLocalStorage);
+    }
 
     if (sismoDataFromLocalStorage) {
       setSismoData(JSON.parse(sismoDataFromLocalStorage));
@@ -213,35 +225,64 @@ const Identity: NextPage = () => {
 
   const createNewPKP = async () => {
     console.log("Create new PKP");
+    let id = notification.loading("Creating new PKP");
 
-    const newEncryptedPK = await sismoPKP?.createPKP(sismoData?.auths[0]?.userId);
-
+    const newEncryptedPK = await sismoPKP?.createPKP(sismoData?.auths[0]?.userId, password);
     console.log("newEncryptedPK", newEncryptedPK);
+    notification.remove(id);
+    notification.success("PKP created");
 
-    const result = await sismoPKP.getPKP(sismoData?.auths[0]?.userId);
-    console.log("result", result);
+    const message = ethers.utils.defaultAbiCoder.encode(["string", "string"], [password, sismoData?.auths[0]?.userId]);
+    id = notification.loading("Get PKP");
 
-    setForwarderAddress(result.address);
+    const wallet = await sismoPKP.getPKP(sismoData?.auths[0]?.userId, message);
+    console.log("wallet", wallet);
 
-    const wallet = await sismoPKP.getPKP(sismoData?.auths[0]?.userId);
+    if (!wallet) {
+      notification.error("Error getting PKP");
+      return;
+    }
+
+    notification.remove(id);
+    notification.success("PKP Fetched");
+
+    setForwarderAddress(wallet.address);
+
     const walletWithProvider = wallet.connect(provider);
 
-    localStorage.setItem("forwarderAddress", result.address);
+    localStorage.setItem("forwarderAddress", wallet.address);
     localStorage.setItem("pk", wallet.privateKey);
 
     setCustomSigner(walletWithProvider as Wallet);
   };
 
   const getForwarder = async () => {
-    if (sismoPKP && sismoData && !forwarderAddress) {
-      const wallet: Wallet = await sismoPKP.getPKP(sismoData?.auths[0]?.userId);
+    if (sismoPKP && sismoData && !forwarderAddress && password) {
+      const id = notification.loading("Get PKP");
+
+      const message = ethers.utils.defaultAbiCoder.encode(
+        ["string", "string"],
+        [password, sismoData?.auths[0]?.userId],
+      );
+      const wallet: Wallet = await sismoPKP.getPKP(sismoData?.auths[0]?.userId, message);
+
+      if (!wallet) {
+        notification.error("Error getting PKP");
+        return;
+      }
+
+      notification.remove(id);
+      notification.success("PKP Fetched");
       setForwarderAddress(wallet.address);
+
       localStorage.setItem("forwarderAddress", wallet.address);
       localStorage.setItem("customSigner", JSON.stringify(wallet));
       localStorage.setItem("pk", wallet.privateKey);
+
       // connect wallet to provider
       const walletWithProvider = wallet.connect(provider);
       console.log("walletWithProvider", walletWithProvider);
+
       localStorage.setItem("customSigner", JSON.stringify(walletWithProvider));
       setCustomSigner(walletWithProvider);
     }
@@ -255,7 +296,22 @@ const Identity: NextPage = () => {
   useEffect(() => {
     initializeState();
     setPageState("verified");
+    const run = async () => {
+      const result = await sismoPKP.prepareSismoConnect(process.env.NEXT_PUBLIC_SISMO_APPID as string);
+      console.log("result", result);
+      setSismoPKPData(result);
+    };
+    run();
   }, []);
+
+  useEffect(() => {
+    getForwarder();
+    if (localStorage.getItem("password")) {
+      setPassword(localStorage.getItem("password"));
+    } else {
+      localStorage.setItem("password", password);
+    }
+  }, [sismoData, password]);
 
   useEffect(() => {
     const run = async () => {
@@ -274,10 +330,7 @@ const Identity: NextPage = () => {
 
   const signMessage = () => {
     if (!withdrawalAddress || !nonce) return;
-    const result = ethers.utils.defaultAbiCoder.encode(
-      ["address", "bytes32"],
-      [String(withdrawalAddress), String(nonce)],
-    );
+    const result = ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [String(withdrawalAddress), nonce]);
     return result;
   };
 
@@ -382,6 +435,59 @@ const Identity: NextPage = () => {
                             </button>
                           </div>
                           <div className="text-green-500 font-bold my-5 ">ZK Proofs verified!</div>
+                          {sismoPKPData ? (
+                            <div>
+                              <SismoConnectButton
+                                config={sismoPKPData.CONFIG}
+                                auths={sismoPKPData.AUTHS}
+                                signature={sismoPKPData.SIGNATURE_REQUEST}
+                                text="Create PassKey"
+                                onResponse={async (response: SismoConnectResponse) => {
+                                  setSismoConnectResponse2(response);
+                                  setPageState("verifying");
+                                  console.log(response);
+
+                                  try {
+                                    const verifiedResult = await fetch("/api/verify2", {
+                                      method: "POST",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                      },
+                                      body: JSON.stringify({
+                                        ...response,
+                                        sig: sismoPKPData.SIGNATURE_REQUEST,
+                                        auths: sismoPKPData.AUTHS,
+                                        config: sismoPKPData.CONFIG,
+                                      }),
+                                    });
+
+                                    const data = await verifiedResult.json();
+
+                                    if (verifiedResult.ok) {
+                                      setSismoConnectVerifiedResult2(data);
+                                      localStorage.setItem("verified", "verified");
+                                      localStorage.setItem("sismoData2", JSON.stringify(await data));
+                                      setPageState("verified");
+                                      getForwarder();
+                                    } else {
+                                      setPageState("error");
+                                      setError(data.error.toString()); // or JSON.stringify(data.error)
+                                    }
+                                  } catch (error) {
+                                    console.error("Error:", error);
+                                    setPageState("error");
+                                    setError(error as any);
+                                  }
+                                }}
+                                onResponseBytes={(responseBytes: string) => {
+                                  setResponseBytes2(responseBytes);
+                                  localStorage.setItem("sismoResponse2", responseBytes);
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div>loading</div>
+                          )}
                           <div className="card  card-shadow ">
                             <div className="text-center font-semibold text-xl">Faucet mDAI/MUSE</div>
                             <button
@@ -406,23 +512,42 @@ const Identity: NextPage = () => {
                           </div>
                           <div className="card  card-shadow ">
                             <div className="font-semibold text-xl">Deposit</div>
-                            <div>
-                              <button className="btn btn-large" onClick={createNewPKP}>
-                                Create{" "}
-                              </button>
-                              {forwarderAddress == ethers.constants.AddressZero && forwarderAddress ? (
-                                <p className="text-lg mb-10">Create forwarder address</p>
-                              ) : (
-                                <div>
+                            <div className=" text-base">Select a safe password to encrypt your address</div>
+
+                            <input
+                              type="password"
+                              onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                // wait 1 sec
+                                await new Promise(r => setTimeout(r, 1000));
+                                setPassword(e.target.value);
+                                localStorage.setItem("password", e.target.value);
+                              }}
+                              className="input input-bordered my-5 w-full"
+                              placeholder="Set Password"
+                            />
+                            {password && (
+                              <div>
+                                <button className="btn btn-large" onClick={createNewPKP} disabled={!password}>
+                                  Create{" "}
+                                </button>
+                                {forwarderAddress == ethers.constants.AddressZero && forwarderAddress ? (
+                                  <p className="text-lg mb-10">Create forwarder address</p>
+                                ) : (
                                   <div>
-                                    {" "}
-                                    <p className="text-lg mb-10"> [1] Send ETH or ERC20 at this forwarder address</p>
-                                    <Address address={forwarderAddress} format="long" />
-                                    <br />
+                                    <div>
+                                      {" "}
+                                      <p className="text-lg mb-10"> [1] Send ETH or ERC20 at this forwarder address</p>
+                                      {forwarderAddress ? (
+                                        <Address address={forwarderAddress} format="long" />
+                                      ) : (
+                                        <div>Waiting for forwarder address</div>
+                                      )}
+                                      <br />
+                                    </div>
                                   </div>
-                                </div>
-                              )}
-                            </div>
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           <div className="card  card-shadow ">

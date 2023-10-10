@@ -50,7 +50,7 @@ const ViewFeed: NextPage = () => {
 
   const { addr } = router?.query;
   const [customSigner, setCustomSigner] = useState<any>(null);
-  const txData = useTransactor(customSigner);
+  const txData = useTransactor(customWallet as Signer);
 
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
@@ -76,8 +76,6 @@ const ViewFeed: NextPage = () => {
   const [userName, setUserName] = useState<any>("");
   const [feedData, setFeedData] = useState<any>([]);
   const deployedContractFeed = getDeployedContract(chain?.id.toString(), "MecenateFeed");
-  const deployedContractUsers = getDeployedContract(chain?.id.toString(), "MecenateUsers");
-  const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
   const deployedContractMUSE = getDeployedContract(chain?.id.toString(), "MUSE");
   const deployedContractMockDai = getDeployedContract(chain?.id.toString(), "MockDai");
 
@@ -87,18 +85,11 @@ const ViewFeed: NextPage = () => {
   let feedAddress!: string;
   let feedAbi: ContractInterface[] = [];
 
-  let usersAddress!: string;
-  let usersAbi: ContractInterface[] = [];
-
   let museAddress!: string;
   let museAbi: ContractInterface[] = [];
 
   let daiAddress!: string;
   let daiAbi: ContractInterface[] = [];
-
-  if (deployedContractUsers) {
-    ({ address: usersAddress, abi: usersAbi } = deployedContractUsers);
-  }
 
   if (deployedContractFeed) {
     ({ address: feedAddress, abi: feedAbi } = deployedContractFeed);
@@ -112,22 +103,18 @@ const ViewFeed: NextPage = () => {
     ({ address: daiAddress, abi: daiAbi } = deployedContractMockDai);
   }
 
-  let vaultAddress!: string;
-  let vaultAbi: ContractInterface[] = [];
-
-  if (deployedContractVault) {
-    ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
-  }
-
   const handleApproveSeller = async () => {
     let _tokenAddress;
     let token;
+
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), museAbi, provider);
+
+      token = new Contract(String(_tokenAddress), museAbi, customSigner);
     } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), daiAbi, provider);
+
+      token = new Contract(String(_tokenAddress), daiAbi, customSigner);
     }
 
     // Write Approval
@@ -142,23 +129,17 @@ const ViewFeed: NextPage = () => {
     let token;
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), museAbi, customProvider);
+      token = new Contract(String(_tokenAddress), museAbi, customSigner);
     } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), daiAbi, customProvider);
+      token = new Contract(String(_tokenAddress), daiAbi, customSigner);
     }
 
     // Write Approval
-    token?.connect(customSigner);
+    token?.connect(customSigner as Signer);
 
     txData(token?.approve(feedCtx?.address, parseEther(postPayment)));
   };
-
-  const vaultCtx = useContract({
-    address: vaultAddress,
-    abi: vaultAbi,
-    signerOrProvider: customSigner,
-  });
 
   const feedCtx = useContract({
     address: addr as string,

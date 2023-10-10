@@ -2,97 +2,12 @@ import { Contract, Signer, ethers, providers } from "ethers";
 import dotenv from "dotenv";
 import { ExternallyOwnedAccount } from "@ethersproject/abstract-signer";
 import { keccak256 } from "ethers/lib/utils.js";
+import SismoABI from "./SismoPKP.json";
+import { AuthType, SignatureRequest, AuthRequest, SismoConnectConfig } from "@sismo-core/sismo-connect-client";
 
 dotenv.config();
 
-const contractAddress = "0x34a428Afee5241f3861DB9Fa5067cfD919f9b6a9"; // goerliBase
-
-const contractABI: any[] = [
-  {
-    inputs: [],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "allVaultIds",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "encryptedVaultId",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "appId",
-        type: "bytes32",
-      },
-    ],
-    name: "getWalletInfo",
-    outputs: [
-      {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "owner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "encryptedVaultId",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "appId",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes",
-        name: "walletInfo",
-        type: "bytes",
-      },
-    ],
-    name: "setWalletInfo",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-];
+const contractAddress = "0x718cb06CE76829556f93Dc634d7fC29c50D6e930"; // goerliBase
 
 class SismoPKP {
   private contractAddress: string;
@@ -103,13 +18,41 @@ class SismoPKP {
   constructor(externalProvider: providers.JsonRpcProvider | Signer, appId: string) {
     this.contractAddress = contractAddress;
     this.externalProvider = externalProvider;
-    this.contract = new Contract(this.contractAddress, contractABI, this.externalProvider);
+    this.contract = new Contract(this.contractAddress, SismoABI.abi, this.externalProvider);
     this.appId = appId;
   }
 
-  async createPKP(vaultId: any) {
+  async createPassKey(sismoConnectResponse: string, appId: string, otp: string) {
+    const signer = this.externalProvider;
+
+    const sismoPKPContract = new Contract(this.contractAddress, SismoABI.abi, signer);
+
+    const tx = await sismoPKPContract.createPassKey(sismoConnectResponse, appId, otp);
+
+    const receipt = await tx.wait();
+
+    return receipt;
+  }
+
+  async getPassKey(sismoConnectResponse: string, appId: string, otp: string) {
+    const signer = this.externalProvider;
+    const sismoPKPContract = new Contract(this.contractAddress, SismoABI.abi, signer);
+    const passKey = await sismoPKPContract.getPassKey(sismoConnectResponse, appId, otp);
+    return passKey;
+  }
+
+  async createPKP(sismoConnectResponse: string, vaultId: string, appId: string, otp: string) {
+    const newPassKey = await this.createPassKey(sismoConnectResponse, appId, otp);
+
+    const passKey = await this.getPassKey(sismoConnectResponse, appId, otp);
+
+    console.log("passKey", passKey);
+
+    newPassKey.wait();
+
     const signer = this.externalProvider;
     console.log("signer", signer);
+
     const contractWithSigner = this.contract.connect(signer);
     console.log("contractWithSigner", contractWithSigner);
 
@@ -120,10 +63,8 @@ class SismoPKP {
     const publicKey = wallet.publicKey;
     console.log("publicKey", publicKey);
 
-    const encryptedPK = await this.encrypt(privateKey, vaultId);
+    const encryptedPK = await this.encrypt(privateKey, passKey);
     console.log("encryptedPK", encryptedPK);
-
-    console.log("keccak256(vaultId)", keccak256(vaultId));
 
     const encryptedPKJson = JSON.stringify(encryptedPK);
     console.log("Encrypted PK JSON:", encryptedPKJson);
@@ -139,8 +80,9 @@ class SismoPKP {
     return encryptedPK;
   }
 
-  async getPKP(vaultId: any) {
+  async getPKP(sismoConnectResponse: string, vaultId: string, appId: string, otp: string) {
     const signer = this.externalProvider;
+    const passKey = await this.getPassKey(sismoConnectResponse, appId, otp);
 
     const contractWithSigner = this.contract.connect(signer);
     const encryptedPKBytes = await contractWithSigner.getWalletInfo(keccak256(vaultId), keccak256(this.appId));
@@ -150,7 +92,7 @@ class SismoPKP {
     const encryptedPKJson = ethers.utils.toUtf8String(encryptedPKBytes);
     console.log("Retrieved Encrypted PK JSON:", encryptedPKJson);
 
-    return this.decrypt(JSON.parse(encryptedPKJson), vaultId);
+    return this.decrypt(JSON.parse(encryptedPKJson), passKey);
   }
 
   async encrypt(
@@ -163,6 +105,32 @@ class SismoPKP {
 
   async decrypt(encryptedWallet: string, password: string | ethers.utils.Bytes) {
     return ethers.Wallet.fromEncryptedJsonSync(encryptedWallet, password);
+  }
+
+  async prepareSismoConnect(_appId: string) {
+    const CONFIG: SismoConnectConfig = {
+      appId: _appId,
+    };
+
+    const AUTHS: AuthRequest[] = [{ authType: AuthType.VAULT }];
+
+    const nonce = keccak256(ethers.utils.randomBytes(32));
+
+    const SIGNATURE_REQUEST: SignatureRequest = {
+      message: String(ethers.utils.defaultAbiCoder.encode(["bytes32"], [nonce])),
+    };
+
+    const message = await this.signMessage(nonce);
+
+    return {
+      CONFIG,
+      AUTHS,
+      SIGNATURE_REQUEST,
+    };
+  }
+
+  async signMessage(_nonce: any) {
+    return ethers.utils.defaultAbiCoder.encode(["bytes32"], [String(_nonce)]);
   }
 }
 
