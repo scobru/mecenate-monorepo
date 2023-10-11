@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, Signer, ethers } from "ethers";
+import { Contract, ContractInterface, Signer, ethers } from "ethers";
 import { formatEther, keccak256, parseEther } from "ethers/lib/utils.js";
 import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
@@ -14,6 +14,8 @@ const Bay: NextPage = () => {
   const { data: signer } = useSigner();
   const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
   const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
+  const [customSigner, setCustomSigner] = React.useState<any>(null);
+
   const deployedContractBay = getDeployedContract(chain?.id.toString(), "MecenateBay");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
@@ -24,7 +26,6 @@ const Bay: NextPage = () => {
   const [requestPayment, setRequestPayment] = React.useState<string>("");
   const [requestStake, setRequestStake] = React.useState<string>("");
   const [requestAddress, setRequestAddress] = React.useState<string>("");
-  const [, setCustomSigner] = React.useState<any>();
   const txData = useTransactor(signer as Signer);
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [, setVerified] = React.useState<any>(null);
@@ -83,13 +84,13 @@ const Bay: NextPage = () => {
   const vaultCtx = useContract({
     address: vaultAddress,
     abi: vaultAbi,
-    signerOrProvider: customWallet,
+    signerOrProvider: customSigner,
   });
 
   const bayCtx = useContract({
     address: bayAddress,
     abi: bayAbi,
-    signerOrProvider: customWallet,
+    signerOrProvider: customSigner,
   });
 
   const daiCtx = useContract({
@@ -101,8 +102,14 @@ const Bay: NextPage = () => {
   const museCtx = useContract({
     address: museAddress,
     abi: museAbi,
-    signerOrProvider: customWallet,
+    signerOrProvider: customSigner,
   });
+
+  useEffect(() => {
+    const pk = localStorage.getItem("pk");
+    const newWallet = new ethers.Wallet(String(pk), provider);
+    setCustomSigner(newWallet);
+  }, []);
 
   const acceptBayRequest = async (index: number, address: string) => {
     if (signer) {
@@ -144,15 +151,11 @@ const Bay: NextPage = () => {
       tokenId: tokenId,
     };
 
-    const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
-    const data = iface.encodeFunctionData("createRequest", [request, sismoResponse, withdrawalAddress, nonce]);
+    bayCtx?.connect(customSigner);
     txData(
-      vaultCtx?.execute(
-        bayCtx?.address,
-        data,
-        tokenId == 0 ? parseEther(requestPayment) : 0,
-        keccak256(String(sismoData.auths[0].userId)),
-      ),
+      bayCtx?.createRequest(request, sismoResponse, withdrawalAddress, nonce, {
+        value: tokenId == 0 ? parseEther(requestPayment) : 0,
+      }),
     );
 
     await sendPublicTelegramMessage();
@@ -212,25 +215,13 @@ const Bay: NextPage = () => {
   };
 
   const handleApproveToken = async () => {
-    let _tokenAddress;
     if (tokenId == 1) {
-      _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
+      museCtx?.connect(customSigner);
+      txData(museCtx?.approve(bayCtx?.address, parseEther(requestPayment)));
     } else if (tokenId == 2) {
-      _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
+      daiCtx?.connect(customSigner);
+      txData(daiCtx?.approve(bayCtx?.address, parseEther(requestPayment)));
     }
-
-    console.log(_tokenAddress);
-    console.log(parseEther(requestPayment));
-    console.log(bayCtx?.address);
-
-    const iface = new ethers.utils.Interface(deployedContractVault?.abi as any[]);
-    const data = iface.encodeFunctionData("approveTokenToFeed", [
-      _tokenAddress,
-      parseEther(requestPayment),
-      bayCtx?.address,
-      keccak256(sismoData.auths[0].userId),
-    ]);
-    txData(vaultCtx?.execute(vaultCtx?.address, data, 0, keccak256(sismoData.auths[0].userId)));
   };
 
   return (

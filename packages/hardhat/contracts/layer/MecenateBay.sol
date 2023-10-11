@@ -78,13 +78,13 @@ contract MecenateBay is Ownable, FeedViewer {
             require(request.payment == msg.value, "BAY:payment is not enough");
         } else if (request.tokenId == Structures.Tokens.DAI) {
             IERC20(daiToken).safeTransferFrom(
-                vaultContract,
+                msg.sender,
                 address(this),
                 request.payment
             );
         } else if (request.tokenId == Structures.Tokens.MUSE) {
             IERC20(museToken).safeTransferFrom(
-                vaultContract,
+                msg.sender,
                 address(this),
                 request.payment
             );

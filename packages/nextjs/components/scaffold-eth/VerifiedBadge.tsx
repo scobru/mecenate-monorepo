@@ -1,64 +1,46 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { getDeployedContract } from "./Contract/utilsContract";
-import { ContractInterface, ethers } from "ethers";
-import { useContract, useNetwork, useProvider } from "wagmi";
+import { ethers } from "ethers";
+import { useNetwork } from "wagmi";
 import { formatEther } from "ethers/lib/utils";
 import Address from "./Address";
 
-type TVerifiedProps = {
-  verified?: string;
-  encryptedVaultId?: string;
-  address?: string;
-};
+// ABI standard per un token ERC-20
+const erc20Abi = ["function balanceOf(address owner) view returns (uint256)"];
 
-export default function VerifiedBadge({ verified, encryptedVaultId, address }: TVerifiedProps) {
-  const [depositedBalance, setDepositedBalance] = useState<number>(0);
-  const [depositedMuse, setDepositedMuse] = useState<number>(0);
-  const [depositedDai, setDepositedDai] = useState<number>(0);
+export default function VerifiedBadge({ verified, encryptedVaultId, address }) {
+  const [depositedEth, setDepositedEth] = useState(0);
+  const [depositedMuse, setDepositedMuse] = useState(0);
+  const [depositedDai, setDepositedDai] = useState(0);
 
   const { chain } = useNetwork();
-  const deployedContractWallet = getDeployedContract(chain?.id.toString(), "MecenateVault");
+  const provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
 
-  const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), customProvider);
+  const museContract = new ethers.Contract(process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE, erc20Abi, provider);
+  const daiContract = new ethers.Contract(process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE, erc20Abi, provider);
 
-  let walletAddress!: string;
-  let walletAbi: ContractInterface[] = [];
+  const getBalances = useCallback(async () => {
+    if (address) {
+      try {
+        // Ottieni il saldo ETH
+        const ethBalance = await provider.getBalance(address);
+        setDepositedEth(Number(formatEther(ethBalance)));
 
-  if (deployedContractWallet) {
-    ({ address: walletAddress, abi: walletAbi } = deployedContractWallet);
-  }
+        // Ottieni il saldo MUSE
+        const museBalance = await museContract.balanceOf(address);
+        setDepositedMuse(Number(formatEther(museBalance)));
 
-  const wallet = useContract({
-    address: walletAddress,
-    abi: walletAbi,
-    signerOrProvider: customWallet,
-  });
-
-  const getDeposit = useCallback(async () => {
-    try {
-      if (encryptedVaultId) {
-        const tx = await wallet?.getEthDeposit(encryptedVaultId);
-        if (tx) setDepositedBalance(Number(formatEther(tx)));
-        const tx2 = await wallet?.getTokenDeposit(process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE, encryptedVaultId);
-        if (tx2) setDepositedMuse(Number(formatEther(tx2)));
-        const tx3 = await wallet?.getTokenDeposit(process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE, encryptedVaultId);
-        if (tx3) setDepositedDai(Number(formatEther(tx3)));
+        // Ottieni il saldo DAI
+        const daiBalance = await daiContract.balanceOf(address);
+        setDepositedDai(Number(formatEther(daiBalance)));
+      } catch (error) {
+        console.error("Failed to get balances:", error);
       }
-    } catch (error) {
-      console.error("Failed to get deposit:", error);
     }
-  }, [encryptedVaultId, wallet]);
+  }, [address, provider]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      getDeposit();
-    }, Number(process.env.NEXT_PUBLIC_RPC_POLLING_INTERVAL));
-
-    return () => {
-      clearInterval(interval);
-    };
-  });
+    getBalances();
+  }, [getBalances]);
 
   return (
     <>
@@ -68,11 +50,11 @@ export default function VerifiedBadge({ verified, encryptedVaultId, address }: T
         </span>
         <div className="origin-top-right font-medium absolute right-0 mt-2 w-36 rounded-md shadow-lg text-black bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block">
           <div className="p-4">
-            <div className="flex justify-between ">
+            <div className="flex justify-between">
               <span>
                 <strong>ETH</strong>
               </span>
-              <span>{depositedBalance.toFixed(3)}</span>
+              <span>{depositedEth.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
               <span>
