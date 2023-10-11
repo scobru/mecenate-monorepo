@@ -20,30 +20,30 @@ const Identity: NextPage = () => {
   const provider = useProvider();
 
   const [sismoConnectVerifiedResult, setSismoConnectVerifiedResult] = React.useState<SismoConnectVerifiedResult>();
-  const [sismoConnectResponse, setSismoConnectResponse] = React.useState<SismoConnectResponse>();
   const [sismoConnectVerifiedResult2, setSismoConnectVerifiedResult2] = React.useState<SismoConnectVerifiedResult>();
+  const [sismoConnectResponse, setSismoConnectResponse] = React.useState<SismoConnectResponse>();
   const [sismoConnectResponse2, setSismoConnectResponse2] = React.useState<SismoConnectResponse>();
+  const [responseBytes, setResponseBytes] = React.useState<string>();
   const [responseBytes2, setResponseBytes2] = React.useState<string>();
+  const [sismoData, setSismoData] = React.useState<any>(null);
+  const [sismoData2, setSismoData2] = React.useState<any>(null);
+  const [sismoPKPData, setSismoPKPData] = React.useState<any>(null);
 
-  const [pageState, setPageState] = React.useState<string>("");
+  const [pageState, setPageState] = React.useState<string>("init");
   const [error, setError] = React.useState<string>();
   const [fee, setFee] = React.useState(0);
-  const [responseBytes, setResponseBytes] = React.useState<string>();
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
   const txData = useTransactor(signer as Signer);
   const [userExists, setUserExists] = React.useState<boolean>(false);
-  const [sismoData, setSismoData] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
-  const [sismoResponse, setSismoResponse] = React.useState<any>(null);
   const [userName, setUserName] = React.useState<any>(null);
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<any>("");
   const [nonce, setNonce] = React.useState<any>(null);
   const [forwarderAddress, setForwarderAddress] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
-  const [sismoPKPData, setSismoPKPData] = React.useState<any>(null);
 
   const [customSigner, setCustomSigner] = React.useState<any>(null);
   const customRelayer = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
@@ -121,10 +121,10 @@ const Identity: NextPage = () => {
     if (localStorage.getItem("nonce") && localStorage.getItem("withdrawalAddress")) return;
 
     const nonce = keccak256(ethers.utils.randomBytes(32));
-    setNonce(nonce);
 
     localStorage.setItem("nonce", nonce);
-  }, [nonce, withdrawalAddress]);
+    setNonce(nonce);
+  }, []);
 
   const signIn = async () => {
     console.log(provider);
@@ -132,7 +132,7 @@ const Identity: NextPage = () => {
     usersCtx?.connect(customSigner);
     txData(
       usersCtx?.registerUser(
-        sismoResponse,
+        responseBytes,
         String(localStorage.getItem("withdrawalAddress")),
         String(localStorage.getItem("nonce")),
         userName,
@@ -164,6 +164,9 @@ const Identity: NextPage = () => {
     localStorage.removeItem("verified");
     localStorage.removeItem("sismoData");
     localStorage.removeItem("sismoResponse");
+    localStorage.removeItem("sismoData2");
+    localStorage.removeItem("sismoResponse2");
+    localStorage.removeItem("sismoPKPData");
   };
 
   // Funzione per inizializzare lo stato
@@ -172,14 +175,19 @@ const Identity: NextPage = () => {
     await checkIfUserExists();
 
     const sismoDataFromLocalStorage = localStorage.getItem("sismoData");
-    const verifiedFromLocalStorage = localStorage.getItem("verified");
+    const sismoDataFromLocalStorage2 = localStorage.getItem("sismoData2");
+    const sismoResponseFromLocalStorage2 = localStorage.getItem("sismoResponse2");
     const sismoResponseFromLocalStorage = localStorage.getItem("sismoResponse");
+    const verifiedFromLocalStorage = localStorage.getItem("verified");
     const nonceFromLocalStorage = localStorage.getItem("nonce");
     const withdrawalAddressFromLocalStorage = localStorage.getItem("withdrawalAddress");
-    const passwordFromLocalStorage = localStorage.getItem("password");
 
-    if (passwordFromLocalStorage) {
-      setPassword(passwordFromLocalStorage);
+    if (sismoDataFromLocalStorage2) {
+      setSismoData2(JSON.parse(sismoDataFromLocalStorage2));
+    }
+
+    if (sismoResponseFromLocalStorage2) {
+      setResponseBytes2(sismoResponseFromLocalStorage2);
     }
 
     if (sismoDataFromLocalStorage) {
@@ -190,7 +198,7 @@ const Identity: NextPage = () => {
       setVerified(verifiedFromLocalStorage);
     }
     if (sismoResponseFromLocalStorage) {
-      setSismoResponse(sismoResponseFromLocalStorage);
+      setResponseBytes(sismoResponseFromLocalStorage);
     }
 
     if (nonceFromLocalStorage) {
@@ -225,17 +233,23 @@ const Identity: NextPage = () => {
 
   const createNewPKP = async () => {
     console.log("Create new PKP");
-    let id = notification.loading("Creating new PKP");
 
-    const newEncryptedPK = await sismoPKP?.createPKP(sismoData?.auths[0]?.userId, password);
+    const newEncryptedPK = await sismoPKP?.createPKP(
+      String(responseBytes2),
+      sismoData?.auths[0]?.userId,
+      String(process.env.NEXT_PUBLIC_SISMO_APPID),
+      sismoPKPData.OTP,
+    );
     console.log("newEncryptedPK", newEncryptedPK);
     notification.remove(id);
     notification.success("PKP created");
 
-    const message = ethers.utils.defaultAbiCoder.encode(["string", "string"], [password, sismoData?.auths[0]?.userId]);
-    id = notification.loading("Get PKP");
-
-    const wallet = await sismoPKP.getPKP(sismoData?.auths[0]?.userId, message);
+    const wallet = await sismoPKP.getPKP(
+      String(responseBytes2),
+      sismoData?.auths[0]?.userId,
+      String(process.env.NEXT_PUBLIC_SISMO_APPID),
+      sismoPKPData.OTP,
+    );
     console.log("wallet", wallet);
 
     if (!wallet) {
@@ -257,22 +271,19 @@ const Identity: NextPage = () => {
   };
 
   const getForwarder = async () => {
-    if (sismoPKP && sismoData && !forwarderAddress && password) {
-      const id = notification.loading("Get PKP");
-
-      const message = ethers.utils.defaultAbiCoder.encode(
-        ["string", "string"],
-        [password, sismoData?.auths[0]?.userId],
+    if (sismoPKP && sismoData && !forwarderAddress && sismoData2) {
+      const wallet: Wallet = await sismoPKP.getPKP(
+        String(responseBytes2),
+        sismoData?.auths[0]?.userId,
+        String(process.env.NEXT_PUBLIC_SISMO_APPID),
+        sismoPKPData.OTP,
       );
-      const wallet: Wallet = await sismoPKP.getPKP(sismoData?.auths[0]?.userId, message);
 
       if (!wallet) {
         notification.error("Error getting PKP");
         return;
       }
 
-      notification.remove(id);
-      notification.success("PKP Fetched");
       setForwarderAddress(wallet.address);
 
       localStorage.setItem("forwarderAddress", wallet.address);
@@ -293,31 +304,34 @@ const Identity: NextPage = () => {
     window.location.href = "/";
   }
 
-  useEffect(() => {
-    initializeState();
-    setPageState("verified");
-    const run = async () => {
-      const result = await sismoPKP.prepareSismoConnect(process.env.NEXT_PUBLIC_SISMO_APPID as string);
-      console.log("result", result);
-      setSismoPKPData(result);
-    };
-    run();
-  }, []);
+  const prepareSismoConnect = async () => {
+    const result = await sismoPKP.prepareSismoConnect(process.env.NEXT_PUBLIC_SISMO_APPID as string);
+    localStorage.setItem("sismoPKPData", JSON.stringify(result));
+    setSismoPKPData(result);
+  };
 
   useEffect(() => {
+    initializeState();
+    generateNonce();
     getForwarder();
-    if (localStorage.getItem("password")) {
-      setPassword(localStorage.getItem("password"));
+    const localSismoPKPDataString = localStorage.getItem("sismoPKPData");
+    const localSismoPKPData = localSismoPKPDataString ? JSON.parse(localSismoPKPDataString) : null;
+    if (localSismoPKPData) {
+      setSismoPKPData(localSismoPKPData); // Esce da useEffect se i dati corrispondono
     } else {
-      localStorage.setItem("password", password);
+      // Chiama prepareSismoConnect se non esistono dati corrispondenti in localStorage
+      const run = async () => {
+        await prepareSismoConnect();
+      };
+      run();
     }
-  }, [sismoData, password]);
+  }, []);
 
   useEffect(() => {
     const run = async () => {
       initializeState();
       generateNonce();
-      getForwarder();
+      await getForwarder();
     };
 
     // pooling run
@@ -400,7 +414,7 @@ const Identity: NextPage = () => {
                         setError(error as any);
                       }
                     }}
-                    onResponseBytes={(responseBytes: string) => {
+                    onResponseBytes={async (responseBytes: string) => {
                       setResponseBytes(responseBytes);
                       localStorage.setItem("sismoResponse", responseBytes);
                     }}
@@ -418,7 +432,7 @@ const Identity: NextPage = () => {
                   ) : (
                     <>
                       {Boolean(error) ? (
-                        <span className="text-red-500 font-bold">Error verifying ZK Proofs: {error}</span>
+                        <div className="text-red-500 font-bold">Error verifying ZK Proofs: {error}</div>
                       ) : (
                         <div className="flex flex-col">
                           <div className="status-wrapper">
@@ -436,137 +450,133 @@ const Identity: NextPage = () => {
                           </div>
                           <div className="text-green-500 font-bold my-5 ">ZK Proofs verified!</div>
                           {sismoPKPData ? (
-                            <div>
-                              <SismoConnectButton
-                                config={sismoPKPData.CONFIG}
-                                auths={sismoPKPData.AUTHS}
-                                signature={sismoPKPData.SIGNATURE_REQUEST}
-                                text="Create PassKey"
-                                onResponse={async (response: SismoConnectResponse) => {
-                                  setSismoConnectResponse2(response);
-                                  setPageState("verifying");
-                                  console.log(response);
+                            <SismoConnectButton
+                              config={sismoPKPData.CONFIG}
+                              auths={sismoPKPData.AUTHS}
+                              signature={sismoPKPData.SIGNATURE_REQUEST}
+                              text="Create PassKey"
+                              onResponse={async (response: SismoConnectResponse) => {
+                                const pkpData = JSON.parse(String(localStorage.getItem("sismoPKPData")));
 
-                                  try {
-                                    const verifiedResult = await fetch("/api/verify2", {
-                                      method: "POST",
-                                      headers: {
-                                        "Content-Type": "application/json",
-                                      },
-                                      body: JSON.stringify({
-                                        ...response,
-                                        sig: sismoPKPData.SIGNATURE_REQUEST,
-                                        auths: sismoPKPData.AUTHS,
-                                        config: sismoPKPData.CONFIG,
-                                      }),
-                                    });
+                                setSismoConnectResponse2(await response);
+                                //setPageState("verifying Pass Ke");
+                                console.log("SismoConnectResponse2", response);
 
-                                    const data = await verifiedResult.json();
+                                try {
+                                  const verifiedResult = await fetch("/api/verify2", {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                      ...response,
+                                      signature: sismoPKPData.SIGNATURE_REQUEST,
+                                      auths: sismoPKPData.AUTHS,
+                                      config: sismoPKPData.CONFIG,
+                                    }),
+                                  });
 
-                                    if (verifiedResult.ok) {
-                                      setSismoConnectVerifiedResult2(data);
-                                      localStorage.setItem("verified", "verified");
-                                      localStorage.setItem("sismoData2", JSON.stringify(await data));
-                                      setPageState("verified");
-                                      getForwarder();
-                                    } else {
-                                      setPageState("error");
-                                      setError(data.error.toString()); // or JSON.stringify(data.error)
-                                    }
-                                  } catch (error) {
-                                    console.error("Error:", error);
+                                  const data = await verifiedResult.json();
+
+                                  if (verifiedResult.ok) {
+                                    localStorage.setItem("verifiedPK", "verified");
+                                    localStorage.setItem("sismoData2", JSON.stringify(await data));
+                                    setSismoConnectVerifiedResult2(data);
+                                    setPageState("verified");
+                                  } else {
                                     setPageState("error");
-                                    setError(error as any);
+                                    setError(JSON.stringify(data.error)); // or JSON.stringify(data.error)
                                   }
-                                }}
-                                onResponseBytes={(responseBytes: string) => {
-                                  setResponseBytes2(responseBytes);
-                                  localStorage.setItem("sismoResponse2", responseBytes);
-                                }}
-                              />
-                            </div>
+                                } catch (error) {
+                                  console.error("Error:", error);
+                                  setPageState("error");
+                                  setError(error as any);
+                                }
+                              }}
+                              onResponseBytes={(responseBytes: string) => {
+                                setResponseBytes2(responseBytes);
+                                localStorage.setItem("sismoResponse2", responseBytes);
+                              }}
+                            />
                           ) : (
-                            <div>loading</div>
+                            <div className="text-green-400 text-center font-semibold">ZK Proofs Pass Key verified!</div>
                           )}
-                          <div className="card  card-shadow ">
-                            <div className="text-center font-semibold text-xl">Faucet mDAI/MUSE</div>
-                            <button
-                              className="btn btn-large"
-                              onClick={async () => {
-                                await mintDai();
-                              }}
-                              disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero && forwarderAddress)}
-                            >
-                              Mint mDAI
-                            </button>
 
-                            <button
-                              className="btn btn-large"
-                              onClick={async () => {
-                                await mintMuse();
-                              }}
-                              disabled={!Boolean(forwarderAddress != ethers.constants.AddressZero && forwarderAddress)}
-                            >
-                              Mint MUSE
-                            </button>
-                          </div>
-                          <div className="card  card-shadow ">
-                            <div className="font-semibold text-xl">Deposit</div>
-                            <div className=" text-base">Select a safe password to encrypt your address</div>
-
-                            <input
-                              type="password"
-                              onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
-                                // wait 1 sec
-                                await new Promise(r => setTimeout(r, 1000));
-                                setPassword(e.target.value);
-                                localStorage.setItem("password", e.target.value);
-                              }}
-                              className="input input-bordered my-5 w-full"
-                              placeholder="Set Password"
-                            />
-                            {password && (
-                              <div>
-                                <button className="btn btn-large" onClick={createNewPKP} disabled={!password}>
-                                  Create{" "}
+                          {sismoData2 ? (
+                            <div>
+                              <div className="card  card-shadow ">
+                                <div className="text-center font-semibold text-xl">Faucet mDAI/MUSE</div>
+                                <button
+                                  className="btn btn-large"
+                                  onClick={async () => {
+                                    await mintDai();
+                                  }}
+                                  disabled={
+                                    !Boolean(forwarderAddress != ethers.constants.AddressZero && forwarderAddress)
+                                  }
+                                >
+                                  Mint mDAI
                                 </button>
-                                {forwarderAddress == ethers.constants.AddressZero && forwarderAddress ? (
-                                  <p className="text-lg mb-10">Create forwarder address</p>
-                                ) : (
-                                  <div>
-                                    <div>
-                                      {" "}
-                                      <p className="text-lg mb-10"> [1] Send ETH or ERC20 at this forwarder address</p>
-                                      {forwarderAddress ? (
-                                        <Address address={forwarderAddress} format="long" />
-                                      ) : (
-                                        <div>Waiting for forwarder address</div>
-                                      )}
-                                      <br />
-                                    </div>
-                                  </div>
-                                )}
+
+                                <button
+                                  className="btn btn-large"
+                                  onClick={async () => {
+                                    await mintMuse();
+                                  }}
+                                  disabled={
+                                    !Boolean(forwarderAddress != ethers.constants.AddressZero && forwarderAddress)
+                                  }
+                                >
+                                  Mint MUSE
+                                </button>
                               </div>
-                            )}
-                          </div>
+                              <div className="card  card-shadow ">
+                                <div className="font-semibold text-xl">Deposit</div>
+                                <div className=" text-base">Select a safe password to encrypt your address</div>
+                                <div>
+                                  <button className="btn btn-large" onClick={createNewPKP} disabled={forwarderAddress}>
+                                    Create{" "}
+                                  </button>
+                                  {forwarderAddress == ethers.constants.AddressZero && forwarderAddress ? (
+                                    <p className="text-lg mb-10">Create forwarder address</p>
+                                  ) : (
+                                    <div>
+                                      <div>
+                                        {" "}
+                                        <p className="text-lg mb-10">
+                                          {" "}
+                                          [1] Send ETH or ERC20 at this forwarder address
+                                        </p>
+                                        {forwarderAddress ? (
+                                          <Address address={forwarderAddress} format="long" />
+                                        ) : (
+                                          <div>Waiting for forwarder address</div>
+                                        )}
+                                        <br />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="card  card-shadow ">
+                                <div className="card card-title">Sign in</div>
 
-                          <div className="card  card-shadow ">
-                            <div className="card card-title">Sign in</div>
-
-                            <input
-                              className="input input-bordered my-5 w-full"
-                              type="text"
-                              placeholder="Set UserName"
-                              onInput={(e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)}
-                            />
-                            <button
-                              className="btn btn-large"
-                              onClick={signIn}
-                              disabled={userExists && withdrawalAddress != "" && userName != ""}
-                            >
-                              Sign In{" "}
-                            </button>
-                          </div>
+                                <input
+                                  className="input input-bordered my-5 w-full"
+                                  type="text"
+                                  placeholder="Set UserName"
+                                  onInput={(e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)}
+                                />
+                                <button
+                                  className="btn btn-large"
+                                  onClick={signIn}
+                                  disabled={userExists && withdrawalAddress != "" && userName != ""}
+                                >
+                                  Sign In{" "}
+                                </button>
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
                       )}
                     </>

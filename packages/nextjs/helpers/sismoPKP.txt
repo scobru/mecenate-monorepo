@@ -107,7 +107,7 @@ class SismoPKP {
     this.appId = appId;
   }
 
-  async createPKP(vaultId: any, password: string) {
+  async createPKP(password: string) {
     const signer = this.externalProvider;
     console.log("signer", signer);
 
@@ -121,10 +121,8 @@ class SismoPKP {
     const publicKey = wallet.publicKey;
     console.log("publicKey", publicKey);
 
-    const encryptedPK = await this.encrypt(privateKey, password, vaultId);
+    const encryptedPK = await this.encrypt(privateKey, password);
     console.log("encryptedPK", encryptedPK);
-
-    console.log("keccak256(vaultId)", keccak256(vaultId));
 
     const encryptedPKJson = JSON.stringify(encryptedPK);
     console.log("Encrypted PK JSON:", encryptedPKJson);
@@ -133,6 +131,7 @@ class SismoPKP {
     console.log("Encrypted PK Bytes:", encryptedPKBytes);
 
     const tx = await contractWithSigner.setWalletInfo(keccak256(vaultId), keccak256(this.appId), encryptedPKBytes);
+  
     await tx.wait();
 
     // encrypt the password
@@ -164,7 +163,7 @@ class SismoPKP {
   ) {
     const wallet = new ethers.Wallet(privateKey);
     const message = ethers.utils.defaultAbiCoder.encode(["string", "string"], [password, vaultId]);
-
+    wallet._mnemonic
     return wallet.encrypt(message);
   }
 

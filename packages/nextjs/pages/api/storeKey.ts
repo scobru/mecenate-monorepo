@@ -15,6 +15,7 @@ export default async function handler(
     const { encryptedPrivateKey, contractAddress } = req.body;
 
     console.log("encryptedPrivateKey:", encryptedPrivateKey);
+
     console.log("Contract address:", contractAddress);
 
     db.run(

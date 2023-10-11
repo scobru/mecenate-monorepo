@@ -7,7 +7,7 @@ import { AuthType, SignatureRequest, AuthRequest, SismoConnectConfig } from "@si
 
 dotenv.config();
 
-const contractAddress = "0x718cb06CE76829556f93Dc634d7fC29c50D6e930"; // goerliBase
+const contractAddress = "0x97653E925B52d0455f5809cbc74104F594201EDC"; // goerliBase
 
 class SismoPKP {
   private contractAddress: string;
@@ -22,76 +22,64 @@ class SismoPKP {
     this.appId = appId;
   }
 
-  async createPassKey(sismoConnectResponse: string, appId: string, otp: string) {
+  async createPKP(sismoConnectResponse: string, vaultId: string, appId: string, otp: string) {
+    console.log("Creating PKP...");
+
+    await this.createPassKey(sismoConnectResponse, appId, otp);
+
+    const passKey = await this.getPassKey(sismoConnectResponse, appId, otp);
     const signer = this.externalProvider;
+    const contractWithSigner = this.contract.connect(signer);
+    const wallet = ethers.Wallet.createRandom();
+    const privateKey = wallet.privateKey;
+    const publicKey = wallet.publicKey;
 
+    console.log("Encrypting PK...");
+    const encryptedPK = await this.encrypt(privateKey, passKey);
+    const encryptedPKJson = JSON.stringify(encryptedPK);
+    const encryptedPKBytes = ethers.utils.toUtf8Bytes(encryptedPKJson);
+    console.log("PK encrypted!");
+    const tx = await contractWithSigner.setWalletInfo(keccak256(vaultId), appId, encryptedPKBytes);
+    await tx.wait();
+
+    console.log("PKP created!");
+
+    return encryptedPK;
+  }
+
+  async createPassKey(sismoConnectResponse: string, appId: string, otp: string) {
+    console.log("Creating passkey...");
+
+    const signer = this.externalProvider;
     const sismoPKPContract = new Contract(this.contractAddress, SismoABI.abi, signer);
-
-    const tx = await sismoPKPContract.createPassKey(sismoConnectResponse, appId, otp);
-
+    const params = {
+      sismoConnectResponse: sismoConnectResponse,
+      appId: appId,
+      otp: ethers.utils.defaultAbiCoder.encode(["bytes32"], [String(otp)]),
+    };
+    const tx = await sismoPKPContract.createPassKey(params.sismoConnectResponse, params.appId, params.otp);
     const receipt = await tx.wait();
+
+    console.log("Passkey created!");
 
     return receipt;
   }
 
   async getPassKey(sismoConnectResponse: string, appId: string, otp: string) {
+    console.log("Getting passkey...");
     const signer = this.externalProvider;
     const sismoPKPContract = new Contract(this.contractAddress, SismoABI.abi, signer);
     const passKey = await sismoPKPContract.getPassKey(sismoConnectResponse, appId, otp);
+    console.log("Passkey retrieved!");
     return passKey;
-  }
-
-  async createPKP(sismoConnectResponse: string, vaultId: string, appId: string, otp: string) {
-    const newPassKey = await this.createPassKey(sismoConnectResponse, appId, otp);
-
-    const passKey = await this.getPassKey(sismoConnectResponse, appId, otp);
-
-    console.log("passKey", passKey);
-
-    newPassKey.wait();
-
-    const signer = this.externalProvider;
-    console.log("signer", signer);
-
-    const contractWithSigner = this.contract.connect(signer);
-    console.log("contractWithSigner", contractWithSigner);
-
-    const wallet = ethers.Wallet.createRandom();
-    console.log("wallet.address", wallet.address);
-
-    const privateKey = wallet.privateKey;
-    const publicKey = wallet.publicKey;
-    console.log("publicKey", publicKey);
-
-    const encryptedPK = await this.encrypt(privateKey, passKey);
-    console.log("encryptedPK", encryptedPK);
-
-    const encryptedPKJson = JSON.stringify(encryptedPK);
-    console.log("Encrypted PK JSON:", encryptedPKJson);
-
-    const encryptedPKBytes = ethers.utils.toUtf8Bytes(encryptedPKJson);
-    console.log("Encrypted PK Bytes:", encryptedPKBytes);
-
-    const tx = await contractWithSigner.setWalletInfo(keccak256(vaultId), keccak256(this.appId), encryptedPKBytes);
-    await tx.wait();
-
-    console.log("Transaction mined!", tx.hash);
-
-    return encryptedPK;
   }
 
   async getPKP(sismoConnectResponse: string, vaultId: string, appId: string, otp: string) {
     const signer = this.externalProvider;
     const passKey = await this.getPassKey(sismoConnectResponse, appId, otp);
-
     const contractWithSigner = this.contract.connect(signer);
-    const encryptedPKBytes = await contractWithSigner.getWalletInfo(keccak256(vaultId), keccak256(this.appId));
-
-    console.log("Retrieved Encrypted PK Bytes:", encryptedPKBytes);
-
+    const encryptedPKBytes = await contractWithSigner.getWalletInfo(keccak256(vaultId), appId);
     const encryptedPKJson = ethers.utils.toUtf8String(encryptedPKBytes);
-    console.log("Retrieved Encrypted PK JSON:", encryptedPKJson);
-
     return this.decrypt(JSON.parse(encryptedPKJson), passKey);
   }
 
@@ -111,26 +99,21 @@ class SismoPKP {
     const CONFIG: SismoConnectConfig = {
       appId: _appId,
     };
-
-    const AUTHS: AuthRequest[] = [{ authType: AuthType.VAULT }];
-
-    const nonce = keccak256(ethers.utils.randomBytes(32));
-
+    const AUTHS: AuthRequest[] = [{ authType: AuthType.VAULT, isSelectableByUser: false }];
+    const OTP = keccak256(ethers.utils.randomBytes(32));
     const SIGNATURE_REQUEST: SignatureRequest = {
-      message: String(ethers.utils.defaultAbiCoder.encode(["bytes32"], [nonce])),
+      message: String(await this.signMessage(OTP)),
     };
-
-    const message = await this.signMessage(nonce);
-
     return {
       CONFIG,
       AUTHS,
       SIGNATURE_REQUEST,
+      OTP,
     };
   }
 
-  async signMessage(_nonce: any) {
-    return ethers.utils.defaultAbiCoder.encode(["bytes32"], [String(_nonce)]);
+  async signMessage(_otp: any) {
+    return ethers.utils.defaultAbiCoder.encode(["bytes32"], [String(_otp)]);
   }
 }
 
