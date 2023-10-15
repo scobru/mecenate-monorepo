@@ -1046,9 +1046,9 @@
           "type": "address"
         },
         {
-          "internalType": "bytes32",
-          "name": "_nonce",
-          "type": "bytes32"
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
         }
       ],
       "name": "createPost",
@@ -1454,9 +1454,9 @@
           "type": "address"
         },
         {
-          "internalType": "bytes32",
-          "name": "_nonce",
-          "type": "bytes32"
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
         }
       ],
       "name": "takeFullStake",
@@ -1493,9 +1493,9 @@
           "type": "address"
         },
         {
-          "internalType": "bytes32",
-          "name": "_nonce",
-          "type": "bytes32"
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
         }
       ],
       "name": "takeStake",

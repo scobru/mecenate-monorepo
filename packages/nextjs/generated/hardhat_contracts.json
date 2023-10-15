@@ -905,7 +905,7 @@
           ]
         },
         "MecenateBay": {
-          "address": "0xc89b8F82f0283041239eD8E7E6E6d06F1C4670CA",
+          "address": "0x8C7D885d3933e7F4D9eAB0b387270b3f188b5616",
           "abi": [
             {
               "inputs": [
@@ -917,11 +917,6 @@
                 {
                   "internalType": "address",
                   "name": "_verifierContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_vaultContract",
                   "type": "address"
                 }
               ],
@@ -1094,9 +1089,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "acceptRequest",
@@ -1189,9 +1184,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "buyerNonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "buyerFrom",
+                  "type": "address"
                 }
               ],
               "stateMutability": "view",
@@ -1232,19 +1227,6 @@
                 }
               ],
               "name": "changeUsersModule",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_vault",
-                  "type": "address"
-                }
-              ],
-              "name": "changeVault",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -1330,9 +1312,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "createRequest",
@@ -1546,9 +1528,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "removeRequest",
@@ -1645,19 +1627,6 @@
             },
             {
               "inputs": [],
-              "name": "vaultContract",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
               "name": "verifierContract",
               "outputs": [
                 {
@@ -1676,7 +1645,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0xd62e338F43E1f3724774D2C60E5ead9323724A84",
+          "address": "0x1759D1F42b9964aBB32485463Bab13B58dd56d6D",
           "abi": [
             {
               "inputs": [
@@ -2693,9 +2662,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 },
                 {
                   "internalType": "enum Structures.Tokens",
@@ -2785,9 +2754,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "createPost",
@@ -2911,6 +2880,21 @@
             {
               "inputs": [
                 {
+                  "internalType": "bytes",
+                  "name": "sismoConnectResponse",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_to",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
+                },
+                {
                   "internalType": "bool",
                   "name": "valid",
                   "type": "bool"
@@ -2919,11 +2903,6 @@
                   "internalType": "uint256",
                   "name": "punishment",
                   "type": "uint256"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "encryptedVaultId",
-                  "type": "bytes32"
                 }
               ],
               "name": "finalizePost",
@@ -2957,9 +2936,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "getHashedVaultId",
@@ -2986,9 +2965,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "getMessage",
@@ -3312,9 +3291,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "renouncePost",
@@ -3340,9 +3319,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "revealData",
@@ -3374,9 +3353,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "submitHash",
@@ -3402,9 +3381,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "takeFullStake",
@@ -3441,9 +3420,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "takeStake",
@@ -3495,7 +3474,7 @@
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0x9e968F3518Fd53b8349f11dA3750f67944513056",
+          "address": "0x6eA1a3dB33d2863F1652f5b53267742B14C0A3fC",
           "abi": [
             {
               "inputs": [
@@ -3563,9 +3542,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "buildFeed",
@@ -4522,7 +4501,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0x20Cd84C1eE4AF97A2e20f65eB3e8D28532A7B5d6",
+          "address": "0x2732a08CeCd4f430cCDae8Effbb6bE814C1aae17",
           "abi": [
             {
               "inputs": [
@@ -4650,7 +4629,7 @@
           ]
         },
         "MecenateTreasury": {
-          "address": "0xd6bde4A86b45AC36f45507eB3658C3f99BBfE79e",
+          "address": "0xF72356F915232705C3bd1a1F7eD03D5c5f67Ca29",
           "abi": [
             {
               "anonymous": false,
@@ -5195,9 +5174,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "takeReward",
@@ -5239,9 +5218,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "takeRewardERC20",
@@ -5318,7 +5297,7 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0x16d01BC38233f8E18228f3D1c46c36FDaeF5B184",
+          "address": "0x602B69dCe63dcDA1bA13b2698f98336876b60e8B",
           "abi": [
             {
               "inputs": [
@@ -5394,9 +5373,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 },
                 {
                   "internalType": "string",
@@ -5574,9 +5553,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 },
                 {
                   "internalType": "string",
@@ -5657,7 +5636,7 @@
           ]
         },
         "MecenateVault": {
-          "address": "0x10b883b100A7F5aA9A7687C7799C976BdDfd659f",
+          "address": "0xf904C367A34BA6F7E3865F36e4526D6B0Adb787B",
           "abi": [
             {
               "inputs": [
@@ -5880,9 +5859,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "withdrawETH",
@@ -5913,9 +5892,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "withdrawToken",
@@ -5936,19 +5915,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
-                },
-                {
                   "internalType": "address",
                   "name": "_to",
                   "type": "address"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
                 }
               ],
               "name": "withdrawWithSecret",
@@ -5963,7 +5932,7 @@
           ]
         },
         "MecenateVerifier": {
-          "address": "0x8CFb40101Fbd1a04b8F460CC5d419E94eFe0c74D",
+          "address": "0xE489083a791C01F2c08600dc5E12051F82Ebc57f",
           "abi": [
             {
               "inputs": [
@@ -6097,9 +6066,9 @@
                   "type": "address"
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "_nonce",
-                  "type": "bytes32"
+                  "internalType": "address",
+                  "name": "_from",
+                  "type": "address"
                 }
               ],
               "name": "sismoVerify",
@@ -6118,11 +6087,6 @@
                   "internalType": "uint256",
                   "name": "",
                   "type": "uint256"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
                 }
               ],
               "stateMutability": "view",

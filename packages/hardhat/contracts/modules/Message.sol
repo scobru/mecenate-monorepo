@@ -48,12 +48,12 @@ abstract contract Message is Events {
     function getHashedVaultId(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external virtual returns (bytes32) {
-        (bytes memory vaultId, , , ) = _verifyNonce(
+        (bytes memory vaultId, , ) = _verifyNonce(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
 
         bytes32 encryptedVaultId = keccak256(vaultId);
@@ -93,12 +93,12 @@ abstract contract Message is Events {
     function getMessage(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external virtual returns (bytes memory) {
         bytes32 encryptedVaultId = _getEncryptedVaultId(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
         require(_isSellerOrBuyer(encryptedVaultId), "NOT_THE_SELLER_OR_BUYER");
         return _getMessage(encryptedVaultId);
@@ -117,12 +117,12 @@ abstract contract Message is Events {
     function _getEncryptedVaultId(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) internal virtual returns (bytes32) {
-        (bytes memory vaultId, , , ) = _verifyNonce(
+        (bytes memory vaultId, , ) = _verifyNonce(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
         return keccak256(vaultId);
     }

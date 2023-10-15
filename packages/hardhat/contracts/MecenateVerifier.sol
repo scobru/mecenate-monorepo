@@ -15,8 +15,8 @@ contract MecenateVerifier is SismoConnect {
     function sismoVerify(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
-    ) external view returns (bytes memory, uint256, uint256, bytes memory) {
+        address _from
+    ) external view returns (bytes memory, uint256, uint256) {
         require(sismoConnectResponse.length > 0, "empty response");
 
         // Build authorization requests
@@ -40,12 +40,21 @@ contract MecenateVerifier is SismoConnect {
         SismoConnectVerifiedResult memory result = verify({
             responseBytes: sismoConnectResponse,
             auths: auths,
-            signature: buildSignature({message: abi.encode(_to, _nonce)})
+            signature: buildSignature({message: abi.encode(_to)})
         });
 
         bytes memory signedMessage = SismoConnectHelper.getSignedMessage(
             result
         );
+
+        (address to, address from) = abi.decode(
+            signedMessage,
+            (address, address)
+        );
+
+        require(_from == from, "WRONG_FROM_ADDRESS");
+
+        require(to == _to, "WRONG_TO_ADDRESS");
 
         // Store the verified auths
         VerifiedAuth[] memory _verifiedAuths = new VerifiedAuth[](
@@ -81,6 +90,6 @@ contract MecenateVerifier is SismoConnect {
             }
         }
 
-        return (vaultIdBytes, twitterId, telegramId, signedMessage);
+        return (vaultIdBytes, twitterId, telegramId);
     }
 }

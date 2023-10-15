@@ -10,7 +10,7 @@ interface IMecenateFeed {
     function acceptPost(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce,
+        address _from,
         Structures.Tokens,
         uint256 _amount
     ) external payable;

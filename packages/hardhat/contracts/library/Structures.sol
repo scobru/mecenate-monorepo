@@ -165,6 +165,6 @@ library Structures {
         bytes vaultIdBuyer;
         bytes buyerResponse;
         address buyerTo;
-        bytes32 buyerNonce;
+        address buyerFrom;
     }
 }

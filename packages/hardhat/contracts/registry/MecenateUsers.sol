@@ -47,23 +47,11 @@ contract MecenateUsers is Ownable {
     function registerUser(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce,
+        address _from,
         string memory _username
     ) public {
-        (
-            bytes memory vaultId,
-            ,
-            ,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to,
-                _nonce
-            );
-
-        (, bytes32 nonce) = abi.decode(signedMessage, (address, bytes32));
-
-        require(_nonce == nonce, "WRONG_NONCE");
+        (bytes memory vaultId, , ) = IMecenateVerifier(verifierContract)
+            .sismoVerify(sismoConnectResponse, _to, _from);
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 
@@ -82,23 +70,11 @@ contract MecenateUsers is Ownable {
     function changeUserName(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce,
+        address _from,
         string memory _username
     ) external {
-        (
-            bytes memory vaultId,
-            ,
-            ,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to,
-                _nonce
-            );
-
-        (, bytes32 nonce) = abi.decode(signedMessage, (address, bytes32));
-
-        require(_nonce == nonce, "WRONG_NONCE");
+        (bytes memory vaultId, , ) = IMecenateVerifier(verifierContract)
+            .sismoVerify(sismoConnectResponse, _to, _from);
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 

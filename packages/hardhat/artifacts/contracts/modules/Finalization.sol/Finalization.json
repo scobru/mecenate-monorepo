@@ -1006,6 +1006,21 @@
     {
       "inputs": [
         {
+          "internalType": "bytes",
+          "name": "sismoConnectResponse",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
           "internalType": "bool",
           "name": "valid",
           "type": "bool"
@@ -1014,11 +1029,6 @@
           "internalType": "uint256",
           "name": "punishment",
           "type": "uint256"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "encryptedVaultId",
-          "type": "bytes32"
         }
       ],
       "name": "finalizePost",
@@ -1311,9 +1321,9 @@
           "type": "address"
         },
         {
-          "internalType": "bytes32",
-          "name": "_nonce",
-          "type": "bytes32"
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
         }
       ],
       "name": "takeFullStake",
@@ -1350,9 +1360,9 @@
           "type": "address"
         },
         {
-          "internalType": "bytes32",
-          "name": "_nonce",
-          "type": "bytes32"
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
         }
       ],
       "name": "takeStake",

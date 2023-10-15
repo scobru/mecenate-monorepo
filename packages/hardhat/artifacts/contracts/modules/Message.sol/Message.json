@@ -856,9 +856,9 @@
           "type": "address"
         },
         {
-          "internalType": "bytes32",
-          "name": "_nonce",
-          "type": "bytes32"
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
         }
       ],
       "name": "getHashedVaultId",
@@ -885,9 +885,9 @@
           "type": "address"
         },
         {
-          "internalType": "bytes32",
-          "name": "_nonce",
-          "type": "bytes32"
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
         }
       ],
       "name": "getMessage",

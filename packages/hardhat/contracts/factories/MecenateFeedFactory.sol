@@ -105,23 +105,11 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     function buildFeed(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external payable returns (address) {
-        (
-            bytes memory vaultId,
-            ,
-            ,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(settings.verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to,
-                _nonce
-            );
-
-        (address to, bytes32 nonce) = abi.decode(
-            signedMessage,
-            (address, bytes32)
-        );
+        (bytes memory vaultId, , ) = IMecenateVerifier(
+            settings.verifierContract
+        ).sismoVerify(sismoConnectResponse, _to, _from);
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 
@@ -132,9 +120,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
             address(this),
             version
         );
-
-        require(_nonce == nonce, "WRONG_NONCE");
-        require(_to == to, "WRONG_TO");
 
         require(
             IMecenateUsers(settings.usersModuleContract).checkifUserExist(

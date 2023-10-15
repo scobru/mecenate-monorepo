@@ -26,7 +26,7 @@ const Bay: NextPage = () => {
   const [requestPayment, setRequestPayment] = React.useState<string>("");
   const [requestStake, setRequestStake] = React.useState<string>("");
   const [requestAddress, setRequestAddress] = React.useState<string>("");
-  const txData = useTransactor(signer as Signer);
+  const txData = useTransactor(customSigner as Signer);
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
@@ -81,12 +81,6 @@ const Bay: NextPage = () => {
     ({ address: museAddress, abi: museAbi } = deployedContractMUSE);
   }
 
-  const vaultCtx = useContract({
-    address: vaultAddress,
-    abi: vaultAbi,
-    signerOrProvider: customSigner,
-  });
-
   const bayCtx = useContract({
     address: bayAddress,
     abi: bayAbi,
@@ -96,7 +90,7 @@ const Bay: NextPage = () => {
   const daiCtx = useContract({
     address: daiAddress,
     abi: daiAbi,
-    signerOrProvider: customWallet,
+    signerOrProvider: customSigner,
   });
 
   const museCtx = useContract({
@@ -140,7 +134,6 @@ const Bay: NextPage = () => {
 
   const createBayContract = async () => {
     const _request = ethers.utils.formatBytes32String(requestString);
-
     const request = {
       request: _request,
       payment: parseEther(requestPayment),
@@ -152,6 +145,12 @@ const Bay: NextPage = () => {
     };
 
     bayCtx?.connect(customSigner);
+
+    console.log(request);
+
+    console.log(customSigner.address);
+    console.log(bayCtx.address);
+
     txData(
       bayCtx?.createRequest(request, sismoResponse, withdrawalAddress, nonce, {
         value: tokenId == 0 ? parseEther(requestPayment) : 0,
@@ -216,10 +215,8 @@ const Bay: NextPage = () => {
 
   const handleApproveToken = async () => {
     if (tokenId == 1) {
-      museCtx?.connect(customSigner);
       txData(museCtx?.approve(bayCtx?.address, parseEther(requestPayment)));
     } else if (tokenId == 2) {
-      daiCtx?.connect(customSigner);
       txData(daiCtx?.approve(bayCtx?.address, parseEther(requestPayment)));
     }
   };

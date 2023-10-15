@@ -17,7 +17,7 @@ abstract contract Creation is Staking {
         Structures.Tokens tokenId,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     )
         external
         payable
@@ -27,9 +27,8 @@ abstract contract Creation is Staking {
         (
             bytes memory vaultId,
             uint256 twitterId,
-            uint256 telegramId,
-
-        ) = _verifyNonce(sismoConnectResponse, _to, _nonce);
+            uint256 telegramId
+        ) = _verifyNonce(sismoConnectResponse, _to, _from);
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 

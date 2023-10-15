@@ -130,25 +130,10 @@ contract MecenateTreasury is Ownable, Swapper {
         address _verifierContract,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external returns (uint256) {
-        (
-            bytes memory vaultId,
-            ,
-            ,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(_verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to,
-                _nonce
-            );
-
-        (address to, bytes32 nonce) = abi.decode(
-            signedMessage,
-            (address, bytes32)
-        );
-
-        require(_nonce == nonce, "Not Same Nonce");
+        (bytes memory vaultId, , ) = IMecenateVerifier(_verifierContract)
+            .sismoVerify(sismoConnectResponse, _to, _from);
 
         bytes32 _user = keccak256(vaultId);
 
@@ -157,7 +142,7 @@ contract MecenateTreasury is Ownable, Swapper {
         userReward[_user] = 0;
 
         // send eth weith data
-        (bool success, ) = payable(to).call{value: amountToSend}(
+        (bool success, ) = payable(_to).call{value: amountToSend}(
             sismoConnectResponse
         );
 
@@ -170,35 +155,21 @@ contract MecenateTreasury is Ownable, Swapper {
         address _verifierContract,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external returns (uint256) {
         // Similar verification logic as your current takeReward for ETH
-        (
-            bytes memory vaultId,
-            ,
-            ,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(_verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to,
-                _nonce
-            );
-
-        (address to, bytes32 nonce) = abi.decode(
-            signedMessage,
-            (address, bytes32)
-        );
-
-        require(_nonce == nonce, "Not Same Nonce");
+        (bytes memory vaultId, , ) = IMecenateVerifier(_verifierContract)
+            .sismoVerify(sismoConnectResponse, _to, _from);
 
         bytes32 _user = keccak256(vaultId);
 
         uint256 amountToSend = userRewardERC20[_user][_token]; // assuming userReward is now a double mapping
+
         require(amountToSend > 0, "No reward available");
 
         userRewardERC20[_user][_token] = 0; // reset the user's reward to 0
 
-        IERC20(_token).safeTransfer(to, amountToSend);
+        IERC20(_token).safeTransfer(_to, amountToSend);
 
         return amountToSend;
     }

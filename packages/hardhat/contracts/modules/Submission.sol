@@ -12,7 +12,7 @@ abstract contract Submission is Events {
         bytes memory encryptedKey,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external virtual {
         Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(
@@ -22,10 +22,10 @@ abstract contract Submission is Events {
             "WRONG_STATUS"
         );
 
-        (bytes memory vaultId, , , ) = _verifyNonce(
+        (bytes memory vaultId, , ) = _verifyNonce(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
         bytes32 encryptedVaultId = keccak256(vaultId);
 
@@ -52,7 +52,7 @@ abstract contract Submission is Events {
         bytes memory decryptedData,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external virtual returns (bytes memory) {
         Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(
@@ -63,10 +63,10 @@ abstract contract Submission is Events {
             "INVALID_STATUS"
         );
 
-        (bytes memory vaultId, , , ) = _verifyNonce(
+        (bytes memory vaultId, , ) = _verifyNonce(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
         bytes32 encryptedVaultId = keccak256(vaultId);
 

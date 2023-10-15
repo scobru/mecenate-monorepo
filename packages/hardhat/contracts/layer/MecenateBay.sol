@@ -47,10 +47,7 @@ contract MecenateBay is Ownable, FeedViewer {
         uint256 indexed index
     );
 
-    constructor(
-        address _usersMouduleContract,
-        address _verifierContract,
-    ) {
+    constructor(address _usersMouduleContract, address _verifierContract) {
         usersMouduleContract = _usersMouduleContract;
         verifierContract = _verifierContract;
     }
@@ -67,7 +64,7 @@ contract MecenateBay is Ownable, FeedViewer {
         Structures.BayRequest memory request,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) public payable returns (Structures.BayRequest memory) {
         if (request.tokenId == Structures.Tokens.NaN) {
             require(msg.value > 0, "BAY:payment is not enough");
@@ -88,10 +85,10 @@ contract MecenateBay is Ownable, FeedViewer {
 
         require(request.payment > 0, "BAY:payment is not enough");
 
-        (bytes memory vaultId, , , ) = _sismoVerify(
+        (bytes memory vaultId, , ) = _sismoVerify(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
 
         bytes32 encryptedVaultId = keccak256(vaultId);
@@ -102,7 +99,9 @@ contract MecenateBay is Ownable, FeedViewer {
             ),
             "user does not exist"
         );
+
         require(request.stake > 0, "BAY:stake is not enough");
+
         require(request.payment > 0, "BAY:payment is not enough");
 
         requests[encryptedVaultId].push(request);
@@ -116,7 +115,7 @@ contract MecenateBay is Ownable, FeedViewer {
                 vaultIdBuyer: vaultId,
                 buyerResponse: sismoConnectResponse,
                 buyerTo: _to,
-                buyerNonce: _nonce
+                buyerFrom: _from
             })
         );
 
@@ -130,12 +129,12 @@ contract MecenateBay is Ownable, FeedViewer {
         address _feed,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) public {
-        (bytes memory vaultId, , , ) = _sismoVerify(
+        (bytes memory vaultId, , ) = _sismoVerify(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
 
         bytes32 encryptedVaultId = keccak256(vaultId);
@@ -166,7 +165,7 @@ contract MecenateBay is Ownable, FeedViewer {
                 vaultIdBuyer: allRequestsPrivate[index].vaultIdBuyer,
                 buyerResponse: allRequestsPrivate[index].buyerResponse,
                 buyerTo: allRequestsPrivate[index].buyerTo,
-                buyerNonce: allRequestsPrivate[index].buyerNonce
+                buyerFrom: allRequestsPrivate[index].buyerFrom
             })
         );
 
@@ -186,7 +185,7 @@ contract MecenateBay is Ownable, FeedViewer {
             IMecenateFeed(_feed).acceptPost{value: 0}(
                 allRequestsPrivate[index].buyerResponse,
                 allRequestsPrivate[index].buyerTo,
-                allRequestsPrivate[index].buyerNonce,
+                allRequestsPrivate[index].buyerFrom,
                 allRequests[index].tokenId,
                 allRequests[index].payment
             );
@@ -194,7 +193,7 @@ contract MecenateBay is Ownable, FeedViewer {
             IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
                 allRequestsPrivate[index].buyerResponse,
                 allRequestsPrivate[index].buyerTo,
-                allRequestsPrivate[index].buyerNonce,
+                allRequestsPrivate[index].buyerFrom,
                 allRequests[index].tokenId,
                 allRequests[index].payment
             );
@@ -212,27 +211,19 @@ contract MecenateBay is Ownable, FeedViewer {
     function _sismoVerify(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
-    ) internal view returns (bytes memory, uint256, uint256, bytes memory) {
+        address _from
+    ) internal view returns (bytes memory, uint256, uint256) {
         (
             bytes memory vaultId,
             uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
+            uint256 telegramId
         ) = IMecenateVerifier(verifierContract).sismoVerify(
                 sismoConnectResponse,
                 _to,
-                _nonce
+                _from
             );
 
-        (address to, bytes32 nonce) = abi.decode(
-            signedMessage,
-            (address, bytes32)
-        );
-
-        require(_nonce == nonce, "Not Same Nonce");
-
-        return (vaultId, twitterId, telegramId, signedMessage);
+        return (vaultId, twitterId, telegramId);
     }
 
     function getRequests()
@@ -254,14 +245,13 @@ contract MecenateBay is Ownable, FeedViewer {
         uint256 index,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) public {
         (
             bytes memory vaultId,
             uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
-        ) = _sismoVerify(sismoConnectResponse, _to, _nonce);
+            uint256 telegramId
+        ) = _sismoVerify(sismoConnectResponse, _to, _from);
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 
@@ -279,8 +269,8 @@ contract MecenateBay is Ownable, FeedViewer {
         Structures.BayRequest memory requestToRemove = allRequests[index];
 
         //  send eth with data to the vaultctx
-        (bool _result, ) = msg.call{value: requestToRemove.payment}(
-            sismoConnectResponse
+        (bool _result, ) = payable(_to).call{value: requestToRemove.payment}(
+            ""
         );
 
         require(_result, "BAY:Vault call failed");
@@ -290,6 +280,7 @@ contract MecenateBay is Ownable, FeedViewer {
         if (index < lastIndex) {
             allRequests[index] = allRequests[lastIndex];
         }
+
         allRequests.pop();
 
         // Remove from allRequestsPrivate array
@@ -320,10 +311,6 @@ contract MecenateBay is Ownable, FeedViewer {
                 break;
             }
         }
-    }
-
-    function changeVault(address _vault) external onlyOwner {
-        vaultContract = _vault;
     }
 
     function changeVerifier(address _verifier) external onlyOwner {

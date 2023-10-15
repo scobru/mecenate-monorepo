@@ -34,7 +34,6 @@ contract MecenateVault is Ownable, ReentrancyGuard {
     }
 
     function depositETH(bytes32 encryptedVaultId) public payable nonReentrant {
-        // 1. Add the deposit to the correct deposit mapping
         ethDeposits[encryptedVaultId] += msg.value;
     }
 
@@ -62,27 +61,10 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         uint256 _amount,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) public nonReentrant {
-        (
-            bytes memory vaultId,
-            ,
-            ,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to,
-                _nonce
-            );
-
-        (address to, bytes32 nonce) = abi.decode(
-            signedMessage,
-            (address, bytes32)
-        );
-
-        require(to == _to, "Not Same Address");
-
-        require(nonce == _nonce, "Not Same Nonce");
+        (bytes memory vaultId, , ) = IMecenateVerifier(verifierContract)
+            .sismoVerify(sismoConnectResponse, _to, _from);
 
         bytes32 encryptedVaultId = keccak256(vaultId);
 
@@ -92,7 +74,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
 
         require(ethDeposits[encryptedVaultId] >= _amount, "Not enough balance");
 
-        (bool result, ) = payable(to).call{value: _amount}("");
+        (bool result, ) = payable(_to).call{value: _amount}("");
 
         ethDeposits[encryptedVaultId] -= _amount;
 
@@ -102,9 +84,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
     function withdrawWithSecret(
         string memory _secret,
         address _token,
-        bytes memory sismoConnectResponse,
-        address _to,
-        bytes32 _nonce
+        address _to
     ) public nonReentrant {
         bytes32 commitment = keccak256(abi.encodePacked(_secret));
         uint256 amount;
@@ -129,27 +109,10 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         uint256 _amount,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) public nonReentrant {
-        (
-            bytes memory vaultId,
-            ,
-            ,
-            bytes memory signedMessage
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to,
-                _nonce
-            );
-
-        (address to, bytes32 nonce) = abi.decode(
-            signedMessage,
-            (address, bytes32)
-        );
-
-        require(to == _to, "Not Same Address");
-
-        require(nonce == _nonce, "Not Same Nonce");
+        (bytes memory vaultId, , ) = IMecenateVerifier(verifierContract)
+            .sismoVerify(sismoConnectResponse, _to, _from);
 
         // Check if the commitment exists
         // and the amount is greater than the deposit.
@@ -162,7 +125,7 @@ contract MecenateVault is Ownable, ReentrancyGuard {
         tokenDeposits[keccak256(vaultId)][_token] -= _amount;
 
         // Transfer the tokens to msg.sender or operator.
-        IERC20(_token).transfer(to, _amount);
+        IERC20(_token).transfer(_to, _amount);
     }
 
     function getEthDeposit(

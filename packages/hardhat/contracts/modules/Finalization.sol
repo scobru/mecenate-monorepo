@@ -4,10 +4,20 @@ import "./Staking.sol";
 
 abstract contract Finalization is Staking {
     function finalizePost(
+        bytes memory sismoConnectResponse,
+        address _to,
+        address _from,
         bool valid,
-        uint256 punishment,
-        bytes32 encryptedVaultId
+        uint256 punishment
     ) external virtual {
+        (bytes memory vaultId, , ) = _verifyNonce(
+            sismoConnectResponse,
+            _to,
+            _from
+        );
+
+        bytes32 encryptedVaultId = keccak256(vaultId);
+
         require(
             post.postdata.settings.status == Structures.PostStatus.Submitted,
             "NOT_SUBMITTED"

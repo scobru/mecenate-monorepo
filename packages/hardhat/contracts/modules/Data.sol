@@ -20,10 +20,13 @@ contract Data {
     bytes32 public owner;
 
     Structures.Post public post;
+
     Structures.PostSettingPrivate internal postSettingPrivate;
+
     Structures.FeedSettings internal settings;
 
     mapping(uint8 => uint256) internal postDurationToDays;
+
     mapping(uint8 => bool) internal validStatuses;
 
     constructor(
@@ -66,48 +69,37 @@ contract Data {
     function _verifyNonce(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
-    ) internal view returns (bytes memory, uint256, uint256, bytes memory) {
+        address _from
+    ) internal view returns (bytes memory, uint256, uint256) {
         (
             bytes memory vaultId,
             uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
+            uint256 telegramId
         ) = IMecenateVerifier(settings.verifierContract).sismoVerify(
                 sismoConnectResponse,
                 _to,
-                _nonce
+                _from
             );
 
-        (address to, bytes32 nonce) = abi.decode(
-            signedMessage,
-            (address, bytes32)
-        );
-
-        require(_nonce == nonce, "WRONG_NONCE");
-
-        require(to == _to, "WRONG_ADDRESS");
-
-        return (vaultId, twitterId, telegramId, signedMessage);
+        return (vaultId, twitterId, telegramId);
     }
 
     function sismoVerify(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
-    ) internal view returns (bytes memory, uint256, uint256, bytes memory) {
+        address _from
+    ) internal view returns (bytes memory, uint256, uint256) {
         (
             bytes memory vaultId,
             uint256 twitterId,
-            uint256 telegramId,
-            bytes memory signedMessage
+            uint256 telegramId
         ) = IMecenateVerifier(settings.verifierContract).sismoVerify(
                 sismoConnectResponse,
                 _to,
-                _nonce
+                _from
             );
 
-        return (vaultId, twitterId, telegramId, signedMessage);
+        return (vaultId, twitterId, telegramId);
     }
 
     function getStatus() external view returns (Structures.PostStatus) {

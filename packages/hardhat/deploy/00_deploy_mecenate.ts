@@ -165,7 +165,7 @@ const deployYourContract: DeployFunction = async function (
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
 
-    args: [users.address, verifier.address, vault.address],
+    args: [users.address, verifier.address],
     log: true,
 
     autoMine: true,

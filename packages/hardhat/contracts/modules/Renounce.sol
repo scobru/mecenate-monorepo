@@ -15,22 +15,25 @@ abstract contract Renounce is Staking {
     function renouncePost(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external {
         // Validate the post status
         Structures.PostStatus currentStatus = post.postdata.settings.status;
+
         require(validStatuses[uint8(currentStatus)], "INVALID_STATUS");
 
         // Verify the nonce and get the vault ID
-        (bytes memory vaultId, , , ) = _verifyNonce(
+        (bytes memory vaultId, , ) = _verifyNonce(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
+
         bytes32 encryptedVaultId = keccak256(vaultId);
 
         // Confirm that the caller is the seller
         bytes32 sellerVaultId = keccak256(postSettingPrivate.vaultIdSeller);
+
         require(encryptedVaultId == sellerVaultId, "NOT_SELLER");
 
         // Reset post and post settings
@@ -60,10 +63,15 @@ abstract contract Renounce is Staking {
         );
 
         postSettingPrivate.vaultIdBuyer = ZEROHASH;
+
         postSettingPrivate.buyerTwitterId = 0;
+
         postSettingPrivate.buyerTelegramId = 0;
+
         postSettingPrivate.vaultIdSeller = ZEROHASH;
+
         postSettingPrivate.sellerTwitterId = 0;
+
         postSettingPrivate.sellerTelegramId = 0;
 
         // Emit event

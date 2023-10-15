@@ -16,9 +16,9 @@
           "type": "address"
         },
         {
-          "internalType": "bytes32",
-          "name": "_nonce",
-          "type": "bytes32"
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
         }
       ],
       "name": "sismoVerify",
@@ -37,11 +37,6 @@
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "",
-          "type": "bytes"
         }
       ],
       "stateMutability": "view",

@@ -12,7 +12,7 @@ abstract contract Acceptance is Events, Staking {
     function acceptPost(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce,
+        address _from,
         Structures.Tokens tokenId,
         uint256 _paymentAmount
     ) external payable virtual {
@@ -26,27 +26,30 @@ abstract contract Acceptance is Events, Staking {
         uint256 amountToAdd = tokenId == Structures.Tokens.NaN
             ? msg.value
             : _paymentAmount;
+
         bytes32 sellerVaultIdHash = keccak256(postSettingPrivate.vaultIdSeller);
 
         // Get encryptedVaultId only once
         (
             bytes memory vaultId,
             uint256 twitterId,
-            uint256 telegramId,
+            uint256 telegramId
+        ) = _verifyNonce(sismoConnectResponse, _to, _from);
 
-        ) = _verifyNonce(sismoConnectResponse, _to, _nonce);
         bytes32 encryptedVaultId = keccak256(vaultId);
 
         // Use local variable for repeated calls
         uint256 sellerStake = Deposit._getDeposit(tokenId, sellerVaultIdHash);
 
         require(sellerStake >= post.postdata.escrow.stake, "STAKE_INCORRECT");
+
         require(
             IMecenateUsers(settings.usersModuleContract).checkifUserExist(
                 encryptedVaultId
             ),
             "USERT_NOT_EXIST"
         );
+
         require(encryptedVaultId != sellerVaultIdHash, "YOU_ARE_THE_SELLER");
 
         if (post.postdata.escrow.payment > 0) {
@@ -68,12 +71,16 @@ abstract contract Acceptance is Events, Staking {
 
         // Update all at once
         post.postdata.escrow.payment = payment;
+
         post.postdata.settings.status = Structures.PostStatus.Accepted;
+
         _changeStatus(Structures.PostStatus.Accepted);
 
         // Update private settings
         postSettingPrivate.vaultIdBuyer = vaultId;
+
         postSettingPrivate.buyerTwitterId = twitterId;
+
         postSettingPrivate.buyerTelegramId = telegramId;
 
         emit Accepted(post);

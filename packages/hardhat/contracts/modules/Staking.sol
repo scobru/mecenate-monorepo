@@ -206,17 +206,18 @@ abstract contract Staking is Events, Deposit, TokenManager {
         uint256 amountToTake,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external returns (uint256) {
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
 
         bytes32 encryptedVaultId = _commonTakeStake(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
 
         uint256 currentDeposit = Deposit._getDeposit(tokenId, encryptedVaultId);
+
         require(currentDeposit >= amountToTake, "NOT_ENOUGH_STAKE");
 
         uint256 newBalance = _takeStake(
@@ -239,14 +240,14 @@ abstract contract Staking is Events, Deposit, TokenManager {
         Structures.Tokens tokenId,
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) external returns (uint256) {
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
 
         bytes32 encryptedVaultId = _commonTakeStake(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
 
         uint256 newBalance = _takeFullStake(tokenId, _to, encryptedVaultId);
@@ -283,12 +284,12 @@ abstract contract Staking is Events, Deposit, TokenManager {
     function _commonTakeStake(
         bytes memory sismoConnectResponse,
         address _to,
-        bytes32 _nonce
+        address _from
     ) internal view returns (bytes32) {
-        (bytes memory vaultId, , , ) = _verifyNonce(
+        (bytes memory vaultId, , ) = _verifyNonce(
             sismoConnectResponse,
             _to,
-            _nonce
+            _from
         );
         bytes32 encryptedVaultId = keccak256(vaultId);
 
