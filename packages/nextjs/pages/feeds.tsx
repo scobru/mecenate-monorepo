@@ -6,6 +6,13 @@ import { ContractInterface, Signer, Wallet, ethers } from "ethers";
 import { AbiCoder, formatEther, keccak256 } from "ethers/lib/utils.js";
 import Link from "next/link";
 import { useTransactor } from "~~/hooks/scaffold-eth";
+import { SismoPK } from "@scobru/sismo-aa";
+
+type TxCallT = {
+  to: string; // address in Solidity is represented as a string in ethers.js/TypeScript
+  value: string | number | bigint; // uint256 can be represented as string, number, or bigint
+  data: Uint8Array; // bytes can be represented as a Uint8Array
+};
 
 const Feeds: NextPage = () => {
   const provider = useProvider();
@@ -19,15 +26,17 @@ const Feeds: NextPage = () => {
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
   const [sismoData, setSismoData] = React.useState<any>(null);
+  const [sismoData2, setSismoData2] = React.useState<any>(null);
   const [verified, setVerified] = React.useState<any>(null);
   const [sismoResponse, setSismoResponse] = React.useState<any>(null);
+  const [sismoResponse2, setSismoResponse2] = React.useState<any>(null);
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
-  const [nonce, setNonce] = React.useState<number>(0);
+  const [nonce, setNonce] = React.useState<string>("");
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
   const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
-  const [customSigner, setCustomSigner] = React.useState<Signer>(customWallet);
-  const txData = useTransactor(customSigner as Signer);
+  const [customSigner, setCustomSigner] = React.useState<Signer>();
+
+  const txData = useTransactor(customSigner);
 
   type Feed = {
     operator: string;
@@ -67,7 +76,7 @@ const Feeds: NextPage = () => {
   const factoryCtx = useContract({
     address: deployedContractFactory?.address,
     abi: factoryAbi,
-    signerOrProvider: (customSigner as Signer) || provider,
+    signerOrProvider: customSigner,
   });
 
   let vaultAddress!: string;
@@ -76,12 +85,6 @@ const Feeds: NextPage = () => {
   if (deployedContractVault) {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
   }
-
-  const vaultCtx = useContract({
-    address: vaultAddress,
-    abi: vaultAbi,
-    signerOrProvider: customWallet,
-  });
 
   const getFeeds = useCallback(async () => {
     if (!factoryCtx || !sismoData) return;
@@ -109,9 +112,10 @@ const Feeds: NextPage = () => {
       const storedData = localStorage.getItem("sismoData");
       const storedVerified = localStorage.getItem("verified");
       const storedSismoResponse = localStorage.getItem("sismoResponse");
+
       const nonce = localStorage.getItem("nonce");
       const withdrawalAddress = localStorage.getItem("withdrawalAddress");
-      const customSigner = localStorage.getItem("customSigner");
+      const _customSigner = localStorage.getItem("customSigner");
       const pk = localStorage.getItem("pk");
 
       if (storedData && storedVerified && storedSismoResponse) {
@@ -120,30 +124,24 @@ const Feeds: NextPage = () => {
         setSismoResponse(storedSismoResponse);
         setNonce(String(nonce));
         setWithdrawalAddress(withdrawalAddress as string);
-        const newWallet = new ethers.Wallet(String(pk), provider);
-        setCustomSigner(newWallet);
+        const newWallet = new ethers.Wallet(localStorage.getItem("pk"), customProvider);
+        setCustomSigner(newWallet as Wallet);
       } else {
         console.warn("Stored ethWallet or its privateKey is undefined.");
       }
     }
   }, [onlyYourFeeds]);
 
+  useEffect(() => {
+    const newWallet = new ethers.Wallet(localStorage.getItem("pk"), customProvider);
+
+    setCustomSigner(newWallet as Wallet);
+  }, []);
+
   const buildFeed = async () => {
-    if (!factoryCtx || !treasuryCtx || !txData || !vaultCtx || !sismoData) return;
-    //factoryCtx?.connect(customSigner as Signer);
-
-    console.log(factoryCtx);
-
-    console.log("customSigner", customSigner as Signer);
-    console.log("customWallet", customWallet);
-    console.log("signer", signer);
+    if (!factoryCtx || !treasuryCtx || !txData || !sismoData) return;
     const fee = await treasuryCtx?.fixedFee();
-
-    txData(
-      factoryCtx?.buildFeed(sismoResponse, withdrawalAddress, nonce, {
-        value: fee,
-      }),
-    );
+    txData(factoryCtx?.buildFeed(sismoResponse, withdrawalAddress, nonce, { value: fee }));
   };
 
   const formattedFeeds = useMemo(() => {

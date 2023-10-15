@@ -25,8 +25,6 @@ contract MecenateBay is Ownable, FeedViewer {
 
     address public verifierContract;
 
-    address public vaultContract;
-
     address public museToken;
 
     address public daiToken;
@@ -52,11 +50,9 @@ contract MecenateBay is Ownable, FeedViewer {
     constructor(
         address _usersMouduleContract,
         address _verifierContract,
-        address _vaultContract
     ) {
         usersMouduleContract = _usersMouduleContract;
         verifierContract = _verifierContract;
-        vaultContract = _vaultContract;
     }
 
     function changeMuseToken(address _museToken) external onlyOwner {
@@ -283,7 +279,7 @@ contract MecenateBay is Ownable, FeedViewer {
         Structures.BayRequest memory requestToRemove = allRequests[index];
 
         //  send eth with data to the vaultctx
-        (bool _result, ) = vaultContract.call{value: requestToRemove.payment}(
+        (bool _result, ) = msg.call{value: requestToRemove.payment}(
             sismoConnectResponse
         );
 
