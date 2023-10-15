@@ -13,6 +13,7 @@ import { Address } from "~~/components/scaffold-eth";
 import { TokenAmount } from "@uniswap/sdk";
 import { SismoPK } from "@scobru/sismo-aa";
 import { notification } from "~~/utils/scaffold-eth";
+import { get } from "http";
 
 type TxCallT = {
   to: string; // address in Solidity is represented as a string in ethers.js/TypeScript
@@ -37,7 +38,7 @@ const Identity: NextPage = () => {
   const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
-  const txData = useTransactor(signer as Signer);
+
   const [userExists, setUserExists] = React.useState<boolean>(false);
   const [verified, setVerified] = React.useState<any>(null);
   const [userName, setUserName] = React.useState<any>(null);
@@ -49,6 +50,7 @@ const Identity: NextPage = () => {
   const [customSigner, setCustomSigner] = React.useState<any>(null);
   const customRelayer = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
   const sismoPK = new SismoPK(customRelayer as Signer, String(process.env.NEXT_PUBLIC_SISMO_APPID));
+  const txData = useTransactor(customSigner as Signer);
 
   let UsersAddress!: string;
   let UsersAbi: ContractInterface[] = [];
@@ -85,16 +87,10 @@ const Identity: NextPage = () => {
     0,
   );
 
-  const vaultCtx = useContract({
-    address: vaultAddress,
-    abi: vaultAbi,
-    signerOrProvider: provider,
-  });
-
   const usersCtx = useContract({
     address: UsersAddress,
     abi: UsersAbi,
-    signerOrProvider: provider || customRelayer,
+    signerOrProvider: customSigner,
   });
 
   const treasury = useContract({
@@ -106,6 +102,11 @@ const Identity: NextPage = () => {
   const generateNonce = useCallback(async () => {
     if (localStorage.getItem("nonce")) setNonce(localStorage.getItem("nonce"));
     if (localStorage.getItem("withdrawalAddress")) setWithdrawalAddress(localStorage.getItem("withdrawalAddress"));
+    if (localStorage.getItem("forwarderAddress")) {
+      setForwarderAddress(localStorage.getItem("forwarderAddress"));
+    } else {
+      setForwarderAddress(ethers.constants.AddressZero);
+    }
     if (localStorage.getItem("nonce") && localStorage.getItem("withdrawalAddress")) return;
 
     const nonce = keccak256(ethers.utils.randomBytes(32));
@@ -115,27 +116,12 @@ const Identity: NextPage = () => {
   }, []);
 
   const signIn = async () => {
-    const iface = new ethers.utils.Interface(deployedContractUser?.abi as any);
-    const txCall = iface.encodeFunctionData("registerUser", [
-      responseBytes,
-      String(localStorage.getItem("withdrawalAddress")),
-      String(localStorage.getItem("nonce")),
-      userName,
-    ]);
-
-    SismoPK.execute(
-      String(responseBytes2),
-      String(sismoData2?.auths[0]?.userId),
-      String(process.env.NEXT_PUBLIC_SISMO_APPID),
-      txCall as any,
-    );
-
     usersCtx?.connect(customSigner);
     txData(
       usersCtx?.registerUser(
         responseBytes,
         String(localStorage.getItem("withdrawalAddress")),
-        String(localStorage.getItem("nonce")),
+        String(localStorage.getItem("forwarderAddress")),
         userName,
       ),
     );
@@ -231,24 +217,25 @@ const Identity: NextPage = () => {
 
   const createNewPKP = async () => {
     console.log("Creating new PKP");
-    const newEncryptedPK = await sismoPK?.createPK(sismoData?.auths[0]?.userId, String(password));
-    const wallet = await sismoPK?.getPK(sismoData?.auths[0]?.userId, String(password));
+    const wallet = await sismoPK?.createPK(sismoData?.auths[0]?.userId, String(password));
+    const newWallet = await new Wallet(wallet?.privateKey, provider);
     notification.success("PKP Fetched");
-    setForwarderAddress(String(wallet.address));
-    setCustomSigner(wallet);
+    setForwarderAddress(String(newWallet?.address));
+    setCustomSigner(newWallet);
+    localStorage.setItem("forwarderAddress", String(newWallet.address));
+    localStorage.setItem("pk", String(newWallet.privateKey));
+    localStorage.setItem("customSigner", JSON.stringify(newWallet));
   };
 
   const getForwarder = async () => {
-    if (sismoPK && sismoData && !forwarderAddress && password) {
+    if (sismoPK && sismoData) {
       const wallet = await sismoPK.getPK(sismoData?.auths[0]?.userId, password);
-      console.log(wallet);
-      if (await wallet) {
-        setForwarderAddress(await wallet.address);
-        setCustomSigner((await wallet) as Wallet);
-        localStorage.setItem("forwarderAddress", await wallet.address);
-        localStorage.setItem("pk", await wallet.privateKey);
-        localStorage.setItem("customSigner", JSON.stringify(await wallet));
-      }
+      const newWallet = new Wallet(wallet?.privateKey, provider);
+      setForwarderAddress(newWallet.address);
+      setCustomSigner(newWallet as Wallet);
+      localStorage.setItem("forwarderAddress", await newWallet.address);
+      localStorage.setItem("pk", wallet.privateKey);
+      localStorage.setItem("customSigner", JSON.stringify(newWallet));
     }
   };
 
@@ -291,9 +278,25 @@ const Identity: NextPage = () => {
   });
 
   const signMessage = () => {
-    if (!withdrawalAddress || !nonce) return;
-    const result = ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [String(withdrawalAddress), nonce]);
+    if (!withdrawalAddress) return;
+
+    const result = ethers.utils.defaultAbiCoder.encode(
+      ["address", "address"],
+      [String(withdrawalAddress), String(ethers.constants.AddressZero)],
+    );
+
+    localStorage.setItem("forwarderAddress", ethers.constants.AddressZero as any);
     return result;
+  };
+
+  const signMessage2 = () => {
+    if (!withdrawalAddress && !forwarderAddress) return;
+    if (forwarderAddress) {
+      const result = ethers.utils.defaultAbiCoder.encode(["address", "address"], [withdrawalAddress, forwarderAddress]);
+      localStorage.setItem("forwarderAddress", forwarderAddress as any);
+
+      return result;
+    }
   };
 
   return (
@@ -324,7 +327,9 @@ const Identity: NextPage = () => {
                     config={CONFIG}
                     auths={AUTHS}
                     signature={{
-                      message: String(signMessage()),
+                      message: String(
+                        forwarderAddress == ethers.constants.AddressZero ? signMessage() : signMessage2(),
+                      ),
                     }}
                     disabled={withdrawalAddress !== "" ? false : true}
                     text="Join With Sismo"
@@ -333,7 +338,6 @@ const Identity: NextPage = () => {
 
                       setSismoConnectResponse(response);
                       setPageState("verifying");
-                      getForwarder();
                       try {
                         const verifiedResult = await fetch("/api/verify", {
                           method: "POST",
@@ -343,7 +347,7 @@ const Identity: NextPage = () => {
                           body: JSON.stringify({
                             ...response,
                             address: localStorage.getItem("withdrawalAddress"),
-                            nonce: localStorage.getItem("nonce"),
+                            address2: localStorage.getItem("forwarderAddress"),
                           }),
                         });
                         const data = await verifiedResult.json();
@@ -366,6 +370,7 @@ const Identity: NextPage = () => {
                     onResponseBytes={async (responseBytes: string) => {
                       setResponseBytes(responseBytes);
                       localStorage.setItem("sismoResponse", responseBytes);
+                      getForwarder();
                     }}
                   />
                 </div>
@@ -427,7 +432,7 @@ const Identity: NextPage = () => {
                                 </button>
                               </div>
                               <div className="card  card-shadow ">
-                                <div className="font-semibold text-xl">Deposit</div>
+                                <div className="font-semibold text-xl">Create Wallet</div>
                                 <div className=" text-base">Select a safe password to encrypt your address</div>
                                 <div>
                                   <input
@@ -438,13 +443,11 @@ const Identity: NextPage = () => {
                                       localStorage.setItem("password", e.target.value);
                                       setPassword(e.target.value);
                                     }}
-                                    disabled={localStorage.getItem("password") != "" ? true : false}
                                   />
                                   <input
                                     type="password"
                                     className="input input-bordered my-5 w-full"
                                     placeholder="Verify Password"
-                                    disabled={password != "" ? true : false}
                                     onChange={async e => {
                                       setCheckPassword(e.target.value);
                                     }}
@@ -470,7 +473,58 @@ const Identity: NextPage = () => {
                                       <div>
                                         {" "}
                                         {forwarderAddress ? (
-                                          <Address address={forwarderAddress} format="long" />
+                                          <div>
+                                            <Address address={forwarderAddress} format="long" />
+                                            <div className="text-center my-10">
+                                              <SismoConnectButton
+                                                config={CONFIG}
+                                                auths={AUTHS}
+                                                signature={{
+                                                  message: String(signMessage2()),
+                                                }}
+                                                disabled={withdrawalAddress !== "" ? false : true}
+                                                text="Register Forwarder"
+                                                onResponse={async (response: SismoConnectResponse) => {
+                                                  console.log("Verify 1");
+
+                                                  setSismoConnectResponse(response);
+                                                  getForwarder();
+                                                  try {
+                                                    const verifiedResult = await fetch("/api/verify", {
+                                                      method: "POST",
+                                                      headers: {
+                                                        "Content-Type": "application/json",
+                                                      },
+                                                      body: JSON.stringify({
+                                                        ...response,
+                                                        address: localStorage.getItem("withdrawalAddress"),
+                                                        address2: localStorage.getItem("forwarderAddress"),
+                                                      }),
+                                                    });
+                                                    const data = await verifiedResult.json();
+
+                                                    if (verifiedResult.ok) {
+                                                      setSismoConnectVerifiedResult(data);
+                                                      localStorage.setItem("verified", "verified");
+                                                      localStorage.setItem("sismoData", JSON.stringify(await data));
+                                                      setPageState("verified");
+                                                    } else {
+                                                      setPageState("error");
+                                                      setError(data.error.toString()); // or JSON.stringify(data.error)
+                                                    }
+                                                  } catch (error) {
+                                                    console.error("Error:", error);
+                                                    setPageState("error");
+                                                    setError(error as any);
+                                                  }
+                                                }}
+                                                onResponseBytes={async (responseBytes: string) => {
+                                                  setResponseBytes(responseBytes);
+                                                  localStorage.setItem("sismoResponse", responseBytes);
+                                                }}
+                                              />
+                                            </div>
+                                          </div>
                                         ) : (
                                           <div className="center">
                                             <Spinner />

@@ -39,10 +39,13 @@ export default async function verify(
 
   // Retrieve withdrawalAddress from request body
   const withdrawalAddress = req.body.address;
-  const nonce = req.body.nonce;
+  const forwarderAddress = req.body.address2;
 
   const signMessage = () => {
-    return ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [String(withdrawalAddress), String(nonce)]);
+    return ethers.utils.defaultAbiCoder.encode(
+      ["address", "address"],
+      [String(withdrawalAddress), String(forwarderAddress)],
+    );
   };
 
   console.log("Received POST request.");
