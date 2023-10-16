@@ -69,12 +69,12 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_native",
+          "name": "nativeAddr",
           "type": "address"
         },
         {
           "internalType": "contract ISwapRouter",
-          "name": "_swapRouter",
+          "name": "swapRouterAddr",
           "type": "address"
         }
       ],
@@ -87,12 +87,12 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_token",
+          "name": "token",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "_amount",
+          "name": "amount",
           "type": "uint256"
         }
       ],
