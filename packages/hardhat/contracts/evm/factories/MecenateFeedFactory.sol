@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
-import "../interfaces/IMecenateVerifier.sol";
 import "../modules/FeedViewer.sol";
 
 contract MecenateFeedFactory is Ownable, FeedViewer {
@@ -26,14 +25,9 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     bool public burnEnabled = false;
 
-    constructor(
-        address _usersModuleContract,
-        address _treasuryContract,
-        address _verifierContract
-    ) {
+    constructor(address _usersModuleContract, address _treasuryContract) {
         settings.usersModuleContract = _usersModuleContract;
         settings.treasuryContract = _treasuryContract;
-        settings.verifierContract = _verifierContract;
     }
 
     function changeVersion(string memory _version) external onlyOwner {
@@ -42,10 +36,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     function treasuryContract() external view returns (address) {
         return settings.treasuryContract;
-    }
-
-    function identityContract() external view returns (address) {
-        return settings.verifierContract;
     }
 
     function daiToken() external view returns (address) {
@@ -106,7 +96,6 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         bytes memory constructorArguments = abi.encode(
             msg.sender,
             settings.usersModuleContract,
-            settings.verifierContract,
             address(this),
             version
         );
@@ -153,7 +142,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         address feed = addr;
 
         feeds.add(address(feed));
-        feedStore[encryptedVaultId].add(address(feed));
+        feedStore[msg.sender].add(address(feed));
         createdContracts[address(feed)] = true;
 
         emit FeedCreated(address(feed));
@@ -166,13 +155,13 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     }
 
     function getFeedsOwned(
-        bytes32 vaultId
+        address vaultId
     ) external view returns (address[] memory) {
         return feedStore[vaultId].values();
     }
 
     function getFeedsInfoOwned(
-        bytes32 vaultId
+        address vaultId
     ) external view returns (Structures.Feed[] memory) {
         return _getFeedsInfo(feedStore[vaultId].values());
     }

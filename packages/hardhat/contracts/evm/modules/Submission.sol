@@ -9,7 +9,7 @@ import "./Events.sol";
 
 abstract contract Submission is Events {
     function submitHash(bytes memory encryptedKey) external virtual {
-        require(msg.sender == postPrivateSetings.vaultIdSeller, "NOT_SELLER");
+        require(msg.sender == postSettingPrivate.sellerAddress, "NOT_SELLER");
 
         Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(
@@ -21,16 +21,16 @@ abstract contract Submission is Events {
 
         require(
             IMecenateUsers(settings.usersModuleContract).checkifUserExist(
-                encryptedVaultId
+                msg.sender
             ),
             "User does not exist"
         );
 
-        require(post.creator.vaultId == encryptedVaultId, "NOT_SELLER");
+        require(post.creator.evmAddress == msg.sender, "NOT_SELLER");
 
         _changeStatus(Structures.PostStatus.Submitted);
 
-        settings.encodedSymKey = post.postdata.data.encryptedKey = encryptedKey;
+        post.postdata.data.encryptedKey = encryptedKey;
         post.postdata.settings.status = Structures.PostStatus.Submitted;
         post.postdata.settings.endTimeStamp =
             block.timestamp +
@@ -54,17 +54,11 @@ abstract contract Submission is Events {
             "INVALID_STATUS"
         );
 
-        (bytes memory vaultId, , ) = _verifyNonce(
-            sismoConnectResponse,
-            _to,
-            _from
-        );
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
         require(
-            encryptedVaultId != keccak256(postSettingPrivate.vaultIdSeller),
+            msg.sender != postSettingPrivate.sellerAddress,
             "YOU_ARE_THE_SELLER"
         );
+
         require(
             currentStatus == Structures.PostStatus.Finalized,
             "NOT_FINALIZED"

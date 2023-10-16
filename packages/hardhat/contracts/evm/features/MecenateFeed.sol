@@ -13,11 +13,9 @@ import "../modules/Acceptance.sol";
 import "../modules/Submission.sol";
 import "../modules/Finalization.sol";
 import "../modules/Renounce.sol";
-import "../modules/Message.sol";
 
 contract MecenateFeed is
     Events,
-    Message,
     Creation,
     Acceptance,
     Renounce,
@@ -25,19 +23,11 @@ contract MecenateFeed is
     Finalization
 {
     constructor(
-        bytes32 _owner,
+        address _owner,
         address _usersModuleContract,
-        address _verifierContract,
         address _factoryContract,
         string memory _version
-    )
-        Data(
-            _usersModuleContract,
-            _verifierContract,
-            _factoryContract,
-            _version
-        )
-    {
+    ) Data(_usersModuleContract, _factoryContract, _version) {
         owner = _owner;
     }
 }

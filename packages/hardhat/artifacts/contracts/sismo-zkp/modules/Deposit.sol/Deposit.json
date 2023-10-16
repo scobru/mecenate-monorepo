@@ -1,0 +1,73 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Deposit",
+  "sourceName": "contracts/sismo-zkp/modules/Deposit.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenID",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "user",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newDeposit",
+          "type": "uint256"
+        }
+      ],
+      "name": "DepositDecreased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenID",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "user",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newDeposit",
+          "type": "uint256"
+        }
+      ],
+      "name": "DepositIncreased",
+      "type": "event"
+    }
+  ],
+  "bytecode": "0x60808060405234601357603a908160198239f35b600080fdfe600080fdfea26469706673582212208716313d732207b04ed7cbe5b2cc11cd028602aa11997482b70c30ecdfbb2f1d64736f6c63430008130033",
+  "deployedBytecode": "0x600080fdfea26469706673582212208716313d732207b04ed7cbe5b2cc11cd028602aa11997482b70c30ecdfbb2f1d64736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

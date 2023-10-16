@@ -13,7 +13,7 @@ import "./Staking.sol";
 
 abstract contract Renounce is Staking {
     function renouncePost() external {
-        require(msg.sender == postPrivateSetings.sellerAddress, "NOT_SELLER");
+        require(msg.sender == postSettingPrivate.sellerAddress, "NOT_SELLER");
 
         // Validate the post status
         Structures.PostStatus currentStatus = post.postdata.settings.status;
@@ -22,7 +22,11 @@ abstract contract Renounce is Staking {
 
         // Reset post and post settings
         post = Structures.Post(
-            Structures.User({vaultId: bytes32(0)}),
+            Structures.User({
+                evmAddress: address(0),
+                sismoVaultId: ZEROHASH,
+                publicKey: ZEROHASH
+            }),
             Structures.PostData({
                 settings: Structures.PostSettings({
                     status: Structures.PostStatus.Renounced,

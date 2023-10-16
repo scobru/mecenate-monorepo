@@ -12,9 +12,9 @@ import "./Events.sol";
 abstract contract Staking is Events, Deposit, TokenManager {
     using SafeMath for uint256;
 
-    event StakeBurned(bytes32 staker, uint256 amount);
-    event StakeTaken(bytes32 staker, uint256 amount, Structures.Tokens tokenId);
-    event StakeAdded(bytes32 staker, uint256 amount, Structures.Tokens tokenId);
+    event StakeBurned(address staker, uint256 amount);
+    event StakeTaken(address staker, uint256 amount, Structures.Tokens tokenId);
+    event StakeAdded(address staker, uint256 amount, Structures.Tokens tokenId);
 
     function _addStake(
         Structures.Tokens tokenId,
@@ -44,7 +44,9 @@ abstract contract Staking is Events, Deposit, TokenManager {
 
     function _takeStake(
         Structures.Tokens tokenId,
+        address staker,
         address receiver,
+        uint256 amountToTake
     ) internal returns (uint256 newStake) {
         // Memorizza lo status del post in una variabile per evitare accessi ridondanti allo storage
         Structures.PostStatus currentStatus = post.postdata.settings.status;
@@ -75,18 +77,23 @@ abstract contract Staking is Events, Deposit, TokenManager {
     function _takeFullStake(
         Structures.Tokens tokenId,
         address staker,
-        address receiver,
+        address receiver
     ) internal returns (uint256 amountTaken) {
         uint256 currentDeposit = Deposit._getDeposit(tokenId, staker);
 
-        uint256 newStake = _takeStake(tokenId, staker, receiver, currentDeposit);
+        uint256 newStake = _takeStake(
+            tokenId,
+            staker,
+            receiver,
+            currentDeposit
+        );
 
         return newStake;
     }
 
     function _burnStake(
         Structures.Tokens tokenId,
-        bytes32 staker,
+        address staker,
         uint256 amountToBurn
     ) internal returns (uint256 newStake) {
         uint256 newDeposit = Deposit._decreaseDeposit(
@@ -128,7 +135,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
 
     function _burnFullStake(
         Structures.Tokens tokenId,
-        bytes32 staker
+        address staker
     ) internal returns (uint256 amountBurned) {
         uint256 currentDeposit = Deposit._getDeposit(tokenId, staker);
 
@@ -139,7 +146,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
 
     function getStake(
         Structures.Tokens tokenId,
-        bytes32 staker
+        address staker
     ) external view returns (uint256 amount) {
         // get deposit
         amount = Deposit._getDeposit(tokenId, staker);
@@ -150,12 +157,12 @@ abstract contract Staking is Events, Deposit, TokenManager {
     function getTotalStaked() external view returns (uint256) {
         uint256 amountSeller = Deposit._getDeposit(
             post.postdata.settings.tokenId,
-            keccak256(postSettingPrivate.vaultIdSeller)
+            postSettingPrivate.sellerAddress
         );
 
         uint256 amountBuyer = Deposit._getDeposit(
             post.postdata.settings.tokenId,
-            keccak256(postSettingPrivate.vaultIdBuyer)
+            postSettingPrivate.buyerAddress
         );
 
         return (amountSeller + amountBuyer);
@@ -163,34 +170,34 @@ abstract contract Staking is Events, Deposit, TokenManager {
 
     function addStake(
         Structures.Tokens tokenId,
-        uint256 amountToAdd,
-        bytes32 encryptedVaultId
+        address _funder,
+        uint256 amountToAdd
     ) external payable returns (uint256) {
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
 
         // Check if the encryptedVaultId matches with either the buyer or the seller
         require(
-            encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer) ||
-                encryptedVaultId == keccak256(postSettingPrivate.vaultIdSeller),
-            "VAULTID_MISMATCH"
+            msg.sender == postSettingPrivate.buyerAddress ||
+                msg.sender == postSettingPrivate.sellerAddress,
+            "WRONG_MSGSENDER"
         );
 
         // Determine the amount to add based on the role (buyer or seller)
-        uint256 actualAmountToAdd = (encryptedVaultId ==
-            keccak256(postSettingPrivate.vaultIdSeller))
+        uint256 actualAmountToAdd = (msg.sender ==
+            postSettingPrivate.sellerAddress)
             ? msg.value
             : amountToAdd;
 
         // Update the stake
         uint256 newStake = _addStake(
             tokenId,
-            encryptedVaultId,
             msg.sender,
+            _funder,
             actualAmountToAdd
         );
 
         // Update the corresponding escrow value based on the role
-        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
+        if (msg.sender == postSettingPrivate.buyerAddress) {
             post.postdata.escrow.payment = newStake;
         } else {
             post.postdata.escrow.stake = newStake;
@@ -201,7 +208,8 @@ abstract contract Staking is Events, Deposit, TokenManager {
 
     function takeStake(
         Structures.Tokens tokenId,
-        address receiver
+        address receiver,
+        uint256 amountToTake
     ) external returns (uint256) {
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
 
@@ -216,7 +224,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
             amountToTake
         );
 
-        if (encryptedVaultId == keccak256(postSettingPrivate.vaultIdBuyer)) {
+        if (msg.sender == postSettingPrivate.buyerAddress) {
             post.postdata.escrow.payment = newBalance;
         } else {
             post.postdata.escrow.stake = newBalance;
@@ -232,12 +240,11 @@ abstract contract Staking is Events, Deposit, TokenManager {
     ) external returns (uint256) {
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
 
-       
         uint256 newBalance = _takeFullStake(tokenId, msg.sender, receiver);
 
         if (msg.sender == postSettingPrivate.buyerAddress) {
             post.postdata.escrow.payment = newBalance;
-        } else (msg.sender == postSettingPrivate.sellerAddress)) {
+        } else if (msg.sender == postSettingPrivate.sellerAddress) {
             post.postdata.escrow.stake = newBalance;
         }
 

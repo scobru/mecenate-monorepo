@@ -1,0 +1,1819 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ClaimRequestBuilder",
+  "sourceName": "contracts/sismo-zkp/helpers/utils/ClaimRequestBuilder.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "DEFAULT_CLAIM_REQUEST_EXTRA_DATA",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP",
+      "outputs": [
+        {
+          "internalType": "bytes16",
+          "name": "",
+          "type": "bytes16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_CLAIM_REQUEST_IS_OPTIONAL",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_CLAIM_REQUEST_TYPE",
+      "outputs": [
+        {
+          "internalType": "enum ClaimType",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_CLAIM_REQUEST_VALUE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bool",
+          "name": "isOptional",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "isOptional",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isOptional",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "isOptional",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "isOptional",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "isOptional",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isOptional",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum ClaimType",
+          "name": "claimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "isOptional",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bool",
+          "name": "isOptional",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "groupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "groupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461001657611109908161001c8239f35b600080fdfe60406080815260048036101561001457600080fd5b600091823560e01c80630d55ad2814610e38578063102f7b6014610de057806330c62a4a1461090757806335628e7114610d4c5780633880e36114610cac5780633a5dc55914610c195780633b0cb07314610b78578063409f789a14610b2b5780634d06bd8814610aa8578063644c52c814610a635780636658580a1461071e5780636b945f38146109fc578063749d6d85146109d85780637aadac0d1461096e57806380decbce1461092257806384a0e907146109075780638628695b146108ca57806397e653531461082c578063a820af1a146107dd578063b5a7fef51461073a578063bd240b861461071e578063c9062f3114610690578063d035c7ca146105fa578063d4e694f7146105c6578063d8b6eb2b14610531578063db9178d61461048b578063e379821c1461040a578063e3ec2c9914610346578063ec294078146102ad578063ee5decf2146102145763f744d6541461017557600080fd5b346102105760603660031901126102105761018e610ea2565b610196610ebe565b9260443567ffffffffffffffff811161020c5761020895916101ba91369101610f2b565b916101c3611093565b506101cc610ed5565b948286526001600160801b031980921660208701521683850152600160608501526080840152600160a084015260c08301525191829182610fce565b0390f35b8580fd5b8280fd5b5082346102aa5760603660031901126102aa5761022f610ea2565b9160243592831515809403610210576102089361024a611057565b90610253611093565b5061025c610f0b565b92858452610268610ed5565b9586526001600160801b0319166020860152651b185d195cdd60d21b84860152600160608601526080850152151560a084015260c08301525191829182610fce565b80fd5b5034610210576060366003190112610210576102c7610ea2565b9160443567ffffffffffffffff81116103425761020894916102eb91369101610f2b565b906102f4611093565b506102fd610ed5565b8181526001600160801b03199094166020850152651b185d195cdd60d21b8385015260243560608501526080840152600160a084015260c08301525191829182610fce565b8480fd5b508290346104065760e036600319011261040657610362610ea2565b9161036b610ebe565b9060643593600585101561040657610381611075565b9061038a611084565b9260c4359067ffffffffffffffff82116102aa5750610208976103af91369101610f2b565b936103b8611093565b506103cb6103c4610ed5565b97886110c7565b6001600160801b031991821660208801521684860152604435606086015215156080850152151560a084015260c08301525191829182610fce565b5080fd5b83823461040657602036600319011261040657906102089161042a610ea2565b91610433611093565b5061043c610f0b565b90808252610448610ed5565b938185526001600160801b0319166020850152651b185d195cdd60d21b83850152600160608501526080840152600160a084015260c08301525191829182610fce565b5034610210576080366003190112610210576104a5610ea2565b6044359260058410156103425760643567ffffffffffffffff811161020c5761020895916104d591369101610f2b565b916104de611093565b506104f16104ea610ed5565b95866110c7565b6001600160801b0319166020850152651b185d195cdd60d21b8385015260243560608501526080840152600160a084015260c08301525191829182610fce565b8382346104065760a0366003190112610406579061020891610551610ea2565b610559610ebe565b90610562611066565b61056a611075565b91610573611093565b5061057c610f0b565b93868552610588610ed5565b9687526001600160801b031991821660208801521684860152604435606086015215156080850152151560a084015260c08301525191829182610fce565b83823461040657816003193601126104065790610208916105e5610f0b565b91825251918291602083526020830190610f8e565b83823461040657608036600319011261040657610615610ea2565b9061061e610ebe565b606435926005841015610342579361020894610638611093565b50610641610f0b565b92828452610657610650610ed5565b96876110c7565b6001600160801b03199182166020870152168385015260443560608501526080840152600160a084015260c08301525191829182610fce565b838234610406576060366003190112610406576106ab610ea2565b906106b4610ebe565b6044359260058410156103425793610208946106ce611093565b506106d7610f0b565b928284526106e6610650610ed5565b6001600160801b031980921660208701521683850152600160608501526080840152600160a084015260c08301525191829182610fce565b8382346104065781600319360112610406576020905160018152f35b83823461040657608036600319011261040657610755610ea2565b906024359160058310156107d9579261020893610770611057565b610778611066565b91610781611093565b5061078a610f0b565b938452610798610650610ed5565b6001600160801b0319166020860152651b185d195cdd60d21b848601526001606086015215156080850152151560a084015260c08301525191829182610fce565b8380fd5b50346102105780600319360112610210576107f6610ea2565b9160243567ffffffffffffffff811161034257610208949161081a91369101610f2b565b90610823611093565b50610448610ed5565b503461021057606036600319011261021057610846610ea2565b6024359260058410156103425760443567ffffffffffffffff811161020c57610208959161087691369101610f2b565b9161087f611093565b5061088b6104ea610ed5565b6001600160801b0319166020850152651b185d195cdd60d21b83850152600160608501526080840152600160a084015260c08301525191829182610fce565b83823461040657806003193601126104065790610208916108e9610ea2565b916108f2611093565b506108fb610f0b565b908082526102fd610ed5565b83823461040657816003193601126104065751908152602090f35b83823461040657806003193601126104065761093c610ea2565b906024359160058310156107d95761020893610956611093565b5061095f610f0b565b9181835261088b6104ea610ed5565b508290346104065760a03660031901126104065761098a610ea2565b91610993610ebe565b906064359360058510156104065760843567ffffffffffffffff811161021057610208966109c391369101610f2b565b926109cc611093565b50610657610650610ed5565b83823461040657816003193601126104065751651b185d195cdd60d21b8152602090f35b5082346102aa5760c03660031901126102aa57610a17610ea2565b91610a20610ebe565b916064359260058410156104065761020894610a3a611075565b90610a43611084565b92610a4c611093565b50610a55610f0b565b9485526103cb6103c4610ed5565b8382346104065780600319360112610406579061020891610a82610ea2565b610a8a610ebe565b92610a93611093565b50610a9c610f0b565b918183526101cc610ed5565b838234610406576060366003190112610406579061020891610ac8610ea2565b610ad0610ebe565b92610ad9611093565b50610ae2610f0b565b91818352610aee610ed5565b8281526001600160801b0319918216602082015294168385015260443560608501526080840152600160a084015260c08301525191829182610fce565b83823461040657606036600319011261040657610b46610ea2565b906044359160058310156107d95761020893610b60611093565b50610b69610f0b565b918183526104f16104ea610ed5565b5082346102aa5760a03660031901126102aa57610b93610ea2565b91610b9c610ebe565b916044359260058410156104065761020894610bb6611066565b90610bbf611075565b92610bc8611093565b50610bd1610f0b565b948552610bdf6103c4610ed5565b6001600160801b0319918216602088015216848601526001606086015215156080850152151560a084015260c08301525191829182610fce565b838234610406576080366003190112610406579061020891610c39610ea2565b610c41611057565b610c49611066565b90610c52611093565b50610c5b610f0b565b92858452610c67610ed5565b9586526001600160801b0319166020860152651b185d195cdd60d21b84860152602435606086015215156080850152151560a084015260c08301525191829182610fce565b8382346104065760a036600319011261040657610cc7610ea2565b906044359160058310156107d9579261020893610ce2611066565b610cea611075565b91610cf3611093565b50610cfc610f0b565b938452610d0a610650610ed5565b6001600160801b0319166020860152651b185d195cdd60d21b84860152602435606086015215156080850152151560a084015260c08301525191829182610fce565b838234610406576080366003190112610406579061020891610d6c610ea2565b610d74610ebe565b90610d7d611057565b610d85611066565b91610d8e611093565b50610d97610f0b565b93868552610da3610ed5565b9687526001600160801b0319918216602088015216848601526001606086015215156080850152151560a084015260c08301525191829182610fce565b503461021057608036600319011261021057610dfa610ea2565b610e02610ebe565b9260643567ffffffffffffffff811161020c576102089591610e2691369101610f2b565b91610e2f611093565b50610aee610ed5565b5082903461040657608036600319011261040657610e54610ea2565b91610e5d610ebe565b906044359360058510156104065760643567ffffffffffffffff81116102105761020896610e8d91369101610f2b565b92610e96611093565b506106e6610650610ed5565b600435906001600160801b031982168203610eb957565b600080fd5b602435906001600160801b031982168203610eb957565b6040519060e0820182811067ffffffffffffffff821117610ef557604052565b634e487b7160e01b600052604160045260246000fd5b604051906020820182811067ffffffffffffffff821117610ef557604052565b81601f82011215610eb95780359067ffffffffffffffff92838311610ef55760405193601f8401601f19908116603f0116850190811185821017610ef55760405282845260208383010111610eb957816000926020809301838601378301015290565b919082519283825260005b848110610fba575050826000602080949584010152601f8019910116010190565b602081830181015184830182015201610f99565b6020815281519160058310156110415760c06101009161103e9460208501526001600160801b03198060208301511660408601526040820151166060850152606081015160808501526080810151151560a085015260a081015115158285015201519160e0808201520190610f8e565b90565b634e487b7160e01b600052602160045260246000fd5b604435908115158203610eb957565b606435908115158203610eb957565b608435908115158203610eb957565b60a435908115158203610eb957565b61109b610ed5565b90600080835280602084015280604084015280606084015280608084015260a0830152606060c0830152565b6005821015611041575256fea26469706673582212205810cf8da9a4f050a5e6ad04009201f59ab61510781940cfa3889a01a316f65964736f6c63430008130033",
+  "deployedBytecode": "0x60406080815260048036101561001457600080fd5b600091823560e01c80630d55ad2814610e38578063102f7b6014610de057806330c62a4a1461090757806335628e7114610d4c5780633880e36114610cac5780633a5dc55914610c195780633b0cb07314610b78578063409f789a14610b2b5780634d06bd8814610aa8578063644c52c814610a635780636658580a1461071e5780636b945f38146109fc578063749d6d85146109d85780637aadac0d1461096e57806380decbce1461092257806384a0e907146109075780638628695b146108ca57806397e653531461082c578063a820af1a146107dd578063b5a7fef51461073a578063bd240b861461071e578063c9062f3114610690578063d035c7ca146105fa578063d4e694f7146105c6578063d8b6eb2b14610531578063db9178d61461048b578063e379821c1461040a578063e3ec2c9914610346578063ec294078146102ad578063ee5decf2146102145763f744d6541461017557600080fd5b346102105760603660031901126102105761018e610ea2565b610196610ebe565b9260443567ffffffffffffffff811161020c5761020895916101ba91369101610f2b565b916101c3611093565b506101cc610ed5565b948286526001600160801b031980921660208701521683850152600160608501526080840152600160a084015260c08301525191829182610fce565b0390f35b8580fd5b8280fd5b5082346102aa5760603660031901126102aa5761022f610ea2565b9160243592831515809403610210576102089361024a611057565b90610253611093565b5061025c610f0b565b92858452610268610ed5565b9586526001600160801b0319166020860152651b185d195cdd60d21b84860152600160608601526080850152151560a084015260c08301525191829182610fce565b80fd5b5034610210576060366003190112610210576102c7610ea2565b9160443567ffffffffffffffff81116103425761020894916102eb91369101610f2b565b906102f4611093565b506102fd610ed5565b8181526001600160801b03199094166020850152651b185d195cdd60d21b8385015260243560608501526080840152600160a084015260c08301525191829182610fce565b8480fd5b508290346104065760e036600319011261040657610362610ea2565b9161036b610ebe565b9060643593600585101561040657610381611075565b9061038a611084565b9260c4359067ffffffffffffffff82116102aa5750610208976103af91369101610f2b565b936103b8611093565b506103cb6103c4610ed5565b97886110c7565b6001600160801b031991821660208801521684860152604435606086015215156080850152151560a084015260c08301525191829182610fce565b5080fd5b83823461040657602036600319011261040657906102089161042a610ea2565b91610433611093565b5061043c610f0b565b90808252610448610ed5565b938185526001600160801b0319166020850152651b185d195cdd60d21b83850152600160608501526080840152600160a084015260c08301525191829182610fce565b5034610210576080366003190112610210576104a5610ea2565b6044359260058410156103425760643567ffffffffffffffff811161020c5761020895916104d591369101610f2b565b916104de611093565b506104f16104ea610ed5565b95866110c7565b6001600160801b0319166020850152651b185d195cdd60d21b8385015260243560608501526080840152600160a084015260c08301525191829182610fce565b8382346104065760a0366003190112610406579061020891610551610ea2565b610559610ebe565b90610562611066565b61056a611075565b91610573611093565b5061057c610f0b565b93868552610588610ed5565b9687526001600160801b031991821660208801521684860152604435606086015215156080850152151560a084015260c08301525191829182610fce565b83823461040657816003193601126104065790610208916105e5610f0b565b91825251918291602083526020830190610f8e565b83823461040657608036600319011261040657610615610ea2565b9061061e610ebe565b606435926005841015610342579361020894610638611093565b50610641610f0b565b92828452610657610650610ed5565b96876110c7565b6001600160801b03199182166020870152168385015260443560608501526080840152600160a084015260c08301525191829182610fce565b838234610406576060366003190112610406576106ab610ea2565b906106b4610ebe565b6044359260058410156103425793610208946106ce611093565b506106d7610f0b565b928284526106e6610650610ed5565b6001600160801b031980921660208701521683850152600160608501526080840152600160a084015260c08301525191829182610fce565b8382346104065781600319360112610406576020905160018152f35b83823461040657608036600319011261040657610755610ea2565b906024359160058310156107d9579261020893610770611057565b610778611066565b91610781611093565b5061078a610f0b565b938452610798610650610ed5565b6001600160801b0319166020860152651b185d195cdd60d21b848601526001606086015215156080850152151560a084015260c08301525191829182610fce565b8380fd5b50346102105780600319360112610210576107f6610ea2565b9160243567ffffffffffffffff811161034257610208949161081a91369101610f2b565b90610823611093565b50610448610ed5565b503461021057606036600319011261021057610846610ea2565b6024359260058410156103425760443567ffffffffffffffff811161020c57610208959161087691369101610f2b565b9161087f611093565b5061088b6104ea610ed5565b6001600160801b0319166020850152651b185d195cdd60d21b83850152600160608501526080840152600160a084015260c08301525191829182610fce565b83823461040657806003193601126104065790610208916108e9610ea2565b916108f2611093565b506108fb610f0b565b908082526102fd610ed5565b83823461040657816003193601126104065751908152602090f35b83823461040657806003193601126104065761093c610ea2565b906024359160058310156107d95761020893610956611093565b5061095f610f0b565b9181835261088b6104ea610ed5565b508290346104065760a03660031901126104065761098a610ea2565b91610993610ebe565b906064359360058510156104065760843567ffffffffffffffff811161021057610208966109c391369101610f2b565b926109cc611093565b50610657610650610ed5565b83823461040657816003193601126104065751651b185d195cdd60d21b8152602090f35b5082346102aa5760c03660031901126102aa57610a17610ea2565b91610a20610ebe565b916064359260058410156104065761020894610a3a611075565b90610a43611084565b92610a4c611093565b50610a55610f0b565b9485526103cb6103c4610ed5565b8382346104065780600319360112610406579061020891610a82610ea2565b610a8a610ebe565b92610a93611093565b50610a9c610f0b565b918183526101cc610ed5565b838234610406576060366003190112610406579061020891610ac8610ea2565b610ad0610ebe565b92610ad9611093565b50610ae2610f0b565b91818352610aee610ed5565b8281526001600160801b0319918216602082015294168385015260443560608501526080840152600160a084015260c08301525191829182610fce565b83823461040657606036600319011261040657610b46610ea2565b906044359160058310156107d95761020893610b60611093565b50610b69610f0b565b918183526104f16104ea610ed5565b5082346102aa5760a03660031901126102aa57610b93610ea2565b91610b9c610ebe565b916044359260058410156104065761020894610bb6611066565b90610bbf611075565b92610bc8611093565b50610bd1610f0b565b948552610bdf6103c4610ed5565b6001600160801b0319918216602088015216848601526001606086015215156080850152151560a084015260c08301525191829182610fce565b838234610406576080366003190112610406579061020891610c39610ea2565b610c41611057565b610c49611066565b90610c52611093565b50610c5b610f0b565b92858452610c67610ed5565b9586526001600160801b0319166020860152651b185d195cdd60d21b84860152602435606086015215156080850152151560a084015260c08301525191829182610fce565b8382346104065760a036600319011261040657610cc7610ea2565b906044359160058310156107d9579261020893610ce2611066565b610cea611075565b91610cf3611093565b50610cfc610f0b565b938452610d0a610650610ed5565b6001600160801b0319166020860152651b185d195cdd60d21b84860152602435606086015215156080850152151560a084015260c08301525191829182610fce565b838234610406576080366003190112610406579061020891610d6c610ea2565b610d74610ebe565b90610d7d611057565b610d85611066565b91610d8e611093565b50610d97610f0b565b93868552610da3610ed5565b9687526001600160801b0319918216602088015216848601526001606086015215156080850152151560a084015260c08301525191829182610fce565b503461021057608036600319011261021057610dfa610ea2565b610e02610ebe565b9260643567ffffffffffffffff811161020c576102089591610e2691369101610f2b565b91610e2f611093565b50610aee610ed5565b5082903461040657608036600319011261040657610e54610ea2565b91610e5d610ebe565b906044359360058510156104065760643567ffffffffffffffff81116102105761020896610e8d91369101610f2b565b92610e96611093565b506106e6610650610ed5565b600435906001600160801b031982168203610eb957565b600080fd5b602435906001600160801b031982168203610eb957565b6040519060e0820182811067ffffffffffffffff821117610ef557604052565b634e487b7160e01b600052604160045260246000fd5b604051906020820182811067ffffffffffffffff821117610ef557604052565b81601f82011215610eb95780359067ffffffffffffffff92838311610ef55760405193601f8401601f19908116603f0116850190811185821017610ef55760405282845260208383010111610eb957816000926020809301838601378301015290565b919082519283825260005b848110610fba575050826000602080949584010152601f8019910116010190565b602081830181015184830182015201610f99565b6020815281519160058310156110415760c06101009161103e9460208501526001600160801b03198060208301511660408601526040820151166060850152606081015160808501526080810151151560a085015260a081015115158285015201519160e0808201520190610f8e565b90565b634e487b7160e01b600052602160045260246000fd5b604435908115158203610eb957565b606435908115158203610eb957565b608435908115158203610eb957565b60a435908115158203610eb957565b61109b610ed5565b90600080835280602084015280604084015280606084015280608084015260a0830152606060c0830152565b6005821015611041575256fea26469706673582212205810cf8da9a4f050a5e6ad04009201f59ab61510781940cfa3889a01a316f65964736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

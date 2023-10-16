@@ -1,0 +1,168 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "AuthMatchingLib",
+  "sourceName": "contracts/evm/helpers/utils/AuthMatchingLib.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "requestAuthType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "requestIsAnon",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "requestUserId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "requestExtraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "AuthInRequestNotFoundInResponse",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "requestIsAnon",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "requestUserId",
+          "type": "uint256"
+        }
+      ],
+      "name": "AuthIsAnonAndUserIdNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "requestIsAnon",
+          "type": "bool"
+        }
+      ],
+      "name": "AuthIsAnonNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "requestAuthType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "requestIsAnon",
+          "type": "bool"
+        }
+      ],
+      "name": "AuthTypeAndIsAnonNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "requestAuthType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "requestUserId",
+          "type": "uint256"
+        }
+      ],
+      "name": "AuthTypeAndUserIdNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "requestAuthType",
+          "type": "uint8"
+        }
+      ],
+      "name": "AuthTypeNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestUserId",
+          "type": "uint256"
+        }
+      ],
+      "name": "AuthUserIdNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "maxMatchingProperties",
+          "type": "uint8"
+        },
+        {
+          "components": [
+            {
+              "internalType": "enum AuthType",
+              "name": "authType",
+              "type": "AuthType"
+            },
+            {
+              "internalType": "uint256",
+              "name": "userId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isAnon",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct AuthRequest",
+          "name": "auth",
+          "type": "tuple"
+        }
+      ],
+      "name": "handleAuthErrors",
+      "outputs": [],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461001a576103c09081610020823930815050f35b600080fdfe60806004908136101561001157600080fd5b6000803560e01c63c19f87361461002757600080fd5b60406003199181833601126103755784359460ff86168096036103715760249586359567ffffffffffffffff9586881161036d5760c09088360301126103695760c0810181811087821117610357578552600697838801358981101561035357825260209384830192828a013584526100a260448b01610378565b908881019182526100b560648c01610378565b60608201526100c660848c01610378565b608082015260a49a8b810135908b821161034f5701953660238801121561034b57838701358b8111610339578a5197601f199c8d603f81601f86011601168a01908a821090821117610327578c528189523687838301011161032357818b92888c9301838c01378901015260a08201968752806101d05750519a8b10156101be575192519351965163c805101160e01b815260ff9a909a16908a0152901515908801526044870152608060648701528251608487018190529193869390929185915b8387106101a65750508394508582601f949501015201168101030190fd5b86810182015189880189015295810195889550610188565b50634e487b7160e01b86526021905284fd5b8c898b9496938360018a951460001461020457505050506044945115159051925193630889653f60e31b8552840152820152fd5b6002819992939498969914600014610253575050519485101561024157509060ff6044959251935194631051220160e31b86521690840152820152fd5b634e487b7160e01b8152602183528590fd5b9287928460038b9997961460001461027d5750505050505190519163e0de2b1360e01b8352820152fd5b8897949695508085036102b65750519485101561024157509060ff604495925115159351946301f7639360e51b86521690840152820152fd5b6005819793949597146000146102de575050505051151590519162a7039160e01b8352820152fd5b85839289948993146102ee578580f35b85905193841015610311575051633647c6db60e01b815260ff9290921690820152fd5b634e487b7160e01b8152602183528490fd5b8a80fd5b634e487b7160e01b8c5260418752878cfd5b634e487b7160e01b8a5260418552858afd5b8880fd5b8980fd5b8580fd5b634e487b7160e01b8552604184528885fd5b8380fd5b8480fd5b5080fd5b80fd5b3590811515820361038557565b600080fdfea2646970667358221220bd9b19ea4c1bbfb2bf4d7cc50d144f6749f2b7d6ac91cbb7f2b35d9fbe235cb064736f6c63430008130033",
+  "deployedBytecode": "0x60806004908136101561001157600080fd5b6000803560e01c63c19f87361461002757600080fd5b60406003199181833601126103755784359460ff86168096036103715760249586359567ffffffffffffffff9586881161036d5760c09088360301126103695760c0810181811087821117610357578552600697838801358981101561035357825260209384830192828a013584526100a260448b01610378565b908881019182526100b560648c01610378565b60608201526100c660848c01610378565b608082015260a49a8b810135908b821161034f5701953660238801121561034b57838701358b8111610339578a5197601f199c8d603f81601f86011601168a01908a821090821117610327578c528189523687838301011161032357818b92888c9301838c01378901015260a08201968752806101d05750519a8b10156101be575192519351965163c805101160e01b815260ff9a909a16908a0152901515908801526044870152608060648701528251608487018190529193869390929185915b8387106101a65750508394508582601f949501015201168101030190fd5b86810182015189880189015295810195889550610188565b50634e487b7160e01b86526021905284fd5b8c898b9496938360018a951460001461020457505050506044945115159051925193630889653f60e31b8552840152820152fd5b6002819992939498969914600014610253575050519485101561024157509060ff6044959251935194631051220160e31b86521690840152820152fd5b634e487b7160e01b8152602183528590fd5b9287928460038b9997961460001461027d5750505050505190519163e0de2b1360e01b8352820152fd5b8897949695508085036102b65750519485101561024157509060ff604495925115159351946301f7639360e51b86521690840152820152fd5b6005819793949597146000146102de575050505051151590519162a7039160e01b8352820152fd5b85839289948993146102ee578580f35b85905193841015610311575051633647c6db60e01b815260ff9290921690820152fd5b634e487b7160e01b8152602183528490fd5b8a80fd5b634e487b7160e01b8c5260418752878cfd5b634e487b7160e01b8a5260418552858afd5b8880fd5b8980fd5b8580fd5b634e487b7160e01b8552604184528885fd5b8380fd5b8480fd5b5080fd5b80fd5b3590811515820361038557565b600080fdfea2646970667358221220bd9b19ea4c1bbfb2bf4d7cc50d144f6749f2b7d6ac91cbb7f2b35d9fbe235cb064736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

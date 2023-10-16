@@ -1,0 +1,178 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ClaimMatchingLib",
+  "sourceName": "contracts/sismo-zkp/helpers/utils/ClaimMatchingLib.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "requestClaimGroupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "requestClaimGroupTimestamp",
+          "type": "bytes16"
+        }
+      ],
+      "name": "ClaimGroupIdAndGroupTimestampNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "requestClaimGroupId",
+          "type": "bytes16"
+        }
+      ],
+      "name": "ClaimGroupIdNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes16",
+          "name": "requestClaimGroupTimestamp",
+          "type": "bytes16"
+        }
+      ],
+      "name": "ClaimGroupTimestampNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "responseClaimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "responseClaimGroupId",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "responseClaimGroupTimestamp",
+          "type": "bytes16"
+        },
+        {
+          "internalType": "uint256",
+          "name": "responseClaimValue",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "responseExtraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "ClaimInRequestNotFoundInResponse",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "requestClaimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "requestClaimGroupId",
+          "type": "bytes16"
+        }
+      ],
+      "name": "ClaimTypeAndGroupIdNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "requestClaimType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes16",
+          "name": "requestClaimGroupTimestamp",
+          "type": "bytes16"
+        }
+      ],
+      "name": "ClaimTypeAndGroupTimestampNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "requestClaimType",
+          "type": "uint8"
+        }
+      ],
+      "name": "ClaimTypeNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "maxMatchingProperties",
+          "type": "uint8"
+        },
+        {
+          "components": [
+            {
+              "internalType": "enum ClaimType",
+              "name": "claimType",
+              "type": "ClaimType"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupId",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "bytes16",
+              "name": "groupTimestamp",
+              "type": "bytes16"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "isOptional",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct ClaimRequest",
+          "name": "claim",
+          "type": "tuple"
+        }
+      ],
+      "name": "handleClaimErrors",
+      "outputs": [],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461001a576104349081610020823930815050f35b600080fdfe60806004908136101561001157600080fd5b6000803560e01c63ccf025941461002757600080fd5b60406003199181833601126103d45784359460ff86168096036103d05760249586359567ffffffffffffffff958688116103cc5760e09088360301126103c85760e08101818110878211176103b657855260059783880135898110156103b25782526100948189016103d7565b906020948584019283526100aa60448b016103d7565b92888501938452606085019460648c013586526100c960848d016103f1565b60808201526100da60a48d016103f1565b60a082015260c49b8c810135908c82116103ae570196366023890112156103aa57838801358c8111610398578b5198601f199d8e603f81601f86011601168b01908b821090821117610386578d52818a523687838301011161038257818c92888d9301838d01378a01015260c08201978852806101f55750519b8c10156101e3575192519351945197516301a95d6960e51b815260ff9b909b16908b01526001600160801b0319918216908a0152166044880152606487015260a06084870152825160a487018190529193869390929185915b8387106101cb5750508394508582601f949501015201168101030190fd5b868101820151898801890152958101958895506101ad565b50634e487b7160e01b87526021905285fd5b8d8a8c9496938360018a951460001461023457505050506044946001600160801b031980915116915116925193632d522f5160e11b8552840152820152fd5b600281999293949897969914600014610295575050519485101561028357505190516302d0981b60e41b815260ff9093169183019182526001600160801b031916602082015281906040010390fd5b634e487b7160e01b8152602184528590fd5b889793919290600381036102c65750505050506001600160801b03199051169051916309360a1360e11b8352820152fd5b8897949694955080860361030f575051948510156102835750519051634a9fccc560e11b815260ff9093169183019182526001600160801b031916602082015281906040010390fd5b8796919082810361033c57505050506001600160801b0319905116905191633493f11f60e11b8352820152fd5b85889392600689931461034d578580f35b859051938410156103705750516320a0d15160e11b815260ff9290921690820152fd5b634e487b7160e01b8152602183528490fd5b8b80fd5b634e487b7160e01b8d5260418752878dfd5b634e487b7160e01b8b5260418552858bfd5b8980fd5b8a80fd5b8580fd5b634e487b7160e01b8552604184528885fd5b8380fd5b8480fd5b5080fd5b80fd5b35906001600160801b0319821682036103ec57565b600080fd5b359081151582036103ec5756fea264697066735822122093ffe0ec5fbcaf76fd82b3fb1418622d81088020a9ea26e1acdf38414568f62364736f6c63430008130033",
+  "deployedBytecode": "0x60806004908136101561001157600080fd5b6000803560e01c63ccf025941461002757600080fd5b60406003199181833601126103d45784359460ff86168096036103d05760249586359567ffffffffffffffff958688116103cc5760e09088360301126103c85760e08101818110878211176103b657855260059783880135898110156103b25782526100948189016103d7565b906020948584019283526100aa60448b016103d7565b92888501938452606085019460648c013586526100c960848d016103f1565b60808201526100da60a48d016103f1565b60a082015260c49b8c810135908c82116103ae570196366023890112156103aa57838801358c8111610398578b5198601f199d8e603f81601f86011601168b01908b821090821117610386578d52818a523687838301011161038257818c92888d9301838d01378a01015260c08201978852806101f55750519b8c10156101e3575192519351945197516301a95d6960e51b815260ff9b909b16908b01526001600160801b0319918216908a0152166044880152606487015260a06084870152825160a487018190529193869390929185915b8387106101cb5750508394508582601f949501015201168101030190fd5b868101820151898801890152958101958895506101ad565b50634e487b7160e01b87526021905285fd5b8d8a8c9496938360018a951460001461023457505050506044946001600160801b031980915116915116925193632d522f5160e11b8552840152820152fd5b600281999293949897969914600014610295575050519485101561028357505190516302d0981b60e41b815260ff9093169183019182526001600160801b031916602082015281906040010390fd5b634e487b7160e01b8152602184528590fd5b889793919290600381036102c65750505050506001600160801b03199051169051916309360a1360e11b8352820152fd5b8897949694955080860361030f575051948510156102835750519051634a9fccc560e11b815260ff9093169183019182526001600160801b031916602082015281906040010390fd5b8796919082810361033c57505050506001600160801b0319905116905191633493f11f60e11b8352820152fd5b85889392600689931461034d578580f35b859051938410156103705750516320a0d15160e11b815260ff9290921690820152fd5b634e487b7160e01b8152602183528490fd5b8b80fd5b634e487b7160e01b8d5260418752878dfd5b634e487b7160e01b8b5260418552858bfd5b8980fd5b8a80fd5b8580fd5b634e487b7160e01b8552604184528885fd5b8380fd5b8480fd5b5080fd5b80fd5b35906001600160801b0319821682036103ec57565b600080fd5b359081151582036103ec5756fea264697066735822122093ffe0ec5fbcaf76fd82b3fb1418622d81088020a9ea26e1acdf38414568f62364736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -1,0 +1,44 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IFeedInitializer",
+  "sourceName": "contracts/evm/interfaces/IFeedInitializer.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_factoryContract",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_treasuryContract",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_verifierContract",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_usersModuleContract",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_proxyCallContract",
+          "type": "address"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

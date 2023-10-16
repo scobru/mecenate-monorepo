@@ -5,7 +5,6 @@
 pragma solidity 0.8.19;
 
 library Structures {
-    
     enum PostStatus {
         Waiting,
         Proposed,
@@ -116,7 +115,9 @@ library Structures {
      * @dev Struct representing a user on the Mecenate platform.
      */
     struct User {
-        address id;
+        address evmAddress;
+        bytes sismoVaultId;
+        bytes publicKey;
     }
 
     /**
@@ -124,7 +125,7 @@ library Structures {
      */
     struct Feed {
         address contractAddress;
-        bytes32 operator;
+        address operator;
         uint256 sellerStake;
         uint256 buyerStake;
         uint256 totalStake;

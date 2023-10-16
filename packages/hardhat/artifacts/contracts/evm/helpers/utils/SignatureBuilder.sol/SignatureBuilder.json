@@ -1,0 +1,321 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "SignatureBuilder",
+  "sourceName": "contracts/evm/helpers/utils/SignatureBuilder.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "DEFAULT_SIGNATURE_REQUEST_EXTRA_DATA",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_SIGNATURE_REQUEST_IS_SELECTABLE_BY_USER",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_SIGNATURE_REQUEST_MESSAGE",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "message",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "message",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignatureRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "message",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignatureRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "message",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "message",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignatureRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "message",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "message",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignatureRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "message",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "message",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignatureRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "isSelectableByUser",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes",
+          "name": "extraData",
+          "type": "bytes"
+        }
+      ],
+      "name": "build",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "message",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignatureRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "buildEmpty",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes",
+              "name": "message",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSelectableByUser",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct SignatureRequest",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461001657610582908161001c8239f35b600080fdfe6040608081526004908136101561001557600080fd5b600091823560e01c9081631f785c951461031f5781633ed8572e146102e45781635c4b7b60146102c95781635de3b44c1461026457816364009b991461020c5781636835f32c146101c257816372915d891461018e5781637476d1ac1461011a57508063800e65f2146100c85763ac799cb31461009157600080fd5b346100c457816003193601126100c4576100c0906100ad6104e5565b9051918291602083526020830190610461565b0390f35b5080fd5b50346100c457816003193601126100c457906100c0916100e661052f565b506100ef6104e5565b916100f86103bb565b90808252610104610385565b93845260208401528183015251918291826104a1565b8383346100c457806003193601126100c457610134610452565b916024359067ffffffffffffffff821161018b57506100c093610159913691016103db565b61016161052f565b5061016a6104e5565b92610173610385565b938452151560208401528183015251918291826104a1565b80fd5b5050346100c457816003193601126100c457906100c0916101ad6103bb565b91825251918291602083526020830190610461565b8383346100c45760203660031901126100c457823567ffffffffffffffff8111610208576100c0936101f6913691016103db565b916101ff61052f565b506100f86103bb565b8280fd5b8383346100c457806003193601126100c457823567ffffffffffffffff8111610208576100c09361023f913691016103db565b91610248610443565b61025061052f565b506102596103bb565b918252610173610385565b9190503461020857806003193601126102085767ffffffffffffffff9180358381116102c55761029790369083016103db565b926024359081116102c5576100c094916102b3913691016103db565b906102bc61052f565b50610104610385565b8480fd5b5050346100c457816003193601126100c45751908152602090f35b5050346100c45760203660031901126100c457906100c091610304610452565b9161030d61052f565b506103166104e5565b926102596103bb565b8383346100c45760603660031901126100c45767ffffffffffffffff9183358381116100c45761035290369086016103db565b9261035b610443565b9160443591821161018b57506100c094610377913691016103db565b9061038061052f565b506101735b604051906060820182811067ffffffffffffffff8211176103a557604052565b634e487b7160e01b600052604160045260246000fd5b604051906020820182811067ffffffffffffffff8211176103a557604052565b81601f8201121561043e5780359067ffffffffffffffff928383116103a55760405193601f8401601f19908116603f01168501908111858210176103a5576040528284526020838301011161043e57816000926020809301838601378301015290565b600080fd5b60243590811515820361043e57565b60043590811515820361043e57565b919082519283825260005b84811061048d575050826000602080949584010152601f8019910116010190565b60208183018101518483018201520161046c565b906104e2916020815260406104c28351606060208501526080840190610461565b9260208101511515828401520151906060601f1982850301910152610461565b90565b604051906040820182811067ffffffffffffffff8211176103a557604052601882527f4d4553534147455f53454c45435445445f42595f5553455200000000000000006020830152565b610537610385565b9060608252600060208301526060604083015256fea2646970667358221220fe34a276cf33ba45038ac2aab1fad01e71ec991c7b188a5c1ec033fd8d76a76264736f6c63430008130033",
+  "deployedBytecode": "0x6040608081526004908136101561001557600080fd5b600091823560e01c9081631f785c951461031f5781633ed8572e146102e45781635c4b7b60146102c95781635de3b44c1461026457816364009b991461020c5781636835f32c146101c257816372915d891461018e5781637476d1ac1461011a57508063800e65f2146100c85763ac799cb31461009157600080fd5b346100c457816003193601126100c4576100c0906100ad6104e5565b9051918291602083526020830190610461565b0390f35b5080fd5b50346100c457816003193601126100c457906100c0916100e661052f565b506100ef6104e5565b916100f86103bb565b90808252610104610385565b93845260208401528183015251918291826104a1565b8383346100c457806003193601126100c457610134610452565b916024359067ffffffffffffffff821161018b57506100c093610159913691016103db565b61016161052f565b5061016a6104e5565b92610173610385565b938452151560208401528183015251918291826104a1565b80fd5b5050346100c457816003193601126100c457906100c0916101ad6103bb565b91825251918291602083526020830190610461565b8383346100c45760203660031901126100c457823567ffffffffffffffff8111610208576100c0936101f6913691016103db565b916101ff61052f565b506100f86103bb565b8280fd5b8383346100c457806003193601126100c457823567ffffffffffffffff8111610208576100c09361023f913691016103db565b91610248610443565b61025061052f565b506102596103bb565b918252610173610385565b9190503461020857806003193601126102085767ffffffffffffffff9180358381116102c55761029790369083016103db565b926024359081116102c5576100c094916102b3913691016103db565b906102bc61052f565b50610104610385565b8480fd5b5050346100c457816003193601126100c45751908152602090f35b5050346100c45760203660031901126100c457906100c091610304610452565b9161030d61052f565b506103166104e5565b926102596103bb565b8383346100c45760603660031901126100c45767ffffffffffffffff9183358381116100c45761035290369086016103db565b9261035b610443565b9160443591821161018b57506100c094610377913691016103db565b9061038061052f565b506101735b604051906060820182811067ffffffffffffffff8211176103a557604052565b634e487b7160e01b600052604160045260246000fd5b604051906020820182811067ffffffffffffffff8211176103a557604052565b81601f8201121561043e5780359067ffffffffffffffff928383116103a55760405193601f8401601f19908116603f01168501908111858210176103a5576040528284526020838301011161043e57816000926020809301838601378301015290565b600080fd5b60243590811515820361043e57565b60043590811515820361043e57565b919082519283825260005b84811061048d575050826000602080949584010152601f8019910116010190565b60208183018101518483018201520161046c565b906104e2916020815260406104c28351606060208501526080840190610461565b9260208101511515828401520151906060601f1982850301910152610461565b90565b604051906040820182811067ffffffffffffffff8211176103a557604052601882527f4d4553534147455f53454c45435445445f42595f5553455200000000000000006020830152565b610537610385565b9060608252600060208301526060604083015256fea2646970667358221220fe34a276cf33ba45038ac2aab1fad01e71ec991c7b188a5c1ec033fd8d76a76264736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

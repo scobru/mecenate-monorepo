@@ -13,7 +13,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./modules/Swapper.sol";
 import "./interfaces/IMecenateUsers.sol";
 
-import "./interfaces/IMecenateVerifier.sol";
 import "./interfaces/IMUSE.sol";
 
 contract MecenateTreasury is Ownable, Swapper {
@@ -29,9 +28,8 @@ contract MecenateTreasury is Ownable, Swapper {
 
     uint256 public ownerFee;
 
-    mapping(bytes32 => uint256) public userReward;
-    mapping(bytes32 => mapping(address => uint256)) public userRewardERC20;
-
+    mapping(address => uint256) public userReward;
+    mapping(address => mapping(address => uint256)) public userRewardERC20;
     mapping(address => uint256) public distributableERC20Balance;
 
     function addFunds() external payable {
@@ -85,7 +83,7 @@ contract MecenateTreasury is Ownable, Swapper {
         uint256 perIdentity = total / userCount;
 
         for (uint256 i = 0; i < userCount; i++) {
-            bytes32 user = IMecenateUsers(_usersContract).getUserVaultIdAt(i);
+            address user = IMecenateUsers(_usersContract).getUserAt(i);
             userReward[user] += perIdentity;
         }
 
@@ -111,7 +109,7 @@ contract MecenateTreasury is Ownable, Swapper {
         uint256 perIdentity = total / userCount;
 
         for (uint256 i = 0; i < userCount; i++) {
-            bytes32 user = IMecenateUsers(_usersContract).getUserVaultIdAt(i);
+            address user = IMecenateUsers(_usersContract).getUserAt(i);
             // Implement logic to distribute perIdentity ERC20 tokens to each user
             // For example: IERC20(token).safeTransfer(userAddress, perIdentity);
             userRewardERC20[user][token] += perIdentity;
@@ -125,43 +123,24 @@ contract MecenateTreasury is Ownable, Swapper {
         swapRouter = _swapRouter;
     }
 
-    function takeReward(
-        address _receiver,
-        address _verifierContract,
-        bytes memory sismoConnectResponse,
-        address _to,
-        address _from
-    ) external returns (uint256) {
-        (bytes memory vaultId, , ) = IMecenateVerifier(_verifierContract)
-            .sismoVerify(sismoConnectResponse, _to, _from);
+    function takeReward(address _receiver) external returns (uint256) {
+        uint256 amountToSend = userReward[msg.sender];
 
-        bytes32 _user = keccak256(vaultId);
-
-        uint256 amountToSend = userReward[_user];
-
-        userReward[_user] = 0;
+        userReward[msg.sender] = 0;
 
         // send eth weith data
-        (bool success, ) = payable(_to).call{value: amountToSend}(
-            sismoConnectResponse
-        );
+        (bool success, ) = payable(_receiver).call{value: amountToSend}("");
 
         return amountToSend;
     }
 
     function takeRewardERC20(
         address _token,
-        address _receiver,
-        address _verifierContract,
-        bytes memory sismoConnectResponse,
-        address _to,
-        address _from
+        address _receiver
     ) external returns (uint256) {
         // Similar verification logic as your current takeReward for ETH
-        (bytes memory vaultId, , ) = IMecenateVerifier(_verifierContract)
-            .sismoVerify(sismoConnectResponse, _to, _from);
 
-        bytes32 _user = keccak256(vaultId);
+        address _user = msg.sender;
 
         uint256 amountToSend = userRewardERC20[_user][_token]; // assuming userReward is now a double mapping
 
@@ -169,22 +148,21 @@ contract MecenateTreasury is Ownable, Swapper {
 
         userRewardERC20[_user][_token] = 0; // reset the user's reward to 0
 
-        IERC20(_token).safeTransfer(_to, amountToSend);
+        IERC20(_token).safeTransfer(_receiver, amountToSend);
 
         return amountToSend;
     }
 
     function getReward(
         address _verifierContract,
-        bytes32 encryptedVaultId
+        address encryptedVaultId
     ) external view returns (uint256) {
         return userReward[encryptedVaultId];
     }
 
     function getRewardERC20(
         address _token,
-        address _verifierContract,
-        bytes32 encryptedVaultId
+        address encryptedVaultId
     ) external view returns (uint256) {
         return userRewardERC20[encryptedVaultId][_token]; // assuming userReward is now a double mapping
     }

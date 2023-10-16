@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Structures",
+  "sourceName": "contracts/evm/library/Structures.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea264697066735822122066af4862b592039297ffe41430d5611b5dc502961a12b8853b032f369d3e6d3e64736f6c63430008130033",
+  "deployedBytecode": "0x600080fdfea264697066735822122066af4862b592039297ffe41430d5611b5dc502961a12b8853b032f369d3e6d3e64736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -65,13 +65,13 @@ abstract contract Finalization is Staking {
 
             post.postdata.escrow.payment = _burnStake(
                 post.postdata.settings.tokenId,
-                keccak256(postSettingPrivate.vaultIdBuyer),
+                postSettingPrivate.buyerAddress,
                 penalty
             );
 
             post.postdata.escrow.stake = _burnStake(
                 post.postdata.settings.tokenId,
-                keccak256(postSettingPrivate.vaultIdSeller),
+                postSettingPrivate.sellerAddress,
                 punishment
             );
 

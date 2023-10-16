@@ -6,7 +6,6 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IMecenateVerifier.sol";
 import "../library/Structures.sol";
 import "../modules/FeedViewer.sol";
 import "../interfaces/IMecenateUsers.sol";
@@ -19,8 +18,6 @@ contract MecenateBay is Ownable, FeedViewer {
 
     Structures.BayRequest[] public allRequests;
 
-    Structures.BayRequestPrivate[] public allRequestsPrivate;
-
     address public usersMouduleContract;
 
     address public verifierContract;
@@ -29,20 +26,20 @@ contract MecenateBay is Ownable, FeedViewer {
 
     address public daiToken;
 
-    mapping(bytes32 => Structures.BayRequest[]) public requests;
+    mapping(address => Structures.BayRequest[]) public requests;
 
     uint256 public contractCounter;
 
     mapping(uint256 => bytes) private sismoResponseMapping;
 
     event RequestCreated(
-        bytes32 indexed user,
+        address indexed user,
         Structures.BayRequest,
         uint256 indexed index
     );
 
     event RequestAccepted(
-        bytes32 indexed user,
+        address indexed user,
         Structures.BayRequest,
         uint256 indexed index
     );
@@ -85,18 +82,8 @@ contract MecenateBay is Ownable, FeedViewer {
 
         require(request.payment > 0, "BAY:payment is not enough");
 
-        (bytes memory vaultId, , ) = _sismoVerify(
-            sismoConnectResponse,
-            _to,
-            _from
-        );
-
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
         require(
-            IMecenateUsers(usersMouduleContract).checkifUserExist(
-                keccak256(vaultId)
-            ),
+            IMecenateUsers(usersMouduleContract).checkifUserExist(msg.sender),
             "user does not exist"
         );
 
@@ -104,41 +91,16 @@ contract MecenateBay is Ownable, FeedViewer {
 
         require(request.payment > 0, "BAY:payment is not enough");
 
-        requests[encryptedVaultId].push(request);
+        requests[msg.sender].push(request);
 
         allRequests.push(request);
 
-        allRequestsPrivate.push(
-            Structures.BayRequestPrivate({
-                vaultIdSeller: "0x00",
-                sellerResponse: "0x00",
-                vaultIdBuyer: vaultId,
-                buyerResponse: sismoConnectResponse,
-                buyerTo: _to,
-                buyerFrom: _from
-            })
-        );
-
         contractCounter++;
 
-        emit RequestCreated(encryptedVaultId, request, allRequests.length - 1);
+        emit RequestCreated(msg.sender, request, allRequests.length - 1);
     }
 
-    function acceptRequest(
-        uint256 index,
-        address _feed,
-        bytes memory sismoConnectResponse,
-        address _to,
-        address _from
-    ) public {
-        (bytes memory vaultId, , ) = _sismoVerify(
-            sismoConnectResponse,
-            _to,
-            _from
-        );
-
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
+    function acceptRequest(uint256 index, address _feed) public {
         Structures.Feed memory feed = _getFeedInfo(_feed);
 
         require(
@@ -152,50 +114,27 @@ contract MecenateBay is Ownable, FeedViewer {
         );
 
         require(
-            IMecenateUsers(usersMouduleContract).checkifUserExist(
-                encryptedVaultId
-            ),
+            IMecenateUsers(usersMouduleContract).checkifUserExist(msg.sender),
             "BAY:user does not exist"
-        );
-
-        allRequestsPrivate.push(
-            Structures.BayRequestPrivate({
-                vaultIdSeller: vaultId,
-                sellerResponse: sismoConnectResponse,
-                vaultIdBuyer: allRequestsPrivate[index].vaultIdBuyer,
-                buyerResponse: allRequestsPrivate[index].buyerResponse,
-                buyerTo: allRequestsPrivate[index].buyerTo,
-                buyerFrom: allRequestsPrivate[index].buyerFrom
-            })
         );
 
         if (allRequests[index].tokenId != Structures.Tokens.NaN) {
             if (allRequests[index].tokenId == Structures.Tokens.DAI) {
-                IERC20(daiToken).approve(
-                    msg.sender,
-                    allRequests[index].payment
-                );
+                IERC20(daiToken).approve(_feed, allRequests[index].payment);
             } else if (allRequests[index].tokenId == Structures.Tokens.MUSE) {
-                IERC20(museToken).approve(
-                    msg.sender,
-                    allRequests[index].payment
-                );
+                IERC20(museToken).approve(_feed, allRequests[index].payment);
             }
 
             IMecenateFeed(_feed).acceptPost{value: 0}(
-                allRequestsPrivate[index].buyerResponse,
-                allRequestsPrivate[index].buyerTo,
-                allRequestsPrivate[index].buyerFrom,
                 allRequests[index].tokenId,
-                allRequests[index].payment
+                allRequests[index].payment,
+                address(this)
             );
         } else {
             IMecenateFeed(_feed).acceptPost{value: allRequests[index].payment}(
-                allRequestsPrivate[index].buyerResponse,
-                allRequestsPrivate[index].buyerTo,
-                allRequestsPrivate[index].buyerFrom,
                 allRequests[index].tokenId,
-                allRequests[index].payment
+                allRequests[index].payment,
+                address(this)
             );
         }
 
@@ -205,25 +144,7 @@ contract MecenateBay is Ownable, FeedViewer {
 
         allRequests[index].postCount = feed.postCount;
 
-        emit RequestAccepted(encryptedVaultId, allRequests[index], index);
-    }
-
-    function _sismoVerify(
-        bytes memory sismoConnectResponse,
-        address _to,
-        address _from
-    ) internal view returns (bytes memory, uint256, uint256) {
-        (
-            bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId
-        ) = IMecenateVerifier(verifierContract).sismoVerify(
-                sismoConnectResponse,
-                _to,
-                _from
-            );
-
-        return (vaultId, twitterId, telegramId);
+        emit RequestAccepted(msg.sender, allRequests[index], index);
     }
 
     function getRequests()
@@ -235,31 +156,14 @@ contract MecenateBay is Ownable, FeedViewer {
     }
 
     function getRequestForAddress(
-        bytes32 _user
+        address _user
     ) public view returns (Structures.BayRequest[] memory) {
         return requests[_user];
     }
 
     // removéthe request and refund the user delete the array and move the last element to the index
-    function removeRequest(
-        uint256 index,
-        bytes memory sismoConnectResponse,
-        address _to,
-        address _from
-    ) public {
-        (
-            bytes memory vaultId,
-            uint256 twitterId,
-            uint256 telegramId
-        ) = _sismoVerify(sismoConnectResponse, _to, _from);
-
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
-        require(
-            encryptedVaultId ==
-                keccak256(allRequestsPrivate[index].vaultIdBuyer),
-            "BAY:you are not the buyer"
-        );
+    function removeRequest(uint256 index) public {
+        require(allRequests[index].buyerAddress == msg.sender, "NOT THE BUYER");
 
         require(
             allRequests[index].accepted == false,
@@ -269,9 +173,9 @@ contract MecenateBay is Ownable, FeedViewer {
         Structures.BayRequest memory requestToRemove = allRequests[index];
 
         //  send eth with data to the vaultctx
-        (bool _result, ) = payable(_to).call{value: requestToRemove.payment}(
-            ""
-        );
+        (bool _result, ) = payable(msg.sender).call{
+            value: requestToRemove.payment
+        }("");
 
         require(_result, "BAY:Vault call failed");
 
@@ -283,31 +187,22 @@ contract MecenateBay is Ownable, FeedViewer {
 
         allRequests.pop();
 
-        // Remove from allRequestsPrivate array
-        uint256 lastIndexPrivate = allRequestsPrivate.length - 1;
-        if (index < lastIndexPrivate) {
-            allRequestsPrivate[index] = allRequestsPrivate[lastIndexPrivate];
-        }
-        allRequestsPrivate.pop();
-
         // Remove from requests mapping
-        for (uint256 i = 0; i < requests[encryptedVaultId].length; i++) {
+        for (uint256 i = 0; i < requests[msg.sender].length; i++) {
             if (
-                requests[encryptedVaultId][i].payment ==
-                requestToRemove.payment &&
-                requests[encryptedVaultId][i].stake == requestToRemove.stake &&
-                requests[encryptedVaultId][i].postAddress ==
+                requests[msg.sender][i].payment == requestToRemove.payment &&
+                requests[msg.sender][i].stake == requestToRemove.stake &&
+                requests[msg.sender][i].postAddress ==
                 requestToRemove.postAddress &&
-                requests[encryptedVaultId][i].postCount ==
-                requestToRemove.postCount
+                requests[msg.sender][i].postCount == requestToRemove.postCount
             ) {
-                uint256 lastIndexSender = requests[encryptedVaultId].length - 1;
+                uint256 lastIndexSender = requests[msg.sender].length - 1;
                 if (i < lastIndexSender) {
-                    requests[encryptedVaultId][i] = requests[encryptedVaultId][
+                    requests[msg.sender][i] = requests[msg.sender][
                         lastIndexSender
                     ];
                 }
-                requests[encryptedVaultId].pop();
+                requests[msg.sender].pop();
                 break;
             }
         }

@@ -1,16 +1,28 @@
-pragma solidity 0.8.19;
+// SPDX-License-Identifier: MIT
+
 import "../library/Structures.sol";
 
 interface IMecenateUsers {
-    function checkifUserExist(bytes32 vaultId) external view returns (bool);
+    function registerUser(bytes memory metadata) external;
 
-    function getUserData(
-        address user
-    ) external view returns (Structures.User memory);
+    function getUsers() external view returns (address[] memory);
 
     function getUserCount() external view returns (uint256);
 
     function getUserAt(uint256 index) external view returns (address);
 
-    function getUserVaultIdAt(uint256 index) external view returns (bytes32);
+    function checkifUserExist(address userAddress) external view returns (bool);
+
+    function getPaginatedUsers(
+        uint256 startIndex,
+        uint256 endIndex
+    ) external view returns (address[] memory);
+
+    function getUserMetadata(
+        address userAddress
+    ) external view returns (Structures.User memory);
+
+    function getUserPublicKey(
+        address userAddress
+    ) external view returns (bytes memory);
 }

@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "FeedViewer",
+  "sourceName": "contracts/sismo-zkp/modules/FeedViewer.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601357603a908160198239f35b600080fdfe600080fdfea264697066735822122010455ef257c7fcbffe82f70ab3a67f8669579796fbdb9394dbd8790f44c81c9c64736f6c63430008130033",
+  "deployedBytecode": "0x600080fdfea264697066735822122010455ef257c7fcbffe82f70ab3a67f8669579796fbdb9394dbd8790f44c81c9c64736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

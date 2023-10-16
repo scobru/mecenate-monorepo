@@ -22,7 +22,7 @@ abstract contract Creation is Staking {
         onlyValidTokenID(tokenId)
         returns (Structures.Post memory)
     {
-        require(msg.sender == owener);
+        require(msg.sender == owner);
 
         require(
             IMecenateUsers(settings.usersModuleContract).checkifUserExist(
@@ -36,7 +36,14 @@ abstract contract Creation is Staking {
             "INVALID_STATUS"
         );
 
-        require(stakeAmount > 0, "STAKE_AMOUNT_ZERO");
+        if (post.postdata.escrow.stake == 0) {
+            require(stakeAmount > 0, "STAKE_AMOUNT_ZERO");
+            require(msg.value > 0, "PAYMENT_ZERO");
+        }
+
+        if (tokenId == Structures.Tokens.NaN) {
+            require(msg.value == stakeAmount, "PAYMENT_NOT_EQUAL");
+        }
 
         uint256 duration = postDurationToDays[uint8(postDuration)];
 
@@ -45,9 +52,13 @@ abstract contract Creation is Staking {
         // Change status to Proposed
         _changeStatus(Structures.PostStatus.Proposed);
 
+        Structures.User memory creator = IMecenateUsers(
+            settings.usersModuleContract
+        ).getUserMetadata(msg.sender);
+
         // Initialize the new Post struct with named arguments for clarity
         Structures.Post memory newPost = Structures.Post({
-            creator: Structures.User({vaultId: encryptedVaultId}),
+            creator: creator,
             postdata: Structures.PostData({
                 settings: Structures.PostSettings({
                     postType: postType,
