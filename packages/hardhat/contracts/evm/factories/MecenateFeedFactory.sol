@@ -19,7 +19,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     EnumerableSet.AddressSet internal feeds;
     Structures.FactorySettings internal settings;
     mapping(uint8 => uint24) internal routerFee;
-    mapping(bytes32 => EnumerableSet.AddressSet) internal feedStore;
+    mapping(address => EnumerableSet.AddressSet) internal feedStore;
     mapping(address => bool) internal createdContracts;
 
     event FeedCreated(address indexed addr);
@@ -102,19 +102,9 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         version = string(abi.encodePacked("v2.0.1"));
     }
 
-    function buildFeed(
-        bytes memory sismoConnectResponse,
-        address _to,
-        address _from
-    ) external payable returns (address) {
-        (bytes memory vaultId, , ) = IMecenateVerifier(
-            settings.verifierContract
-        ).sismoVerify(sismoConnectResponse, _to, _from);
-
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
+    function buildFeed() external payable returns (address) {
         bytes memory constructorArguments = abi.encode(
-            encryptedVaultId,
+            msg.sender,
             settings.usersModuleContract,
             settings.verifierContract,
             address(this),
@@ -123,7 +113,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
         require(
             IMecenateUsers(settings.usersModuleContract).checkifUserExist(
-                encryptedVaultId
+                msg.sender
             ),
             "user does not exist"
         );

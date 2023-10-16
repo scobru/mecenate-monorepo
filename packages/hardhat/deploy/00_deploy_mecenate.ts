@@ -160,8 +160,6 @@ const deployYourContract: DeployFunction = async function (
   vault.receipt &&
     console.log("Vault deployed at:", vault.receipt.contractAddress);
 
-  console.log("Setting Vault...");
-
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
 

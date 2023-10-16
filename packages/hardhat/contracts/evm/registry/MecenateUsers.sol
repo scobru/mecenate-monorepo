@@ -16,11 +16,13 @@ import "../library/SismoStructs.sol";
 contract MecenateUsers is Ownable {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    EnumerableSet.Bytes32Set private _users;
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    EnumerableSet.AddressSet private _users;
 
     Structures.User private _metadata;
 
-    event UserRegistered(bytes32 vaultId);
+    event UserRegistered(address vaultId);
 
     address public verifierContract;
 
@@ -42,50 +44,30 @@ contract MecenateUsers is Ownable {
         verifierContract = _verifier;
     }
 
-    function registerUser(
-        bytes memory sismoConnectResponse,
-        address _to,
-        address _from,
-        string memory _username
-    ) public {
-        (bytes memory vaultId, , ) = IMecenateVerifier(verifierContract)
-            .sismoVerify(sismoConnectResponse, _to, _from);
-
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
-        userNames[encryptedVaultId] = _username;
+    function registerUser(string memory _username) public {
+        userNames[msg.sender] = _username;
 
         // check if user exists
-        require(!_users.contains(encryptedVaultId), "USER_ALREADY_EXISTS");
+        require(!_users.contains(msg.sender), "USER_ALREADY_EXISTS");
 
         // add user
-        _users.add(encryptedVaultId);
+        _users.add(msg.sender);
 
         // emit event
-        emit UserRegistered(encryptedVaultId);
+        emit UserRegistered(msg.sender);
     }
 
-    function changeUserName(
-        bytes memory sismoConnectResponse,
-        address _to,
-        address _from,
-        string memory _username
-    ) external {
-        (bytes memory vaultId, , ) = IMecenateVerifier(verifierContract)
-            .sismoVerify(sismoConnectResponse, _to, _from);
+    function changeUserName(string memory _username) external {
+        require(_users.contains(msg.sender), "USER_ALREADY_EXISTS");
 
-        bytes32 encryptedVaultId = keccak256(vaultId);
-
-        require(_users.contains(encryptedVaultId), "USER_ALREADY_EXISTS");
-
-        userNames[encryptedVaultId] = _username;
+        userNames[msg.sender] = _username;
     }
 
-    function getUserName(bytes32 vaultId) public view returns (string memory) {
-        return userNames[vaultId];
+    function getUserName(address _user) public view returns (string memory) {
+        return userNames[_user];
     }
 
-    function getUsers() public view returns (bytes32[] memory users) {
+    function getUsers() public view returns (address[] memory users) {
         return _users.values();
     }
 
@@ -93,14 +75,14 @@ contract MecenateUsers is Ownable {
         count = _users.length();
     }
 
-    function getUserAt(uint256 index) public view returns (bytes32 user) {
+    function getUserAt(uint256 index) public view returns (address user) {
         require(index < _users.length(), "OUT_OF_RANGE");
         user = _users.at(index);
     }
 
     function getUserVaultIdAt(
         uint256 index
-    ) public view returns (bytes32 user) {
+    ) public view returns (address user) {
         require(msg.sender == treasuryContract, "ONLY_TREASURY");
         require(index < _users.length(), "OUT_OF_RANGE");
         user = _users.at(index);
@@ -114,7 +96,7 @@ contract MecenateUsers is Ownable {
     function getPaginatedUsers(
         uint256 startIndex,
         uint256 endIndex
-    ) public view returns (bytes32[] memory users) {
+    ) public view returns (address[] memory users) {
         require(startIndex < endIndex, "START_INDEX_GREATER_THAN_END_INDEX");
         require(endIndex <= _users.length(), "OUT_OF_RANGE");
 

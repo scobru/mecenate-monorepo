@@ -117,6 +117,7 @@ const Identity: NextPage = () => {
 
   const signIn = async () => {
     usersCtx?.connect(customSigner);
+
     txData(
       usersCtx?.registerUser(
         responseBytes,

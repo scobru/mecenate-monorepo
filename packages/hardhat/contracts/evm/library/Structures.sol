@@ -5,6 +5,7 @@
 pragma solidity 0.8.19;
 
 library Structures {
+    
     enum PostStatus {
         Waiting,
         Proposed,
@@ -49,7 +50,6 @@ library Structures {
     struct FactorySettings {
         address treasuryContract;
         address usersModuleContract;
-        address verifierContract;
         address museToken;
         address daiToken;
         address wethToken;
