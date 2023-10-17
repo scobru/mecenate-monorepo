@@ -3,7 +3,11 @@ pragma solidity ^0.8.9;
 import "./Staking.sol";
 
 abstract contract Finalization is Staking {
-    function finalizePost(bool valid, uint256 punishment, bytes32 uid) external virtual {
+    function finalizePost(
+        bool valid,
+        uint256 punishment,
+        bytes32 uid
+    ) external virtual {
         require(msg.sender == postSettingPrivate.buyerAddress, "NOT_SELLER");
 
         require(
@@ -11,26 +15,40 @@ abstract contract Finalization is Staking {
             "NOT_SUBMITTED"
         );
 
-        IEAS eas = IEAS(settings.easContract);
+        IEAS eas = IEAS(
+            IMecenateFeedFactory(settings.factoryContract).easContract()
+        );
 
-        Attestation memory)attestation = eas.getAttestation(uid);
+        Attestation memory attestation = eas.getAttestation(uid);
 
         require(
             attestation.attester == postSettingPrivate.buyerAddress,
             "INVALID_ATTESTATION"
         );
 
-        require(attestation.recipient == postSettingPrivate.sellerAddress, "INVALID_RECIPIENT");
+        require(
+            attestation.recipient == postSettingPrivate.sellerAddress,
+            "INVALID_RECIPIENT"
+        );
 
-        require(attestation.schema == IMecenateFeedFactory(
-            settings.factoryContract
-        ).easSchema(), "INVALID_SCHEMA");
+        require(
+            attestation.schema ==
+                IMecenateFeedFactory(settings.factoryContract).easSchema(),
+            "INVALID_SCHEMA"
+        );
 
-        (bool easResult, address feed, bytes memory post ) = abi.decode(attestation.data, (bool,address,bytes));
+        (bool easResult, address feed, bytes memory postBytes) = abi.decode(
+            attestation.data,
+            (bool, address, bytes)
+        );
 
         require(feed == address(this), "INVALID_FEED");
 
-        require(post == post.postdata.data.encryptedData, "INVALID_POST");
+        require(
+            keccak256(abi.encode(postBytes)) ==
+                keccak256(abi.encode(post.postdata.data.encryptedData)),
+            "INVALID_POST"
+        );
 
         // Common contract addresses and variables
         address treasuryContract = IMecenateFeedFactory(
@@ -65,7 +83,6 @@ abstract contract Finalization is Staking {
 
             _burn(post.postdata.settings.tokenId, treasuryContract, buyerFee);
 
-            // Update status and stakes
             post.postdata.escrow.stake = sellerStake;
 
             post.postdata.escrow.payment = buyerStake;

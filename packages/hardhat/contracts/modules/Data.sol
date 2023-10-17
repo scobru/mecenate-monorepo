@@ -5,6 +5,7 @@ import "../interfaces/IMecenateFeed.sol";
 import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
 import "../interfaces/IMecenateFeedFactory.sol";
+import "../helpers/eas/IEAS.sol";
 
 /**
  * @title Data

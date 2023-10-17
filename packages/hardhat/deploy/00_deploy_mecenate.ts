@@ -4,31 +4,21 @@ import { ethers } from "hardhat";
 
 import { deployPool, encodePriceSqrt } from "../scripts/01_deployPools";
 
+// Goerli Base
 const router = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d";
+const eas = "0xAcfE09Fd03f7812F022FBf636700AdEA18Fd2A7A";
+const schema =
+  "0x810f5486d17adb2e879cb61042ea3fb55466e1326c0d023f99674b98eead56b8";
+
+// Version
 const version = "v2.0.0";
 
-/**
- * Deploys a contract named "YourContract" using the deployer account and
- * constructor arguments set to the deployer address
- *
- * @param hre HardhatRuntimeEnvironment object.
- */
 const deployYourContract: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
 ) {
-  /*
-    On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
-
-    When deploying to live networks (e.g `yarn deploy --network goerli`), the deployer account
-    should have sufficient balance to pay for the gas fees for contract creation.
-
-    You can generate a random account with `yarn generate` which will fill DEPLOYER_PRIVATE_KEY
-    with a random private key in the .env file (then used on hardhat.config.ts)
-    You can run the `yarn account` command to check your balance in every network.
-  */
   const { deployer } = await hre.getNamedAccounts();
+
   const { deploy } = hre.deployments;
-  const from = deployer;
 
   const mockDai = await deploy("MockDai", {
     from: deployer,
@@ -103,13 +93,12 @@ const deployYourContract: DeployFunction = async function (
   const feedFactory = await deploy("MecenateFeedFactory", {
     from: deployer,
 
-    args: [users.address, treasury.address],
+    args: [],
     log: true,
 
     autoMine: true,
   });
 
-  // feed Factory instance
   const feedFactoryInstance = await ethers.getContractAt(
     "MecenateFeedFactory",
     feedFactory.address,
@@ -154,7 +143,6 @@ const deployYourContract: DeployFunction = async function (
       mecenateBay.receipt.contractAddress,
     );
 
-  // wall setMecenateBay of instance of vault
   console.log("Setting Mecenate Bay...");
 
   const mecenateStats = await deploy("MecenateStats", {
@@ -180,6 +168,8 @@ const deployYourContract: DeployFunction = async function (
   await feedFactoryInstance.changeMultipleSettings(
     treasury.address,
     users.address,
+    eas,
+    schema,
     mockWeth.address,
     muse.address,
     mockDai.address,
@@ -198,6 +188,4 @@ const deployYourContract: DeployFunction = async function (
 
 export default deployYourContract;
 
-// Tags are useful if you have multiple deploy files and only want to run one of them.
-// e.g. yarn deploy --tags YourContract
 deployYourContract.tags = ["Mecenate"];

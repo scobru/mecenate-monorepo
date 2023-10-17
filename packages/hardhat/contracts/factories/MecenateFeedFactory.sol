@@ -86,7 +86,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         address wethTokenAddr,
         address museTokenAddr,
         address daiTokenAddr,
-        address routerAddr,
+        address routerAddr
     ) external onlyOwner {
         settings.treasuryContract = treasury;
         settings.usersModuleContract = usersModule;

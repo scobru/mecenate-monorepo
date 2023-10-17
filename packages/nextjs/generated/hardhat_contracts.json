@@ -5,7 +5,7 @@
       "chainId": "84531",
       "contracts": {
         "MUSE": {
-          "address": "0x45eD419B9634865E6f69DDD79b4beF2e29b72274",
+          "address": "0x06260F1Fb2cf60eD15E6e683f5f8dd0D05C3FBeB",
           "abi": [
             {
               "inputs": [],
@@ -905,7 +905,7 @@
           ]
         },
         "MecenateBay": {
-          "address": "0x627ACc9b3D507530634D5c07E72340d0B74c4813",
+          "address": "0xF7684419314376Dd0942619721C66568DaBE99a6",
           "abi": [
             {
               "inputs": [
@@ -1565,7 +1565,7 @@
           ]
         },
         "MecenateFeed": {
-          "address": "0xE9153dDc0397542C36C3D4dD24efE234CD77c167",
+          "address": "0x67Ce3C99d6EB22991bB4dC64fA92f2F05447Ca92",
           "abi": [
             {
               "inputs": [
@@ -2863,6 +2863,11 @@
                   "internalType": "uint256",
                   "name": "punishment",
                   "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "uid",
+                  "type": "bytes32"
                 }
               ],
               "name": "finalizePost",
@@ -3264,24 +3269,8 @@
           ]
         },
         "MecenateFeedFactory": {
-          "address": "0xeC155124BCFdA12d9752C142B534779389F08784",
+          "address": "0x81e74f728E06f559be14711f4e6a902AFb549075",
           "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "newUsersModuleContract",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "newTreasuryContract",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
             {
               "anonymous": false,
               "inputs": [
@@ -3354,6 +3343,16 @@
                 },
                 {
                   "internalType": "address",
+                  "name": "easContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "easSchema",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
                   "name": "wethTokenAddr",
                   "type": "address"
                 },
@@ -3399,6 +3398,32 @@
                   "internalType": "address",
                   "name": "",
                   "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "easContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "easSchema",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
                 }
               ],
               "stateMutability": "view",
@@ -4245,7 +4270,7 @@
           ]
         },
         "MecenateStats": {
-          "address": "0xAFE331FBf1D55728Af23e7bB9F762C0427075814",
+          "address": "0xE79d2cB1bcc4e3612307b0B6142CFD1dcC9DA7D1",
           "abi": [
             {
               "inputs": [
@@ -4373,7 +4398,7 @@
           ]
         },
         "MecenateTreasury": {
-          "address": "0x467C14497078f0f3A5367fd3953278c9f7Ea6736",
+          "address": "0x18fD96949A80d87dC1Fb84d54817602EE7080E33",
           "abi": [
             {
               "anonymous": false,
@@ -4991,7 +5016,7 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0xb27dc56e80DA00Fe939FC984fDb55b6E6107B5E7",
+          "address": "0x69923B1551cd54F9084F0cf75b75DB8D7641bB33",
           "abi": [
             {
               "inputs": [
@@ -5537,7 +5562,7 @@
           ]
         },
         "MecenateVerifier": {
-          "address": "0x5c0DaBD1960Cd862e190aecF1A853e1Ac669194E",
+          "address": "0x88528D12EA8BE35f446282745048DDC81ba51914",
           "abi": [
             {
               "inputs": [
@@ -5680,7 +5705,7 @@
           ]
         },
         "MockDai": {
-          "address": "0xa04127bDcfA4977a5A7ec275E923fEfFba042DE8",
+          "address": "0x070Aa218E7aEFB3B41B23a4970a66B9887138b0C",
           "abi": [
             {
               "inputs": [],
@@ -6048,7 +6073,7 @@
           ]
         },
         "MockWeth": {
-          "address": "0x39BCaCD12648D422a23170cb4A12aFD4831d08f8",
+          "address": "0xB52262721FD11fd68241b2f1F0a7a9bB501351f2",
           "abi": [
             {
               "inputs": [],

@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "FeedViewer",
+  "sourceName": "contracts/modules/FeedViewer.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601357603a908160198239f35b600080fdfe600080fdfea2646970667358221220ea1316d7634276b6f4a5ab3a52e9dcc8a53c8d9e1744bcc91ae6b9563534522664736f6c63430008130033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220ea1316d7634276b6f4a5ab3a52e9dcc8a53c8d9e1744bcc91ae6b9563534522664736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
