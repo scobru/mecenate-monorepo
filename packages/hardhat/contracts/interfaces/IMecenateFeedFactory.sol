@@ -26,4 +26,8 @@ interface IMecenateFeedFactory {
     function burnEnabled() external view returns (bool);
 
     function version() external view returns (string memory);
+
+    function easSchema() external view returns (bytes32);
+
+    function easContract() external view returns (address);
 }

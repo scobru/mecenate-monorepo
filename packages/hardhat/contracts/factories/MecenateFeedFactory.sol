@@ -30,17 +30,20 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     event FeedCreated(address indexed addr);
 
-    constructor(address newUsersModuleContract, address newTreasuryContract) {
-        settings.usersModuleContract = newUsersModuleContract;
-        settings.treasuryContract = newTreasuryContract;
-    }
-
     function _changeVersion(string memory newVersion) internal {
         version = newVersion;
     }
 
     function treasuryContract() external view returns (address) {
         return settings.treasuryContract;
+    }
+
+    function easSchema() external view returns (bytes32) {
+        return settings.easSchema;
+    }
+
+    function easContract() external view returns (address) {
+        return settings.easContract;
     }
 
     function daiToken() external view returns (address) {
@@ -78,13 +81,17 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     function changeMultipleSettings(
         address treasury,
         address usersModule,
+        address easContract,
+        bytes32 easSchema,
         address wethTokenAddr,
         address museTokenAddr,
         address daiTokenAddr,
-        address routerAddr
+        address routerAddr,
     ) external onlyOwner {
         settings.treasuryContract = treasury;
         settings.usersModuleContract = usersModule;
+        settings.easContract = easContract;
+        settings.easSchema = easSchema;
         settings.wethToken = wethTokenAddr;
         settings.museToken = museTokenAddr;
         settings.daiToken = daiTokenAddr;

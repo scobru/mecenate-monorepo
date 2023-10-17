@@ -1,10 +1,12 @@
 import dotenv from "dotenv"; // Load environment variables from .env file
-import crypto from "asymmetric-crypto";
+// const crypto = require("asymmetric-crypto");
+import crypto from "asymmetric-crypto"
 
 dotenv.config();
 
 async function createKeyPair() {
   console.log("Generating Key Pair...");
+
   const kp = crypto.keyPair();
 
   // encode the keypair as a JSON string

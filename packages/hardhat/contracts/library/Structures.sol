@@ -50,6 +50,7 @@ library Structures {
         address treasuryContract;
         address usersModuleContract;
         address easContract;
+        bytes32 easSchema;
         address museToken;
         address daiToken;
         address wethToken;

@@ -3,13 +3,34 @@ pragma solidity ^0.8.9;
 import "./Staking.sol";
 
 abstract contract Finalization is Staking {
-    function finalizePost(bool valid, uint256 punishment) external virtual {
+    function finalizePost(bool valid, uint256 punishment, bytes32 uid) external virtual {
         require(msg.sender == postSettingPrivate.buyerAddress, "NOT_SELLER");
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Submitted,
             "NOT_SUBMITTED"
         );
+
+        IEAS eas = IEAS(settings.easContract);
+
+        Attestation memory)attestation = eas.getAttestation(uid);
+
+        require(
+            attestation.attester == postSettingPrivate.buyerAddress,
+            "INVALID_ATTESTATION"
+        );
+
+        require(attestation.recipient == postSettingPrivate.sellerAddress, "INVALID_RECIPIENT");
+
+        require(attestation.schema == IMecenateFeedFactory(
+            settings.factoryContract
+        ).easSchema(), "INVALID_SCHEMA");
+
+        (bool easResult, address feed, bytes memory post ) = abi.decode(attestation.data, (bool,address,bytes));
+
+        require(feed == address(this), "INVALID_FEED");
+
+        require(post == post.postdata.data.encryptedData, "INVALID_POST");
 
         // Common contract addresses and variables
         address treasuryContract = IMecenateFeedFactory(
@@ -27,6 +48,8 @@ abstract contract Finalization is Staking {
         uint256 sellerStake;
 
         if (post.postdata.settings.endTimeStamp < block.timestamp || valid) {
+            require(easResult == valid, "INVALID_ATTESTATION");
+
             // Code for both the timeout and the valid case
             buyerStake = Deposit._decreaseDeposit(
                 post.postdata.settings.tokenId,
@@ -55,6 +78,8 @@ abstract contract Finalization is Staking {
 
             emit Valid(post);
         } else if (!valid) {
+            require(easResult == valid, "INVALID_ATTESTATION");
+
             require(
                 punishment <= post.postdata.escrow.stake,
                 "PUNISHMENT_TOO_HIGH"
