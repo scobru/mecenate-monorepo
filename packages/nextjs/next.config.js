@@ -22,4 +22,25 @@ module.exports = {
     // Will only be available on the server side
     wsPort: 3001, // you can set any unused port number
   },
+  async headers() {
+    return [
+      {
+        source: "/", // this applies to all routes
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "http://localhost:3000",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PUT, DELETE, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
+        ],
+      },
+    ];
+  },
 };
