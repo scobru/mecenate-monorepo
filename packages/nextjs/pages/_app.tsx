@@ -32,12 +32,12 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
     <WagmiConfig client={wagmiClient}>
       <NextNProgress />
       <RainbowKitProvider chains={appChains.chains} avatar={BlockieAvatar}>
-        <div className="flex flex-col min-h-screen min-w-fit bg-base-100 font-opensans">
-          <div className="text-center bg-gradient-to-r from-blue-100 to-yellow-200 p-2 w-screen">
+        <div className="flex flex-col min-h-screen min-w-fit bg-base-100 font-inter ">
+          <div className="text-center bg-gradient-to-r from-blue-100 to-yellow-200 p-1 w-screen text-black">
             Live on <strong>Base Goerli</strong> 🎉
           </div>{" "}
           <Header />
-          <main className="relative flex flex-col flex-1 min-w-fit bg-secondary bg-opacity-90">
+          <main className="relative flex flex-col flex-1 min-w-fit bg-gradient-to-tl from-slate-700 to-slate-900">
             <Component {...pageProps} />
             <Analytics />
           </main>

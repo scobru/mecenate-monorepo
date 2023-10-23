@@ -28,8 +28,20 @@ import {
   ChatBubbleBottomCenterIcon,
   InboxArrowDownIcon,
 } from "@heroicons/react/20/solid";
-import crypto from "crypto";
+import { ApolloClient, InMemoryCache, createHttpLink, gql } from "@apollo/client";
+
 import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
+import { EAS, Offchain, SchemaEncoder, SchemaRegistry } from "@ethereum-attestation-service/eas-sdk";
+
+export const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia v0.26
+const eas = new EAS(EASContractAddress);
+
+// Initialize SchemaEncoder with the schema string
+const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes post,");
+
+const schemaUID = "0xa685677ba3ea1c2df3ed44de688bf5147c36f910b54ec32f08e1e0de4914a113";
+
+const crypto = require("asymmetric-crypto");
 
 const ViewFeed: NextPage = () => {
   const { data: signer } = useSigner();
@@ -45,6 +57,7 @@ const ViewFeed: NextPage = () => {
   const [nonce, setNonce] = React.useState<string>("0");
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
   const [tokenId, setTokenId] = React.useState<string>("");
+  const [uid, setUid] = React.useState<string>("");
 
   const { chain } = useNetwork();
 
@@ -58,6 +71,7 @@ const ViewFeed: NextPage = () => {
   const [postRawData, setPostRawData] = useState<any>([]);
   const [postPayment, setPostPayment] = useState<any>([]);
   const [symmetricKey, setSymmetricKey] = useState<any>([]);
+  const [secretKey, setSecretKey] = useState<any>([]);
   const [valid, setValid] = useState<boolean>(false);
   const [punishment, setPunishment] = useState<any>(0);
   const [buyerPayment, setBuyerPayment] = useState<any>("");
@@ -76,10 +90,18 @@ const ViewFeed: NextPage = () => {
   const [userName, setUserName] = useState<any>("");
   const [feedData, setFeedData] = useState<any>([]);
   const deployedContractFeed = getDeployedContract(chain?.id.toString(), "MecenateFeed");
+  const deployedContractUsers = getDeployedContract(chain?.id.toString(), "MecenateUsers");
+
+  const [attestations, setAttestations] = useState<any>([]);
+
   const deployedContractMUSE = getDeployedContract(chain?.id.toString(), "MUSE");
   const deployedContractMockDai = getDeployedContract(chain?.id.toString(), "MockDai");
+  const [password, setPassword] = useState<any>("");
 
   const [receiver, setReceiver] = useState<any>("");
+
+  eas.connect(signer);
+
   const allStatuses = ["Waiting for Creator", "Proposed", "Accepted", "Submitted", "Finalized", "Punished", "Revealed"];
 
   let feedAddress!: string;
@@ -102,6 +124,51 @@ const ViewFeed: NextPage = () => {
   if (deployedContractMockDai) {
     ({ address: daiAddress, abi: daiAbi } = deployedContractMockDai);
   }
+
+  const usersCtx = useContract({
+    address: deployedContractUsers?.address,
+    abi: deployedContractUsers?.abi,
+    signerOrProvider: signer,
+  });
+
+  const graphUri = "https://base-goerli.easscan.org/graphql";
+
+  const httpLink = createHttpLink({
+    uri: graphUri,
+  });
+
+  const apolloClient = new ApolloClient({
+    link: httpLink,
+    cache: new InMemoryCache(),
+  });
+
+  const getAttestationsGraphQl = gql`
+    query Attestation($where: AttestationWhereInput) {
+      attestations(where: $where) {
+        attester
+        data
+        timeCreated
+        id
+      }
+    }
+  `;
+
+  const fetchAttestations = async () => {
+    console.log("attests");
+
+    const newAttestations = await apolloClient.query({
+      query: getAttestationsGraphQl,
+      variables: {
+        where: { schemaId: { equals: schemaUID } },
+      },
+    });
+
+    //setIsLoading(false);
+
+    console.log("newAttestations: ", newAttestations);
+
+    setAttestations(newAttestations.data.attestations);
+  };
 
   const handleApproveSeller = async () => {
     let _tokenAddress;
@@ -129,10 +196,10 @@ const ViewFeed: NextPage = () => {
     let token;
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), museAbi, customSigner);
+      token = new Contract(String(_tokenAddress), museAbi, signer);
     } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), daiAbi, customSigner);
+      token = new Contract(String(_tokenAddress), daiAbi, signer);
     }
 
     // Write Approval
@@ -144,103 +211,14 @@ const ViewFeed: NextPage = () => {
   const feedCtx = useContract({
     address: addr as string,
     abi: feedAbi,
-    signerOrProvider: customSigner,
+    signerOrProvider: signer,
   });
-
-  //******************** Messenger *********************//
-
-  const sendTelegramMessage = async () => {
-    if (
-      feedData.postdata.settings.status != 0 &&
-      feedData.postdata.settings.status != 1 &&
-      feedData.postdata.settings.status != 2
-    ) {
-      const telegramIds = await feedCtx?.getTelegramIds(keccak256(sismoData.auths[0].userId));
-      const buyerID = telegramIds[0].toHexString().slice(33);
-      const sellerID = telegramIds[1].toHexString().slice(33);
-
-      const isBuyer = buyerID == sismoData.auths[3].userId;
-
-      const url = `https://api.telegram.org/bot${String(process.env.NEXT_PUBLIC_TELEGRAM_TOKEN)}/sendMessage`;
-
-      if (isBuyer) {
-        const message = {
-          feed: "https://mecenate.vercel.app/viewFeed?addr=" + addr,
-          username: userName,
-          message: secretMessage,
-        };
-
-        const formattedText = `<b>🔏 Private Message</b>\n\n<b>➡️ feed: </b> <a href="${message.feed}">${message.feed}</a>\n<b>📨 message: </b> ${message.message}`;
-
-        try {
-          const response = await axios.post(url, {
-            chat_id: sellerID,
-            text: formattedText,
-            parse_mode: "HTML",
-          });
-
-          console.log("Message sent:", response.data);
-        } catch (error) {
-          console.error("Error sending message:", error);
-        }
-        notification.success("Message sent successfully");
-      } else {
-        const message = {
-          feed: "https://mecenate.vercel.app/viewFeed?addr=" + addr,
-          message: secretMessage,
-        };
-
-        const formattedText = `<b>🔏 Private Message</b><b>🔡</b> <a href="${message.feed}">${message.feed}</a>\n<b>📨</b> ${message.message}`;
-
-        try {
-          const response = await axios.post(url, {
-            chat_id: buyerID,
-            text: formattedText,
-            parse_mode: "HTML",
-          });
-
-          console.log("Message sent:", response.data);
-        } catch (error) {
-          console.error("Error sending message:", error);
-        }
-        notification.success("Message sent successfully");
-      }
-    }
-  };
-
-  const sendSecretMessage = async () => {
-    const encryptedMessage = encryptMessage(keccak256(sismoData.auths[0].userId), secretMessage);
-
-    const tx = await feedCtx?.write(keccak256(sismoData.auths[0].userId), toUtf8Bytes(encryptedMessage));
-    await tx?.wait();
-    notification.success("Message sent successfully");
-  };
-
-  const getSecretMessage = async () => {
-    // postStatus != 0
-    if (
-      feedData.postdata.settings.status != 0 &&
-      feedData.postdata.settings.status != 1 &&
-      feedData.postdata.settings.status != 2
-    ) {
-      const _secretMessage = await feedCtx?.getMessage(sismoResponse, withdrawalAddress, nonce);
-
-      console.log("Secret Message: ", _secretMessage);
-
-      const encryptedVaultId = await getHashedVaultId(sismoResponse, withdrawalAddress, nonce);
-      console.log("Encrypted Vault Id: ", encryptedVaultId);
-
-      const decryptedMessage = decryptMessage(encryptedVaultId, toUtf8String(_secretMessage));
-      console.log("Decrypted Message: ", decryptedMessage);
-      return decryptedMessage;
-    }
-  };
 
   //******************** Feed Operation *********************//
 
-  async function storePrivateKey(privateKey: any, contractAddress: any, sismoData: any) {
+  async function storePrivateKey(privateKey: any, contractAddress: any) {
     try {
-      const encryptedKey = await encryptMessage(String(sismoData?.auths[0]?.userId), String(privateKey));
+      const encryptedKey = await encryptMessage(String(password), String(privateKey));
       console.log("Encrypted Key: ", encryptedKey);
       console.log("Contract Address: ", contractAddress);
       const response = await fetch("/api/storeKey", {
@@ -276,7 +254,7 @@ const ViewFeed: NextPage = () => {
 
     const dataSaved = await savePost(postRawData);
 
-    /* notification.warning(
+    notification.warning(
       <div
         id="alert-additional-content-3"
         className="p-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
@@ -332,16 +310,16 @@ const ViewFeed: NextPage = () => {
       data: JSON.stringify(dataSaved),
       fileName: String(postCount) + "_" + feedCtx?.address + "_sellData.json",
       fileType: "text/json",
-    }); */
+    });
 
-    const response = await storePrivateKey(dataSaved?.symmetricKey, feedCtx?.address, sismoData);
+    /*  const response = await storePrivateKey(dataSaved?.symmetricKey, feedCtx?.address);
 
     if (response.message == "Key stored successfully") {
       notification.success("Symmetric key saved successfully");
     } else {
       notification.error("Symmetric key failed to save");
       return;
-    }
+    } */
 
     const proofOfHashEncode = await ErasureHelper.multihash({
       input: dataSaved?.proofhash,
@@ -361,8 +339,6 @@ const ViewFeed: NextPage = () => {
       _buyer = buyer;
     }
 
-    feedCtx?.connect(customSigner);
-
     txData(
       feedCtx?.createPost(
         proofOfHashEncode,
@@ -371,9 +347,7 @@ const ViewFeed: NextPage = () => {
         parseEther(await buyerPayment),
         parseEther(postStake),
         Number(tokenId),
-        sismoResponse,
-        localStorage.getItem("withdrawalAddress"),
-        localStorage.getItem("nonce"),
+        signer?.getAddress(),
         {
           value: tokenId == "0" ? parseEther(postStake) : 0,
         },
@@ -382,18 +356,10 @@ const ViewFeed: NextPage = () => {
   };
 
   async function acceptPost() {
-    feedCtx?.connect(customSigner);
     txData(
-      feedCtx?.acceptPost(
-        sismoResponse,
-        withdrawalAddress,
-        nonce,
-        feedData?.postdata?.settings?.tokenId,
-        parseEther(postPayment),
-        {
-          value: tokenId == "0" ? parseEther(postPayment) : 0,
-        },
-      ),
+      feedCtx?.acceptPost(feedData?.postdata?.settings?.tokenId, parseEther(postPayment), signer?.getAddress(), {
+        value: feedData?.postdata?.settings?.tokenId == "0" ? parseEther(postPayment) : 0,
+      }),
     );
   }
 
@@ -489,34 +455,30 @@ const ViewFeed: NextPage = () => {
   async function submitData() {
     const abiCoder = new ethers.utils.AbiCoder();
     const proofhash = abiCoder.decode(["bytes32"], feedData[1][2].encryptedData);
-    const encryptedSymKeyStored = await fetchPrivateKey(feedCtx?.address);
 
-    if (encryptedSymKeyStored == undefined) {
-      notification.error("Symmetric key not found");
-      return;
-    }
+    const buyerAddress = feedData[1][1].buyer;
+    const sellerAddress = feedData[1][1].seller;
 
-    console.log("Encrypted Symmetric Key Stored: ", encryptedSymKeyStored);
-    const symKey = await decryptMessage(String(sismoData?.auths[0].userId), String(encryptedSymKeyStored));
+    const buyerPublicKey = await usersCtx?.getUserPublicKey(buyerAddress);
+    const sellerPublicKey = await usersCtx?.getUserPublicKey(sellerAddress);
 
-    /* const symmetricKeyHash = await ErasureHelper.multihash({
-      input: symmetricKey,
-      inputType: "raw",
-      outputType: "hex",
-    }); */
+    const encrypted = crypto.encrypt(symmetricKey, toUtf8String(buyerPublicKey), secretKey);
 
-    /*  const encryptedSymKey_Buyer = {
-      ciphertext: encrypted,
-      ephemPubKey: sellerPubKeyDecoded,
-      nonce: 0,
-      version: "v1.0.0",
-    }; */
+    const encryptedSymKey_Buyer = {
+      ciphertext: encrypted.data,
+      ephemPubKey: sellerPublicKey,
+      nonce: encrypted.nonce,
+      version: "v2.0.0",
+    };
 
     const json_selldata_v120 = {
-      esp_version: "v1.2.0",
+      esp_version: "v2.0.0",
       proofhash: proofhash,
-      sender: signer?.getAddress(),
-      encryptedSymKey: await symKey,
+      sender: sellerAddress,
+      senderPubKey: sellerPublicKey,
+      receiver: buyerAddress,
+      receiverPubKey: buyerPublicKey,
+      encryptedSymKey: encryptedSymKey_Buyer,
     };
 
     const pinata = await new pinataSDK(pinataApiKey, pinataApiSecret);
@@ -543,7 +505,19 @@ const ViewFeed: NextPage = () => {
       outputType: "digest",
     });
 
-    if (pin.IpfsHash !== proofHash58) {
+    console.group("Subimt Data");
+    console.log("Buyer Address: ", buyerAddress);
+    console.log("Seller Address: ", sellerAddress);
+    console.log("Buyer Public Key: ", buyerPublicKey);
+    console.log("Seller Public Key: ", sellerPublicKey);
+    console.log("Encrypted Symmetric Key: ", encryptedSymKey_Buyer);
+    console.log("Proof JSON: ", json_selldata_v120);
+    console.log("Pinata Pin: ", pin);
+    console.log("Proof Hash: ", proofHash58);
+    console.log("Proof Hash Digest: ", proofHash58Digest);
+    console.groupEnd();
+
+    if (String(pin.IpfsHash) !== String(proofHash58)) {
       console.log("Error with proof Hash.");
       console.log(pin.IpfsHash);
       console.log(proofHash58);
@@ -561,10 +535,9 @@ const ViewFeed: NextPage = () => {
     });
 
     // check response is ipfs valid content
-    if (responseIPFS.data.esp_version !== "v1.2.0") {
+    if (responseIPFS.data.esp_version !== "v2.0.0") {
       console.log("Error with proof Hash.");
       console.log(responseIPFS.data.esp_version);
-      console.log("v1.2.0");
       return;
     }
 
@@ -573,7 +546,7 @@ const ViewFeed: NextPage = () => {
 
     feedCtx?.connect(customSigner);
 
-    txData(feedCtx?.submitHash(proofHash58Digest, sismoResponse, withdrawalAddress, nonce));
+    txData(feedCtx?.submitHash(proofHash58Digest));
 
     return {
       proofJson: json_selldata_v120,
@@ -612,12 +585,14 @@ const ViewFeed: NextPage = () => {
     const encryptedSymKey = await JSON.parse(JSON.stringify(responseDecodeHahJSON.encryptedSymKey));
     console.log("Encrypted Symmetric Key: ", encryptedSymKey);
 
-    /* const decrypted = crypto.decrypt(
+    const decrypted = crypto.decrypt(
       encryptedSymKey.ciphertext,
       encryptedSymKey.nonce,
-      encryptedSymKey.ephemPubKey,
+      toUtf8String(encryptedSymKey.ephemPubKey),
       secretKey,
-    ); */
+    );
+
+    console.log("Decrypted", decrypted);
 
     const _decodeHash = await ErasureHelper.multihash({
       input: responseDecodeHahJSON.proofhash.toString(),
@@ -653,7 +628,7 @@ const ViewFeed: NextPage = () => {
     const response_Encrypteddatahash_JSON = JSON.parse(JSON.stringify(response_Encrypteddatahash.data));
 
     const decryptFile = ErasureHelper.crypto.symmetric.decryptMessage(
-      encryptedSymKey,
+      decrypted,
       response_Encrypteddatahash_JSON.encryptedData,
     );
 
@@ -750,11 +725,31 @@ const ViewFeed: NextPage = () => {
 
   async function finalizePost() {
     console.log("Finalizing Data...");
-    feedCtx?.connect(customSigner);
     if (valid == true) {
-      txData(feedCtx?.finalizePost(valid, parseEther("0"), keccak256(sismoData.auths[0].userId)));
+      const encodedData = schemaEncoder.encodeData([
+        { name: "verified", value: valid, type: "bool" },
+        { name: "feed", value: feedCtx?.address, type: "address" },
+        { name: "post", value: feedData[1][2].encryptedData, type: "bytes" },
+      ]);
+
+      const data = {
+        recipient: feedData?.postdata?.escrow?.seller,
+        revocable: false, // Be aware that if your schema is not revocable, this MUST be false
+        data: encodedData,
+      };
+
+      console.log(data);
+
+      console.log("Encoded Data: ", encodedData);
+      const tx = await eas.attest({
+        schema: schemaUID,
+        data: data,
+      });
+      const newAttestationUID = await tx.wait();
+      console.log("New attestation UID:", newAttestationUID);
+      txData(feedCtx?.finalizePost(valid, parseEther("0"), newAttestationUID));
     } else {
-      txData(feedCtx?.finalizePost(valid, parseEther(punishment), keccak256(sismoData.auths[0].userId)));
+      txData(feedCtx?.finalizePost(valid, parseEther(punishment), uid));
     }
 
     await fetchData();
@@ -762,7 +757,7 @@ const ViewFeed: NextPage = () => {
 
   async function renounce() {
     feedCtx?.connect(customSigner);
-    txData(feedCtx?.renouncePost(sismoResponse, withdrawalAddress, nonce));
+    txData(feedCtx?.renouncePost());
 
     notification.success("Refund successful");
   }
@@ -773,7 +768,7 @@ const ViewFeed: NextPage = () => {
     console.log("Adding Stake...");
     feedCtx?.connect(customSigner);
     txData(
-      feedCtx?.addStake(feedData?.postdata?.settings?.tokenId, parseEther(stakeAmount), sismoResponse, {
+      feedCtx?.addStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress(), parseEther(stakeAmount), {
         value: feedData?.postdata?.settings?.tokenId == 0 ? parseEther(stakeAmount) : 0,
       }),
     );
@@ -782,7 +777,7 @@ const ViewFeed: NextPage = () => {
 
   async function takeAll() {
     feedCtx?.connect(customSigner);
-    txData(feedCtx?.takeFullStake(feedData?.postdata?.settings?.tokenId, sismoResponse, withdrawalAddress, nonce));
+    txData(feedCtx?.takeFullStake(feedData?.postdata?.settings?.tokenId, receiver));
     console.log("Take All Stake...");
     await fetchData();
   }
@@ -792,15 +787,7 @@ const ViewFeed: NextPage = () => {
 
     console.log("Take Stake...");
 
-    txData(
-      feedCtx?.takeStake(
-        feedData?.postdata?.settings?.tokenId,
-        parseEther(stakeAmount),
-        sismoResponse,
-        withdrawalAddress,
-        nonce,
-      ),
-    );
+    txData(feedCtx?.takeStake(feedData?.postdata?.settings?.tokenId, receiver, parseEther(stakeAmount)));
 
     await fetchData();
   }
@@ -810,7 +797,6 @@ const ViewFeed: NextPage = () => {
   const fetchData = async function fetchData() {
     if (feedCtx && signer && provider) {
       const data = await feedCtx?.post();
-
       setFeedData(data);
       setPostCount(await feedCtx?.postCount());
     }
@@ -1051,29 +1037,12 @@ const ViewFeed: NextPage = () => {
   //******************** useEffects *********************//
 
   useEffect(() => {
-    setUserName(localStorage.getItem("userName") || "");
-    const pk = localStorage.getItem("pk");
-    const newWallet = new ethers.Wallet(String(pk), provider);
-    setCustomSigner(newWallet);
-  }, []);
-
-  useEffect(() => {
     const fetchDataAsync = async () => {
       try {
         console.log("Fetching Data...");
         await fetchData();
-        setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
-        setVerified(localStorage.getItem("verified"));
-        setSismoResponse(localStorage.getItem("sismoResponse"));
-        setNonce(String(localStorage.getItem("nonce")));
-        setWithdrawalAddress(String(localStorage.getItem("withdrawalAddress")));
-
-        if (sismoData) {
-          const _message = await getSecretMessage();
-          console.log("Message: ", _message);
-          setMessage(_message);
-        }
-        console.log(feedData);
+        await fetchAttestations();
+        console.log(attestations);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -1095,13 +1064,10 @@ const ViewFeed: NextPage = () => {
 
   useEffect(() => {
     const run = async () => {
-      const yourStake = await feedCtx?.getStake(
-        feedData?.postdata?.settings?.tokenId,
-        keccak256(sismoData.auths[0].userId),
-      );
+      const yourStake = await feedCtx?.getStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress());
       setYourStake(yourStake);
     };
-    if (sismoData) {
+    if (signer) {
       run();
     }
   }, [feedCtx]);
@@ -1127,17 +1093,20 @@ const ViewFeed: NextPage = () => {
   return (
     <div className="flex flex-col items-center pt-2 p-2 w-10/12 mx-auto ">
       {feedData[0] != null ? (
-        <div className="flex flex-col text-left bg-primary rounded-lg card card-shadow">
+        <div className="flex flex-col text-left rounded-lg  mt-5">
           <div className="flex flex-col mb-5  min-w-fit items-left justify-center w-full">
             <div className="flex flex-row gap-5 mx-10 my-5">
-              <div className="dropdown dropdown-bottom ">
+              <div className="dropdown dropdown-bottom  ">
                 <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
                   <DocumentCheckIcon className="h-8 w-8 mx-2" /> Seller
                 </label>
-                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow  rounded-box w-52  bg-primary ">
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content z-[1] menu p-2 shadow  rounded-box w-52  bg-gradient-to-tr from-slate-700 to-slate-800  "
+                >
                   <li>
                     {" "}
-                    <label htmlFor="modal-create" className="feedData.postData font-semibold">
+                    <label htmlFor="modal-create" className="feedData.postData font-semibold ">
                       Create
                     </label>
                   </li>
@@ -1167,7 +1136,10 @@ const ViewFeed: NextPage = () => {
                 <label tabIndex={0} className="hover:bg-secondary-focus  btn btn-custom bg-inherit">
                   <MegaphoneIcon className="h-8 w-8 mx-2" /> Buyer
                 </label>
-                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-primary rounded-box w-52">
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
+                >
                   <li>
                     {" "}
                     <label htmlFor="modal-accept" className=" font-semibold">
@@ -1186,11 +1158,14 @@ const ViewFeed: NextPage = () => {
                   </li>
                 </ul>
               </div>
-              <div className="dropdown dropdown-bottom">
+              <div className="dropdown dropdown-bottom ">
                 <label tabIndex={0} className="hover:bg-secondary-focus btn btn btn-custom bg-inherit">
                   <ScaleIcon className="h-8 w-8 mx-2" /> Stake
                 </label>
-                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
+                >
                   <li>
                     {" "}
                     <label htmlFor="modal-stake" className="feedData.postData font-semibold">
@@ -1257,63 +1232,10 @@ const ViewFeed: NextPage = () => {
               })}
             </ul>
           </div>
-
-          <div className="flex flex-col mt-5 mb-16 min-w-fit items-left justify-center w-full border-2 p-10 bg-primary border-secondary rounded-2xl">
-            <div className="text-2xl font-bold mx-10">Messenger</div>
-            <div className="text-base font-light mx-10">Comunicate with buyer/seller or mecenate community</div>
-            <a href="https://t.me/mecenate_message_bot" className="link-hover mx-10">
-              Telegram Bot
-            </a>
-            <a href="https://t.me/mecenate_message_bot" className="link-hover mx-10">
-              Telegram Channel
-            </a>
-            <div className="mx-10  font-base text-lg">
-              <input
-                type="text"
-                className="input w-full mt-8"
-                placeholder="Message to send"
-                onChange={e => setSecretMessage(e.target.value)}
-              />{" "}
-              <button
-                className="btn btn-primary mt-8"
-                onClick={() => {
-                  sendSecretMessage();
-                }}
-              >
-                <PaperAirplaneIcon className="h-8 w-8 mx-2" /> Send On-Chain
-              </button>
-              {sismoData && sismoData.auths[2] && sismoData.auths[2].userId ? (
-                <div>
-                  <button
-                    className="btn btn-primary mt-8 "
-                    onClick={() => {
-                      sendTelegramMessage();
-                    }}
-                    disabled={!sismoData.auths[2].userId}
-                  >
-                    <PaperAirplaneIcon className="h-8 w-8 mx-2" /> Send Private on Telegram
-                  </button>
-                </div>
-              ) : (
-                <div></div>
-              )}
-              <div className="flex flex-row my-10">
-                <InboxArrowDownIcon className="h-8 w-8 mx-5 " />
-                <div className="flex flex-col">
-                  <span className="text-xs mb-2">Last On-Chain Message Received</span>
-                  {message && message != "" ? (
-                    <div className="font-base text-lg">{message}</div>
-                  ) : (
-                    <div className="font-base text-lg">No Message</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
           <div>
             <input type="checkbox" id="modal-create" className="modal-toggle " />
-            <div className="modal">
-              <div className="modal-box rounded-lg shadow-xl">
+            <div className="modal ">
+              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                 <div className="modal-header">
                   <div className="modal-title text-2xl font-bold">Create Post</div>
                   <label htmlFor="modal-create" className="btn btn-ghost">
@@ -1324,16 +1246,26 @@ const ViewFeed: NextPage = () => {
                   <label className="block text-base-500">Duration</label>
                   <select
                     key={5}
-                    className="form-select w-full mb-8"
+                    className="select select-text w-full mb-8 text-black bg-white"
                     value={postDuration}
                     onChange={e => setPostDuration(e.target.value)}
                   >
-                    <option>Select Duration</option>
-                    <option value="0">1 Days</option>
-                    <option value="1">3 Days</option>
-                    <option value="2">1 Week</option>
-                    <option value="3">2 Weeks</option>
-                    <option value="4">1 Month</option>
+                    <option className="bg-transparent">Select Duration</option>
+                    <option className="bg-transparent" value="0">
+                      1 Days
+                    </option>
+                    <option className="bg-transparent" value="1">
+                      3 Days
+                    </option>
+                    <option className="bg-transparent" value="2">
+                      1 Week
+                    </option>
+                    <option className="bg-transparent" value="3">
+                      2 Weeks
+                    </option>
+                    <option className="bg-transparent" value="4">
+                      1 Month
+                    </option>
                   </select>
                   <label className="block text-base-500 mt-8">Stake</label>
                   <input
@@ -1345,7 +1277,7 @@ const ViewFeed: NextPage = () => {
                   />
 
                   <select
-                    className="select select-text bg-transparent my-4"
+                    className="select select-text bg-transparent my-4 text-black bg-white"
                     name="tokens"
                     id="tokens"
                     onChange={e => handleSelectToken(e.target.value)}
@@ -1379,7 +1311,11 @@ const ViewFeed: NextPage = () => {
                   />
 
                   <label className="block text-base-500">Type</label>
-                  <select className="form-select w-full" value={postType} onChange={e => setPostType(e.target.value)}>
+                  <select
+                    className="select select-text w-full text-black bg-white"
+                    value={postType}
+                    onChange={e => setPostType(e.target.value)}
+                  >
                     <option>Select Type</option>
                     <option value="0">Text</option>
                     <option value="1">Image</option>
@@ -1417,6 +1353,14 @@ const ViewFeed: NextPage = () => {
                       </Dropzone>
                     </div>
                   ) : null}
+                  {/* <input
+                    type="password"
+                    className="input w-full my-4"
+                    placeholder="Password to save the symmetric key"
+                    onChange={async e => {
+                      setPassword(e.target.value);
+                    }}
+                  /> */}
                   <button
                     className="btn btn-primary w-full mt-4"
                     onClick={async () => {
@@ -1435,7 +1379,7 @@ const ViewFeed: NextPage = () => {
             </div>
             <input type="checkbox" id="modal-submit" className="modal-toggle " />
             <div className="modal">
-              <div className="modal-box">
+              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                 <div className="modal-header">
                   <div className="modal-title text-2xl font-bold">Submit encrypted key</div>
                   <label htmlFor="modal-submit" className="btn btn-ghost">
@@ -1443,14 +1387,21 @@ const ViewFeed: NextPage = () => {
                   </label>
                 </div>
                 <div className="modal-body space-y-4 text-left">
-                  {/* <input
+                  <input
                     type="password"
                     className="input w-full"
                     placeholder="Symmetric Key"
                     value={symmetricKey}
                     onChange={e => setSymmetricKey(e.target.value)}
                   />
-                  <br /> */}
+                  <br />
+                  <input
+                    type="password"
+                    className="input w-full"
+                    placeholder="Secret Key"
+                    value={secretKey}
+                    onChange={e => setSecretKey(e.target.value)}
+                  />
                   <button
                     className="btn  w-full"
                     onClick={async () => {
@@ -1462,7 +1413,14 @@ const ViewFeed: NextPage = () => {
                   </button>
                 </div>
                 <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-submit" className="btn">
+                  <label
+                    htmlFor="modal-submit"
+                    className="btn"
+                    onClick={async () => {
+                      setSecretKey("");
+                      setSymmetricKey("");
+                    }}
+                  >
                     Close
                   </label>
                 </div>
@@ -1470,7 +1428,7 @@ const ViewFeed: NextPage = () => {
             </div>
             <input type="checkbox" id="modal-reveal" className="modal-toggle" />
             <div className="modal">
-              <div className="modal-box">
+              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                 <div className="modal-header">
                   <div className="modal-title text-2xl font-bold">Reveal Post</div>
                   <label htmlFor="modal-reveal" className="btn btn-ghost">
@@ -1549,7 +1507,7 @@ const ViewFeed: NextPage = () => {
             </div>
             <input type="checkbox" id="modal-accept" className="modal-toggle" />
             <div className="modal">
-              <div className="modal-box">
+              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                 <div className="modal-header">
                   <div className="modal-title text-2xl font-bold">Accept Post</div>
                   <label htmlFor="modal-accept" className="btn btn-ghost">
@@ -1597,7 +1555,7 @@ const ViewFeed: NextPage = () => {
             </div>
             <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
             <div className="modal">
-              <div className="modal-box">
+              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                 <div className="modal-header">
                   <div className="modal-title text-2xl font-bold">Retrieve Post</div>
                   <label htmlFor="modal-retrieve" className="btn btn-ghost">
@@ -1605,6 +1563,13 @@ const ViewFeed: NextPage = () => {
                   </label>
                 </div>
                 <div className="modal-body space-y-4 text-left">
+                  <input
+                    type="password"
+                    className="input w-full"
+                    placeholder="Secret Key"
+                    value={secretKey}
+                    onChange={e => setSecretKey(e.target.value)}
+                  />
                   <button
                     className="btn  w-full"
                     onClick={async () => {
@@ -1616,7 +1581,13 @@ const ViewFeed: NextPage = () => {
                   </button>
                 </div>
                 <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-retrieve" className="btn">
+                  <label
+                    htmlFor="modal-retrieve"
+                    className="btn"
+                    onClick={async () => {
+                      setSecretKey("");
+                    }}
+                  >
                     Close
                   </label>
                 </div>
@@ -1624,7 +1595,7 @@ const ViewFeed: NextPage = () => {
             </div>
             <input type="checkbox" id="modal-finalize" className="modal-toggle" />
             <div className="modal">
-              <div className="modal-box">
+              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                 <div className="modal-header">
                   <div className="modal-title text-2xl font-bold">Finalize Post</div>
                 </div>
@@ -1672,7 +1643,7 @@ const ViewFeed: NextPage = () => {
             </div>
             <input type="checkbox" id="modal-stake" className="modal-toggle" />
             <div className="modal">
-              <div className="modal-box">
+              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                 <div className="modal-header">
                   <div className="modal-title text-2xl font-bold">Stake</div>
                   <label htmlFor="modal-stake" className="btn btn-ghost">
@@ -1688,7 +1659,12 @@ const ViewFeed: NextPage = () => {
                     value={stakeAmount}
                     onChange={e => setStakeAmount(e.target.value)}
                   />
-
+                  <input
+                    type="text"
+                    className="input w-full"
+                    placeholder="Receivert"
+                    onChange={e => setReceiver(e.target.value)}
+                  />
                   <button
                     className="btn  w-full"
                     onClick={async () => {
@@ -1722,7 +1698,7 @@ const ViewFeed: NextPage = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col mb-16  min-w-fit items-left justify-center w-full border-2 p-10 bg-primary border-secondary rounded-2xl">
+          <div className="flex flex-col mb-16  min-w-fit items-left justify-center w-full  p-10  rounded-2xl">
             <div className="card w-fit">
               <div className="card-body">
                 <h2 className="text-2xl font-bold">Feed Info</h2>
@@ -1815,7 +1791,13 @@ const ViewFeed: NextPage = () => {
             <div className="card w-fit">
               <div className="card-body">
                 <h2 className="text-2xl font-bold">Punishment</h2>
-                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 break-all">
+                  <p>
+                    <span className="font-bold">Buyer </span> <br /> {feedData[1][1].buyer.toString()}
+                  </p>
+                  <p>
+                    <span className="font-bold">Seller</span> <br /> {feedData[1][1].seller.toString()}
+                  </p>
                   <p>
                     <span className="font-bold">Buyer Penalty</span> <br />{" "}
                     {formatEther(feedData[1][1].penalty.toString())}

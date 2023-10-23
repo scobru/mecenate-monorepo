@@ -9,7 +9,7 @@ import "./Events.sol";
 
 abstract contract Submission is Events {
     function submitHash(bytes memory encryptedKey) external virtual {
-        require(msg.sender == postSettingPrivate.sellerAddress, "NOT_SELLER");
+        require(msg.sender == post.postdata.escrow.seller, "NOT_SELLER");
 
         Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(
@@ -52,7 +52,7 @@ abstract contract Submission is Events {
         );
 
         require(
-            msg.sender != postSettingPrivate.sellerAddress,
+            msg.sender != post.postdata.escrow.seller,
             "YOU_ARE_THE_SELLER"
         );
 

@@ -6,19 +6,18 @@ import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
 import "../interfaces/IMecenateFeedFactory.sol";
 import "../helpers/eas/IEAS.sol";
+import "./Version.sol";
 
 /**
  * @title Data
  * @dev This contract stores data related to Mecenate posts and provides functions to interact with it.
  */
-contract Data {
+contract Data is Version {
     bytes internal constant ZEROHASH = "0x00";
 
     address public owner;
 
     Structures.Post public post;
-
-    Structures.PostSettingPrivate internal postSettingPrivate;
 
     Structures.FeedSettings internal settings;
 
@@ -29,13 +28,17 @@ contract Data {
     constructor(
         address usersModuleContract,
         address factoryContract,
-        string memory ver
-    ) {
+        uint256 _major,
+        uint256 _minor,
+        uint256 _patch
+    ) Version(_major, _minor, _patch) {
         settings.punishmentRatio = 100000000000000000; // Constant value
         settings.postCount = 0; // Initialize postCount to 0
         settings.usersModuleContract = usersModuleContract;
         settings.factoryContract = msg.sender;
         settings.router = IMecenateFeedFactory(factoryContract).router();
+        settings.version = _version();
+
         post.postdata.settings.status = Structures.PostStatus.Waiting;
 
         postDurationToDays[uint8(Structures.PostDuration.OneDay)] = 1 days;
@@ -43,13 +46,8 @@ contract Data {
         postDurationToDays[uint8(Structures.PostDuration.OneWeek)] = 7 days;
         postDurationToDays[uint8(Structures.PostDuration.TwoWeeks)] = 14 days;
         postDurationToDays[uint8(Structures.PostDuration.OneMonth)] = 30 days;
+
         validStatuses[uint8(Structures.PostStatus.Waiting)] = true;
-
-        settings.version = ver;
-    }
-
-    function version() external view returns (string memory) {
-        return settings.version;
     }
 
     function _changeStatus(Structures.PostStatus newStatus) internal {
@@ -90,6 +88,14 @@ contract Data {
 
     function postCount() external view returns (uint256) {
         return settings.postCount;
+    }
+
+    function getEncryptedPost() external view returns (bytes memory) {
+        return post.postdata.data.encryptedData;
+    }
+
+    function getPost() external view returns (Structures.Post memory) {
+        return post;
     }
 
     receive() external payable {}

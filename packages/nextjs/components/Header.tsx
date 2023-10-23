@@ -1,6 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
-import { FaucetButton, VerifiedBadge } from "~~/components/scaffold-eth";
+import { FaucetButton } from "~~/components/scaffold-eth";
 import RainbowKitCustomConnectButton from "~~/components/scaffold-eth/RainbowKitCustomConnectButton";
 import { Bars3Icon, BugAntIcon, DocumentIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
@@ -16,7 +15,7 @@ import {
   MegaphoneIcon,
   HomeIcon,
 } from "@heroicons/react/24/outline";
-import { InboxIcon } from "@heroicons/react/20/solid";
+import { ArchiveBoxIcon, InboxIcon } from "@heroicons/react/20/solid";
 import { keccak256 } from "ethers/lib/utils.js";
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
@@ -113,15 +112,9 @@ export default function Header() {
         </NavLink>
       </li>
       <li className="font-semibold">
-        <NavLink href="/vault">
-          <KeyIcon className="h-4 w-4" />
-          Vault
-        </NavLink>
-      </li>
-      <li className="font-semibold">
-        <NavLink href="/messenger">
-          <InboxIcon className="h-4 w-4" />
-          Messenger
+        <NavLink href="/attestations">
+          <ArchiveBoxIcon className="h-4 w-4" />
+          Attestations
         </NavLink>
       </li>
       <li className="font-semibold">
@@ -134,7 +127,7 @@ export default function Header() {
   );
 
   return (
-    <div className="sticky lg:static top-0 navbar bg-primary min-h-0 flex-shrink-0 justify-between z-20 shadow-md lg:shadow-none shadow-secondary">
+    <div className="sticky lg:static top-0 navbar bg-gradient-to-bl from-slate-700 to-slate-900 min-h-0 flex-shrink-0 justify-between z-20 ">
       <div className="navbar-start w-auto lg:w-1/2">
         <div className="lg:hidden dropdown" ref={burgerMenuRef}>
           <button
@@ -169,9 +162,6 @@ export default function Header() {
       </div>
 
       <div className="navbar-end flex-grow mr-4">
-        <div>
-          <VerifiedBadge verified={String(verified)} encryptedVaultId={encryptedVaultId} address={forwarderAddress} />
-        </div>
         <RainbowKitCustomConnectButton />
         <FaucetButton />
       </div>

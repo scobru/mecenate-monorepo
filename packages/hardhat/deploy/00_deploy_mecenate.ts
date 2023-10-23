@@ -6,9 +6,9 @@ import { deployPool, encodePriceSqrt } from "../scripts/01_deployPools";
 
 // Goerli Base
 const router = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d";
-const eas = "0xAcfE09Fd03f7812F022FBf636700AdEA18Fd2A7A";
+const eas = "0x4200000000000000000000000000000000000021";
 const schema =
-  "0x810f5486d17adb2e879cb61042ea3fb55466e1326c0d023f99674b98eead56b8";
+  "0xa685677ba3ea1c2df3ed44de688bf5147c36f910b54ec32f08e1e0de4914a113";
 
 // Version
 const version = "v2.0.0";
@@ -68,10 +68,8 @@ const deployYourContract: DeployFunction = async function (
 
   const verifier = await deploy("MecenateVerifier", {
     from: deployer,
-
     args: ["0x6c434d2de6efa3e7169bc58843b74d74"],
     log: true,
-
     autoMine: true,
   });
 
@@ -80,10 +78,8 @@ const deployYourContract: DeployFunction = async function (
 
   const users = await deploy("MecenateUsers", {
     from: deployer,
-
     args: [verifier.address],
     log: true,
-
     autoMine: true,
   });
 
@@ -118,7 +114,9 @@ const deployYourContract: DeployFunction = async function (
       ethers.constants.AddressZero,
       users.address,
       feedFactory.address,
-      version,
+      2,
+      0,
+      0,
     ],
     log: true,
 
@@ -178,7 +176,9 @@ const deployYourContract: DeployFunction = async function (
 
   const setByteCode = await feedFactoryInstance.setFeedByteCode(
     feed.bytecode,
-    version,
+    2,
+    0,
+    0,
   );
 
   setByteCode.wait();

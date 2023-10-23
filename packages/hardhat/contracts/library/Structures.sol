@@ -96,17 +96,11 @@ library Structures {
     }
 
     /**
-     * @dev Struct representing the private settings of a post on the Mecenate platform.
-     */
-    struct PostSettingPrivate {
-        address buyerAddress;
-        address sellerAddress;
-    }
-
-    /**
      * @dev Struct representing the escrow of a post on the Mecenate platform.
      */
     struct PostEscrow {
+        address buyer;
+        address seller;
         uint256 stake;
         uint256 payment;
         uint256 punishment;

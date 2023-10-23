@@ -30,9 +30,9 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     event FeedCreated(address indexed addr);
 
-    function _changeVersion(string memory newVersion) internal {
-        version = newVersion;
-    }
+    uint8 public major;
+    uint8 public minor;
+    uint8 public patch;
 
     function treasuryContract() external view returns (address) {
         return settings.treasuryContract;
@@ -100,10 +100,14 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
     function setFeedByteCode(
         bytes memory newByteCode,
-        string memory newVersion
+        uint8 newMajor,
+        uint8 newMinor,
+        uint8 newPatch
     ) external onlyOwner {
+        major = newMajor;
+        minor = newMinor;
+        patch = newPatch;
         feedByteCode = newByteCode;
-        _changeVersion(newVersion);
     }
 
     function buildFeed() external payable returns (address) {
@@ -111,7 +115,9 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
             msg.sender,
             settings.usersModuleContract,
             address(this),
-            version
+            major,
+            minor,
+            patch
         );
 
         require(

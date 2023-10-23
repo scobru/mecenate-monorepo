@@ -65,7 +65,7 @@ const Home: NextPage = () => {
             </span>
           </h1>
           {stats ? (
-            <div className="text-2xl font-semibold rounded-xl text-left my-5  p-2 bg-primary w-fit mx-auto ">
+            <div className="text-2xl font-semibold rounded-xl text-left my-5  p-2 bg-gradient-to-bl from-slate-800 to-slate-950 w-fit mx-auto ">
               <div className="flex-wrap items-center min-w-fit  lg:text-5xl md:text-4xl text-xl ">
                 <div className="stats  mx-2 min-w-fit bg-inherit  ">
                   <div className="stat gap-3">
@@ -106,7 +106,7 @@ const Home: NextPage = () => {
         </div>
 
         <div className="w-screen bg-sharding bg-cover bg-left">
-          <div className="xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-primary opacity-85">
+          <div className="xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-gradient-to-bl from-slate-800 to-slate-950 ">
             <div className="p-10 my-20">
               <h2 className="text-6xl sm:text-xl font-extrabold  ">Getting Started</h2>
               <h2 className="text-5xl font-light  ">with Mecenate</h2>
@@ -120,7 +120,7 @@ const Home: NextPage = () => {
               </ol>
             </div>
           </div>
-          <div className="max-w-3xl bg-primary opacity-95 p-10 flex-col mx-auto text-center  text-base-content">
+          <div className="max-w-3xl bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95 p-10 flex-col mx-auto text-center  text-base-content">
             <h1 className="text-7xl font-extrabold mb-20">Data Privacy and Security</h1>
             <h1 className="text-3xl font-extralight mb-20">Redefined.</h1>
             <p className="text-3xl mb-20 font-extralight text-left hover:font-semibold hover:text-base-content">
@@ -178,8 +178,8 @@ const Home: NextPage = () => {
             want.
           </p>
         </div>
-        <div className="w-screen p-5 bg-primary">
-          <div className="flex p-5 flex-col items-center text-center py-10 xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-primary opacity-95 ">
+        <div className="w-screen p-5 bg-gradient-to-bl from-slate-800 to-slate-950">
+          <div className="flex p-5 flex-col items-center text-center py-10 xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95 ">
             <MegaphoneIcon className="h-20 w-20 fill-secondary" />
             <div className="p">
               <div className="font-base align-baseline text-justify-center my-5">
@@ -204,7 +204,7 @@ const Home: NextPage = () => {
           </div>
         </div>
         <div className="w-screen  bg-bazaar bg-cover bg-center ">
-          <div className="flex flex-col xl:w-6/12 md:8/12 lg:10/12 sm:12/12  p-10  text-left  my-5  bg-primary opacity-95 mx-auto">
+          <div className="flex flex-col xl:w-6/12 md:8/12 lg:10/12 sm:12/12  p-10  text-left  my-5  bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95 mx-auto">
             <h1 className="text-4xl font-extrabold mb-8 text-left ">INFORMATIONS FINDS YOU 🔮</h1>
             <p className="text-2xl  mb-8">
               {" "}
@@ -221,7 +221,7 @@ const Home: NextPage = () => {
           </div>
         </div>
         <div className="backdrop-opacity-50 backdrop-blur-2xl bg-dev bg-cover ">
-          <div className="flex-grow mx-auto xl:w-6/12 md:8/12 lg:10/12 sm:12/12  py-12 p-10 bg-primary opacity-95">
+          <div className="flex-grow mx-auto xl:w-6/12 md:8/12 lg:10/12 sm:12/12  py-12 p-10 bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95">
             <div className="text-5xl font-bold my-10">HOW IT WORKS?</div>
             <p className="text-xl  mb-8">
               <strong>Question</strong> Enter a short explanation of what you&apos;re looking for. This can include

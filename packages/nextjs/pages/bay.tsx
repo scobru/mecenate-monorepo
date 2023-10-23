@@ -12,27 +12,20 @@ const Bay: NextPage = () => {
   const provider = useProvider();
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
-  const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
-  const [customSigner, setCustomSigner] = React.useState<any>(null);
+  const txData = useTransactor(signer as Signer);
 
   const deployedContractBay = getDeployedContract(chain?.id.toString(), "MecenateBay");
   const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
   const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
   const deployedContractDai = getDeployedContract(chain?.id.toString(), "MockDai");
   const deployedContractMUSE = getDeployedContract(chain?.id.toString(), "MUSE");
+
   const [requests, setRequests] = React.useState<BayRequest[]>([]);
   const [requestString, setRequestString] = React.useState<string>("");
   const [requestPayment, setRequestPayment] = React.useState<string>("");
   const [requestStake, setRequestStake] = React.useState<string>("");
   const [requestAddress, setRequestAddress] = React.useState<string>("");
-  const txData = useTransactor(customSigner as Signer);
-  const [sismoData, setSismoData] = React.useState<any>(null);
-  const [, setVerified] = React.useState<any>(null);
-  const [sismoResponse, setSismoResponse] = React.useState<any>(null);
   const [tokenId, setTokenId] = React.useState<number>(0);
-  const [nonce, setNonce] = React.useState<number>(0);
-  const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
 
   type BayRequest = {
     request: string;
@@ -84,48 +77,35 @@ const Bay: NextPage = () => {
   const bayCtx = useContract({
     address: bayAddress,
     abi: bayAbi,
-    signerOrProvider: customSigner,
+    signerOrProvider: signer,
   });
 
   const daiCtx = useContract({
     address: daiAddress,
     abi: daiAbi,
-    signerOrProvider: customSigner,
+    signerOrProvider: signer,
   });
 
   const museCtx = useContract({
     address: museAddress,
     abi: museAbi,
-    signerOrProvider: customSigner,
+    signerOrProvider: signer,
   });
-
-  useEffect(() => {
-    const pk = localStorage.getItem("pk");
-    const newWallet = new ethers.Wallet(String(pk), provider);
-    setCustomSigner(newWallet);
-  }, []);
 
   const acceptBayRequest = async (index: number, address: string) => {
     if (signer) {
-      const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
-      const data = iface.encodeFunctionData("acceptRequest", [index, address, sismoResponse, withdrawalAddress, nonce]);
-      txData(vaultCtx?.execute(bayCtx?.address, data, 0, keccak256(String(sismoData.auths[0].userId))));
+      bayCtx?.connect(signer as Signer);
+      txData(bayCtx?.acceptRequest(index, address));
     }
   };
 
   const removeRequest = async (index: number) => {
-    const iface = new ethers.utils.Interface(deployedContractBay?.abi as any[]);
-    const data = iface.encodeFunctionData("removeRequest", [
-      index,
-      sismoResponse,
-      keccak256(String(vaultCtx?.address)),
-    ]);
-    txData(vaultCtx?.execute(bayCtx?.address, data, 0, keccak256(String(sismoData.auths[0].userId))));
+    txData(bayCtx?.removeRequest(index));
   };
 
   const getAllRequest = useMemo(() => {
     return async () => {
-      if (customProvider && deployedContractBay) {
+      if (signer && deployedContractBay) {
         const _requests = await bayCtx?.getRequests();
         setRequests(_requests);
       }
@@ -142,36 +122,19 @@ const Bay: NextPage = () => {
       accepted: false,
       postCount: 0,
       tokenId: tokenId,
+      buyerAddress: signer?.getAddress(),
     };
 
-    bayCtx?.connect(customSigner);
-
-    console.log(request);
-
-    console.log(customSigner.address);
-    console.log(bayCtx.address);
+    bayCtx?.connect(signer as Signer);
 
     txData(
-      bayCtx?.createRequest(request, sismoResponse, withdrawalAddress, nonce, {
+      bayCtx?.createRequest(request, {
         value: tokenId == 0 ? parseEther(requestPayment) : 0,
       }),
     );
 
     await sendPublicTelegramMessage();
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      // Get and set data from localStorage
-      setSismoData(JSON.parse(String(localStorage.getItem("sismoData"))));
-      setNonce(String(localStorage.getItem("nonce")));
-      setWithdrawalAddress(String(localStorage.getItem("withdrawalAddress")));
-      setVerified(localStorage.getItem("verified"));
-      setSismoResponse(localStorage.getItem("sismoResponse"));
-    };
-
-    fetchData();
-  }, [sismoResponse]); // include customProvider if it's expected to change over time
 
   useEffect(() => {
     getAllRequest();
@@ -224,7 +187,7 @@ const Bay: NextPage = () => {
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black min-w-fit">
       <div className="text-center my-2 text-base-content mx-auto">
-        <div className=" text-center">
+        {/* <div className=" text-center">
           <h1 className="text-6xl font-bold mb-8">BAY</h1>
           <h1 className="text-base font-base mb-8">
             {" "}
@@ -236,7 +199,7 @@ const Bay: NextPage = () => {
 
           <p className="text-xl  mb-20">Request any data</p>
         </div>
-
+ */}
         <div className="flex flex-col min-w-fit mx-auto items-center mb-20 ">
           <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary py-2   p-4 m-4 text-black">
             <label className="text-black font-semibold text-sm" htmlFor="request">
@@ -277,7 +240,7 @@ const Bay: NextPage = () => {
             />
 
             <button
-              className="btn btn-large hover:bg-accent  font-bold py-2 px-4 rounded my-5"
+              className="btn btn-large hover:bg-accent  font-bold py-2 px-4 rounded my-5 bg-gradient-to-br from-slate-700 to-slate-900"
               onClick={async () => {
                 await handleApproveToken();
               }}
@@ -295,7 +258,7 @@ const Bay: NextPage = () => {
               onChange={e => setRequestStake(e.target.value)}
             />
             <button
-              className=" hover:bg-accent  font-bold py-2 px-4 rounded my-5"
+              className="btn btn-large hover:bg-accent  font-bold py-2 px-4 rounded my-5 bg-gradient-to-br from-slate-700 to-slate-900 "
               onClick={async () => {
                 await createBayContract();
               }}
@@ -310,9 +273,9 @@ const Bay: NextPage = () => {
               <div
                 key={index}
                 tabIndex={0}
-                className="card card-bordered grid-cols-3 my-5 bg-secondary hover:bg-base-300 shadow-lg shadow-primary hover:shadow-2xl hover:scale-105 transform transition-all duration-500"
+                className="card card-bordered rounded-2xl grid-cols-3 my-5 bg-gradient-to-bl from-slate-500 to-slate-500 hover:bg-base-300 shadow-lg shadow-primary hover:shadow-2xl hover:scale-105 transform transition-all duration-500"
               >
-                <div className="bg-primary  ">
+                <div className=" bg-gradient-to-tl from-slate-700 to-slate-900rounded-t-xl">
                   <div className="text-left p-5">
                     <span className="font-light text-left">WANTED</span>
                     <div className="text-2xl font-bold">{ethers.utils.parseBytes32String(request.request)}</div>
@@ -321,13 +284,13 @@ const Bay: NextPage = () => {
                       {request.postAddress}
                     </a>
                   </div>
-                  <div className="text-right p-5">
+                  <div className="text-right p-5 ">
                     <div className="text-xl font-regular">{formatEther(request.payment)} ETH</div>
                     <div className=" text-md font-light">Reward</div>
                   </div>
                 </div>
-                <div className="bg-secondary">
-                  <div className="text-left p-5 space-y-1">
+                <div className=" bg-gradient-to-tl from-slate-700 to-slate-900  rounded-b-xl ">
+                  <div className="text-left p-5 space-y-">
                     <div className="font-medium">
                       Fulfiller must stake{" "}
                       <strong>
@@ -351,10 +314,10 @@ const Bay: NextPage = () => {
                       Accepted: <strong>{String(request.accepted)}</strong>
                     </div>
                   </div>
-                  <div className="text-right p-5 space-x-4 mt-5">
+                  <div className="text-right p-5 space-x-4">
                     <div className="text-left">
                       <input
-                        className="input input-primary"
+                        className="input input-primary border-white bg-transparent my-10"
                         type="text"
                         name="address"
                         placeholder="Enter Feed Address"

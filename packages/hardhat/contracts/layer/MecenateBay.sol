@@ -123,13 +123,15 @@ contract MecenateBay is Ownable, FeedViewer {
             IMecenateFeed(feed).acceptPost{value: 0}(
                 allRequests[index].tokenId,
                 allRequests[index].payment,
-                address(this)
+                address(this),
+                allRequests[index].buyerAddress
             );
         } else {
             IMecenateFeed(feed).acceptPost{value: allRequests[index].payment}(
                 allRequests[index].tokenId,
                 allRequests[index].payment,
-                address(this)
+                address(this),
+                allRequests[index].buyerAddress
             );
         }
 

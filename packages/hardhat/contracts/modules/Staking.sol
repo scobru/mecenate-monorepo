@@ -160,12 +160,12 @@ abstract contract Staking is Events, Deposit, TokenManager {
     function getTotalStaked() external view returns (uint256) {
         uint256 amountSeller = Deposit._getDeposit(
             post.postdata.settings.tokenId,
-            postSettingPrivate.sellerAddress
+            post.postdata.escrow.seller
         );
 
         uint256 amountBuyer = Deposit._getDeposit(
             post.postdata.settings.tokenId,
-            postSettingPrivate.buyerAddress
+            post.postdata.escrow.buyer
         );
 
         return (amountSeller + amountBuyer);
@@ -180,14 +180,13 @@ abstract contract Staking is Events, Deposit, TokenManager {
 
         // Check if the encryptedVaultId matches with either the buyer or the seller
         require(
-            msg.sender == postSettingPrivate.buyerAddress ||
-                msg.sender == postSettingPrivate.sellerAddress,
+            msg.sender == post.postdata.escrow.buyer ||
+                msg.sender == post.postdata.escrow.seller,
             "WRONG_MSGSENDER"
         );
 
         // Determine the amount to add based on the role (buyer or seller)
-        uint256 actualAmountToAdd = (msg.sender ==
-            postSettingPrivate.sellerAddress)
+        uint256 actualAmountToAdd = (msg.sender == post.postdata.escrow.seller)
             ? msg.value
             : amountToAdd;
 
@@ -200,7 +199,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
         );
 
         // Update the corresponding escrow value based on the role
-        if (msg.sender == postSettingPrivate.buyerAddress) {
+        if (msg.sender == post.postdata.escrow.buyer) {
             post.postdata.escrow.payment = newStake;
         } else {
             post.postdata.escrow.stake = newStake;
@@ -227,7 +226,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
             amountToTake
         );
 
-        if (msg.sender == postSettingPrivate.buyerAddress) {
+        if (msg.sender == post.postdata.escrow.buyer) {
             post.postdata.escrow.payment = newBalance;
         } else {
             post.postdata.escrow.stake = newBalance;
@@ -238,16 +237,15 @@ abstract contract Staking is Events, Deposit, TokenManager {
 
     function takeFullStake(
         Structures.Tokens tokenId,
-        bytes memory sismoConnectResponse,
         address receiver
     ) external returns (uint256) {
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
 
         uint256 newBalance = _takeFullStake(tokenId, msg.sender, receiver);
 
-        if (msg.sender == postSettingPrivate.buyerAddress) {
+        if (msg.sender == post.postdata.escrow.buyer) {
             post.postdata.escrow.payment = newBalance;
-        } else if (msg.sender == postSettingPrivate.sellerAddress) {
+        } else if (msg.sender == post.postdata.escrow.seller) {
             post.postdata.escrow.stake = newBalance;
         }
 
@@ -258,7 +256,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
         // get deposit
         amount = Deposit._getDeposit(
             post.postdata.settings.tokenId,
-            postSettingPrivate.sellerAddress
+            post.postdata.escrow.seller
         );
         // explicit return
         return amount;
@@ -268,7 +266,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
         // get deposit
         amount = Deposit._getDeposit(
             post.postdata.settings.tokenId,
-            postSettingPrivate.buyerAddress
+            post.postdata.escrow.buyer
         );
         // explicit return
         return amount;

@@ -15,7 +15,9 @@ abstract contract Creation is Staking {
         uint256 payment,
         uint256 stakeAmount,
         Structures.Tokens tokenId,
-        address funder
+        address funder,
+        address seller,
+        bool useStake
     )
         external
         payable
@@ -26,7 +28,7 @@ abstract contract Creation is Staking {
 
         require(
             IMecenateUsers(settings.usersModuleContract).checkifUserExist(
-                msg.sender
+                seller
             ),
             "USER_NOT_EXIST"
         );
@@ -40,20 +42,30 @@ abstract contract Creation is Staking {
 
         require(payment > 0, "PAYMENT_ZERO");
 
-        if (tokenId == Structures.Tokens.NaN) {
-            require(msg.value == stakeAmount, "WRONG_MSG_VALUE");
+        uint256 stake;
+
+        if (useStake) {
+            require(
+                Deposit._getDeposit(tokenId, seller) >= stakeAmount,
+                "STAKE_INCORRECT"
+            );
+
+            stake = stakeAmount;
+        } else {
+            if (tokenId == Structures.Tokens.NaN) {
+                require(msg.value == stakeAmount, "WRONG_MSG_VALUE");
+            }
+
+            stake = _addStake(tokenId, seller, funder, stakeAmount);
         }
 
         uint256 duration = postDurationToDays[uint8(postDuration)];
 
-        uint256 stake = _addStake(tokenId, msg.sender, funder, stakeAmount);
-
-        // Change status to Proposed
         _changeStatus(Structures.PostStatus.Proposed);
 
         Structures.User memory creator = IMecenateUsers(
             settings.usersModuleContract
-        ).getUserMetadata(msg.sender);
+        ).getUserMetadata(seller);
 
         // Initialize the new Post struct with named arguments for clarity
         Structures.Post memory newPost = Structures.Post({
@@ -68,6 +80,8 @@ abstract contract Creation is Staking {
                     tokenId: tokenId
                 }),
                 escrow: Structures.PostEscrow({
+                    buyer: address(0),
+                    seller: seller,
                     stake: stake,
                     payment: payment,
                     punishment: 0,
@@ -85,8 +99,6 @@ abstract contract Creation is Staking {
         post = newPost;
 
         settings.postCount++;
-
-        postSettingPrivate.sellerAddress = msg.sender;
 
         emit Created(newPost);
 

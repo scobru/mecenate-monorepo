@@ -12,7 +12,8 @@ abstract contract Acceptance is Events, Staking {
     function acceptPost(
         Structures.Tokens tokenId,
         uint256 paymentAmount,
-        address funder
+        address funder,
+        address buyer
     ) external payable virtual {
         require(
             validStatuses[uint8(Structures.PostStatus.Proposed)],
@@ -28,20 +29,21 @@ abstract contract Acceptance is Events, Staking {
         // Use local variable for repeated calls
         uint256 sellerStake = Deposit._getDeposit(
             tokenId,
-            postSettingPrivate.sellerAddress
+            post.postdata.escrow.seller
         );
 
         require(sellerStake >= post.postdata.escrow.stake, "STAKE_INCORRECT");
 
         require(
             IMecenateUsers(settings.usersModuleContract).checkifUserExist(
-                msg.sender
+                buyer
             ),
             "USERT_NOT_EXIST"
         );
 
         require(
-            msg.sender != postSettingPrivate.sellerAddress,
+            msg.sender != post.postdata.escrow.seller ||
+                buyer != post.postdata.escrow.seller,
             "YOU_ARE_THE_SELLER"
         );
 
@@ -56,15 +58,15 @@ abstract contract Acceptance is Events, Staking {
             require(paymentAmount > 0, "ZERO_PAYMENT");
         }
 
-        uint256 payment = _addStake(tokenId, msg.sender, funder, amountToAdd);
+        uint256 payment = _addStake(tokenId, buyer, funder, amountToAdd);
 
         post.postdata.escrow.payment = payment;
+
+        post.postdata.escrow.buyer = buyer;
 
         post.postdata.settings.status = Structures.PostStatus.Accepted;
 
         _changeStatus(Structures.PostStatus.Accepted);
-
-        postSettingPrivate.buyerAddress = msg.sender;
 
         emit Accepted(post);
     }

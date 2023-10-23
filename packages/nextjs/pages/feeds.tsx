@@ -3,40 +3,21 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, Wallet, ethers } from "ethers";
-import { AbiCoder, formatEther, keccak256 } from "ethers/lib/utils.js";
+import { formatEther } from "ethers/lib/utils.js";
 import Link from "next/link";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { SismoPK } from "@scobru/sismo-aa";
-
-type TxCallT = {
-  to: string; // address in Solidity is represented as a string in ethers.js/TypeScript
-  value: string | number | bigint; // uint256 can be represented as string, number, or bigint
-  data: Uint8Array; // bytes can be represented as a Uint8Array
-};
 
 const Feeds: NextPage = () => {
-  const provider = useProvider();
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
-
   const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateFeedFactory");
   const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
-
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
   const [sismoData, setSismoData] = React.useState<any>(null);
-  const [sismoData2, setSismoData2] = React.useState<any>(null);
-  const [verified, setVerified] = React.useState<any>(null);
-  const [sismoResponse, setSismoResponse] = React.useState<any>(null);
-  const [sismoResponse2, setSismoResponse2] = React.useState<any>(null);
-  const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
-  const [nonce, setNonce] = React.useState<string>("");
-  const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
-  const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const [customSigner, setCustomSigner] = React.useState<Signer>();
 
-  const txData = useTransactor(customSigner);
+  const txData = useTransactor(signer as Signer);
 
   type Feed = {
     operator: string;
@@ -70,21 +51,14 @@ const Feeds: NextPage = () => {
   const treasuryCtx = useContract({
     address: deployedContractTreasury?.address,
     abi: treasuryAbi,
-    signerOrProvider: customSigner,
+    signerOrProvider: signer,
   });
 
   const factoryCtx = useContract({
     address: deployedContractFactory?.address,
     abi: factoryAbi,
-    signerOrProvider: customSigner,
+    signerOrProvider: signer,
   });
-
-  let vaultAddress!: string;
-  let vaultAbi: ContractInterface[] = [];
-
-  if (deployedContractVault) {
-    ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
-  }
 
   const getFeeds = useCallback(async () => {
     if (!factoryCtx || !sismoData) return;
@@ -92,9 +66,9 @@ const Feeds: NextPage = () => {
     let _feeds, _feedsInfo;
 
     if (onlyYourFeeds) {
-      _feeds = await factoryCtx.getFeedsOwned(keccak256(sismoData.auths[0].userId));
+      _feeds = await factoryCtx.getFeedsOwned(signer?.getAddress());
       console.log(_feeds);
-      _feedsInfo = await factoryCtx.getFeedsInfoOwned(keccak256(sismoData.auths[0].userId));
+      _feedsInfo = await factoryCtx.getFeedsInfoOwned(signer?.getAddress());
       console.log(_feedsInfo);
     } else {
       _feeds = await factoryCtx.getFeeds();
@@ -110,38 +84,20 @@ const Feeds: NextPage = () => {
     if (factoryCtx) {
       getFeeds();
       const storedData = localStorage.getItem("sismoData");
-      const storedVerified = localStorage.getItem("verified");
       const storedSismoResponse = localStorage.getItem("sismoResponse");
 
-      const nonce = localStorage.getItem("nonce");
-      const withdrawalAddress = localStorage.getItem("withdrawalAddress");
-      const _customSigner = localStorage.getItem("customSigner");
-      const pk = localStorage.getItem("pk");
-
-      if (storedData && storedVerified && storedSismoResponse) {
+      if (storedData && storedSismoResponse) {
         setSismoData(JSON.parse(storedData));
-        setVerified(storedVerified);
-        setSismoResponse(storedSismoResponse);
-        setNonce(String(nonce));
-        setWithdrawalAddress(withdrawalAddress as string);
-        const newWallet = new ethers.Wallet(localStorage.getItem("pk"), customProvider);
-        setCustomSigner(newWallet as Wallet);
       } else {
         console.warn("Stored ethWallet or its privateKey is undefined.");
       }
     }
   }, [onlyYourFeeds]);
 
-  useEffect(() => {
-    const newWallet = new ethers.Wallet(localStorage.getItem("pk"), customProvider);
-
-    setCustomSigner(newWallet as Wallet);
-  }, []);
-
   const buildFeed = async () => {
     if (!factoryCtx || !treasuryCtx || !txData || !sismoData) return;
     const fee = await treasuryCtx?.fixedFee();
-    txData(factoryCtx?.buildFeed(sismoResponse, withdrawalAddress, nonce, { value: fee }));
+    txData(factoryCtx?.buildFeed({ value: fee }));
   };
 
   const formattedFeeds = useMemo(() => {
@@ -151,7 +107,7 @@ const Feeds: NextPage = () => {
       feeds.map((feed, i) => (
         <div key={i}>
           <Link href={`/viewFeed?addr=${feed}`} passHref>
-            <div className="card card-shadow grid grid-cols-12 gap-4 border rounded-xl p-4 hover:bg-opacity-10 transition-all duration-300 ease-in-out transform hover:scale-105 bg-base-300 text-base-content ">
+            <div className="card card-shadow grid grid-cols-12 gap-4 border rounded-xl p-4 hover:bg-opacity-90 transition-all duration-300 ease-in-out transform hover:scale-105  text-base-content ">
               <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Currency:</div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {Number(feedsInfos[i].tokenId) == 0 ? "ETH" : Number(feedsInfos[i].tokenId) == 1 ? "MUSE" : "DAI"}{" "}
@@ -205,10 +161,10 @@ const Feeds: NextPage = () => {
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10  min-w-fit">
-      <div className="max-w-3xl text-center">
+      {/*  <div className="max-w-3xl text-center">
         <h1 className="text-6xl font-bold mb-8">FEEDS</h1>
         <p className="text-xl  mb-20">Create your feed and sell your data</p>
-      </div>
+      </div> */}
       <div className="mx-auto  w-fit text-center items-center"></div>
       <div className="flex flex-row items-center mb-5  gap-4 text-lg p-5">
         <button className="link-hover font-bold" onClick={buildFeed}>

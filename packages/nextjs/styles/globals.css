@@ -71,10 +71,9 @@ p {
   @apply shadow-center;
   @apply rounded-xl;
   @apply p-10;
-  @apply bg-secondary;
-  @apply border-gray-800;
+  @apply border-slate-700;
   @apply shadow-2xl;
-  @apply shadow-blue-950;
-  @apply border;
+  @apply shadow-slate-900;
   @apply my-5;
+  @apply border-2
 }

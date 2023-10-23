@@ -20,10 +20,10 @@ contract MecenateUsers is Ownable {
         verifierContract = verifierContractAddress;
     }
 
-    function registerUser(bytes memory metadata) public {
-        (bytes memory sismoConnectResponse, bytes memory publicKey) = abi
-            .decode(metadata, (bytes, bytes));
-
+    function registerUser(
+        bytes memory sismoConnectResponse,
+        bytes memory pubKey
+    ) external returns (Structures.User memory) {
         bytes memory vaultId = IMecenateVerifier(verifierContract).sismoVerify(
             sismoConnectResponse
         );
@@ -31,7 +31,7 @@ contract MecenateUsers is Ownable {
         Structures.User memory newUser = Structures.User({
             evmAddress: msg.sender,
             sismoVaultId: vaultId,
-            publicKey: publicKey
+            publicKey: pubKey
         });
 
         _metadata[msg.sender] = newUser;
@@ -41,6 +41,8 @@ contract MecenateUsers is Ownable {
         _users.add(msg.sender);
 
         emit UserRegistered(msg.sender);
+
+        return newUser;
     }
 
     function getUsers() public view returns (address[] memory) {

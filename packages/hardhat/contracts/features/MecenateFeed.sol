@@ -26,8 +26,10 @@ contract MecenateFeed is
         address _owner,
         address _usersModuleContract,
         address _factoryContract,
-        string memory _version
-    ) Data(_usersModuleContract, _factoryContract, _version) {
+        uint256 _major,
+        uint256 _minor,
+        uint256 _patch
+    ) Data(_usersModuleContract, _factoryContract, _major, _minor, _patch) {
         owner = _owner;
     }
 }

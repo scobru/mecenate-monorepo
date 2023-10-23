@@ -8,7 +8,7 @@ abstract contract Finalization is Staking {
         uint256 punishment,
         bytes32 uid
     ) external virtual {
-        require(msg.sender == postSettingPrivate.buyerAddress, "NOT_SELLER");
+        require(msg.sender == post.postdata.escrow.buyer, "NOT_SELLER");
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Submitted,
@@ -22,12 +22,12 @@ abstract contract Finalization is Staking {
         Attestation memory attestation = eas.getAttestation(uid);
 
         require(
-            attestation.attester == postSettingPrivate.buyerAddress,
+            attestation.attester == post.postdata.escrow.buyer,
             "INVALID_ATTESTATION"
         );
 
         require(
-            attestation.recipient == postSettingPrivate.sellerAddress,
+            attestation.recipient == post.postdata.escrow.seller,
             "INVALID_RECIPIENT"
         );
 
@@ -71,13 +71,13 @@ abstract contract Finalization is Staking {
             // Code for both the timeout and the valid case
             buyerStake = Deposit._decreaseDeposit(
                 post.postdata.settings.tokenId,
-                postSettingPrivate.buyerAddress,
+                post.postdata.escrow.buyer,
                 post.postdata.escrow.payment
             );
 
             sellerStake = Deposit._increaseDeposit(
                 post.postdata.settings.tokenId,
-                postSettingPrivate.sellerAddress,
+                post.postdata.escrow.seller,
                 amountToAdd
             );
 
@@ -107,13 +107,13 @@ abstract contract Finalization is Staking {
 
             post.postdata.escrow.payment = _burnStake(
                 post.postdata.settings.tokenId,
-                postSettingPrivate.buyerAddress,
+                post.postdata.escrow.buyer,
                 penalty
             );
 
             post.postdata.escrow.stake = _burnStake(
                 post.postdata.settings.tokenId,
-                postSettingPrivate.sellerAddress,
+                post.postdata.escrow.seller,
                 punishment
             );
 
