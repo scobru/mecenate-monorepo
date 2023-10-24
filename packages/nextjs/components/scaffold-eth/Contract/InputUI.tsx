@@ -1,5 +1,5 @@
 import { utils } from "ethers";
-import { FunctionFragment } from "ethers/lib/utils";
+import { FunctionFragment } from "ethers";
 import React, { Dispatch, ReactElement, SetStateAction } from "react";
 import { AddressInput } from "~~/components/scaffold-eth";
 

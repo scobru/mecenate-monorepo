@@ -1,4 +1,4 @@
-import { FunctionFragment } from "ethers/lib/utils";
+import { FunctionFragment } from "ethers";
 import { Contract, utils } from "ethers";
 import DisplayVariable from "~~/components/scaffold-eth/Contract/DisplayVariables";
 import { ReadOnlyFunctionForm } from "./ReadOnlyFunctionForm";

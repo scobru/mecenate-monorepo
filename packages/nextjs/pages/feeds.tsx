@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, Wallet, ethers } from "ethers";
-import { formatEther } from "ethers/lib/utils.js";
+import { formatEther } from "ethers";
 import Link from "next/link";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 

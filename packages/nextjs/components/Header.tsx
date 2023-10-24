@@ -16,7 +16,6 @@ import {
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import { ArchiveBoxIcon, InboxIcon } from "@heroicons/react/20/solid";
-import { keccak256 } from "ethers/lib/utils.js";
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const router = useRouter();
@@ -56,22 +55,6 @@ export default function Header() {
     burgerMenuRef,
     useCallback(() => setIsDrawerOpen(false), []),
   );
-
-  useEffect(() => {
-    const verified = localStorage.getItem("verified");
-    const sismoData = JSON.parse(localStorage.getItem("sismoData") || "{}");
-    if (verified == "verified" && sismoData) {
-      setIsLocalStorage(true);
-      setVerified(String(verified));
-      setEncryptedVaultId(keccak256(String(sismoData?.auths[0]?.userId)));
-      if (localStorage.getItem("withdrawalAddress")) {
-        setWithdrawalAddress(String(localStorage.getItem("withdrawalAddress")));
-      }
-      if (localStorage.getItem("forwarderAddress")) {
-        setForwarderAddress(String(localStorage.getItem("forwarderAddress")));
-      }
-    }
-  }, [encryptedVaultId]);
 
   const navLinks = (
     <>

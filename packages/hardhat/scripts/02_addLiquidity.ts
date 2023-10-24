@@ -2,7 +2,6 @@ import { Token, BigintIsh } from "@uniswap/sdk-core";
 import { TickMath, Pool, Position, nearestUsableTick } from "@uniswap/v3-sdk";
 import { parse } from "dotenv";
 import { BigNumber, ethers, Contract } from "ethers";
-import { parseEther } from "ethers/lib/utils";
 import hre from "hardhat";
 const bn = require("bignumber.js");
 

@@ -14,7 +14,7 @@ import {
   parseEther,
   toUtf8Bytes,
   toUtf8String,
-} from "ethers/lib/utils";
+} from "ethers";
 import pinataSDK from "@pinata/sdk";
 import axios from "axios";
 import Dropzone from "react-dropzone";

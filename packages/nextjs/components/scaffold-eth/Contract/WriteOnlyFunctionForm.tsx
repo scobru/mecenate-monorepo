@@ -1,4 +1,4 @@
-import { FunctionFragment } from "ethers/lib/utils";
+import { FunctionFragment } from "ethers";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useContractWrite, useNetwork, useWaitForTransaction } from "wagmi";
 import InputUI from "./InputUI";

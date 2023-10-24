@@ -6,8 +6,7 @@
     "packages": [
       "packages/hardhat",
       "packages/nextjs",
-      "packages/client",
-      "packages/sdk"
+      "packages/helpers"
     ]
   },
   "scripts": {

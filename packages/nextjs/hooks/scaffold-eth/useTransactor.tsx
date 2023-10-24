@@ -1,7 +1,7 @@
 import { TransactionRequest, TransactionResponse, TransactionReceipt } from "@ethersproject/abstract-provider";
 import { SendTransactionResult } from "@wagmi/core";
 import { Signer } from "ethers";
-import { Deferrable } from "ethers/lib/utils";
+import { Deferrable } from "ethers";
 import { useSigner } from "wagmi";
 import { getParsedEthersError } from "~~/components/scaffold-eth/Contract/utilsContract";
 import { getBlockExplorerTxLink, notification } from "~~/utils/scaffold-eth";
