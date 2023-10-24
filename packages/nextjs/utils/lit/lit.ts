@@ -28,7 +28,6 @@ export const litAuthClient: LitAuthClient = new LitAuthClient({
 export const litNodeClient = litAuthClient.litNodeClient;
 
 if (litNodeClient) {
-  litNodeClient.config.litNewtork = "serrano";
   litNodeClient.config.debug = true;
   console.log("litAuthClient: ", litAuthClient);
 }
@@ -179,7 +178,6 @@ export async function getSessionSigs({
       pkpPublicKey,
       authMethod,
       sessionSigsParams,
-      litNodeClient: litClient,
     });
 
     console.log("Session sigs: ", sessionSigs);
