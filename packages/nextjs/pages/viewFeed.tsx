@@ -13,7 +13,7 @@ import { saveAs } from "file-saver";
 import Spinner from "~~/components/Spinner";
 import { ScaleIcon, MegaphoneIcon, DocumentCheckIcon } from "@heroicons/react/20/solid";
 import { ApolloClient, InMemoryCache, createHttpLink, gql } from "@apollo/client";
-
+import Web3 from "web3";
 import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 import { EAS, Offchain, SchemaEncoder, SchemaRegistry } from "@ethereum-attestation-service/eas-sdk";
 
@@ -28,16 +28,12 @@ const schemaUID = "0xb73edc40219f8224352f6d9c12364faadae4e09726e78d0e9e78bea4569
 const crypto = require("asymmetric-crypto");
 
 const ViewFeed: NextPage = () => {
-  const { data: customSigner } = useSigner();
-  const provider = useProvider();
   const router = useRouter();
   const AbiCoder = new ethers.utils.AbiCoder();
-  const customProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
 
   const ErasureHelper = require("@erasure/crypto-ipfs");
   const pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
   const pinataApiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY;
-  const customWallet = new ethers.Wallet(String(process.env.NEXT_PUBLIC_RELAYER_KEY), provider);
   const [nonce, setNonce] = React.useState<string>("0");
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
   const [tokenId, setTokenId] = React.useState<string>("");
@@ -65,13 +61,7 @@ const ViewFeed: NextPage = () => {
   const [image, setImage] = React.useState("");
   const [postCount, setPostCount] = useState<any>("");
   const [sismoData, setSismoData] = React.useState<any>(null);
-  const [verified, setVerified] = React.useState<any>(null);
-  const [sismoResponse, setSismoResponse] = React.useState<any>(null);
   const [yourStake, setYourStake] = useState<any>(0);
-  const [hashedVaultId, setHashedVaultId] = useState<any>([]);
-  const [secretMessage, setSecretMessage] = useState<any>("");
-  const [message, setMessage] = useState<any>("");
-  const [userName, setUserName] = useState<any>("");
   const [feedData, setFeedData] = useState<any>([]);
   const deployedContractFeed = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateFeed");
   const deployedContractUsers = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateUsers");
@@ -86,29 +76,7 @@ const ViewFeed: NextPage = () => {
 
   const runTx = useTransactor();
 
-  useEffect(() => {
-    let _signer;
-
-    try {
-      if (customSigner) {
-        console.log("Custom Signer: ", customSigner);
-        _signer = customSigner;
-        setSigner(_signer);
-      } else {
-        console.log("Local Storage: ", localStorage.getItem("pk"));
-        const pk = JSON.parse(JSON.stringify(localStorage.getItem("pk")));
-        _signer = new ethers.Wallet(pk, publicProvider);
-        setSigner(_signer);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    console.log("Signer Address: ", _signer?.getAddress());
-  }, [customSigner]);
-
   const [receiver, setReceiver] = useState<any>("");
-
-  eas.connect(signer);
 
   const allStatuses = ["Waiting for Creator", "Proposed", "Accepted", "Submitted", "Finalized", "Punished", "Revealed"];
 
@@ -139,7 +107,7 @@ const ViewFeed: NextPage = () => {
     signerOrProvider: signer,
   });
 
-  const graphUri = "https://base-goerli.easscan.org/graphql";
+  const graphUri = "https://base-goerli-predeploy.easscan.org/graphql";
 
   const httpLink = createHttpLink({
     uri: graphUri,
@@ -154,6 +122,7 @@ const ViewFeed: NextPage = () => {
     query Attestation($where: AttestationWhereInput) {
       attestations(where: $where) {
         attester
+        recipient
         data
         timeCreated
         id
@@ -167,11 +136,12 @@ const ViewFeed: NextPage = () => {
     const newAttestations = await apolloClient.query({
       query: getAttestationsGraphQl,
       variables: {
-        where: { schemaId: { equals: schemaUID } },
+        where: {
+          schemaId: { equals: "0xb73edc40219f8224352f6d9c12364faadae4e09726e78d0e9e78bea456930b5a" },
+          recipient: { equals: String(feedData[1][1].seller) },
+        },
       },
     });
-
-    //setIsLoading(false);
 
     console.log("newAttestations: ", newAttestations);
 
@@ -185,17 +155,16 @@ const ViewFeed: NextPage = () => {
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
 
-      token = new Contract(String(_tokenAddress), museAbi, customSigner);
+      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi, signer);
     } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
 
-      token = new Contract(String(_tokenAddress), daiAbi, customSigner);
+      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi, signer);
     }
 
     // Write Approval
-    token?.connect(customSigner);
-    console.log(customSigner);
-    console.log(token);
+    token?.connect(signer);
+
     runTx(token?.approve(feedCtx?.address, parseEther(postStake)), signer);
   };
 
@@ -204,14 +173,14 @@ const ViewFeed: NextPage = () => {
     let token;
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), museAbi, signer);
+      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi, signer);
     } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), daiAbi, signer);
+      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi, signer);
     }
 
     // Write Approval
-    token?.connect(customSigner as Signer);
+    token?.connect(signer as Signer);
 
     runTx(token?.approve(feedCtx?.address, parseEther(postPayment))), signer;
   };
@@ -406,6 +375,7 @@ const ViewFeed: NextPage = () => {
 
       // jsonblob_v1_2_0 = JSON(multihashformat(datahash), multihashformat(keyhash), multihashformat(encryptedDatahash))
       const jsonblob_v1_2_0 = {
+        seller: signer?.getAddress(),
         datahash: dataHash,
         encryptedDatahash: encryptedDataHash, // This allows the encrypted data to be located on IPFS or 3Box
         keyhash: symmetricKeyHash,
@@ -476,6 +446,9 @@ const ViewFeed: NextPage = () => {
 
     const encrypted = crypto.encrypt(symmetricKey, toUtf8String(buyerPublicKey), secretKey);
 
+    const buyerMetadata = await usersCtx?.getUserMetadata(buyerAddress);
+    const sellerMetadata = await usersCtx?.getUserMetadata(sellerAddress);
+
     const encryptedSymKey_Buyer = {
       ciphertext: encrypted.data,
       ephemPubKey: sellerPublicKey,
@@ -484,12 +457,14 @@ const ViewFeed: NextPage = () => {
     };
 
     const json_selldata_v120 = {
-      esp_version: "v2.0.0",
+      msp_version: "v1.0.0",
       proofhash: proofhash,
-      sender: sellerAddress,
-      senderPubKey: sellerPublicKey,
-      receiver: buyerAddress,
-      receiverPubKey: buyerPublicKey,
+      sender: sellerMetadata?.evmAddress,
+      senderPubKey: sellerMetadata?.publicKey,
+      senderVaultId: sellerMetadata?.sismoVaultId,
+      receiver: buyerMetadata?.evmAddress,
+      receiverPubKey: buyerMetadata?.publicKey,
+      receiverVaultId: buyerMetadata?.sismoVaultId,
       encryptedSymKey: encryptedSymKey_Buyer,
     };
 
@@ -556,7 +531,7 @@ const ViewFeed: NextPage = () => {
     console.log("Data Retrieved.");
     console.log("Proof Hash Digest: ", proofHash58Digest);
 
-    feedCtx?.connect(customSigner);
+    feedCtx?.connect(signer);
 
     runTx(feedCtx?.submitHash(proofHash58Digest), signer);
 
@@ -752,6 +727,8 @@ const ViewFeed: NextPage = () => {
 
       console.log(data);
 
+      eas.connect(signer);
+
       console.log("Encoded Data: ", encodedData);
       const tx = await eas.attest({
         schema: schemaUID,
@@ -795,7 +772,7 @@ const ViewFeed: NextPage = () => {
   }
 
   async function takeStake() {
-    feedCtx?.connect(customSigner);
+    feedCtx?.connect(signer);
 
     console.log("Take Stake...");
 
@@ -807,7 +784,7 @@ const ViewFeed: NextPage = () => {
   //******************** Helpers *********************//
 
   const fetchData = async function fetchData() {
-    if (feedCtx && signer && provider) {
+    if (feedCtx && signer) {
       const data = await feedCtx?.post();
       setFeedData(data);
       setPostCount(await feedCtx?.postCount());
@@ -845,12 +822,6 @@ const ViewFeed: NextPage = () => {
 
     a.dispatchEvent(clickEvt);
     a.remove();
-  };
-
-  const getHashedVaultId = async () => {
-    const _hashedVaultId = await feedCtx?.getHashedVaultId(keccak256(sismoData.auths[0].userId));
-    setHashedVaultId(_hashedVaultId);
-    return _hashedVaultId;
   };
 
   function encryptMessage(secretKey: string, message: string): string {
@@ -1049,11 +1020,42 @@ const ViewFeed: NextPage = () => {
   //******************** useEffects *********************//
 
   useEffect(() => {
+    const run = async () => {
+      try {
+        let _signer;
+        const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
+        if (cachedAdapter !== "metamask") {
+          const pk = localStorage.getItem("pk");
+          if (pk) {
+            _signer = new ethers.Wallet(pk, publicProvider);
+          } else {
+            throw new Error("Private key not found in local storage.");
+          }
+        } else {
+          const web3Auth = JSON.parse(String(localStorage.getItem("web3AuthProvider")));
+          if (web3Auth) {
+            const web3 = new Web3(web3Auth as any);
+            const ethersProvider = new ethers.providers.Web3Provider(web3.givenProvider);
+            _signer = ethersProvider.getSigner();
+          } else {
+            throw new Error("Invalid web3Auth object in local storage.");
+          }
+        }
+        setSigner(_signer);
+      } catch (error) {
+        console.error("Failed to initialize signer:", error);
+      }
+    };
+
+    run();
+  }, []);
+
+  useEffect(() => {
     const fetchDataAsync = async () => {
       try {
         console.log("Fetching Data...");
         await fetchData();
-        await fetchAttestations();
+        if (feedData.lenght != 0) await fetchAttestations();
         console.log(attestations);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -1061,12 +1063,11 @@ const ViewFeed: NextPage = () => {
     };
 
     const interval = setInterval(() => {
-      if (signer && provider && feedCtx && router.isReady) {
+      if (signer && feedCtx && router.isReady) {
         fetchDataAsync();
       }
     }, Number(process.env.NEXT_PUBLIC_RPC_POLLING_INTERVAL));
 
-    // Cleanup function
     return () => clearInterval(interval);
   });
 
@@ -1076,7 +1077,7 @@ const ViewFeed: NextPage = () => {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      if (signer) {
+      if (signer && feedData.length != 0) {
         feedCtx?.connect(signer as Signer);
         const yourStake = await feedCtx?.getStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress());
         console.log("Your Stake: ", yourStake);
@@ -1220,7 +1221,7 @@ const ViewFeed: NextPage = () => {
           <div className="mx-10  font-base text-lg">
             Smart Contract address is <strong>{addr}</strong>{" "}
           </div>
-          <div className="mx-10  mb-5 font-base text-lg">
+          <div className="mx-10  font-base text-lg">
             Your current deposit is{" "}
             <strong>
               {formatEther(yourStake)}{" "}
@@ -1233,6 +1234,10 @@ const ViewFeed: NextPage = () => {
                 : "ETH"}
             </strong>
           </div>
+          <div className="mx-10  mb-5 font-base text-lg">
+            This seller had received <strong>{attestations && <>{attestations.length}</>}</strong> attestations
+          </div>
+
           <div className="flex flex-col  my-20  min-w-fit items-left justify-center w-full">
             <ul className="steps">
               {allStatuses.map((statusText, index) => {

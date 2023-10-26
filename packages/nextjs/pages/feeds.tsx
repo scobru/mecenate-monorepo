@@ -6,40 +6,49 @@ import { ContractInterface, Signer, Wallet, ethers } from "ethers";
 import Link from "next/link";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { formatEther } from "ethers/lib/utils.js";
+import Web3 from "web3";
 
 const Feeds: NextPage = () => {
-  const { chain } = useNetwork();
-  const { data: customSigner } = useSigner();
   const deployedContractFactory = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateFeedFactory");
   const deployedContractTreasury = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateTreasury");
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
   const [sismoData, setSismoData] = React.useState<any>(null);
-
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
   const [signer, setSigner] = React.useState<Signer | undefined>();
   const runTx = useTransactor();
 
   useEffect(() => {
-    let _signer;
-
-    try {
-      if (customSigner) {
-        console.log("Custom Signer: ", customSigner);
-        _signer = customSigner;
+    const run = async () => {
+      try {
+        let _signer;
+        const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
+        if (cachedAdapter !== "metamask") {
+          const pk = localStorage.getItem("pk");
+          if (pk) {
+            _signer = new ethers.Wallet(pk, publicProvider);
+          } else {
+            throw new Error("Private key not found in local storage.");
+          }
+        } else {
+          const web3Auth = JSON.parse(String(localStorage.getItem("web3AuthProvider")));
+          if (web3Auth) {
+            const web3 = new Web3(web3Auth as any);
+            const ethersProvider = new ethers.providers.Web3Provider(web3.givenProvider);
+            _signer = ethersProvider.getSigner();
+          } else {
+            throw new Error("Invalid web3Auth object in local storage.");
+          }
+        }
         setSigner(_signer);
-      } else if (window.localStorage) {
-        console.log("Local Storage: ", localStorage.getItem("pk"));
-        const pk = JSON.parse(JSON.stringify(localStorage.getItem("pk")));
-        _signer = new ethers.Wallet(pk, publicProvider);
-        setSigner(_signer);
+      } catch (error) {
+        console.error("Failed to initialize signer:", error);
       }
-    } catch (error) {
-      console.error(error);
-    }
-    console.log("Signer Address: ", _signer?.getAddress());
-  }, [customSigner]);
+    };
+
+    run();
+  }, []);
 
   type Feed = {
     operator: string;

@@ -42,12 +42,12 @@ p {
   @apply rounded-lg;
   @apply my-5;
   @apply border-0;
-  @apply hover: bg-slate-800;
+  @layer hover: bg-slate-800;
   @apply w-full;
   @apply text-white;
-  @apply disabled: bg-slate-800;
-  @apply disabled: cursor-not-allowed;
-  @apply disabled: opacity-50;
+  @layer disabled: bg-slate-800;
+  @layer disabled: cursor-not-allowed;
+  @layer disabled: opacity-50;
   background-color: #311c31;
 }
 
@@ -57,12 +57,12 @@ p {
   @apply rounded-lg;
   @apply my-5;
   @apply border-0;
-  @apply hover: bg-slate-800;
+  @layer hover: bg-slate-800;
   @apply w-full;
   @apply text-white;
-  @apply disabled: bg-slate-800;
-  @apply disabled: cursor-not-allowed;
-  @apply disabled: opacity-50;
+  @layer disabled: bg-slate-800;
+  @layer disabled: cursor-not-allowed;
+  @layer disabled: opacity-50;
   background-color: #311c31;
 }
 

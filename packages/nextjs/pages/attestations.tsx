@@ -5,7 +5,7 @@ import { useInterval } from "usehooks-ts";
 import { Address } from "~~/components/scaffold-eth";
 import scaffoldConfig from "~~/scaffold.config";
 import { toUtf8String } from "ethers/lib/utils.js";
-import { ethers } from "ethers";
+import { Signer, ethers } from "ethers";
 import Link from "next/link";
 
 const ErasureHelper = require("@erasure/crypto-ipfs");

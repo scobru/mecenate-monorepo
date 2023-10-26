@@ -15,12 +15,14 @@ import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plu
 
 // import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 import { WalletConnectV2Adapter, getWalletConnectV2Settings } from "@web3auth/wallet-connect-v2-adapter";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 import RPC from "../utils/web3RPC"; // for using web3.js
 import { Wallet, ethers } from "ethers";
 import { formatEther } from "ethers/lib/utils.js";
 import { NextPage } from "next";
+import Spinner from "~~/components/Spinner";
+import { create } from "domain";
 
 const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
 
@@ -30,8 +32,8 @@ const WalletPage: NextPage = () => {
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-  // new provider with public RPC
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -39,8 +41,8 @@ const WalletPage: NextPage = () => {
           clientId,
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
-            chainId: "0x1",
-            //rpcTarget: "https://rpc.ankr.com/eth", // This is the public RPC we have added, please pass on your own endpoint while creating an app
+            chainId: "0x14a33",
+            rpcTarget: "https://goerli.base.org", // This is the public RPC we have added, please pass on your own endpoint while creating an app
           },
           // uiConfig refers to the whitelabeling options, which is available only on Growth Plan and above
           // Please remove this parameter if you're on the Base Plan
@@ -74,7 +76,7 @@ const WalletPage: NextPage = () => {
               logoLight: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
             },
             useWalletConnect: true,
-            enableLogging: true,
+            enableLogging: false,
           },
         });
         setTorusPlugin(torusPlugin);
@@ -102,8 +104,18 @@ const WalletPage: NextPage = () => {
         web3auth.configureAdapter(walletConnectV2Adapter);
 
         // adding metamask adapter
-
         const metamaskAdapter = new MetamaskAdapter({
+          clientId,
+          sessionTime: 3600, // 1 hour in seconds
+          web3AuthNetwork: "cyan",
+          chainConfig: {
+            chainNamespace: CHAIN_NAMESPACES.EIP155,
+            chainId: "0x14a33",
+            rpcTarget: "https://goerli.base.org", // This is the public RPC we have added, please pass on your own endpoint while creating an app
+          },
+        });
+
+        /* const metamaskAdapter = new MetamaskAdapter({
           clientId,
           sessionTime: 3600, // 1 hour in seconds
           web3AuthNetwork: "cyan",
@@ -113,16 +125,18 @@ const WalletPage: NextPage = () => {
             rpcTarget: "https://rpc.ankr.com/eth", // This is the public RPC we have added, please pass on your own endpoint while creating an app
           },
         });
+
+        
         // we can change the above settings using this function
         metamaskAdapter.setAdapterSettings({
           sessionTime: 86400, // 1 day in seconds
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
-            chainId: "0x89",
-            rpcTarget: "https://rpc-mainnet.matic.network", // This is the public RPC we have added, please pass on your own endpoint while creating an app
+            chainId: "0x14a33",
+            rpcTarget: "https://goerli.base.org", // This is the public RPC we have added, please pass on your own endpoint while creating an app
           },
           web3AuthNetwork: "cyan",
-        });
+        }); */
 
         // it will add/update  the metamask adapter in to web3auth class
         web3auth.configureAdapter(metamaskAdapter);
@@ -141,8 +155,16 @@ const WalletPage: NextPage = () => {
 
         await web3auth.initModal();
 
-        if (web3auth.status === "connected") {
+        const rpc = new RPC(web3auth?.provider);
+        const account = await rpc.getAccounts();
+        const accountAddress = account[0];
+        localStorage.setItem("accountAddress", JSON.stringify(accountAddress));
+
+        if (accountAddress) setLoggedIn(true);
+
+        if (web3auth?.status === "connected") {
           setLoggedIn(true);
+          createWallet();
         }
       } catch (error) {
         console.error(error);
@@ -153,19 +175,35 @@ const WalletPage: NextPage = () => {
   }, []);
 
   const createWallet = async () => {
-    const rpc = new RPC(web3auth.provider);
-    const privateKey = await rpc.getPrivateKey();
-    const newWallet = new Wallet(String(privateKey), publicProvider);
-    localStorage.setItem("wallet", JSON.stringify(newWallet));
-    localStorage.setItem("pk", String(privateKey));
-    console.log("newWallet", newWallet);
+    const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
+    if (cachedAdapter == "metamask" && web3auth?.provider) {
+      console.log("metamask");
+      const rpc = new RPC(web3auth?.provider);
+      const account = await rpc.getAccounts();
+      const accountAddress = account[0];
+      localStorage.setItem("web3AuthProvider", JSON.stringify(web3auth?.provider));
+      localStorage.setItem("accountAddress", JSON.stringify(accountAddress));
+    } else if (cachedAdapter == "openlogin" && web3auth?.provider) {
+      const rpc = new RPC(web3auth?.provider);
+      const privateKey = await rpc.getPrivateKey();
+      localStorage.setItem("pk", String(privateKey));
+      const wallet = new Wallet(String(privateKey), publicProvider);
+      localStorage.setItem("accountAddress", JSON.stringify(wallet.address));
+    }
   };
 
   useEffect(() => {
-    if (loggedIn) {
-      createWallet();
-    }
-  }, [loggedIn]);
+    const run = async () => {
+      if (localStorage.getItem("Web3Auth-loggedIn") == "true") {
+        setLoggedIn(true);
+      }
+    };
+
+    // set intervall to check if user is logged in
+    const interval = setInterval(() => {
+      run();
+    }, process.env.NEXT_PUBLIC_RPC_POLLING_INTERVAL);
+  });
 
   const login = async () => {
     if (!web3auth) {
@@ -174,6 +212,7 @@ const WalletPage: NextPage = () => {
     }
     const web3authProvider = await web3auth.connect();
     setProvider(web3authProvider);
+    localStorage.setItem("Web3Auth-loggedIn", "true");
   };
 
   const authenticateUser = async () => {
@@ -200,6 +239,7 @@ const WalletPage: NextPage = () => {
       return;
     }
     await web3auth.logout();
+    localStorage.setItem("Web3Auth-loggedIn", "false");
     setProvider(null);
     setLoggedIn(false);
   };
@@ -273,7 +313,11 @@ const WalletPage: NextPage = () => {
     }
     const rpc = new RPC(web3auth?.provider);
     const address = await rpc.getAccounts();
-    uiConsole(address);
+    if (web3auth.cachedAdapter == "metamask") {
+      uiConsole(address[0]);
+    } else {
+      uiConsole(address);
+    }
   };
 
   const getBalance = async () => {
@@ -314,10 +358,14 @@ const WalletPage: NextPage = () => {
       uiConsole("provider not initialized yet");
       return;
     }
-    const rpc = new RPC(web3auth?.provider);
-    const privateKey = await rpc.getPrivateKey();
-    uiConsole(privateKey);
-    createWallet();
+    if (web3auth?.cachedAdapter != "metamask") {
+      const rpc = new RPC(web3auth?.provider);
+      const privateKey = await rpc.getPrivateKey();
+      uiConsole(privateKey);
+      createWallet();
+    } else {
+      uiConsole("Private key not available for metamask");
+    }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -329,7 +377,11 @@ const WalletPage: NextPage = () => {
   }
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="text-center my-10 mx-auto">
+        <Spinner />
+      </div>
+    );
   }
 
   const loggedInView = (

@@ -140,7 +140,7 @@ export default function Header() {
       <div className="navbar-end flex-grow mr-4">
         <WalletBadge />
 
-        <RainbowKitCustomConnectButton />
+        {/*   <RainbowKitCustomConnectButton /> */}
         <FaucetButton />
       </div>
     </div>

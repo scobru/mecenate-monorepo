@@ -6,6 +6,8 @@ import * as multihash from "multihashes";
 import * as sha256_cid from "ipfs-only-hash";
 import * as ethers from "ethers";
 
+const crypto = require("asymmetric-crypto");
+
 const MAX_UINT32 = Math.pow(2, 32) - 1;
 const MAX_UINT8 = Math.pow(2, 8) - 1;
 const FERNET_SECRET_LENGTH = 32;
@@ -27,6 +29,47 @@ const randomString = (): string => {
     result += characters.charAt(Math.floor(randomNumber() * charactersLength));
   }
   return result;
+};
+
+const downloadFile = ({
+  data,
+  fileName,
+  fileType,
+}: {
+  data: BlobPart;
+  fileName: string;
+  fileType: string;
+}): void => {
+  if (!data || !fileName || !fileType) {
+    throw new Error("Invalid inputs");
+  }
+
+  const blob = new Blob([data], { type: fileType });
+  const a = document.createElement("a");
+  a.download = fileName;
+  a.href = window.URL.createObjectURL(blob);
+
+  const clickEvt = new MouseEvent("click", {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+  });
+
+  a.dispatchEvent(clickEvt);
+  a.remove();
+};
+
+const createPair = (): string => {
+  const kp = crypto.keyPair();
+  console.log("Generating Key Pair...", kp);
+
+  downloadFile({
+    data: JSON.stringify(kp),
+    fileName: "MecenatekeyPair.json",
+    fileType: "text/json",
+  });
+
+  return JSON.stringify(kp);
 };
 
 /// Convert multihash from input of specified type to multihash buffer object
@@ -90,26 +133,21 @@ async function multihashTo(
   }
 }
 
-const ErasureHelper = {
+const MecenateClient = {
   multihash: async ({
     input,
     inputType,
     outputType,
   }: {
-    input: string,
-    inputType: string,
-    outputType: string,
+    input: string;
+    inputType: string;
+    outputType: string;
   }): Promise<string> =>
     multihashTo(await multihashFrom(input, inputType), outputType),
   constants: {
-    RATIO_TYPES: {
-      NaN: 0,
-      Inf: 1,
-      Dec: 2,
-    },
     TOKEN_TYPES: {
       NaN: 0,
-      NMR: 1,
+      MUSE: 1,
       DAI: 2,
     },
   },
@@ -208,4 +246,4 @@ const ErasureHelper = {
   },
 };
 
-export default ErasureHelper;
+export default MecenateClient;

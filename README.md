@@ -1,14 +1,41 @@
-# Mecenate
+# Mecenate v2.0.0
 
 ## #100builders #backdrop #sismo #scaffold-eth #buildguild
 
-This project is dedicated to anyone who wishes to exchange information and data anonymously, while also providing a system designed to filter and ensure the quality of the data received.
-
-## What's New ?
-
-## Update 26/10/2023 v2.0.0
-
 We are thrilled to announce version 2 of Mecenate with the following enhancements:
+
+enjoy the beta on : <https://mecenate.vercel.app/>
+
+## What is this?
+
+Mecenate is a protocol composed by a set of smart contracts that assicure the user's privacy and the integrity of the data. The protocol would to be open source and decentralized. All the fees are distributed to the Mecenate users.
+
+Mecenate consists of several applications, including:
+
+- **📄Mecenate Feed:**  Mecenate Feeds Mecenate Feeds allows anyone to publish data and stake capital behind the accuracy of that information. Users can build a verifiable track record and stake their predictions with ETH. By staking ETH, the seller of a prediction puts value at risk if the prediction goes wrong. When a seller stakes behind their prediction they choose a "griefing factor". Griefing factor = degree (e.g. 1:10) to which the buyer is able to destroy their stake. If the seller stakes ETH, the buyer can destroy both their stakes for ETH .
+
+- **📣Mecenate Bay:** A marketplace build on top of Mecenate Feeds for sourcing ANY kind of information (secrets, predictions etc). Requests for information are matched with a stake by "fulfillers" who get paid if the information meets the set parameters. ETH is used for staking. Ethers from punished fulfillers are sent to the Mecenate treasury and distributed between users protocol.
+
+## How it works?
+
+**QUESTION** Enter a short explanation of what you're looking for. This can include links, Twitter handles and hastags. Make your descriptions as clear as possible.
+
+**REWARD** An amount of ETH cryptocurrency you are locking up as a reward. This will be transferred into an escrow when you make the request, you make sure you have this in your wallet. Like this fulfillers can see you really have the money and will take your request seriously. (Once someone fulfills your request it is added to their stake and you will not get it back, you can only punish it.)
+
+**FULLFILLER** stake This is what makes Mecenate Bay powerful. This is how much ETH cryptocurrency someone will need to deposit when fulfilling your request. You can destroy a fraction or all of their staked money if you are dissatisfied with what they provide. This will stop people responding with spam or bad information. It usually makes sense to have this be roughly 10% - 50% of the reward.
+
+**PUNISH RATIO** How many ETH it will cost you to destroy one dollar of the fulfiller's stake. For example; if you set the ratio to 0.1 and punish a fulfiller who staked 100 ETH, it will cost you 10 ETH to destroy their entire stake. This protects the fulfiller from reckless punishment. The default value is good for most requests.
+
+**PUNISH PERIOD**  How many days after your request is fulfilled you have to verify the quality of the information provided. Within this window, you may punish the fulfiller. After this time their stake and reward are released. You may decide to release it early if you are satisfied with the submission. The default value is good for most requests.
+
+## </u>New in V2</u>
+
+- Scaffold-Eth2 (UI and Smart Contract)
+- OpenZeppelin
+- Uniswap SDK
+- EAS (Attestation)
+- Sismo (ZKP commitment)
+- Web3Auth (Account Abstraction)
 
 ### Smart Contract
 
@@ -19,31 +46,60 @@ We are thrilled to announce version 2 of Mecenate with the following enhancement
 - [x] **MUSE Token Burning Mechanism**: Implemented a mechanism for burning the native MUSE tokens to control the supply and increase scarcity.
 - [x] **Uniswap Purchase and Burning**: Enabled the purchase of native MUSE tokens on Uniswap using DAI and ETH, followed by a burning mechanism to further manage the token economics.
 
-### Frontend
+### UI
 
 - [x] **Account Abstraction and Social Login**: Implemented Account Abstraction and social login functionalities using Web3Auth.
 - [x] **Sismo Implementation**: Integrated Sismo to verify user identity via zkproof without requiring the user to provide any data to the platform.
 
-enjoy the beta on : <https://mecenate.vercel.app/>
-
 Documentation: <https://scobru.gitbook.io/mecenatedocs/>
 
-- [**Mecente Protocol v2.0.0**](./#mecente-protocol-v100)
-  - [Features](./#features)
-  - [Quick Start](./#-quick-start)
-  - [Contribution](./#contribution)
+## Mecenate Platform Workflow
 
-### Features
+### New User Registration
 
-Mecenate consists of several applications, including:
+1. **Initial Connection**: New user connects to `MecenateClient` or `MecenateUI`.
+2. **Key Generation**: `MecenateClient` generates asymmetric encryption keys `PubKey, PrivKey`.
+3. **Identity Verification**: User verifies their identity through Sismo zk-proof.
+4. **Key Storage**: User stores the private key (`pk`) in a safe place.
+5. **Registration**: `MecenateClient` calls `registerUser(evmAccount, vaultID, pubKey)`.
 
-- 📄Mecenate Feed: A smart contract protocol for buy and sell encrypted and private data.
-- 📣Mecenate Bay: A Dapp marketplace built on top of Mecenate Feed.
+### Creating a Post
 
-## 🚀 QUICK START
+1. **Feed Creation**: Seller creates a Feed using `Feed_Factory.buildFeed()`.
+2. **Data Upload**: Seller uploads `rawdata` to `MecenateClient_Seller`.
+3. **Symmetric Key**: `MecenateClient_Seller` generates symmetric encryption key `SymKey`.
+4. **Data Encryption**: `MecenateClient_Seller` computes `encryptedData = SymKey.encrypt(rawdata)`.
+5. **Hash Computations**:
+    - `keyhash = sha256(SymKey)`
+    - `datahash = sha256(rawdata)`
+    - `encryptedDatahash = sha256(encryptedData)`
+6. **JSON and Proof**:
+    - `json_proofhash_v120 = JSON(address_seller, multihashformat(datahash), multihashformat(keyhash), multihashformat(encryptedDatahash))`
+    - `proofhash = sha256(json_proofhash_v120)`
+7. **Blockchain Interaction**:
+    - Submits `proofhash` to their Feed contract
+    - Uploads `json_proofhash_v120` to IPFS at `multihashformat(proofhash)`
+    - Uploads `encryptedData` to IPFS at `multihashformat(encryptedDatahash)`
+8. **Post Submission**: Creates a Post using `Feed.submitHash(proofhash)`.
+
+### Selling a Post
+
+1. **Payment**: Buyer deposits the required payment using `Feed.accept()`.
+2. **Key Retrieval**: `MecenateClient_Seller` retrieves `PubKey_Buyer` from `Mecenate_Users` contract.
+3. **Encryption**: `MecenateClient_Seller` computes `encryptedSymKey_Buyer = PubKey_Buyer.encrypt(SymKey)`.
+4. **Sell Data**:
+    - `json_selldata_v120 = JSON(encryptedSymKey_Buyer, multihashformat(proofhash))`
+    - Uploads `json_selldata_v120` to IPFS at `multihashformat(sha256(json_selldata_v120))`
+5. **Submission**: Submits `json_selldata_v120` to buyer using `Feed.submitHash(multihashformat(sha256(json_selldata_v120)))`.
+
+### Revealing a Post
+
+1. **SymKey Upload**: `MecenateClient_Seller` uploads `SymKey` to IPFS at `multihashformat(keyhash)`.
+2. **Raw Data Upload**: `MecenateClient_Seller` uploads `rawdata` to IPFS at `multihashformat(datahash)`.
+
+## QUICK START
 
 ---
-
 To get started with Scaffold-Eth 2, follow the steps below:
 
 1. Clone this repo & install dependencies

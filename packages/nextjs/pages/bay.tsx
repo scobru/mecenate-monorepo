@@ -7,12 +7,9 @@ import { formatEther, keccak256, parseEther } from "ethers/lib/utils.js";
 import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 import axios from "axios";
+import Web3 from "web3";
 
 const Bay: NextPage = () => {
-  const provider = useProvider();
-  const { chain } = useNetwork();
-  const { data: customSigner } = useSigner();
-
   const deployedContractBay = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateBay");
   const deployedContractIdentity = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateIdentity");
   const deployedContractVault = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateVault");
@@ -31,24 +28,35 @@ const Bay: NextPage = () => {
   const runTx = useTransactor();
 
   useEffect(() => {
-    let _signer;
-
-    try {
-      if (customSigner) {
-        console.log("Custom Signer: ", customSigner);
-        _signer = customSigner;
+    const run = async () => {
+      try {
+        let _signer;
+        const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
+        if (cachedAdapter !== "metamask") {
+          const pk = localStorage.getItem("pk");
+          if (pk) {
+            _signer = new ethers.Wallet(pk, publicProvider);
+          } else {
+            throw new Error("Private key not found in local storage.");
+          }
+        } else {
+          const web3Auth = JSON.parse(String(localStorage.getItem("web3AuthProvider")));
+          if (web3Auth) {
+            const web3 = new Web3(web3Auth as any);
+            const ethersProvider = new ethers.providers.Web3Provider(web3.givenProvider);
+            _signer = ethersProvider.getSigner();
+          } else {
+            throw new Error("Invalid web3Auth object in local storage.");
+          }
+        }
         setSigner(_signer);
-      } else if (window.localStorage) {
-        console.log("Local Storage: ", localStorage.getItem("pk"));
-        const pk = JSON.parse(JSON.stringify(localStorage.getItem("pk")));
-        _signer = new ethers.Wallet(pk, publicProvider);
-        setSigner(_signer);
+      } catch (error) {
+        console.error("Failed to initialize signer:", error);
       }
-    } catch (error) {
-      console.error(error);
-    }
-    console.log("Signer Address: ", _signer?.getAddress());
-  }, [customSigner]);
+    };
+
+    run();
+  }, []);
 
   type BayRequest = {
     request: string;
@@ -300,7 +308,7 @@ const Bay: NextPage = () => {
                 tabIndex={0}
                 className="card card-bordered rounded-2xl grid-cols-3 my-5 bg-gradient-to-bl from-slate-500 to-slate-500 hover:bg-base-300 shadow-lg shadow-primary hover:shadow-2xl hover:scale-105 transform transition-all duration-500"
               >
-                <div className=" bg-gradient-to-tl from-slate-700 to-slate-900rounded-t-xl">
+                <div className=" bg-gradient-to-tl from-slate-700 to-slate-900rounded-t-xl break-all">
                   <div className="text-left p-5">
                     <span className="font-light text-left">WANTED</span>
                     <div className="text-2xl font-bold">{ethers.utils.parseBytes32String(request.request)}</div>

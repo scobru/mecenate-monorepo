@@ -15,6 +15,8 @@ contract MecenateUsers is Ownable {
     address public verifierContract;
 
     event UserRegistered(address indexed userAddress);
+    event PublicKeyChanged(address indexed userAddress, bytes newPublicKey);
+    event EVMAddressChanged(address indexed oldAddress, address newAddress);
 
     constructor(address verifierContractAddress) {
         verifierContract = verifierContractAddress;
@@ -41,6 +43,76 @@ contract MecenateUsers is Ownable {
         _users.add(msg.sender);
 
         emit UserRegistered(msg.sender);
+
+        return newUser;
+    }
+
+    function changePublicKey(
+        bytes memory sismoConnectResponse,
+        bytes memory pubKey
+    ) external returns (Structures.User memory) {
+        bytes memory vaultId = IMecenateVerifier(verifierContract).sismoVerify(
+            sismoConnectResponse
+        );
+
+        require(_users.contains(msg.sender), "USER_DOES_NOT_EXIST");
+
+        require(
+            keccak256(_metadata[msg.sender].sismoVaultId) == keccak256(vaultId),
+            "VAULT_ID_MISMATCH"
+        );
+
+        require(
+            keccak256(_metadata[msg.sender].publicKey) != keccak256(pubKey),
+            "SAME_PUBLIC_KEY"
+        );
+
+        // modify user metadata
+        _metadata[msg.sender].sismoVaultId = vaultId;
+
+        _metadata[msg.sender].publicKey = pubKey;
+
+        emit PublicKeyChanged(msg.sender, pubKey);
+
+        return _metadata[msg.sender];
+    }
+
+    function changeEVMAddress(
+        bytes memory sismoConnectResponse,
+        address newAddress
+    ) external returns (Structures.User memory) {
+        bytes memory vaultId = IMecenateVerifier(verifierContract).sismoVerify(
+            sismoConnectResponse
+        );
+
+        require(_users.contains(msg.sender), "USER_DOES_NOT_EXIST");
+
+        require(
+            keccak256(_metadata[msg.sender].sismoVaultId) == keccak256(vaultId),
+            "VAULT_ID_MISMATCH"
+        );
+
+        require(
+            _metadata[msg.sender].evmAddress != newAddress,
+            "SAME_EVM_ADDRESS"
+        );
+
+        require(!_users.contains(newAddress), "USER_ALREADY_EXISTS");
+
+        Structures.User memory newUser = Structures.User({
+            evmAddress: newAddress,
+            sismoVaultId: vaultId,
+            publicKey: _metadata[msg.sender].publicKey
+        });
+
+        _metadata[newAddress] = newUser;
+        _users.add(newAddress);
+
+        emit EVMAddressChanged(msg.sender, newAddress);
+
+        // remove old user
+        _users.remove(msg.sender);
+        delete _metadata[msg.sender];
 
         return newUser;
     }

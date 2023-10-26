@@ -9,8 +9,10 @@ import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 import Spinner from "~~/components/Spinner";
 import { notification } from "~~/utils/scaffold-eth";
 import { toUtf8Bytes, toUtf8String } from "ethers/lib/utils.js";
+import { IProvider } from "@web3auth/base";
 const crypto = require("asymmetric-crypto");
 const ErasureHelper = require("@erasure/crypto-ipfs");
+import Web3 from "web3";
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
@@ -39,26 +41,8 @@ const Identity: NextPage = () => {
 
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
   const [signer, setSigner] = React.useState<Signer | undefined>();
-  const runTx = useTransactor();
-  useEffect(() => {
-    let _signer;
 
-    try {
-      if (customSigner) {
-        console.log("Custom Signer: ", customSigner);
-        _signer = customSigner;
-        setSigner(_signer);
-      } else if (window.localStorage) {
-        console.log("Local Storage: ", localStorage.getItem("pk"));
-        const pk = JSON.parse(JSON.stringify(localStorage.getItem("pk")));
-        _signer = new ethers.Wallet(pk, publicProvider);
-        setSigner(_signer);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    console.log("Signer Address: ", _signer?.getAddress());
-  }, [customSigner]);
+  const runTx = useTransactor();
 
   let UsersAddress!: string;
   let UsersAbi: ContractInterface[] = [];
@@ -278,6 +262,39 @@ const Identity: NextPage = () => {
   };
 
   useEffect(() => {
+    const run = async () => {
+      try {
+        let _signer;
+        const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
+        if (cachedAdapter !== "metamask") {
+          const pk = localStorage.getItem("pk");
+          if (pk) {
+            _signer = new ethers.Wallet(pk, publicProvider);
+          } else {
+            throw new Error("Private key not found in local storage.");
+          }
+        } else {
+          const web3Auth = JSON.parse(String(localStorage.getItem("web3AuthProvider")));
+          if (web3Auth) {
+            const web3 = new Web3(web3Auth as any);
+            const ethersProvider = new ethers.providers.Web3Provider(web3.givenProvider);
+            _signer = ethersProvider.getSigner();
+          } else {
+            throw new Error("Invalid web3Auth object in local storage.");
+          }
+        }
+        setSigner(_signer);
+      } catch (error) {
+        console.error("Failed to initialize signer:", error);
+      }
+
+      initializeState();
+    };
+
+    run();
+  }, []);
+
+  useEffect(() => {
     if (signer) {
       initializeState();
     }
@@ -335,7 +352,6 @@ const Identity: NextPage = () => {
 
                         if (verifiedResult.ok) {
                           setSismoConnectVerifiedResult(data);
-                          localStorage.setItem("verified", "verified");
                           localStorage.setItem("sismoData", JSON.stringify(await data));
                           setPageState("verified");
                         } else {

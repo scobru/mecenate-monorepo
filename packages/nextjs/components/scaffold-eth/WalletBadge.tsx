@@ -23,7 +23,7 @@ export default function WalletBadge() {
 
   const getBalances = async () => {
     try {
-      const address = JSON.parse(String(localStorage.getItem("wallet"))).address;
+      const address = JSON.parse(String(localStorage.getItem("accountAddress")));
       setAddress(address);
       // Ottieni il saldo ETH
       const ethBalance = await provider.getBalance(address);
@@ -54,7 +54,7 @@ export default function WalletBadge() {
       <div className="relative group inline-block align-baseline mx-5">
         <Link href="/wallet">
           {" "}
-          <Blockies className="rounded-full" seed={address?.toLowerCase() as string} />
+          {address && <Blockies className="rounded-full" seed={address?.toLowerCase() as string} />}
         </Link>
         <div className="origin-top-right font-medium absolute right-0 mt-2  rounded-md shadow-lg text-black bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block">
           <div className="p-4">
