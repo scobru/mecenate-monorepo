@@ -30,7 +30,7 @@ contract MecenateAttesterResolver is SchemaResolver {
 
         // Check if the status is finalized
         require(
-            mecenateFeed.getStatus() == Structures.PostStatus.Finalized,
+            mecenateFeed.getStatus() == Structures.PostStatus.Submitted,
             "POST NOT FINALIZED"
         );
 

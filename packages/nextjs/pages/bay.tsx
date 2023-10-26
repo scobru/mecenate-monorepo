@@ -11,14 +11,13 @@ import axios from "axios";
 const Bay: NextPage = () => {
   const provider = useProvider();
   const { chain } = useNetwork();
-  const { data: signer } = useSigner();
-  const txData = useTransactor(signer as Signer);
+  const { data: customSigner } = useSigner();
 
-  const deployedContractBay = getDeployedContract(chain?.id.toString(), "MecenateBay");
-  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
-  const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
-  const deployedContractDai = getDeployedContract(chain?.id.toString(), "MockDai");
-  const deployedContractMUSE = getDeployedContract(chain?.id.toString(), "MUSE");
+  const deployedContractBay = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateBay");
+  const deployedContractIdentity = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateIdentity");
+  const deployedContractVault = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateVault");
+  const deployedContractDai = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MockDai");
+  const deployedContractMUSE = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MUSE");
 
   const [requests, setRequests] = React.useState<BayRequest[]>([]);
   const [requestString, setRequestString] = React.useState<string>("");
@@ -26,6 +25,30 @@ const Bay: NextPage = () => {
   const [requestStake, setRequestStake] = React.useState<string>("");
   const [requestAddress, setRequestAddress] = React.useState<string>("");
   const [tokenId, setTokenId] = React.useState<number>(0);
+
+  const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const [signer, setSigner] = React.useState<Signer | undefined>();
+  const runTx = useTransactor();
+
+  useEffect(() => {
+    let _signer;
+
+    try {
+      if (customSigner) {
+        console.log("Custom Signer: ", customSigner);
+        _signer = customSigner;
+        setSigner(_signer);
+      } else if (window.localStorage) {
+        console.log("Local Storage: ", localStorage.getItem("pk"));
+        const pk = JSON.parse(JSON.stringify(localStorage.getItem("pk")));
+        _signer = new ethers.Wallet(pk, publicProvider);
+        setSigner(_signer);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    console.log("Signer Address: ", _signer?.getAddress());
+  }, [customSigner]);
 
   type BayRequest = {
     request: string;
@@ -95,12 +118,13 @@ const Bay: NextPage = () => {
   const acceptBayRequest = async (index: number, address: string) => {
     if (signer) {
       bayCtx?.connect(signer as Signer);
-      txData(bayCtx?.acceptRequest(index, address));
+      runTx(bayCtx?.acceptRequest(index, address), signer);
     }
   };
 
   const removeRequest = async (index: number) => {
-    txData(bayCtx?.removeRequest(index));
+    bayCtx?.connect(signer as Signer);
+    runTx(bayCtx?.removeRequest(index), signer);
   };
 
   const getAllRequest = useMemo(() => {
@@ -127,10 +151,11 @@ const Bay: NextPage = () => {
 
     bayCtx?.connect(signer as Signer);
 
-    txData(
+    runTx(
       bayCtx?.createRequest(request, {
         value: tokenId == 0 ? parseEther(requestPayment) : 0,
       }),
+      signer,
     );
 
     await sendPublicTelegramMessage();
@@ -178,9 +203,9 @@ const Bay: NextPage = () => {
 
   const handleApproveToken = async () => {
     if (tokenId == 1) {
-      txData(museCtx?.approve(bayCtx?.address, parseEther(requestPayment)));
+      runTx(museCtx?.approve(bayCtx?.address, parseEther(requestPayment)), signer);
     } else if (tokenId == 2) {
-      txData(daiCtx?.approve(bayCtx?.address, parseEther(requestPayment)));
+      txData(daiCtx?.approve(bayCtx?.address, parseEther(requestPayment)), signer);
     }
   };
 

@@ -44,21 +44,6 @@ contract MecenateTreasury is Ownable, Swapper {
         fixedFee = _fixedFee;
     }
 
-    /* function withdrawTokens(
-        address _token,
-        address _to,
-        uint256 _amount
-    ) external onlyOwner {
-        IERC20(_token).safeTransfer(_to, _amount);
-    }
-
-    function withdrawNative(
-        address payable _to,
-        uint256 _amount
-    ) external onlyOwner {
-        _to.transfer(_amount);
-    } */
-
     function addERC20Funds(address token, uint256 amount) external onlyOwner {
         distributableERC20Balance[token] += amount;
     }
@@ -185,7 +170,8 @@ contract MecenateTreasury is Ownable, Swapper {
             token0,
             token1,
             fee,
-            amount
+            amount,
+            address(this)
         );
 
         require(tokens_bought > 0, "No tokens bought");
@@ -201,7 +187,8 @@ contract MecenateTreasury is Ownable, Swapper {
             token1,
             token2,
             fee2,
-            tokens_bought
+            tokens_bought,
+            address(this)
         );
 
         IMUSE(token2).burn(tokens_sold_to_muse);

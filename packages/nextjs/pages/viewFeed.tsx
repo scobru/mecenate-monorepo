@@ -2,32 +2,16 @@ import type { NextPage } from "next";
 import React, { useEffect, useState } from "react";
 import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { BigNumber, Contract, ContractInterface, FixedNumber, Signer, ethers } from "ethers";
+import { Contract, ContractInterface, Signer, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { useRouter } from "next/router";
-import {
-  formatEther,
-  hexDataSlice,
-  hexStripZeros,
-  hexValue,
-  keccak256,
-  parseEther,
-  toUtf8Bytes,
-  toUtf8String,
-} from "ethers";
+import { formatEther, keccak256, parseEther, toUtf8String } from "ethers/lib/utils.js";
 import pinataSDK from "@pinata/sdk";
 import axios from "axios";
 import Dropzone from "react-dropzone";
 import { saveAs } from "file-saver";
 import Spinner from "~~/components/Spinner";
-import {
-  ScaleIcon,
-  MegaphoneIcon,
-  DocumentCheckIcon,
-  PaperAirplaneIcon,
-  ChatBubbleBottomCenterIcon,
-  InboxArrowDownIcon,
-} from "@heroicons/react/20/solid";
+import { ScaleIcon, MegaphoneIcon, DocumentCheckIcon } from "@heroicons/react/20/solid";
 import { ApolloClient, InMemoryCache, createHttpLink, gql } from "@apollo/client";
 
 import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
@@ -39,12 +23,12 @@ const eas = new EAS(EASContractAddress);
 // Initialize SchemaEncoder with the schema string
 const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes post,");
 
-const schemaUID = "0xa685677ba3ea1c2df3ed44de688bf5147c36f910b54ec32f08e1e0de4914a113";
+const schemaUID = "0xb73edc40219f8224352f6d9c12364faadae4e09726e78d0e9e78bea456930b5a";
 
 const crypto = require("asymmetric-crypto");
 
 const ViewFeed: NextPage = () => {
-  const { data: signer } = useSigner();
+  const { data: customSigner } = useSigner();
   const provider = useProvider();
   const router = useRouter();
   const AbiCoder = new ethers.utils.AbiCoder();
@@ -62,8 +46,8 @@ const ViewFeed: NextPage = () => {
   const { chain } = useNetwork();
 
   const { addr } = router?.query;
-  const [customSigner, setCustomSigner] = useState<any>(null);
-  const txData = useTransactor(customWallet as Signer);
+
+  const [useStake, setUseStake] = useState<boolean>(false);
 
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
@@ -89,14 +73,38 @@ const ViewFeed: NextPage = () => {
   const [message, setMessage] = useState<any>("");
   const [userName, setUserName] = useState<any>("");
   const [feedData, setFeedData] = useState<any>([]);
-  const deployedContractFeed = getDeployedContract(chain?.id.toString(), "MecenateFeed");
-  const deployedContractUsers = getDeployedContract(chain?.id.toString(), "MecenateUsers");
-
+  const deployedContractFeed = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateFeed");
+  const deployedContractUsers = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateUsers");
   const [attestations, setAttestations] = useState<any>([]);
-
-  const deployedContractMUSE = getDeployedContract(chain?.id.toString(), "MUSE");
-  const deployedContractMockDai = getDeployedContract(chain?.id.toString(), "MockDai");
+  const deployedContractMUSE = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MUSE");
+  const deployedContractMockDai = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MockDai");
   const [password, setPassword] = useState<any>("");
+
+  const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+
+  const [signer, setSigner] = React.useState<Signer | undefined>();
+
+  const runTx = useTransactor();
+
+  useEffect(() => {
+    let _signer;
+
+    try {
+      if (customSigner) {
+        console.log("Custom Signer: ", customSigner);
+        _signer = customSigner;
+        setSigner(_signer);
+      } else {
+        console.log("Local Storage: ", localStorage.getItem("pk"));
+        const pk = JSON.parse(JSON.stringify(localStorage.getItem("pk")));
+        _signer = new ethers.Wallet(pk, publicProvider);
+        setSigner(_signer);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    console.log("Signer Address: ", _signer?.getAddress());
+  }, [customSigner]);
 
   const [receiver, setReceiver] = useState<any>("");
 
@@ -188,7 +196,7 @@ const ViewFeed: NextPage = () => {
     token?.connect(customSigner);
     console.log(customSigner);
     console.log(token);
-    txData(token?.approve(feedCtx?.address, parseEther(postStake)));
+    runTx(token?.approve(feedCtx?.address, parseEther(postStake)), signer);
   };
 
   const handleApproveBuyer = async () => {
@@ -205,7 +213,7 @@ const ViewFeed: NextPage = () => {
     // Write Approval
     token?.connect(customSigner as Signer);
 
-    txData(token?.approve(feedCtx?.address, parseEther(postPayment)));
+    runTx(token?.approve(feedCtx?.address, parseEther(postPayment))), signer;
   };
 
   const feedCtx = useContract({
@@ -339,7 +347,7 @@ const ViewFeed: NextPage = () => {
       _buyer = buyer;
     }
 
-    txData(
+    runTx(
       feedCtx?.createPost(
         proofOfHashEncode,
         Number(postType),
@@ -348,18 +356,22 @@ const ViewFeed: NextPage = () => {
         parseEther(postStake),
         Number(tokenId),
         signer?.getAddress(),
+        signer?.getAddress(),
+        useStake,
         {
           value: tokenId == "0" ? parseEther(postStake) : 0,
         },
       ),
+      signer,
     );
   };
 
   async function acceptPost() {
-    txData(
+    runTx(
       feedCtx?.acceptPost(feedData?.postdata?.settings?.tokenId, parseEther(postPayment), signer?.getAddress(), {
         value: feedData?.postdata?.settings?.tokenId == "0" ? parseEther(postPayment) : 0,
       }),
+      signer,
     );
   }
 
@@ -546,7 +558,7 @@ const ViewFeed: NextPage = () => {
 
     feedCtx?.connect(customSigner);
 
-    txData(feedCtx?.submitHash(proofHash58Digest));
+    runTx(feedCtx?.submitHash(proofHash58Digest), signer);
 
     return {
       proofJson: json_selldata_v120,
@@ -716,9 +728,9 @@ const ViewFeed: NextPage = () => {
     const AbiCoder = new ethers.utils.AbiCoder();
     const dataEncoded = AbiCoder.encode(["string", "string"], [symKeyHash, rawDataHash]);
 
-    feedCtx?.connect(customSigner);
+    feedCtx?.connect(signer);
 
-    txData(feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)));
+    runTx(feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)), signer);
 
     await fetchData();
   }
@@ -747,17 +759,17 @@ const ViewFeed: NextPage = () => {
       });
       const newAttestationUID = await tx.wait();
       console.log("New attestation UID:", newAttestationUID);
-      txData(feedCtx?.finalizePost(valid, parseEther("0"), newAttestationUID));
+      runTx(feedCtx?.finalizePost(valid, parseEther("0"), newAttestationUID), signer);
     } else {
-      txData(feedCtx?.finalizePost(valid, parseEther(punishment), uid));
+      runTx(feedCtx?.finalizePost(valid, parseEther(punishment), uid), signer);
     }
 
     await fetchData();
   }
 
   async function renounce() {
-    feedCtx?.connect(customSigner);
-    txData(feedCtx?.renouncePost());
+    feedCtx?.connect(signer);
+    runTx(feedCtx?.renouncePost(), signer);
 
     notification.success("Refund successful");
   }
@@ -766,18 +778,18 @@ const ViewFeed: NextPage = () => {
 
   async function addStake() {
     console.log("Adding Stake...");
-    feedCtx?.connect(customSigner);
-    txData(
+    feedCtx?.connect(signer);
+    runTx(
       feedCtx?.addStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress(), parseEther(stakeAmount), {
         value: feedData?.postdata?.settings?.tokenId == 0 ? parseEther(stakeAmount) : 0,
       }),
+      signer,
     );
     await fetchData();
   }
 
   async function takeAll() {
-    feedCtx?.connect(customSigner);
-    txData(feedCtx?.takeFullStake(feedData?.postdata?.settings?.tokenId, receiver));
+    runTx(feedCtx?.takeFullStake(feedData?.postdata?.settings?.tokenId, receiver), signer);
     console.log("Take All Stake...");
     await fetchData();
   }
@@ -787,7 +799,7 @@ const ViewFeed: NextPage = () => {
 
     console.log("Take Stake...");
 
-    txData(feedCtx?.takeStake(feedData?.postdata?.settings?.tokenId, receiver, parseEther(stakeAmount)));
+    runTx(feedCtx?.takeStake(feedData?.postdata?.settings?.tokenId, receiver, parseEther(stakeAmount)), signer);
 
     await fetchData();
   }
@@ -1063,14 +1075,17 @@ const ViewFeed: NextPage = () => {
   }, []);
 
   useEffect(() => {
-    const run = async () => {
-      const yourStake = await feedCtx?.getStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress());
-      setYourStake(yourStake);
-    };
-    if (signer) {
-      run();
-    }
-  }, [feedCtx]);
+    const interval = setInterval(async () => {
+      if (signer) {
+        feedCtx?.connect(signer as Signer);
+        const yourStake = await feedCtx?.getStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress());
+        console.log("Your Stake: ", yourStake);
+        setYourStake(yourStake);
+      }
+    }, 5000); // call every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [feedCtx, signer, feedData]);
 
   type ModalProps = {
     title: string;
@@ -1275,7 +1290,17 @@ const ViewFeed: NextPage = () => {
                     value={postStake}
                     onChange={e => setPostStake(e.target.value)}
                   />
-
+                  <label className="block text-base-500 mt-8">Use Staked Balance</label>
+                  <input
+                    type="checkbox"
+                    name="useStake"
+                    placeholder="Use Stake"
+                    id=""
+                    onClick={async e => {
+                      setUseStake(e.target.value);
+                    }}
+                  />
+                  <br />
                   <select
                     className="select select-text bg-transparent my-4 text-black bg-white"
                     name="tokens"
@@ -1361,6 +1386,7 @@ const ViewFeed: NextPage = () => {
                       setPassword(e.target.value);
                     }}
                   /> */}
+
                   <button
                     className="btn btn-primary w-full mt-4"
                     onClick={async () => {

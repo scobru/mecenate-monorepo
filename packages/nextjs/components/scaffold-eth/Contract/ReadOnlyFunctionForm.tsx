@@ -1,4 +1,4 @@
-import { FunctionFragment } from "ethers";
+import { FunctionFragment } from "ethers/lib/utils";
 import { useState } from "react";
 import { useContractRead } from "wagmi";
 import { displayTxResult } from "./utilsDisplay";

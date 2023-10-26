@@ -29,7 +29,6 @@ p {
 .btn {
   @apply shadow-md;
   @apply capitalize;
-  
 }
 
 .btn.btn-ghost {
@@ -43,12 +42,12 @@ p {
   @apply rounded-lg;
   @apply my-5;
   @apply border-0;
-  @apply hover:bg-slate-800;
+  @apply hover: bg-slate-800;
   @apply w-full;
   @apply text-white;
-  @apply disabled:bg-slate-800;
-  @apply disabled:cursor-not-allowed;
-  @apply disabled:opacity-50;
+  @apply disabled: bg-slate-800;
+  @apply disabled: cursor-not-allowed;
+  @apply disabled: opacity-50;
   background-color: #311c31;
 }
 
@@ -58,12 +57,12 @@ p {
   @apply rounded-lg;
   @apply my-5;
   @apply border-0;
-  @apply hover:bg-slate-800;
+  @apply hover: bg-slate-800;
   @apply w-full;
   @apply text-white;
-  @apply disabled:bg-slate-800;
-  @apply disabled:cursor-not-allowed;
-  @apply disabled:opacity-50;
+  @apply disabled: bg-slate-800;
+  @apply disabled: cursor-not-allowed;
+  @apply disabled: opacity-50;
   background-color: #311c31;
 }
 
@@ -75,7 +74,5 @@ p {
   @apply shadow-2xl;
   @apply shadow-slate-900;
   @apply my-5;
-  @apply border-2
+  @apply border-2;
 }
-
-

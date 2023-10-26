@@ -3,7 +3,7 @@ import Blockies from "react-blockies";
 import { DocumentDuplicateIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useEnsAvatar, useEnsName } from "wagmi";
-import ethers from "ethers";
+import { ethers } from "ethers";
 
 const blockExplorerLink = (address: string, blockExplorer?: string) =>
   `${blockExplorer || "https://etherscan.io/"}address/${address}`;
@@ -23,10 +23,10 @@ export default function Address({ address, blockExplorer, disableAddressLink, fo
   const [ensAvatar, setEnsAvatar] = useState<string | null>();
   const [addressCopied, setAddressCopied] = useState(false);
 
-  const { data: fetchedEns } = useEnsName({ address, enabled: ethers.isAddress(address ?? ""), chainId: 1 });
+  const { data: fetchedEns } = useEnsName({ address, enabled: ethers.utils.isAddress(address ?? ""), chainId: 1 });
   const { data: fetchedEnsAvatar } = useEnsAvatar({
     address,
-    enabled: isAddress(address ?? ""),
+    enabled: ethers.utils.isAddress(address ?? ""),
     chainId: 1,
     cacheTime: 30_000,
   });

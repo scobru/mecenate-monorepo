@@ -8,6 +8,7 @@ import { getBlockExplorerTxLink, notification } from "~~/utils/scaffold-eth";
 
 type TTransactionFunc = (
   tx: Promise<SendTransactionResult> | Deferrable<TransactionRequest> | undefined,
+  signer?: Signer | undefined,
   callback?: ((_param: any) => void) | undefined,
 ) => Promise<Record<string, any> | undefined>;
 
@@ -32,14 +33,14 @@ const TxnNotification = ({ message, blockExplorerLink }: { message: string; bloc
  * @param _signer
  * @dev If signer is provided => dev wants to send a raw tx.
  */
-export const useTransactor = (_signer?: Signer): TTransactionFunc => {
-  let signer = _signer;
+export const useTransactor = (/* _signer?: Signer */): TTransactionFunc => {
+  /*  let signer = _signer;
   const { data } = useSigner();
   if (signer === undefined && data) {
     signer = data;
-  }
+  } */
 
-  const result: TTransactionFunc = async (tx, callback) => {
+  const result: TTransactionFunc = async (tx, signer, callback) => {
     if (!signer) {
       notification.error("Wallet/Signer not connected");
       console.error("⚡️ ~ file: useTransactor.tsx ~ error");

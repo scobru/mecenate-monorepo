@@ -1,6 +1,5 @@
 import "~~/styles/globals.css";
 import "~~/styles/carousel.css";
-import "~~/styles/lit.css";
 
 import type { AppProps } from "next/app";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";

@@ -3,19 +3,32 @@ import { ethers } from "ethers/lib";
 const ErasureHelper = require("@erasure/crypto-ipfs");
 const pinataSDK = require("@pinata/sdk");
 const axios = require("axios");
-const pinataApiSecret = "49be591effec457330d0b7f3b985a64b5fe34e8731006e2a72ddbf6388c6baf3";
+const pinataApiSecret = "";
 const pinataApiKey = "db6edfd69adcb416fe1c";
 import nacl = require("tweetnacl"); // cryptographic functions
 import util = require("tweetnacl-util"); // encoding & decoding
 
-const PrivateKey1 = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
-const PrivateKey2 = "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
+const PrivateKey1 = "";
+const PrivateKey2 = "";
+
 const secretKeyUInt8Array = util.decodeUTF8(PrivateKey1);
-const secretUInt8Array_32 = Uint8Array.prototype.slice.call(secretKeyUInt8Array, 0, 32);
+const secretUInt8Array_32 = Uint8Array.prototype.slice.call(
+  secretKeyUInt8Array,
+  0,
+  32,
+);
 const secretKeyUInt8Array_2 = util.decodeUTF8(PrivateKey1);
-const secretUInt8Array_32_2 = Uint8Array.prototype.slice.call(secretKeyUInt8Array_2, 0, 32);
-let account1KeyPair = nacl.box.keyPair.fromSecretKey(Buffer.from(secretUInt8Array_32));
-let account2KeyPair = nacl.box.keyPair.fromSecretKey(Buffer.from(secretUInt8Array_32_2));
+const secretUInt8Array_32_2 = Uint8Array.prototype.slice.call(
+  secretKeyUInt8Array_2,
+  0,
+  32,
+);
+let account1KeyPair = nacl.box.keyPair.fromSecretKey(
+  Buffer.from(secretUInt8Array_32),
+);
+let account2KeyPair = nacl.box.keyPair.fromSecretKey(
+  Buffer.from(secretUInt8Array_32_2),
+);
 
 console.log(account1KeyPair);
 console.log(account2KeyPair);
@@ -67,7 +80,9 @@ async function savePost(RawData: string, seller: string) {
 
   console.log("Saving encrypted data...");
   // Saves the encrypted data to IPFS.
-  var pin = await pinata.pinJSONToIPFS({ encryptedData: postData?.encryptedData });
+  var pin = await pinata.pinJSONToIPFS({
+    encryptedData: postData?.encryptedData,
+  });
   // Check that JSON proof does have the correct info.
   if (pin.IpfsHash !== postData?.proofJson.encryptedDatahash) {
     console.log("Error with Encrypted Data Hash.");
@@ -119,7 +134,10 @@ async function createPostData(RawData: any, seller: string) {
     const symmetricKey = ErasureHelper.crypto.symmetric.generateKey(); // base64 string
 
     // encryptedData Encrypt Raw Data
-    const encryptedFile = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
+    const encryptedFile = ErasureHelper.crypto.symmetric.encryptMessage(
+      symmetricKey,
+      RawData,
+    );
 
     // keyhash Hash sym key
     const symmetricKeyHash = await ErasureHelper.multihash({
@@ -221,13 +239,27 @@ async function revealPost(SymKey: any, RawData: any) {
   console.log("Data Saved.");
 }
 
-async function submitData(symmetricKey: string, proofhash: string, seller: string, buyer: string) {
-  const pubKeyUInt8Array = Uint8Array.prototype.slice.call(account2KeyPair.publicKey, 0, 32);
+async function submitData(
+  symmetricKey: string,
+  proofhash: string,
+  seller: string,
+  buyer: string,
+) {
+  const pubKeyUInt8Array = Uint8Array.prototype.slice.call(
+    account2KeyPair.publicKey,
+    0,
+    32,
+  );
   const msgParamsUInt8Array = util.decodeBase64(symmetricKey);
 
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
 
-  const encryptedMessage = nacl.box(msgParamsUInt8Array, nonce, pubKeyUInt8Array, account1KeyPair.secretKey);
+  const encryptedMessage = nacl.box(
+    msgParamsUInt8Array,
+    nonce,
+    pubKeyUInt8Array,
+    account1KeyPair.secretKey,
+  );
 
   const encryptedSymKey_Buyer = {
     ciphertext: util.encodeBase64(encryptedMessage),
@@ -290,12 +322,21 @@ async function submitData(symmetricKey: string, proofhash: string, seller: strin
   };
 }
 
-async function retrievePost(JsonHash: string, encryptedSymKey: IEncryptedMsg, SymKey: string) {
+async function retrievePost(
+  JsonHash: string,
+  encryptedSymKey: IEncryptedMsg,
+  SymKey: string,
+) {
   console.log("Retrieving Data...");
   const nonce = util.decodeBase64(encryptedSymKey.nonce);
   const ciphertext = util.decodeBase64(encryptedSymKey.ciphertext);
   const ephemPubKey = util.decodeBase64(encryptedSymKey.ephemPubKey);
-  const decryptedMessage = nacl.box.open(ciphertext, nonce, ephemPubKey, account2KeyPair.secretKey);
+  const decryptedMessage = nacl.box.open(
+    ciphertext,
+    nonce,
+    ephemPubKey,
+    account2KeyPair.secretKey,
+  );
 
   if (decryptedMessage) {
     console.log("Encrypted Data: ", decryptedMessage);
@@ -306,7 +347,9 @@ async function retrievePost(JsonHash: string, encryptedSymKey: IEncryptedMsg, Sy
       outputType: "hex",
     });
 
-    const response = await axios.get("https://gateway.pinata.cloud/ipfs/" + JsonHash);
+    const response = await axios.get(
+      "https://gateway.pinata.cloud/ipfs/" + JsonHash,
+    );
 
     const hashCheck = response.data.datahash === dataHash;
 
@@ -328,8 +371,17 @@ async function main() {
   const account2 = accounts[2];
 
   const postdata = await createPostData("Hello World", account1);
-  const submit = await submitData(postdata?.symmetricKey, postdata?.proofhash, account1.address, account2.address);
-  const retrieve = await retrievePost(postdata?.proofhash, submit?.proofJson?.encryptedSymKey!, account1.address);
+  const submit = await submitData(
+    postdata?.symmetricKey,
+    postdata?.proofhash,
+    account1.address,
+    account2.address,
+  );
+  const retrieve = await retrievePost(
+    postdata?.proofhash,
+    submit?.proofJson?.encryptedSymKey!,
+    account1.address,
+  );
 }
 
 main();

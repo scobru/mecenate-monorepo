@@ -3,21 +3,43 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, Signer, Wallet, ethers } from "ethers";
-import { formatEther } from "ethers";
 import Link from "next/link";
 import { useTransactor } from "~~/hooks/scaffold-eth";
+import { formatEther } from "ethers/lib/utils.js";
 
 const Feeds: NextPage = () => {
   const { chain } = useNetwork();
-  const { data: signer } = useSigner();
-  const deployedContractFactory = getDeployedContract(chain?.id.toString(), "MecenateFeedFactory");
-  const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
+  const { data: customSigner } = useSigner();
+  const deployedContractFactory = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateFeedFactory");
+  const deployedContractTreasury = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateTreasury");
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
   const [sismoData, setSismoData] = React.useState<any>(null);
 
-  const txData = useTransactor(signer as Signer);
+  const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const [signer, setSigner] = React.useState<Signer | undefined>();
+  const runTx = useTransactor();
+
+  useEffect(() => {
+    let _signer;
+
+    try {
+      if (customSigner) {
+        console.log("Custom Signer: ", customSigner);
+        _signer = customSigner;
+        setSigner(_signer);
+      } else if (window.localStorage) {
+        console.log("Local Storage: ", localStorage.getItem("pk"));
+        const pk = JSON.parse(JSON.stringify(localStorage.getItem("pk")));
+        _signer = new ethers.Wallet(pk, publicProvider);
+        setSigner(_signer);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    console.log("Signer Address: ", _signer?.getAddress());
+  }, [customSigner]);
 
   type Feed = {
     operator: string;
@@ -95,9 +117,9 @@ const Feeds: NextPage = () => {
   }, [onlyYourFeeds]);
 
   const buildFeed = async () => {
-    if (!factoryCtx || !treasuryCtx || !txData || !sismoData) return;
+    if (!factoryCtx || !treasuryCtx || !runTx || !sismoData) return;
     const fee = await treasuryCtx?.fixedFee();
-    txData(factoryCtx?.buildFeed({ value: fee }));
+    runTx(factoryCtx?.buildFeed({ value: fee }), signer);
   };
 
   const formattedFeeds = useMemo(() => {

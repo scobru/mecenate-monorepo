@@ -2,6 +2,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import Blockies from "react-blockies";
 import { useEnsAddress, useEnsAvatar, useEnsName } from "wagmi";
 import ethers from "ethers";
+import { isAddress } from "ethers/lib/utils.js";
 type TAddressInputProps = {
   onChange?: (arg: string) => void;
   placeholder?: string;
@@ -31,14 +32,14 @@ const AddressInput = ({ value, name, placeholder, onChange }: TAddressInputProps
 
   const { data: ensName, isLoading: isEnsNameLoading } = useEnsName({
     address,
-    enabled: ethers.isAddress(address),
+    enabled: isAddress(address),
     chainId: 1,
     cacheTime: 30_000,
   });
 
   const { data: ensAvatar } = useEnsAvatar({
     address,
-    enabled: ethers.isAddress(address),
+    enabled: isAddress(address),
     chainId: 1,
     cacheTime: 30_000,
   });

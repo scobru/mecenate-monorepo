@@ -14,7 +14,7 @@ const ErasureHelper = require("@erasure/crypto-ipfs");
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
-  const { data: signer } = useSigner();
+  const { data: customSigner } = useSigner();
   const [sismoConnectVerifiedResult, setSismoConnectVerifiedResult] = React.useState<SismoConnectVerifiedResult>();
   const [sismoConnectResponse, setSismoConnectResponse] = React.useState<SismoConnectResponse>();
   const [responseBytes, setResponseBytes] = React.useState<string>();
@@ -23,9 +23,10 @@ const Identity: NextPage = () => {
   const [pageState, setPageState] = React.useState<string>("init");
   const [error, setError] = React.useState<string>();
   const [fee, setFee] = React.useState(0);
-  const deployedContractUser = getDeployedContract(chain?.id.toString(), "MecenateUsers");
-  const deployedContractTreasury = getDeployedContract(chain?.id.toString(), "MecenateTreasury");
-  const deployedContractVault = getDeployedContract(chain?.id.toString(), "MecenateVault");
+
+  const deployedContractUser = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateUsers");
+  const deployedContractTreasury = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateTreasury");
+  const deployedContractVault = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateVault");
 
   const [userExists, setUserExists] = React.useState<boolean>(false);
   const [verified, setVerified] = React.useState<any>(null);
@@ -36,7 +37,28 @@ const Identity: NextPage = () => {
 
   const [pubKey, setPubKey] = React.useState<any>(null);
 
-  const txData = useTransactor(signer as Signer);
+  const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const [signer, setSigner] = React.useState<Signer | undefined>();
+  const runTx = useTransactor();
+  useEffect(() => {
+    let _signer;
+
+    try {
+      if (customSigner) {
+        console.log("Custom Signer: ", customSigner);
+        _signer = customSigner;
+        setSigner(_signer);
+      } else if (window.localStorage) {
+        console.log("Local Storage: ", localStorage.getItem("pk"));
+        const pk = JSON.parse(JSON.stringify(localStorage.getItem("pk")));
+        _signer = new ethers.Wallet(pk, publicProvider);
+        setSigner(_signer);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    console.log("Signer Address: ", _signer?.getAddress());
+  }, [customSigner]);
 
   let UsersAddress!: string;
   let UsersAbi: ContractInterface[] = [];
@@ -59,19 +81,17 @@ const Identity: NextPage = () => {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
   }
 
-  const { writeAsync: mintDai } = useScaffoldContractWrite(
-    "MockDai",
-    "mint",
-    [signer?.getAddress, ethers.utils.parseEther("1")],
-    "0",
-  );
+  async function mintDai() {
+    const daiAbi = ["function mint(address _to, uint256 _amount) public"];
+    const daiContract = new ethers.Contract(String(process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE), daiAbi, signer);
+    runTx(daiContract.mint(await signer?.getAddress(), ethers.utils.parseEther("1")), signer);
+  }
 
-  const { writeAsync: mintMuse } = useScaffoldContractWrite(
-    "MUSE",
-    "mint",
-    [signer?.getAddress, ethers.utils.parseEther("1")],
-    "0",
-  );
+  async function mintMuse() {
+    const museAbi = ["function mint(address _to, uint256 _amount) public"];
+    const daiContract = new ethers.Contract(String(process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE), museAbi, signer);
+    runTx(daiContract.mint(await signer?.getAddress(), ethers.utils.parseEther("1")), signer);
+  }
 
   const usersCtx = useContract({
     address: UsersAddress,
@@ -87,9 +107,7 @@ const Identity: NextPage = () => {
 
   const signIn = async () => {
     console.log("Signing in...");
-    console.log(pubKey);
-    console.log(responseBytes);
-    txData(usersCtx?.registerUser(responseBytes, toUtf8Bytes(String(pubKey))));
+    runTx(usersCtx?.registerUser(responseBytes, toUtf8Bytes(String(pubKey))), signer);
   };
 
   const getContractData = async function getContractData() {
@@ -234,7 +252,7 @@ const Identity: NextPage = () => {
 
     downloadFile({
       data: JSON.stringify(data),
-      fileName: (await signer?.getAddress()) + "_keyPair.json",
+      fileName: (await signer?.address) + "_keyPair.json",
       fileType: "text/json",
     });
   }
@@ -263,7 +281,7 @@ const Identity: NextPage = () => {
     if (signer) {
       initializeState();
     }
-  }, []);
+  }, [signer]);
 
   useEffect(() => {
     if (signer) {
@@ -272,7 +290,13 @@ const Identity: NextPage = () => {
   }, [signer]);
 
   return (
-    <div className="flex flex-col  items-center mb-20 ">
+    <div className="flex flex-col items-center justify-center min-h-screen ">
+      <h1 className="text-2xl font-light mb-8 my-10">
+        <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
+          Join Mecenate{" "}
+        </a>
+        without revealing your identity
+      </h1>
       <div className="max-w-3xl text-center my-2 text-base-content">
         <div className="flex flex-col  items-center mb-20">
           {/*  <div className="max-w-3xl text-center">
@@ -282,7 +306,7 @@ const Identity: NextPage = () => {
           </div> */}
           <div className="text-center w-full">
             {!signer?.provider && <div className="text-center font-bold text-xl my-5">Please connect your wallet</div>}
-            {pageState == "init" ? (
+            {pageState == "init" && !sismoData ? (
               <>
                 <div className="text-center sm:p-2 lg:p-4">
                   <SismoConnectButton

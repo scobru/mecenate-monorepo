@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FaucetButton } from "~~/components/scaffold-eth";
+import { WalletBadge } from "~~/components/scaffold-eth";
 import RainbowKitCustomConnectButton from "~~/components/scaffold-eth/RainbowKitCustomConnectButton";
 import { Bars3Icon, BugAntIcon, DocumentIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
@@ -15,7 +16,7 @@ import {
   MegaphoneIcon,
   HomeIcon,
 } from "@heroicons/react/24/outline";
-import { ArchiveBoxIcon, InboxIcon } from "@heroicons/react/20/solid";
+import { ArchiveBoxIcon, InboxIcon, SparklesIcon } from "@heroicons/react/20/solid";
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const router = useRouter();
@@ -34,23 +35,13 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
   );
 };
 
-let storage;
-
-if (typeof window !== "undefined") {
-  storage = window.localStorage;
-}
-
 /**
  * Site header
  */
 export default function Header() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const burgerMenuRef = useRef<HTMLDivElement>(null);
-  const [isLocalStorage, setIsLocalStorage] = useState(false);
-  const [verified, setVerified] = useState("");
-  const [encryptedVaultId, setEncryptedVaultId] = useState("");
-  const [withrawalAddress, setWithdrawalAddress] = useState("");
-  const [forwarderAddress, setForwarderAddress] = useState("");
+
   useOutsideClick(
     burgerMenuRef,
     useCallback(() => setIsDrawerOpen(false), []),
@@ -70,12 +61,13 @@ export default function Header() {
           Debug Contracts
         </NavLink>
       </li>
+      */}
       <li>
-        <NavLink href="/example-ui">
-          <SparklesIcon className="h-4 w-4" />
-          Example UI
+        <NavLink href="/wallet">
+          <KeyIcon className="h-4 w-4" />
+          Wallet
         </NavLink>
-      </li> */}
+      </li>
       <li className="font-semibold">
         <NavLink href="/identity">
           <UserIcon className="h-4 w-4" />
@@ -137,6 +129,7 @@ export default function Header() {
           {/* <Link href="/" passHref className="flex relative w-10 h-10">
             <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
           </Link> */}
+
           <div className="flex flex-col py-2">
             <span className="font-bold  text-4xl"> ℳ</span>
           </div>
@@ -145,6 +138,8 @@ export default function Header() {
       </div>
 
       <div className="navbar-end flex-grow mr-4">
+        <WalletBadge />
+
         <RainbowKitCustomConnectButton />
         <FaucetButton />
       </div>

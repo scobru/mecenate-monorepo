@@ -4,16 +4,16 @@ import { Square3Stack3DIcon, MegaphoneIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useEffect } from "react";
 import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface } from "ethers";
+import { ContractInterface, ethers } from "ethers";
 
 const Home: NextPage = () => {
   const { chain } = useNetwork();
   const { data: signer } = useSigner();
   const provider = useProvider();
-  const deployedContractIdentity = getDeployedContract(chain?.id.toString(), "MecenateIdentity");
-  const deployedContractStats = getDeployedContract(chain?.id.toString(), "MecenateStats");
+  const deployedContractIdentity = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateIdentity");
+  const deployedContractStats = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateStats");
   const [stats, setStats] = React.useState<any>([]);
-
+  const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
   let identityAddress = "";
   let identityAbi: ContractInterface[] = [];
   let statsAddress = "";
@@ -30,7 +30,7 @@ const Home: NextPage = () => {
   const statsCtx = useContract({
     address: statsAddress,
     abi: statsAbi,
-    signerOrProvider: signer || provider,
+    signerOrProvider: publicProvider,
   });
 
   const getStats = useCallback(async () => {

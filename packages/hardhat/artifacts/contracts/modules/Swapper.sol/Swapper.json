@@ -213,9 +213,48 @@
           "internalType": "uint24",
           "name": "fee",
           "type": "uint24"
+        },
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
         }
       ],
       "name": "swapTokensForTokens",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token1",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "token2",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        }
+      ],
+      "name": "swapTxT",
       "outputs": [
         {
           "internalType": "uint256",

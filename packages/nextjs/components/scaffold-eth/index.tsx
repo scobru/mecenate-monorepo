@@ -6,3 +6,4 @@ export { default as AddressInput } from "./AddressInput";
 export { default as EtherInput } from "./EtherInput";
 export { default as BlockieAvatar } from "./BlockieAvatar";
 export { default as ContractUI } from "./Contract/ContractUI";
+export { default as WalletBadge } from "./WalletBadge";
