@@ -63,6 +63,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.PostSettings",
@@ -203,6 +208,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.PostSettings",
@@ -343,6 +353,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.PostSettings",
@@ -483,6 +498,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.PostSettings",
@@ -623,6 +643,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.PostSettings",
@@ -763,6 +788,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.PostSettings",
@@ -903,6 +933,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.PostSettings",
@@ -982,6 +1017,38 @@
       ],
       "name": "Valid",
       "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "postId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "containPostId",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAllPostIds",
+      "outputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [],
@@ -1070,6 +1137,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.PostSettings",
@@ -1151,6 +1223,55 @@
     },
     {
       "inputs": [],
+      "name": "getPostId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "postId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getPostTimestamp",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum Structures.PostResult",
+              "name": "postResult",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "creationTimeStamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "endTimeStamp",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Structures.PostTimestamp",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "getStakeRequested",
       "outputs": [
         {
@@ -1196,6 +1317,19 @@
           "internalType": "address",
           "name": "",
           "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "locked",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -1273,6 +1407,11 @@
                   "internalType": "enum Structures.Tokens",
                   "name": "tokenId",
                   "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "postId",
+                  "type": "bytes32"
                 }
               ],
               "internalType": "struct Structures.PostSettings",

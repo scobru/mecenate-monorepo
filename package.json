@@ -6,7 +6,8 @@
     "packages": [
       "packages/hardhat",
       "packages/nextjs",
-      "packages/helpers"
+      "packages/client",
+      "packages/crypto-ipfs"
     ]
   },
   "scripts": {

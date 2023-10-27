@@ -213,7 +213,7 @@ const Bay: NextPage = () => {
     if (tokenId == 1) {
       runTx(museCtx?.approve(bayCtx?.address, parseEther(requestPayment)), signer);
     } else if (tokenId == 2) {
-      txData(daiCtx?.approve(bayCtx?.address, parseEther(requestPayment)), signer);
+      runTx(daiCtx?.approve(bayCtx?.address, parseEther(requestPayment)), signer);
     }
   };
 

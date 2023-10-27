@@ -9,14 +9,17 @@ import "./Events.sol";
 
 abstract contract Submission is Events {
     function submitHash(bytes memory encryptedKey) external virtual {
+        require(locked == true, "NOT_LOCKED");
+
         require(msg.sender == post.postdata.escrow.seller, "NOT_SELLER");
 
         Structures.PostStatus currentStatus = post.postdata.settings.status;
+
         require(
             validStatuses[uint8(currentStatus)] &&
                 (currentStatus == Structures.PostStatus.Accepted ||
                     currentStatus == Structures.PostStatus.Submitted),
-            "WRONG_STATUS"
+            "INVALID_STATUS"
         );
 
         require(
@@ -42,6 +45,8 @@ abstract contract Submission is Events {
     function revealData(
         bytes memory decryptedData
     ) external virtual returns (bytes memory) {
+        require(locked == false, "LOCKED");
+
         Structures.PostStatus currentStatus = post.postdata.settings.status;
         require(
             validStatuses[uint8(currentStatus)] &&

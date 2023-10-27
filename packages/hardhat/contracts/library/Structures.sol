@@ -16,6 +16,12 @@ library Structures {
         Renounced
     }
 
+    enum PostResult {
+        None,
+        Valid,
+        Punished
+    }
+
     enum Tokens {
         NaN,
         MUSE,
@@ -35,6 +41,12 @@ library Structures {
         OneWeek,
         TwoWeeks,
         OneMonth
+    }
+
+    struct PostTimestamp {
+        PostResult postResult;
+        uint256 creationTimeStamp;
+        uint256 endTimeStamp;
     }
 
     struct FeedSettings {
@@ -93,6 +105,7 @@ library Structures {
         uint256 endTimeStamp;
         uint256 duration;
         Tokens tokenId;
+        bytes32 postId;
     }
 
     /**
@@ -131,6 +144,7 @@ library Structures {
         PostStatus status;
         Tokens tokenId;
         string version;
+        bytes32 postId;
     }
 
     /**
@@ -145,5 +159,7 @@ library Structures {
         uint256 postCount;
         Tokens tokenId;
         address buyerAddress;
+        bytes32 postId;
+        PostTimestamp postTimestamp;
     }
 }

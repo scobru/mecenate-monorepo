@@ -48,6 +48,33 @@
               "internalType": "address",
               "name": "buyerAddress",
               "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "postId",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "enum Structures.PostResult",
+                  "name": "postResult",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "creationTimeStamp",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "endTimeStamp",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct Structures.PostTimestamp",
+              "name": "postTimestamp",
+              "type": "tuple"
             }
           ],
           "internalType": "struct Structures.BayRequest[]",

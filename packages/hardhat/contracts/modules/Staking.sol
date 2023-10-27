@@ -177,6 +177,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
         uint256 amountToAdd
     ) external payable returns (uint256) {
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
+        require(locked == false, "LOCKED");
 
         // Check if the encryptedVaultId matches with either the buyer or the seller
         require(
@@ -214,6 +215,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
         uint256 amountToTake
     ) external returns (uint256) {
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
+        require(locked == false, "LOCKED");
 
         uint256 currentDeposit = Deposit._getDeposit(tokenId, msg.sender);
 
@@ -240,6 +242,7 @@ abstract contract Staking is Events, Deposit, TokenManager {
         address receiver
     ) external returns (uint256) {
         require(tokenId == post.postdata.settings.tokenId, "WRONG_TOKEN");
+        require(locked == false, "LOCKED");
 
         uint256 newBalance = _takeFullStake(tokenId, msg.sender, receiver);
 

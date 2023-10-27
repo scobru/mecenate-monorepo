@@ -163,6 +163,7 @@ const Identity: NextPage = () => {
     console.log(signer);
 
     notification.success("Key pair created");
+
     notification.warning(
       <div
         id="alert-additional-content-3"
@@ -236,7 +237,7 @@ const Identity: NextPage = () => {
 
     downloadFile({
       data: JSON.stringify(data),
-      fileName: (await signer?.address) + "_keyPair.json",
+      fileName: (await signer?.getAddress()) + "_keyPair.json",
       fileType: "text/json",
     });
   }

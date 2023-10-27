@@ -28,6 +28,14 @@ interface IMecenateFeed {
 
     function getTokenId() external view returns (Structures.Tokens tokenId);
 
+    function getPostId() external view returns (bytes32);
+
+    function getAllPostIds() external view returns (bytes32[] memory);
+
+    function getPostTimestamp(
+        bytes32 postId
+    ) external view returns (Structures.PostTimestamp memory);
+
     function owner() external view returns (address);
 
     function version() external view returns (string memory);

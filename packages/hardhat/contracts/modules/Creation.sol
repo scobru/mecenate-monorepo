@@ -18,13 +18,10 @@ abstract contract Creation is Staking {
         address funder,
         address seller,
         bool useStake
-    )
-        external
-        payable
-        onlyValidTokenID(tokenId)
-        returns (Structures.Post memory)
-    {
+    ) external payable onlyValidTokenID(tokenId) {
         require(msg.sender == owner);
+
+        require(locked == false, "LOCKED");
 
         require(
             IMecenateUsers(settings.usersModuleContract).checkifUserExist(
@@ -67,6 +64,10 @@ abstract contract Creation is Staking {
             settings.usersModuleContract
         ).getUserMetadata(seller);
 
+        bytes32 newPostId = keccak256(
+            abi.encodePacked(encryptedHash, block.timestamp, creator.evmAddress)
+        );
+
         // Initialize the new Post struct with named arguments for clarity
         Structures.Post memory newPost = Structures.Post({
             creator: creator,
@@ -77,7 +78,8 @@ abstract contract Creation is Staking {
                     creationTimeStamp: block.timestamp,
                     endTimeStamp: 0,
                     duration: duration,
-                    tokenId: tokenId
+                    tokenId: tokenId,
+                    postId: newPostId
                 }),
                 escrow: Structures.PostEscrow({
                     buyer: address(0),
@@ -98,10 +100,17 @@ abstract contract Creation is Staking {
         // Update storage and emit event
         post = newPost;
 
+        // add intto postIds
+        addPostId(newPostId);
+
         settings.postCount++;
 
-        emit Created(newPost);
+        postTimestamps[newPostId] = Structures.PostTimestamp({
+            postResult: Structures.PostResult.None,
+            creationTimeStamp: block.timestamp,
+            endTimeStamp: 0
+        });
 
-        return newPost;
+        emit Created(newPost);
     }
 }

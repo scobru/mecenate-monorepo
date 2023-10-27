@@ -9,6 +9,7 @@ abstract contract Finalization is Staking {
         bytes32 uid
     ) external virtual {
         require(msg.sender == post.postdata.escrow.buyer, "NOT_SELLER");
+        require(locked == true, "NOT_LOCKED");
 
         require(
             post.postdata.settings.status == Structures.PostStatus.Submitted,
@@ -93,10 +94,17 @@ abstract contract Finalization is Staking {
                     : Structures.PostStatus.Punished
             );
 
+            postTimestamps[post.postdata.settings.postId] = Structures
+                .PostTimestamp({
+                    postResult: Structures.PostResult.Valid,
+                    creationTimeStamp: postTimestamps[
+                        post.postdata.settings.postId
+                    ].creationTimeStamp,
+                    endTimeStamp: block.timestamp
+                });
+
             emit Valid(post);
         } else if (!valid) {
-            require(easResult == valid, "INVALID_ATTESTATION");
-
             require(
                 punishment <= post.postdata.escrow.stake,
                 "PUNISHMENT_TOO_HIGH"
@@ -126,7 +134,18 @@ abstract contract Finalization is Staking {
 
             _changeStatus(Structures.PostStatus.Punished);
 
+            postTimestamps[post.postdata.settings.postId] = Structures
+                .PostTimestamp({
+                    postResult: Structures.PostResult.Punished,
+                    creationTimeStamp: postTimestamps[
+                        post.postdata.settings.postId
+                    ].creationTimeStamp,
+                    endTimeStamp: block.timestamp
+                });
+
             emit Invalid(post);
         }
+
+        locked = false;
     }
 }

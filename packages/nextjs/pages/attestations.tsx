@@ -130,10 +130,10 @@ const Attestations = () => {
                       </a>
                     </td>
                     <td className="md:table-cell p-1 md:p-2">
-                      <Address address={attestation.attester} size="sm" />
+                      <Address address={attestation.attester} format="short" />
                     </td>
                     <td className="md:table-cell p-1 md:p-2">
-                      <Address address={attestation.recipient} size="sm" />
+                      <Address address={attestation.recipient} format="short" />
                     </td>
                     <td className="md:table-cell p-1 md:p-2">
                       {schemaEncoder.decodeData(attestation.data)[0].value.value.toString()}
@@ -141,7 +141,7 @@ const Attestations = () => {
                     <td className="md:table-cell p-1 md:p-2">
                       <Address
                         address={schemaEncoder.decodeData(attestation.data)[1].value.value.toString()}
-                        size="sm"
+                        format="short"
                       />
                     </td>
                     <td className="md:table-cell p-1 md:p-2">

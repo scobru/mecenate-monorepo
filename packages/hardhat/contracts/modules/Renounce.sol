@@ -14,6 +14,7 @@ import "./Staking.sol";
 abstract contract Renounce is Staking {
     function renouncePost() external {
         require(msg.sender == post.postdata.escrow.seller, "NOT_SELLER");
+        require(locked == true, "NOT_LOCKED");
 
         // Validate the post status
         Structures.PostStatus currentStatus = post.postdata.settings.status;
@@ -34,7 +35,8 @@ abstract contract Renounce is Staking {
                     creationTimeStamp: 0,
                     endTimeStamp: 0,
                     duration: 0,
-                    tokenId: Structures.Tokens.NaN
+                    tokenId: Structures.Tokens.NaN,
+                    postId: bytes32(0)
                 }),
                 escrow: Structures.PostEscrow({
                     buyer: address(0),

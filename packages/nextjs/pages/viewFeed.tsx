@@ -14,8 +14,10 @@ import Spinner from "~~/components/Spinner";
 import { ScaleIcon, MegaphoneIcon, DocumentCheckIcon } from "@heroicons/react/20/solid";
 import { ApolloClient, InMemoryCache, createHttpLink, gql } from "@apollo/client";
 import Web3 from "web3";
-import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
+import { useTransactor } from "~~/hooks/scaffold-eth";
 import { EAS, Offchain, SchemaEncoder, SchemaRegistry } from "@ethereum-attestation-service/eas-sdk";
+import MecenateHelper from "../../crypto-ipfs/index";
+import { SignerOrProvider } from "@ethereum-attestation-service/eas-sdk/dist/transaction";
 
 export const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia v0.26
 const eas = new EAS(EASContractAddress);
@@ -31,7 +33,6 @@ const ViewFeed: NextPage = () => {
   const router = useRouter();
   const AbiCoder = new ethers.utils.AbiCoder();
 
-  const ErasureHelper = require("@erasure/crypto-ipfs");
   const pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
   const pinataApiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY;
   const [nonce, setNonce] = React.useState<string>("0");
@@ -155,15 +156,12 @@ const ViewFeed: NextPage = () => {
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
 
-      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi, signer);
+      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi as ContractInterface, signer);
     } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
 
-      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi, signer);
+      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi as ContractInterface, signer);
     }
-
-    // Write Approval
-    token?.connect(signer);
 
     runTx(token?.approve(feedCtx?.address, parseEther(postStake)), signer);
   };
@@ -173,10 +171,10 @@ const ViewFeed: NextPage = () => {
     let token;
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi, signer);
+      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi as ContractInterface, signer);
     } else if (tokenId == "2") {
-      _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi, signer);
+      _tokenAddress = String(process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE);
+      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi as ContractInterface, signer);
     }
 
     // Write Approval
@@ -298,7 +296,7 @@ const ViewFeed: NextPage = () => {
       return;
     } */
 
-    const proofOfHashEncode = await ErasureHelper.multihash({
+    const proofOfHashEncode = await MecenateHelper.multihash({
       input: dataSaved?.proofhash,
       inputType: "b58",
       outputType: "digest",
@@ -347,10 +345,10 @@ const ViewFeed: NextPage = () => {
   async function createPostData(RawData: any) {
     console.log("Creating Data...");
     try {
-      const symmetricKey = ErasureHelper.crypto.symmetric.generateKey();
-      const encryptedFile = ErasureHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
+      const symmetricKey = MecenateHelper.crypto.symmetric.generateKey();
+      const encryptedFile = MecenateHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
 
-      const symmetricKeyHash = await ErasureHelper.multihash({
+      const symmetricKeyHash = await MecenateHelper.multihash({
         input: symmetricKey,
         inputType: "raw",
         outputType: "hex",
@@ -358,7 +356,7 @@ const ViewFeed: NextPage = () => {
 
       // datahash sha256(rawdata)
 
-      const dataHash = await ErasureHelper.multihash({
+      const dataHash = await MecenateHelper.multihash({
         input: RawData,
         inputType: "raw",
         outputType: "hex",
@@ -367,7 +365,7 @@ const ViewFeed: NextPage = () => {
       // encryptedDatahash = sha256(encryptedData)
 
       // This hash will match the IPFS pin hash
-      const encryptedDataHash = await ErasureHelper.multihash({
+      const encryptedDataHash = await MecenateHelper.multihash({
         input: JSON.stringify({ encryptedData: encryptedFile }),
         inputType: "raw",
         outputType: "b58",
@@ -383,7 +381,7 @@ const ViewFeed: NextPage = () => {
 
       // proofhash = sha256(jsonblob_v1_2_0)
       // This hash will match the IPFS pin hash. It should be saved to the users feed contract.
-      const proofHash58 = await ErasureHelper.multihash({
+      const proofHash58 = await MecenateHelper.multihash({
         input: JSON.stringify(jsonblob_v1_2_0),
         inputType: "raw",
         outputType: "b58",
@@ -480,13 +478,13 @@ const ViewFeed: NextPage = () => {
     notification.success("Saving proof JSON...");
 
     const pin = await pinata.pinJSONToIPFS(json_selldata_v120);
-    const proofHash58 = await ErasureHelper.multihash({
+    const proofHash58 = await MecenateHelper.multihash({
       input: JSON.stringify(json_selldata_v120),
       inputType: "raw",
       outputType: "b58",
     });
 
-    const proofHash58Digest = await ErasureHelper.multihash({
+    const proofHash58Digest = await MecenateHelper.multihash({
       input: proofHash58,
       inputType: "b58",
       outputType: "digest",
@@ -531,8 +529,6 @@ const ViewFeed: NextPage = () => {
     console.log("Data Retrieved.");
     console.log("Proof Hash Digest: ", proofHash58Digest);
 
-    feedCtx?.connect(signer);
-
     runTx(feedCtx?.submitHash(proofHash58Digest), signer);
 
     return {
@@ -548,7 +544,7 @@ const ViewFeed: NextPage = () => {
     const id = notification.loading("Retrieving Data...");
     await fetchData();
 
-    const decodeHash = await ErasureHelper.multihash({
+    const decodeHash = await MecenateHelper.multihash({
       input: feedData[1][2].encryptedKey,
       inputType: "sha2-256",
       outputType: "b58",
@@ -581,7 +577,7 @@ const ViewFeed: NextPage = () => {
 
     console.log("Decrypted", decrypted);
 
-    const _decodeHash = await ErasureHelper.multihash({
+    const _decodeHash = await MecenateHelper.multihash({
       input: responseDecodeHahJSON.proofhash.toString(),
       inputType: "sha2-256",
       outputType: "b58",
@@ -614,7 +610,7 @@ const ViewFeed: NextPage = () => {
 
     const response_Encrypteddatahash_JSON = JSON.parse(JSON.stringify(response_Encrypteddatahash.data));
 
-    const decryptFile = ErasureHelper.crypto.symmetric.decryptMessage(
+    const decryptFile = MecenateHelper.crypto.symmetric.decryptMessage(
       decrypted,
       response_Encrypteddatahash_JSON.encryptedData,
     );
@@ -623,7 +619,7 @@ const ViewFeed: NextPage = () => {
       // wait 10 seconds
       console.log("Decrypted Data: ", decryptFile);
 
-      const dataHash = await ErasureHelper.multihash({
+      const dataHash = await MecenateHelper.multihash({
         input: decryptFile,
         inputType: "raw",
         outputType: "hex",
@@ -664,13 +660,13 @@ const ViewFeed: NextPage = () => {
   }
 
   async function revealPost() {
-    const symKeyHash = await ErasureHelper.multihash({
+    const symKeyHash = await MecenateHelper.multihash({
       input: JSON.stringify({ symmetricKey: symmetricKey }),
       inputType: "raw",
       outputType: "b58",
     });
 
-    const rawDataHash = await ErasureHelper.multihash({
+    const rawDataHash = await MecenateHelper.multihash({
       input: JSON.stringify({ rawData: postRawData }),
       inputType: "raw",
       outputType: "b58",
@@ -703,7 +699,7 @@ const ViewFeed: NextPage = () => {
     const AbiCoder = new ethers.utils.AbiCoder();
     const dataEncoded = AbiCoder.encode(["string", "string"], [symKeyHash, rawDataHash]);
 
-    feedCtx?.connect(signer);
+    feedCtx?.connect(signer as any);
 
     runTx(feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)), signer);
 
@@ -727,7 +723,7 @@ const ViewFeed: NextPage = () => {
 
       console.log(data);
 
-      eas.connect(signer);
+      eas.connect(signer as any);
 
       console.log("Encoded Data: ", encodedData);
       const tx = await eas.attest({
@@ -745,9 +741,7 @@ const ViewFeed: NextPage = () => {
   }
 
   async function renounce() {
-    feedCtx?.connect(signer);
     runTx(feedCtx?.renouncePost(), signer);
-
     notification.success("Refund successful");
   }
 
@@ -755,7 +749,6 @@ const ViewFeed: NextPage = () => {
 
   async function addStake() {
     console.log("Adding Stake...");
-    feedCtx?.connect(signer);
     runTx(
       feedCtx?.addStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress(), parseEther(stakeAmount), {
         value: feedData?.postdata?.settings?.tokenId == 0 ? parseEther(stakeAmount) : 0,
@@ -772,7 +765,7 @@ const ViewFeed: NextPage = () => {
   }
 
   async function takeStake() {
-    feedCtx?.connect(signer);
+    feedCtx?.connect(signer as any);
 
     console.log("Take Stake...");
 
@@ -875,13 +868,13 @@ const ViewFeed: NextPage = () => {
     if (feedData[1][2].decryptedData != "0x30783030") {
       const decryptedData = AbiCoder.decode(["string", "string"], feedData[1][2].decryptedData);
 
-      const encryptedData = await ErasureHelper.multihash({
+      const encryptedData = await MecenateHelper.multihash({
         input: feedData[1][2].encryptedData,
         inputType: "sha2-256",
         outputType: "b58",
       });
 
-      const encryptedKey = await ErasureHelper.multihash({
+      const encryptedKey = await MecenateHelper.multihash({
         input: feedData[1][2].encryptedKey,
         inputType: "sha2-256",
         outputType: "b58",
@@ -913,7 +906,7 @@ const ViewFeed: NextPage = () => {
         </div>,
       );
     } else {
-      const encryptedData = await ErasureHelper.multihash({
+      const encryptedData = await MecenateHelper.multihash({
         input: feedData[1][2].encryptedData,
         inputType: "sha2-256",
         outputType: "b58",
@@ -1175,7 +1168,7 @@ const ViewFeed: NextPage = () => {
                 </ul>
               </div>
               <div className="dropdown dropdown-bottom ">
-                <label tabIndex={0} className="hover:bg-secondary-focus btn btn btn-custom bg-inherit">
+                <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
                   <ScaleIcon className="h-8 w-8 mx-2" /> Stake
                 </label>
                 <ul
@@ -1302,7 +1295,8 @@ const ViewFeed: NextPage = () => {
                     placeholder="Use Stake"
                     id=""
                     onClick={async e => {
-                      setUseStake(e.target.value);
+                      const target = e.target as HTMLInputElement;
+                      setUseStake(target.checked);
                     }}
                   />
                   <br />

@@ -141,6 +141,8 @@ contract MecenateBay is Ownable, FeedViewer {
 
         allRequests[index].postCount = newFeed.postCount;
 
+        allRequests[index].postId = IMecenateFeed(feed).getPostId();
+
         emit RequestAccepted(msg.sender, allRequests[index], index);
     }
 

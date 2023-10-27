@@ -8,11 +8,18 @@ import "../interfaces/IMecenateFeedFactory.sol";
 import "../helpers/eas/IEAS.sol";
 import "./Version.sol";
 
+// import enumerablet bytes set
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 /**
  * @title Data
  * @dev This contract stores data related to Mecenate posts and provides functions to interact with it.
  */
 contract Data is Version {
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    EnumerableSet.Bytes32Set internal postIds;
+
     bytes internal constant ZEROHASH = "0x00";
 
     address public owner;
@@ -24,6 +31,10 @@ contract Data is Version {
     mapping(uint8 => uint256) internal postDurationToDays;
 
     mapping(uint8 => bool) internal validStatuses;
+
+    mapping(bytes32 => Structures.PostTimestamp) internal postTimestamps;
+
+    bool public locked;
 
     constructor(
         address usersModuleContract,
@@ -54,6 +65,35 @@ contract Data is Version {
         validStatuses[uint8(post.postdata.settings.status)] = false;
         validStatuses[uint8(newStatus)] = true;
         post.postdata.settings.status = newStatus;
+    }
+
+    function addPostId(bytes32 postId) internal {
+        postIds.add(postId);
+    }
+
+    function getAllPostIds() external view returns (bytes32[] memory) {
+        uint256 length = postIds.length();
+        bytes32[] memory ids = new bytes32[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            ids[i] = postIds.at(i);
+        }
+
+        return ids;
+    }
+
+    function getPostId() external view returns (bytes32) {
+        return post.postdata.settings.postId;
+    }
+
+    function getPostTimestamp(
+        bytes32 postId
+    ) external view returns (Structures.PostTimestamp memory) {
+        return postTimestamps[postId];
+    }
+
+    function containPostId(bytes32 postId) external view returns (bool) {
+        return postIds.contains(postId);
     }
 
     function getStatus() external view returns (Structures.PostStatus) {

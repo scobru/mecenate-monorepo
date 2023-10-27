@@ -33,6 +33,19 @@
     },
     {
       "inputs": [],
+      "name": "getAllPostIds",
+      "outputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "getBuyerStake",
       "outputs": [
         {
@@ -131,6 +144,11 @@
                       "internalType": "enum Structures.Tokens",
                       "name": "tokenId",
                       "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
                     }
                   ],
                   "internalType": "struct Structures.PostSettings",
@@ -203,6 +221,55 @@
             }
           ],
           "internalType": "struct Structures.Post",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPostId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "postId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getPostTimestamp",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum Structures.PostResult",
+              "name": "postResult",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "creationTimeStamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "endTimeStamp",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Structures.PostTimestamp",
           "name": "",
           "type": "tuple"
         }
