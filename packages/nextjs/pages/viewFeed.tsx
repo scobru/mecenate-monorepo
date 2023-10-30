@@ -1736,7 +1736,7 @@ const ViewFeed: NextPage = () => {
             <div className="card w-full md:w-fit">
               <div className="card-body">
                 <h2 className="text-2xl font-bold">Post Settings</h2>
-                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 break-all">
                   <p>
                     <span className="font-bold">Creation</span> <br />
                     {new Date(Number(feedData[1][0].creationTimeStamp) * 1000).toUTCString()}

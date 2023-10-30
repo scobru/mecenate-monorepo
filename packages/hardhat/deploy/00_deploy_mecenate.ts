@@ -1,6 +1,6 @@
 import { EthereumProvider, HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { ethers } from "hardhat";
+import { ethers, run, upgrades } from "hardhat";
 
 import { deployPool, encodePriceSqrt } from "../scripts/01_deployPools";
 
@@ -19,6 +19,21 @@ const deployYourContract: DeployFunction = async function (
   const { deployer } = await hre.getNamedAccounts();
 
   const { deploy } = hre.deployments;
+
+  const externalProxyCall = await deploy("ExternalProxyCall", {
+    from: deployer,
+
+    args: [],
+    log: true,
+
+    autoMine: true,
+  });
+
+  externalProxyCall.receipt &&
+    console.log(
+      "externalProxyCall deployed at:",
+      externalProxyCall.receipt.contractAddress,
+    );
 
   const mockDai = await deploy("MockDai", {
     from: deployer,
@@ -86,34 +101,34 @@ const deployYourContract: DeployFunction = async function (
   users.receipt &&
     console.log("Users deployed at:", users.receipt.contractAddress);
 
-  const feedFactory = await deploy("MecenateFeedFactory", {
-    from: deployer,
+  const Factory = await ethers.getContractFactory("MecenateFeedFactory");
 
-    args: [],
-    log: true,
-
-    autoMine: true,
-  });
-
-  const feedFactoryInstance = await ethers.getContractAt(
-    "MecenateFeedFactory",
-    feedFactory.address,
+  const factory = await upgrades.deployProxy(
+    Factory,
+    [
+      externalProxyCall.address,
+      treasury.address,
+      users.address,
+      eas,
+      schema,
+      mockWeth.address,
+      muse.address,
+      mockDai.address,
+      router,
+    ],
+    {
+      initializer: "initialize",
+    },
   );
 
-  feedFactory.receipt &&
-    console.log(
-      "Feed Factory deployed at:",
-      feedFactory.receipt.contractAddress,
-    );
-
-  const gasPrice = await ethers.provider.getGasPrice();
+  console.log("Factory Deployed: " + factory.address);
 
   const feed = await deploy("MecenateFeed", {
     from: deployer,
     args: [
       ethers.constants.AddressZero,
       users.address,
-      feedFactory.address,
+      factory.address,
       2,
       0,
       0,
@@ -125,6 +140,8 @@ const deployYourContract: DeployFunction = async function (
 
   feed.receipt &&
     console.log("Feed deployed at:", feed.receipt.contractAddress);
+
+  await factory.adminUpdateImplementation(feed.address, 2, 0, 0);
 
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
@@ -162,28 +179,6 @@ const deployYourContract: DeployFunction = async function (
       "Mecenate Stats Factory deployed at:",
       mecenateStats.receipt.contractAddress,
     );
-
-  await feedFactoryInstance.changeMultipleSettings(
-    treasury.address,
-    users.address,
-    eas,
-    schema,
-    mockWeth.address,
-    muse.address,
-    mockDai.address,
-    router,
-  );
-
-  const setByteCode = await feedFactoryInstance.setFeedByteCode(
-    feed.bytecode,
-    2,
-    0,
-    0,
-  );
-
-  setByteCode.wait();
-
-  console.log("Feed Bytecode setted");
 };
 
 export default deployYourContract;

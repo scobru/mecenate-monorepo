@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "EnumerableSetUpgradeable",
+  "sourceName": "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea26469706673582212200593c5db797d1012b972b686c8aa1102721b29461bd4f5f0243ffb32be1400f564736f6c63430008130033",
+  "deployedBytecode": "0x600080fdfea26469706673582212200593c5db797d1012b972b686c8aa1102721b29461bd4f5f0243ffb32be1400f564736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

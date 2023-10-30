@@ -19,8 +19,7 @@ abstract contract Creation is Staking {
         address seller,
         bool useStake
     ) external payable onlyValidTokenID(tokenId) {
-        require(msg.sender == owner);
-
+        require(msg.sender == owner, "NOT_OWNER");
         require(locked == false, "LOCKED");
 
         require(

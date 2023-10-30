@@ -35,7 +35,7 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
       <Web3authProvider>
         <RainbowKitProvider chains={appChains.chains} avatar={BlockieAvatar}>
           <div className="flex flex-col min-h-screen min-w-fit bg-base-100 font-ui">
-            <div className="text-center bg-gradient-to-r from-blue-100 to-yellow-200 p-1 w-screen text-black">
+            <div className="text-center bg-gradient-to-r from-blue-100 to-yellow-200 p-1 w-full text-black">
               Live on <strong>Base Goerli</strong> 🎉
             </div>{" "}
             <Header />

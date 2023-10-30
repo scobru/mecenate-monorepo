@@ -1,38 +1,102 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
 import "../modules/FeedViewer.sol";
+import "../interfaces/IProxyCall.sol";
+import "../interfaces/IFeedInitializer.sol";
 
-contract MecenateFeedFactory is Ownable, FeedViewer {
-    using EnumerableSet for EnumerableSet.AddressSet;
+contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+    using ClonesUpgradeable for address;
+    using StringsUpgradeable for uint256;
 
-    EnumerableSet.AddressSet internal feeds;
+    using AddressUpgradeable for address;
+    using AddressUpgradeable for address payable;
 
+    IProxyCall public proxyCallContract;
+
+    address public implementation;
+    address public defaultOperator;
+
+    EnumerableSetUpgradeable.AddressSet internal feeds;
     Structures.FactorySettings internal settings;
 
     bytes internal feedByteCode;
 
-    mapping(uint8 => uint24) internal routerFee;
-
-    mapping(address => EnumerableSet.AddressSet) internal feedStore;
-
-    mapping(address => bool) internal createdContracts;
-
-    string public version = "v2.0.0"; // Iitialized
+    mapping(uint256 => uint24) internal routerFee;
+    mapping(address => EnumerableSetUpgradeable.AddressSet) internal feedStore;
 
     bool public burnEnabled = false;
 
     uint256 public contractCounter;
 
+    uint256 public major;
+    uint256 public minor;
+    uint256 public patch;
+
     event FeedCreated(address indexed addr);
 
-    uint8 public major;
-    uint8 public minor;
-    uint8 public patch;
+    event ImplementationUpdated(
+        address indexed implementation,
+        uint256 indexed version
+    );
+
+    event ProxyCallContractUpdated(address indexed _proxyCallContract);
+
+    function initialize(
+        address _proxyCallContract,
+        address _usersModuleContract,
+        address _treasuryContract,
+        address _easContract,
+        bytes32 _easSchema,
+        address _wethToken,
+        address _museToken,
+        address _daiToken,
+        address _router
+    ) public initializer {
+        __Ownable_init();
+        __Ownable_init_unchained();
+
+        transferOwnership(msg.sender);
+        _updateProxyCallContract(_proxyCallContract);
+
+        settings.usersModuleContract = _usersModuleContract;
+        settings.treasuryContract = _treasuryContract;
+        settings.easContract = _easContract;
+        settings.easSchema = _easSchema;
+        settings.wethToken = _wethToken;
+        settings.museToken = _museToken;
+        settings.daiToken = _daiToken;
+        settings.router = _router;
+        proxyCallContract = IProxyCall(_proxyCallContract);
+        defaultOperator = msg.sender;
+        major = 2;
+        minor = 0;
+        patch = 0;
+    }
+
+    function adminUpdateImplementation(
+        address _implementation,
+        uint256 major,
+        uint256 minor,
+        uint256 patch
+    ) external onlyOwner {
+        _updateImplementation(_implementation, major, minor, patch);
+    }
+
+    function adminUpdateProxyCallContract(
+        address _proxyCallContract
+    ) external onlyOwner {
+        _updateProxyCallContract(_proxyCallContract);
+    }
 
     function treasuryContract() external view returns (address) {
         return settings.treasuryContract;
@@ -62,11 +126,11 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         return settings.router;
     }
 
-    function getRouterFee(uint8 tokenId) external view returns (uint24) {
+    function getRouterFee(uint256 tokenId) external view returns (uint24) {
         return routerFee[tokenId];
     }
 
-    function setRouterFee(uint8 tokenId, uint24 fee) external onlyOwner {
+    function setRouterFee(uint256 tokenId, uint24 fee) external onlyOwner {
         routerFee[tokenId] = fee;
     }
 
@@ -75,7 +139,7 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     }
 
     function isFeed(address newFeed) external view returns (bool) {
-        return createdContracts[newFeed];
+        return feeds.contains(newFeed);
     }
 
     function changeMultipleSettings(
@@ -98,23 +162,19 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
         settings.router = routerAddr;
     }
 
-    function setFeedByteCode(
-        bytes memory newByteCode,
-        uint8 newMajor,
-        uint8 newMinor,
-        uint8 newPatch
-    ) external onlyOwner {
-        major = newMajor;
-        minor = newMinor;
-        patch = newPatch;
-        feedByteCode = newByteCode;
-    }
+    function buildFeed() external payable returns (address ctx) {
+        uint256 nonce = uint256(
+            keccak256(abi.encodePacked(msg.sender, block.timestamp))
+        );
 
-    function buildFeed() external payable returns (address) {
-        bytes memory constructorArguments = abi.encode(
+        ctx = implementation.cloneDeterministic(
+            _getSalt(msg.sender, nonce + 1)
+        );
+
+        IFeedInitializer(ctx).initialize(
             msg.sender,
-            settings.usersModuleContract,
             address(this),
+            settings.usersModuleContract,
             major,
             minor,
             patch
@@ -137,35 +197,11 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
 
         contractCounter++;
 
-        address addr;
-
-        bytes memory tempByteCode = feedByteCode; // Carico la variabile di storage in una variabile locale
-
-        // Concatena il bytecode e gli argomenti del costruttore
-        bytes memory bytecodeWithConstructor = abi.encodePacked(
-            tempByteCode,
-            constructorArguments
-        );
-
-        // Deploy del contratto con gli argomenti del costruttore
-        assembly {
-            addr := create(
-                0,
-                add(bytecodeWithConstructor, 0x20),
-                mload(bytecodeWithConstructor)
-            )
-            if iszero(extcodesize(addr)) {
-                revert(0, 0)
-            }
-        }
-
-        address feed = addr;
+        address feed = ctx;
 
         feeds.add(address(feed));
 
         feedStore[msg.sender].add(address(feed));
-
-        createdContracts[address(feed)] = true;
 
         emit FeedCreated(address(feed));
 
@@ -201,10 +237,61 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     function isContractCreated(
         address contractAddress
     ) external view returns (bool) {
-        return createdContracts[contractAddress];
+        return feeds.contains(contractAddress);
     }
 
     function getCreationFee() internal view returns (uint256) {
         return IMecenateTreasury(settings.treasuryContract).fixedFee();
+    }
+
+    function _updateProxyCallContract(address _proxyCallContract) private {
+        require(
+            _proxyCallContract.isContract(),
+            "FNDCollectionFactory: Proxy call address is not a contract"
+        );
+        proxyCallContract = IProxyCall(_proxyCallContract);
+
+        emit ProxyCallContractUpdated(_proxyCallContract);
+    }
+
+    function _updateImplementation(
+        address _implementation,
+        uint256 majorNew,
+        uint256 minorNew,
+        uint256 patchNew
+    ) private {
+        require(
+            _implementation.isContract(),
+            "nali: implementation is not a contract"
+        );
+
+        implementation = _implementation;
+
+        unchecked {
+            // Version cannot overflow 256 bits.
+            major = majorNew;
+            minor = minorNew;
+            patch = patchNew;
+        }
+
+        IFeedInitializer(implementation).initialize(
+            msg.sender,
+            address(this),
+            settings.usersModuleContract,
+            major,
+            minor,
+            patch
+        );
+
+        uint256 version = majorNew * 10000 + minorNew * 100 + patchNew;
+
+        emit ImplementationUpdated(_implementation, version);
+    }
+
+    function _getSalt(
+        address creator,
+        uint256 nonce
+    ) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(creator, nonce));
     }
 }

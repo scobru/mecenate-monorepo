@@ -572,8 +572,8 @@ const Identity: NextPage = () => {
                                         setPassword(e.target.value);
                                       }}
                                     />
-                                    <button className="btn btn-large" onClick={decryptPair}>
-                                      Decrypt{" "}
+                                    <button className="btn btn-custom" onClick={decryptPair}>
+                                      Recover{" "}
                                     </button>
                                     <div id="console" className="p-4 break-all">
                                       <pre className="whitespace-pre-line mt-3"></pre>

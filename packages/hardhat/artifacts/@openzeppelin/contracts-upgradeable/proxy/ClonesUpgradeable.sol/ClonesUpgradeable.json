@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ClonesUpgradeable",
+  "sourceName": "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea2646970667358221220b6b82420753eda19c300746be28a73863704df589823f2a0e378eb5013cb7d0464736f6c63430008130033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220b6b82420753eda19c300746be28a73863704df589823f2a0e378eb5013cb7d0464736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

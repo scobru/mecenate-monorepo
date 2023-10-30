@@ -37,7 +37,7 @@ module.exports = {
     extend: {
       fontFamily: {
         "bai-jamjuree": ["Bai Jamjuree", "sans-serif"],
-        ui: ["Lato", "sans-serif"],
+        ui: ["Inter", "sans-serif"],
         heading: ["Roboto", "sans-serif"],
         number: ["Roboto Mono"],
       },

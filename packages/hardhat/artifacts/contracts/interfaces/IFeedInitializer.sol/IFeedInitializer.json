@@ -7,17 +7,12 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
           "name": "_factoryContract",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_treasuryContract",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_verifierContract",
           "type": "address"
         },
         {
@@ -26,9 +21,19 @@
           "type": "address"
         },
         {
-          "internalType": "address",
-          "name": "_proxyCallContract",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "major",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "minor",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "patch",
+          "type": "uint256"
         }
       ],
       "name": "initialize",

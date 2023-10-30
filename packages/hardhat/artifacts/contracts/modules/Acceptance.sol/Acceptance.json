@@ -1170,6 +1170,11 @@
           "internalType": "address",
           "name": "buyer",
           "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "useStake",
+          "type": "bool"
         }
       ],
       "name": "acceptPost",
@@ -1801,19 +1806,6 @@
         }
       ],
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "version",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
       "type": "function"
     },
     {

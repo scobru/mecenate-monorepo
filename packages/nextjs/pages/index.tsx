@@ -113,7 +113,7 @@ const Home: NextPage = () => {
 
         <div className="w-screen bg-sharding bg-cover bg-left">
           <div className="xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-gradient-to-bl from-slate-800 to-slate-950 ">
-            <div className="p-10 my-20">
+            <div className="p-10 my-20 w-screen">
               <h2 className="text-6xl sm:text-xl   ">Getting Started</h2>
               <h2 className="text-5xl font-light   ">with Mecenate</h2>
               <p className="mb-4 text-2xl font-semibold  ">Follow these steps to begin your journey:</p>
@@ -226,8 +226,8 @@ const Home: NextPage = () => {
             <h2 className="text-2xl font-semibold mb-4">Make a request 📣</h2>
           </div>
         </div>
-        <div className="backdrop-opacity-50 backdrop-blur-2xl bg-dev bg-cover ">
-          <div className="flex-grow mx-auto xl:w-6/12 md:8/12 lg:10/12 sm:12/12  py-12 p-10 bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95">
+        <div className="w-screen  backdrop-opacity-50 backdrop-blur-2xl bg-dev bg-cover">
+          <div className="flex flex-col xl:w-6/12 md:8/12 lg:10/12 sm:12/12  p-10  text-left  my-5  bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95 mx-auto">
             <div className="text-5xl font-bold my-10">HOW IT WORKS?</div>
             <p className="text-xl  mb-8">
               <strong>Question</strong> Enter a short explanation of what you&apos;re looking for. This can include

@@ -6,60 +6,28 @@ import "../interfaces/IMecenateUsers.sol";
 import "../interfaces/IMecenateTreasury.sol";
 import "../interfaces/IMecenateFeedFactory.sol";
 import "../helpers/eas/IEAS.sol";
-import "./Version.sol";
-
-// import enumerablet bytes set
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 /**
  * @title Data
  * @dev This contract stores data related to Mecenate posts and provides functions to interact with it.
  */
-contract Data is Version {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    EnumerableSet.Bytes32Set internal postIds;
+abstract contract Data {
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
+    EnumerableSetUpgradeable.Bytes32Set internal postIds;
 
     bytes internal constant ZEROHASH = "0x00";
 
     address public owner;
 
     Structures.Post public post;
-
     Structures.FeedSettings internal settings;
 
     mapping(uint8 => uint256) internal postDurationToDays;
-
     mapping(uint8 => bool) internal validStatuses;
-
     mapping(bytes32 => Structures.PostTimestamp) internal postTimestamps;
 
     bool public locked;
-
-    constructor(
-        address usersModuleContract,
-        address factoryContract,
-        uint256 _major,
-        uint256 _minor,
-        uint256 _patch
-    ) Version(_major, _minor, _patch) {
-        settings.punishmentRatio = 100000000000000000; // Constant value
-        settings.postCount = 0; // Initialize postCount to 0
-        settings.usersModuleContract = usersModuleContract;
-        settings.factoryContract = msg.sender;
-        settings.router = IMecenateFeedFactory(factoryContract).router();
-        settings.version = _version();
-
-        post.postdata.settings.status = Structures.PostStatus.Waiting;
-
-        postDurationToDays[uint8(Structures.PostDuration.OneDay)] = 1 days;
-        postDurationToDays[uint8(Structures.PostDuration.ThreeDays)] = 3 days;
-        postDurationToDays[uint8(Structures.PostDuration.OneWeek)] = 7 days;
-        postDurationToDays[uint8(Structures.PostDuration.TwoWeeks)] = 14 days;
-        postDurationToDays[uint8(Structures.PostDuration.OneMonth)] = 30 days;
-
-        validStatuses[uint8(Structures.PostStatus.Waiting)] = true;
-    }
 
     function _changeStatus(Structures.PostStatus newStatus) internal {
         validStatuses[uint8(post.postdata.settings.status)] = false;
