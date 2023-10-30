@@ -28,7 +28,7 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
       passHref
       className={`${
         isActive ? "bg-secondary shadow-md" : ""
-      } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-base font-semibold rounded-full gap-2`}
+      } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm font-heading rounded-full gap-2`}
     >
       {children}
     </Link>
@@ -49,7 +49,7 @@ export default function Header() {
 
   const navLinks = (
     <>
-      <li className="font-semibold">
+      <li>
         <NavLink href="/">
           {" "}
           <HomeIcon className="h-4 w-4" />
@@ -63,36 +63,36 @@ export default function Header() {
       </li>
       */}
       <li>
-        <NavLink href="/wallet">
+        <NavLink href="/connect">
           <KeyIcon className="h-4 w-4" />
-          Wallet
+          Connect
         </NavLink>
       </li>
-      <li className="font-semibold">
+      <li>
         <NavLink href="/identity">
           <UserIcon className="h-4 w-4" />
           Identity
         </NavLink>
       </li>
-      <li className="font-semibold">
+      <li>
         <NavLink href="/bay">
           <MegaphoneIcon className="h-4 w-4" />
           Bay
         </NavLink>
       </li>
-      <li className="font-semibold">
+      <li>
         <NavLink href="/feeds">
           <Square3Stack3DIcon className="h-4 w-4" />
           Feeds
         </NavLink>
       </li>
-      <li className="font-semibold">
+      <li>
         <NavLink href="/attestations">
           <ArchiveBoxIcon className="h-4 w-4" />
           Attestations
         </NavLink>
       </li>
-      <li className="font-semibold">
+      <li>
         <NavLink href="https://scobru.gitbook.io/mecenatedocs/">
           <DocumentIcon className="h-4 w-4" />
           Docs
@@ -139,9 +139,8 @@ export default function Header() {
 
       <div className="navbar-end flex-grow mr-4">
         <WalletBadge />
-
-        {/*   <RainbowKitCustomConnectButton /> */}
-        <FaucetButton />
+        {/* <RainbowKitCustomConnectButton /> */}
+        {/* <FaucetButton /> */}
       </div>
     </div>
   );

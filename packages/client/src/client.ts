@@ -2,11 +2,10 @@ import { ethers, Contract } from "ethers";
 import { formatEther, parseEther, toUtf8String } from "ethers/lib/utils.js";
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { saveAs } from "file-saver";
-import MecenateHelper from "../../crypto-ipfs/index"
+import MecenateHelper from "@scobru/crypto-ipfs";
 import ABIS from "../../nextjs/generated/hardhat_contracts.json";
 import axios from "axios";
 import fs from "fs";
-import ProgressBar from 'progress';
 
 // encoding & decoding
 
@@ -19,10 +18,10 @@ const eas = new EAS(EASContractAddress);
 
 // Initialize SchemaEncoder with the schema string
 const schemaEncoder = new SchemaEncoder(
-  "bool verified ,address feed, bytes post,"
+  "bool verified ,address feed,bytes32 postId, bytes post,"
 );
 const schemaUID =
-  "0xb73edc40219f8224352f6d9c12364faadae4e09726e78d0e9e78bea456930b5a";
+  "0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a";
 
 export class MecenateClient {
   private signer: any;
@@ -472,7 +471,7 @@ export class MecenateClient {
 
     const response_Encrypteddatahash = await axios.get(
       "https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" +
-      responseProofHashJSON.encryptedDatahash,
+        responseProofHashJSON.encryptedDatahash,
       {
         headers: {
           Accept: "text/plain",
@@ -512,13 +511,15 @@ export class MecenateClient {
           feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1]
         );
 
-        fs.writeFileSync("./" +
-          String(postCount) +
-          feedCtx?.address +
-          "_decryptsaveAsedData" +
-          "." +
-          mimeType?.split("/")[1],
-          file as any)
+        fs.writeFileSync(
+          "./" +
+            String(postCount) +
+            feedCtx?.address +
+            "_decryptsaveAsedData" +
+            "." +
+            mimeType?.split("/")[1],
+          file as any
+        );
       } else {
         console.log("Decrypted Data: ", decryptFile);
       }
@@ -596,11 +597,12 @@ export class MecenateClient {
     const post = await feedCtx?.post();
 
     const encryptedData = post.postdata?.data.encryptedData;
-
+    const postId = post.postdata?.settings?.postId;
     if (valid == true) {
       const encodedData = schemaEncoder.encodeData([
         { name: "verified", value: valid, type: "bool" },
         { name: "feed", value: feedAddress, type: "address" },
+        { name: "postId", value: postId, type: "bytes32" },
         { name: "post", value: encryptedData, type: "bytes" },
       ]);
       console.log("Encoded Data: ", encodedData);
@@ -670,15 +672,15 @@ export class MecenateClient {
 
     let post = await MecenateFeed.post();
 
-    const result = ({
+    const result = {
       feedAddress: feedAddress,
       creator: post[0],
       settings: post[1][0],
       escrow: post[1][1],
       data: post[1][2],
-    });
+    };
 
-    console.log("Feed Info:", JSON.stringify(result))
+    console.log("Feed Info:", JSON.stringify(result));
 
     return result;
   }
@@ -691,7 +693,7 @@ export class MecenateClient {
     );
 
     const post = await MecenateFeed.post();
-    return JSON.stringify(post)
+    return JSON.stringify(post);
   }
 
   async getStake(_feedAddr: string) {
@@ -701,13 +703,16 @@ export class MecenateClient {
       this.signer
     );
 
-
     const stake = await MecenateFeed.getStake(this.signer?.getAddress());
 
     console.log(formatEther(stake));
   }
 
-  public async addStake(tokenId: string, _feedAddr: string, stakeAmount: string) {
+  public async addStake(
+    tokenId: string,
+    _feedAddr: string,
+    stakeAmount: string
+  ) {
     console.log("Adding Stake...");
     const MecenateFeed = new ethers.Contract(
       _feedAddr,
@@ -723,9 +728,14 @@ export class MecenateClient {
       return;
     }
 
-    await MecenateFeed?.addStake(postTokenId, this.signer.getAddress(), parseEther(stakeAmount), {
-      value: postTokenId == 0 ? parseEther(stakeAmount) : 0,
-    })
+    await MecenateFeed?.addStake(
+      postTokenId,
+      this.signer.getAddress(),
+      parseEther(stakeAmount),
+      {
+        value: postTokenId == 0 ? parseEther(stakeAmount) : 0,
+      }
+    );
   }
 
   public async takeAll(tokenId: string, _feedAddr: string, receiver: string) {
@@ -742,12 +752,16 @@ export class MecenateClient {
       return;
     }
 
-    MecenateFeed?.takeFullStake(postTokenId, receiver)
+    MecenateFeed?.takeFullStake(postTokenId, receiver);
     console.log("Take All Stake...");
   }
 
-  public async takeStake(tokenId: string, _feedAddr: string, stakeAmount: string, receiver: string) {
-
+  public async takeStake(
+    tokenId: string,
+    _feedAddr: string,
+    stakeAmount: string,
+    receiver: string
+  ) {
     const MecenateFeed = new ethers.Contract(
       _feedAddr,
       this.feedABI,
@@ -761,8 +775,7 @@ export class MecenateClient {
     }
     console.log("Take Stake...");
 
-    MecenateFeed?.takeStake(postTokenId, receiver, parseEther(stakeAmount))
-
+    MecenateFeed?.takeStake(postTokenId, receiver, parseEther(stakeAmount));
   }
 
   // Helpers
@@ -795,9 +808,4 @@ export class MecenateClient {
     const file = new File([uint8Array], fileName, { type: mime });
     return file;
   }
-
 }
-
-
-
-

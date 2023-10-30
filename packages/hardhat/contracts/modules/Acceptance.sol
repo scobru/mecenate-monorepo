@@ -13,7 +13,8 @@ abstract contract Acceptance is Events, Staking {
         Structures.Tokens tokenId,
         uint256 paymentAmount,
         address funder,
-        address buyer
+        address buyer,
+        bool useStake
     ) external payable virtual {
         require(locked == false, "LOCKED");
         require(
@@ -23,9 +24,14 @@ abstract contract Acceptance is Events, Staking {
 
         _checkToken(tokenId);
 
-        uint256 amountToAdd = tokenId == Structures.Tokens.NaN
-            ? msg.value
-            : paymentAmount;
+        uint256 amountToAdd;
+
+        if (!useStake) {
+            amountToAdd = tokenId == Structures.Tokens.NaN
+                ? msg.value
+                : paymentAmount;
+        }
+
         uint256 sellerStake = Deposit._getDeposit(
             tokenId,
             post.postdata.escrow.seller
@@ -49,13 +55,24 @@ abstract contract Acceptance is Events, Staking {
                 paymentAmount >= post.postdata.escrow.payment,
                 "NOT_ENOUGH_PAYMENT"
             );
-        } else {
-            require(msg.value > 0, "ZERO_MSGVALUE");
-
-            require(paymentAmount > 0, "ZERO_PAYMENT");
         }
 
-        uint256 payment = _addStake(tokenId, buyer, funder, amountToAdd);
+        uint256 payment;
+
+        if (useStake) {
+            require(
+                Deposit._getDeposit(tokenId, msg.sender) >= paymentAmount,
+                "PAYMENT_INCORRECT"
+            );
+
+            payment = paymentAmount;
+        } else {
+            if (tokenId == Structures.Tokens.NaN) {
+                require(msg.value >= paymentAmount, "WRONG_MSG_VALUE");
+            }
+
+            payment = _addStake(tokenId, buyer, funder, paymentAmount);
+        }
 
         post.postdata.escrow.payment = payment;
         post.postdata.escrow.buyer = buyer;

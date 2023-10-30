@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 /**
  * @title Structures
  * @dev This library defines various data structures used in the Mecenate platform.
@@ -160,6 +162,5 @@ library Structures {
         Tokens tokenId;
         address buyerAddress;
         bytes32 postId;
-        PostTimestamp postTimestamp;
     }
 }

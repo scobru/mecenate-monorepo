@@ -9,10 +9,11 @@ import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 import Spinner from "~~/components/Spinner";
 import { notification } from "~~/utils/scaffold-eth";
 import { toUtf8Bytes, toUtf8String } from "ethers/lib/utils.js";
-import { IProvider } from "@web3auth/base";
-const crypto = require("asymmetric-crypto");
-const ErasureHelper = require("@erasure/crypto-ipfs");
 import Web3 from "web3";
+import MecenateHelper from "@scobru/crypto-ipfs";
+import type { IBaseProvider, IProvider } from "@web3auth/base";
+import { useWeb3auth } from "../components/Web3authProvider"; // Aggiusta il percorso in base alla tua struttura di cartelle
+import { useAppStore } from "~~/services/store/store";
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
@@ -21,7 +22,6 @@ const Identity: NextPage = () => {
   const [sismoConnectResponse, setSismoConnectResponse] = React.useState<SismoConnectResponse>();
   const [responseBytes, setResponseBytes] = React.useState<string>();
   const [sismoData, setSismoData] = React.useState<any>(null);
-
   const [pageState, setPageState] = React.useState<string>("init");
   const [error, setError] = React.useState<string>();
   const [fee, setFee] = React.useState(0);
@@ -34,16 +34,18 @@ const Identity: NextPage = () => {
   const [verified, setVerified] = React.useState<any>(null);
   const [userName, setUserName] = React.useState<any>(null);
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<any>("");
-
+  const [password, setPassword] = React.useState<any>(null);
+  const [confirmPassword, setConfirmPassword] = React.useState<any>(null);
   const [userData, setUserData] = React.useState<any>(null);
 
   const [pubKey, setPubKey] = React.useState<any>(null);
-
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const [signer, setSigner] = React.useState<Signer | undefined>();
 
   const runTx = useTransactor();
 
+  const { signer } = useAppStore();
+
+  console.log(signer);
   let UsersAddress!: string;
   let UsersAbi: ContractInterface[] = [];
 
@@ -63,6 +65,13 @@ const Identity: NextPage = () => {
 
   if (deployedContractVault) {
     ({ address: vaultAddress, abi: vaultAbi } = deployedContractVault);
+  }
+
+  function uiConsole(...args: any[]): void {
+    const el = document.querySelector("#console>pre");
+    if (el) {
+      el.innerHTML = JSON.parse(JSON.stringify(args || {}, null, 2));
+    }
   }
 
   async function mintDai() {
@@ -91,7 +100,12 @@ const Identity: NextPage = () => {
 
   const signIn = async () => {
     console.log("Signing in...");
-    runTx(usersCtx?.registerUser(responseBytes, toUtf8Bytes(String(pubKey))), signer);
+    runTx(usersCtx?.registerUser(responseBytes, toUtf8Bytes(String(pubKey))), signer as Signer);
+  };
+
+  const changePublicKey = async () => {
+    console.log("Signing in...");
+    runTx(usersCtx?.changePublicKey(responseBytes, toUtf8Bytes(String(pubKey))), signer as Signer);
   };
 
   const getContractData = async function getContractData() {
@@ -148,19 +162,44 @@ const Identity: NextPage = () => {
   }
 
   async function createPair() {
-    const kp = crypto.keyPair();
+    if (password != confirmPassword) {
+      notification.error("Password is not the same");
+      return;
+    }
 
-    console.log("Generating Key Pair...", kp);
+    const kp = MecenateHelper.crypto.asymmetric.keyPair();
 
-    const keypairJSON = kp;
+    if (!kp) return;
 
-    if (!keypairJSON) return;
+    setPubKey(kp?.publicKey.toString());
+    const keyPairJSON = JSON.stringify(kp);
 
-    console.log(String(keypairJSON?.publicKey));
+    console.log("KeyPairJson", keyPairJSON);
 
-    setPubKey(keypairJSON?.publicKey.toString());
+    // encrypt KeyPair With password and save into db
+    if (typeof keyPairJSON === "string" && keyPairJSON !== null && keyPairJSON !== undefined) {
+      const encryptedKeyPair = await MecenateHelper.crypto.aes.encryptObject(kp, password);
+      console.log("await signer?.getAddress()", await signer?.getAddress());
+      console.log(encryptedKeyPair);
 
-    console.log(signer);
+      const verifiedResult = await fetch("/api/storeKey", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wallet: await signer?.getAddress(),
+          salt: encryptedKeyPair.salt,
+          iv: encryptedKeyPair.iv,
+          ciphertext: encryptedKeyPair.ciphertext,
+        }),
+      });
+
+      console.log(verifiedResult);
+    } else {
+      // handle the case where keypairJSON is not a string, or is null or undefined
+      notification.error("Error creating key pair");
+    }
 
     notification.success("Key pair created");
 
@@ -190,10 +229,10 @@ const Identity: NextPage = () => {
         <div className="mt-2 mb-4 text-sm">
           <div>
             <p>
-              PUBLIC KEY : <br /> {keypairJSON.publicKey.toString()}
+              PUBLIC KEY : <br /> {JSON.parse(keyPairJSON).publicKey.toString()}
             </p>
             <p>
-              SECRET KEY : <br /> {keypairJSON.secretKey.toString()}
+              SECRET KEY : <br /> {JSON.parse(keyPairJSON).secretKey.toString()}
             </p>
           </div>
         </div>
@@ -203,8 +242,8 @@ const Identity: NextPage = () => {
             className="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             onClick={async () => {
               const data = {
-                publicKey: await keypairJSON.publicKey.toString(),
-                secretKey: await keypairJSON.secretKey.toString(),
+                publicKey: await JSON.parse(keyPairJSON).publicKey.toString(),
+                secretKey: await JSON.parse(keyPairJSON).secretKey.toString(),
               };
               navigator.clipboard.writeText(JSON.stringify(data));
               notification.success("Public key copied to clipboard");
@@ -231,8 +270,8 @@ const Identity: NextPage = () => {
     );
 
     const data = {
-      publicKey: await keypairJSON.publicKey.toString(),
-      secretKey: await keypairJSON.secretKey.toString(),
+      publicKey: await JSON.parse(keyPairJSON).publicKey.toString(),
+      secretKey: await JSON.parse(keyPairJSON).secretKey.toString(),
     };
 
     downloadFile({
@@ -240,6 +279,47 @@ const Identity: NextPage = () => {
       fileName: (await signer?.getAddress()) + "_keyPair.json",
       fileType: "text/json",
     });
+
+    uiConsole(JSON.parse(JSON.stringify(keyPairJSON)));
+  }
+
+  async function decryptPair() {
+    const walletAddress = await signer?.getAddress();
+
+    // Verifica che walletAddress sia stato ottenuto correttamente
+    if (!walletAddress) {
+      // Gestisci l'errore come preferisci
+      console.error("Wallet address not available");
+      return;
+    }
+
+    // Esegui la richiesta fetch
+    const url = `/api/storeKey?wallet=${encodeURIComponent(walletAddress)}`;
+
+    // Esegui la richiesta fetch
+    const verifiedResult = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    // Converti la risposta in JSON
+    const resultJson = await verifiedResult.json();
+
+    const parsedResult = JSON.parse(JSON.stringify(resultJson.data));
+
+    const decryptedPair = await MecenateHelper.crypto.aes.decryptObject(
+      parsedResult.salt,
+      parsedResult.iv,
+      parsedResult.ciphertext,
+      password,
+    );
+
+    uiConsole(JSON.parse(JSON.stringify(decryptedPair)));
+
+    // Mostra una notifica con il risultato
+
+    // Gestisci ulteriormente la risposta qui, se necessario
   }
 
   const downloadFile = ({ data, fileName, fileType }: { data: BlobPart; fileName: string; fileType: string }): void => {
@@ -262,29 +342,38 @@ const Identity: NextPage = () => {
     a.remove();
   };
 
-  useEffect(() => {
+  /*   useEffect(() => {
     const run = async () => {
+      console.log("Initializing signer...");
       try {
         let _signer;
         const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
+
         if (cachedAdapter !== "metamask") {
           const pk = localStorage.getItem("pk");
           if (pk) {
             _signer = new ethers.Wallet(pk, publicProvider);
+            console.log("Signer", _signer);
           } else {
             throw new Error("Private key not found in local storage.");
           }
         } else {
-          const web3Auth = JSON.parse(String(localStorage.getItem("web3AuthProvider")));
-          if (web3Auth) {
-            const web3 = new Web3(web3Auth as any);
-            const ethersProvider = new ethers.providers.Web3Provider(web3.givenProvider);
-            _signer = ethersProvider.getSigner();
+          const webauthProvider: IProvider = JSON.parse(String(localStorage.getItem("web3AuthProvider"))) as IProvider;
+          console.log("webauthProvider", webauthProvider);
+          const signer = JSON.parse(String(localStorage.getItem("signer")));
+          console.log("signer", signer);
+          const ethersProvider = new ethers.providers.Web3Provider(webauthProvider as IBaseProvider<unknown>);
+          console.log("ethersProvider", ethersProvider);
+
+          if (signer) {
+            _signer = signer;
+            console.log("Signer", signer);
           } else {
             throw new Error("Invalid web3Auth object in local storage.");
           }
         }
         setSigner(_signer);
+        setawait signer?.getAddress()(String(localStorage.getItem("accountAddress")));
       } catch (error) {
         console.error("Failed to initialize signer:", error);
       }
@@ -293,7 +382,7 @@ const Identity: NextPage = () => {
     };
 
     run();
-  }, []);
+  }, []); */
 
   useEffect(() => {
     if (signer) {
@@ -309,11 +398,11 @@ const Identity: NextPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen ">
-      <h1 className="text-2xl font-light mb-8 my-10">
+      <h1 className="text-2xl  mb-8 my-10 font-heading  ">
         <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
-          Join Mecenate{" "}
+          JOIN MECENATE{" "}
         </a>
-        without revealing your identity
+        WITHOUT REVEALING YOUR IDENTITY
       </h1>
       <div className="max-w-3xl text-center my-2 text-base-content">
         <div className="flex flex-col  items-center mb-20">
@@ -323,7 +412,6 @@ const Identity: NextPage = () => {
             <p className="text-xl  ">Create a Key Pair and sign-in</p>
           </div> */}
           <div className="text-center w-full">
-            {!signer?.provider && <div className="text-center font-bold text-xl my-5">Please connect your wallet</div>}
             {pageState == "init" && !sismoData ? (
               <>
                 <div className="text-center sm:p-2 lg:p-4">
@@ -388,7 +476,7 @@ const Identity: NextPage = () => {
                         <div className="flex flex-col ">
                           <div className="status-wrapper">
                             <button
-                              className="btn btn-primary my-10 text-base-content border-2 border-secondary-focus rounded-xl  hover:bg-red-700  font-bold py-2 px-4 hover:text-white focus:outline-none focus:shadow-outline"
+                              className="btn btn-custom  hover:bg-red-700  font-semibold py-2 px-4 hover:text-white focus:outline-none focus:shadow-outline"
                               onClick={() => {
                                 window.location.href = "/user";
                                 resetLocalStorage();
@@ -396,15 +484,15 @@ const Identity: NextPage = () => {
                               }}
                             >
                               {" "}
-                              RESET{" "}
+                              RESET ZKP{" "}
                             </button>
                           </div>
-
+                          <div className="font-headgin text-sl">Go to Connect</div>
                           {userExists && userData && (
                             <div>
                               {userData[0] && (
                                 <div className="card card-shadow break-all">
-                                  <div className="card card-title">User Data</div>
+                                  <div className="card card-title font-semibold font-heading">User Data</div>
                                   <div className="card-body">
                                     <div className="grid grid-cols-2 gap-4 text-left">
                                       <div className="font-semibold">Address:</div>
@@ -417,47 +505,94 @@ const Identity: NextPage = () => {
                                   </div>
                                 </div>
                               )}
-                            </div>
-                          )}
-                          <div>
-                            <div className="card  card-shadow  ">
-                              <div className="text-center font-semibold text-xl">Faucet mDAI/MUSE</div>
-                              <button
-                                className="btn btn-large"
-                                onClick={async () => {
-                                  await mintDai();
-                                }}
-                              >
-                                Mint mDAI
-                              </button>
-                              <button
-                                className="btn btn-large"
-                                onClick={async () => {
-                                  await mintMuse();
-                                }}
-                              >
-                                Mint MUSE
-                              </button>
-                            </div>
-                            <div className="card  card-shadow mb-10">
-                              <div className="font-semibold text-xl">Create Key Pair</div>
                               <div>
-                                <button className="btn btn-large" onClick={createPair}>
-                                  Create{" "}
-                                </button>
+                                <div className="card  card-shadow  ">
+                                  <div className="text-center font-heading text-xl">Faucet mDAI/MUSE</div>
+                                  <button
+                                    className="btn btn-custom"
+                                    onClick={async () => {
+                                      await mintDai();
+                                    }}
+                                  >
+                                    Mint test DAI
+                                  </button>
+                                  <button
+                                    className="btn btn-custom"
+                                    onClick={async () => {
+                                      await mintMuse();
+                                    }}
+                                  >
+                                    Mint MUSE
+                                  </button>
+                                </div>
+                                <div className="card  card-shadow mb-10">
+                                  <div className="text-center font-heading text-xl">Create Key Pair</div>
+                                  <div>
+                                    <input
+                                      type="password"
+                                      name="password"
+                                      id="password"
+                                      placeholder="Password"
+                                      className="input input-text my-5"
+                                      onChange={e => {
+                                        setPassword(e.target.value);
+                                      }}
+                                    />
+                                    <input
+                                      type="password"
+                                      name="password"
+                                      id="password"
+                                      placeholder="Re-type"
+                                      className="input input-text my-5"
+                                      onChange={e => {
+                                        setConfirmPassword(e.target.value);
+                                      }}
+                                    />
+                                    <button className="btn btn-custom" onClick={createPair}>
+                                      Create{" "}
+                                    </button>
+                                    <div id="console" className="p-4 break-all">
+                                      <pre className="whitespace-pre-line mt-3"></pre>
+                                    </div>
+                                    <button className="btn btn-custom" onClick={changePublicKey}>
+                                      Change pubKey{" "}
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="card  card-shadow mb-10">
+                                  <div className="text-center font-heading text-xl">Recover Key Pair</div>
+                                  <div>
+                                    <input
+                                      type="password"
+                                      name="password"
+                                      id="password"
+                                      placeholder="Password"
+                                      className="input input-text my-5"
+                                      onChange={e => {
+                                        setPassword(e.target.value);
+                                      }}
+                                    />
+                                    <button className="btn btn-large" onClick={decryptPair}>
+                                      Decrypt{" "}
+                                    </button>
+                                    <div id="console" className="p-4 break-all">
+                                      <pre className="whitespace-pre-line mt-3"></pre>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="card  card-shadow mb-10">
+                                  <div className="text-center font-heading text-xl">Sign in</div>
+                                  <button
+                                    className="btn btn-custom"
+                                    onClick={signIn}
+                                    disabled={userExists && withdrawalAddress != "" && userName != ""}
+                                  >
+                                    Join{" "}
+                                  </button>
+                                </div>
                               </div>
                             </div>
-                            <div className="card  card-shadow mb-10">
-                              <div className="card card-title">Sign in</div>
-                              <button
-                                className="btn btn-large"
-                                onClick={signIn}
-                                disabled={userExists && withdrawalAddress != "" && userName != ""}
-                              >
-                                Join{" "}
-                              </button>
-                            </div>
-                          </div>
+                          )}
                         </div>
                       )}
                     </>

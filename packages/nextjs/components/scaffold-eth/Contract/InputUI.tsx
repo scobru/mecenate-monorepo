@@ -1,5 +1,5 @@
 import { utils } from "ethers";
-import { FunctionFragment } from "ethers";
+import { ethers } from "ethers";
 import React, { Dispatch, ReactElement, SetStateAction } from "react";
 import { AddressInput } from "~~/components/scaffold-eth";
 
@@ -10,7 +10,7 @@ type TInputUIProps = {
   form: Record<string, any>;
   stateObjectKey: string;
   paramType: utils.ParamType;
-  functionFragment: FunctionFragment;
+  functionFragment: utils.FunctionFragment;
 };
 
 /**

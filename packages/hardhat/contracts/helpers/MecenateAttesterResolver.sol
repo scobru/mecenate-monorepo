@@ -16,13 +16,12 @@ contract MecenateAttesterResolver is SchemaResolver {
         Attestation calldata attestation,
         uint256 /*value*/
     ) internal view override returns (bool) {
-        (bool valid, address feed, bytes memory postBytes) = abi.decode(
-            attestation.data,
-            (bool, address, bytes)
-        );
+        (bool valid, address feed, bytes32 postId, bytes memory postBytes) = abi
+            .decode(attestation.data, (bool, address, bytes32, bytes));
 
         // Check if the post is valid
         IMecenateFeed mecenateFeed = IMecenateFeed(feed);
+
         require(
             keccak256(mecenateFeed.getEncryptedPost()) == keccak256(postBytes),
             "ENCRYPTED POST DOES NOT MATCH"
@@ -40,6 +39,10 @@ contract MecenateAttesterResolver is SchemaResolver {
             post.postdata.escrow.buyer == attestation.attester,
             "INVALID ATTESTER"
         );
+
+        bytes32 fetchedPostId = mecenateFeed.getPostId();
+
+        require(fetchedPostId == postId, "POST ID DOES NOT MATCH");
 
         require(valid, "WRONG VALIDATION");
 

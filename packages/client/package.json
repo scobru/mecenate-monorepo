@@ -16,6 +16,7 @@
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^1.2.1-beta.1",
     "@pinata/sdk": "^2.1.0",
+    "@scobru/crypto-ipfs": "1.0.9",
     "axios": "^1.6.0",
     "cmd-ts": "^0.13.0",
     "dotenv": "^16.3.1",

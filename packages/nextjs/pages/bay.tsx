@@ -7,7 +7,7 @@ import { formatEther, keccak256, parseEther } from "ethers/lib/utils.js";
 import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 import axios from "axios";
-import Web3 from "web3";
+import { useAppStore } from "~~/services/store/store";
 
 const Bay: NextPage = () => {
   const deployedContractBay = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateBay");
@@ -24,39 +24,8 @@ const Bay: NextPage = () => {
   const [tokenId, setTokenId] = React.useState<number>(0);
 
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const [signer, setSigner] = React.useState<Signer | undefined>();
   const runTx = useTransactor();
-
-  useEffect(() => {
-    const run = async () => {
-      try {
-        let _signer;
-        const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
-        if (cachedAdapter !== "metamask") {
-          const pk = localStorage.getItem("pk");
-          if (pk) {
-            _signer = new ethers.Wallet(pk, publicProvider);
-          } else {
-            throw new Error("Private key not found in local storage.");
-          }
-        } else {
-          const web3Auth = JSON.parse(String(localStorage.getItem("web3AuthProvider")));
-          if (web3Auth) {
-            const web3 = new Web3(web3Auth as any);
-            const ethersProvider = new ethers.providers.Web3Provider(web3.givenProvider);
-            _signer = ethersProvider.getSigner();
-          } else {
-            throw new Error("Invalid web3Auth object in local storage.");
-          }
-        }
-        setSigner(_signer);
-      } catch (error) {
-        console.error("Failed to initialize signer:", error);
-      }
-    };
-
-    run();
-  }, []);
+  const { signer } = useAppStore();
 
   type BayRequest = {
     request: string;
@@ -68,6 +37,7 @@ const Bay: NextPage = () => {
     accepted: boolean;
     postCount: string;
     tokenId: number;
+    postId: string;
   };
 
   let bayAddress!: string;
@@ -155,6 +125,7 @@ const Bay: NextPage = () => {
       postCount: 0,
       tokenId: tokenId,
       buyerAddress: signer?.getAddress(),
+      postId: keccak256("0"),
     };
 
     bayCtx?.connect(signer as Signer);
@@ -306,7 +277,7 @@ const Bay: NextPage = () => {
               <div
                 key={index}
                 tabIndex={0}
-                className="card card-bordered rounded-2xl grid-cols-3 my-5 bg-gradient-to-bl from-slate-500 to-slate-500 hover:bg-base-300 shadow-lg shadow-primary hover:shadow-2xl hover:scale-105 transform transition-all duration-500"
+                className="card card-bordered w-96 rounded-2xl grid-cols-3 my-5 bg-gradient-to-bl from-slate-500 to-slate-500 hover:bg-base-300 shadow-lg shadow-primary hover:shadow-2xl hover:scale-105 transform transition-all duration-500"
               >
                 <div className=" bg-gradient-to-tl from-slate-700 to-slate-900rounded-t-xl break-all">
                   <div className="text-left p-5">
@@ -320,6 +291,10 @@ const Bay: NextPage = () => {
                   <div className="text-right p-5 ">
                     <div className="text-xl font-regular">{formatEther(request.payment)} ETH</div>
                     <div className=" text-md font-light">Reward</div>
+                  </div>
+                  <div className="text-right p-5 break-all">
+                    <div className=" font-regular text-sm">{request.postId} </div>
+                    <div className=" text-md font-light">PostID</div>
                   </div>
                 </div>
                 <div className=" bg-gradient-to-tl from-slate-700 to-slate-900  rounded-b-xl ">

@@ -8,7 +8,7 @@ import { deployPool, encodePriceSqrt } from "../scripts/01_deployPools";
 const router = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d";
 const eas = "0x4200000000000000000000000000000000000021";
 const schema =
-  "0xa685677ba3ea1c2df3ed44de688bf5147c36f910b54ec32f08e1e0de4914a113";
+  "0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a";
 
 // Version
 const version = "v2.0.0";

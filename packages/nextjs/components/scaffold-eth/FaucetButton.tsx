@@ -20,12 +20,12 @@ export default function FaucetButton() {
   const [loading, setLoading] = useState(false);
   const provider = getLocalProvider(localhost);
   const signer = provider?.getSigner();
-  const faucetTxn = useTransactor(signer);
+  const faucetTxn = useTransactor();
 
   const sendETH = async () => {
     try {
       setLoading(true);
-      await faucetTxn({ to: address, value: ethers.utils.parseEther(NUM_OF_ETH) });
+      await faucetTxn({ to: address, value: ethers.utils.parseEther(NUM_OF_ETH) }, signer);
       setLoading(false);
     } catch (error) {
       console.error("⚡️ ~ file: FaucetButton.tsx:sendETH ~ error", error);

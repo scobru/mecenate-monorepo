@@ -1,4 +1,4 @@
-import { FunctionFragment } from "ethers/lib/utils";
+import { utils } from "ethers";
 import { useState } from "react";
 import { useContractRead } from "wagmi";
 import { displayTxResult } from "./utilsDisplay";
@@ -6,7 +6,7 @@ import InputUI from "./InputUI";
 import { getFunctionInputKey, getParsedContractFunctionArgs } from "./utilsContract";
 import { getTargetNetwork, notification } from "~~/utils/scaffold-eth";
 
-const getInitialFormState = (functionFragment: FunctionFragment) => {
+const getInitialFormState = (functionFragment: utils.FunctionFragment) => {
   const initialForm: Record<string, any> = {};
   functionFragment.inputs.forEach((input, inputIndex) => {
     const key = getFunctionInputKey(functionFragment, input, inputIndex);
@@ -16,7 +16,7 @@ const getInitialFormState = (functionFragment: FunctionFragment) => {
 };
 
 type TReadOnlyFunctionFormProps = {
-  functionFragment: FunctionFragment;
+  functionFragment: utils.FunctionFragment;
   contractAddress: string;
 };
 

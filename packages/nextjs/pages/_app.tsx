@@ -17,10 +17,7 @@ import { useEthPrice } from "~~/hooks/scaffold-eth";
 import NextNProgress from "nextjs-progressbar";
 import "url-polyfill";
 import { Analytics } from "@vercel/analytics/react";
-import { StytchProvider } from "@stytch/nextjs";
-import { createStytchUIClient } from "@stytch/nextjs/ui";
-
-const stytch = createStytchUIClient(process.env.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN || "");
+import { Web3authProvider } from "../components/Web3authProvider"; // Aggiusta il percorso in base alla tua struttura di cartelle
 
 const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
   const price = useEthPrice();
@@ -33,11 +30,11 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
   }, [setEthPrice, price]);
 
   return (
-    <StytchProvider stytch={stytch}>
-      <WagmiConfig client={wagmiClient}>
-        <NextNProgress />
+    <WagmiConfig client={wagmiClient}>
+      <NextNProgress />
+      <Web3authProvider>
         <RainbowKitProvider chains={appChains.chains} avatar={BlockieAvatar}>
-          <div className="flex flex-col min-h-screen min-w-fit bg-base-100 font-inter ">
+          <div className="flex flex-col min-h-screen min-w-fit bg-base-100 font-ui">
             <div className="text-center bg-gradient-to-r from-blue-100 to-yellow-200 p-1 w-screen text-black">
               Live on <strong>Base Goerli</strong> 🎉
             </div>{" "}
@@ -50,8 +47,8 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
           </div>
           <Toaster />
         </RainbowKitProvider>
-      </WagmiConfig>
-    </StytchProvider>
+      </Web3authProvider>
+    </WagmiConfig>
   );
 };
 

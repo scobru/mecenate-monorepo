@@ -69,8 +69,8 @@ const Home: NextPage = () => {
               <div className="flex-wrap items-center min-w-fit  lg:text-5xl md:text-4xl text-xl ">
                 <div className="stats  mx-2 min-w-fit bg-inherit  ">
                   <div className="stat gap-3">
-                    <div className="stat-title  lg:text-5xl md:text-4xl text-xl ">TREASURY</div>
-                    <div className="stat-value lg:text-5xl md:text-4xl text-xl ">
+                    <div className="stat-title  lg:text-5xl md:text-4xl text-xl  ">TREASURY</div>
+                    <div className="stat-value lg:text-5xl md:text-4xl text-xl font-number ">
                       {String(Number(Number(stats.treasuryBalance) / 1e18).toFixed(3))} ETH
                     </div>
                     <div className="stat-desc  text-base">earned across all fee&apos;s product.</div>
@@ -79,27 +79,33 @@ const Home: NextPage = () => {
                 <div className="stats  mx-2 min-w-fit bg-inherit ">
                   <div className="stat gap-3 ">
                     <div className="stat-title font-bold  ">FEE</div>
-                    <div className="stat-value lg:text-5xl md:text-4xl text-xl">
-                      {String(Number(stats.globalFee) / 10000)} %
+                    <div className="stat-value lg:text-5xl md:text-4xl text-xl font-number">
+                      {String(Number(stats.globalFee) / 10000)}%
                     </div>
-                    <div className="stat-desc text-base"> Percent Protocol Fee</div>
+                    <div className="stat-desc text-base "> Percent Protocol Fee</div>
                   </div>
                 </div>
                 <div className="stats  mx-2 min-w-fit bg-inherit">
                   <div className="stat gap-3">
-                    <div className="stat-title font-bold lg:text-5xl md:text-4xl text-xl ">TAX</div>
-                    <div className="stat-value lg:text-5xl md:text-4xl text-xl ">
+                    <div className="stat-title font-bold lg:text-5xl md:text-4xl text-xl  ">TAX</div>
+                    <div className="stat-value lg:text-5xl md:text-4xl text-xl font-number">
                       {" "}
                       {String(Number(stats.fixedFee) / 1e18)} ETH
                     </div>
-                    <div className="stat-desc text-base"> Fixed Protocol Tax </div>
+                    <div className="stat-desc text-base "> Fixed Protocol Tax </div>
                   </div>
                 </div>
               </div>
               <div className="flex flex-wrap mx-auto items-center gap-2 text-center  lg:flex-row px-5 md:text-3xl text-xl ">
-                <div className="font-thin my-2 ">users: {Number(stats.totalUsers)}</div>
-                <div className="font-thin my-2 ">requests: {Number(stats.totalBayRequests)}</div>{" "}
-                <div className="font-thin my-2 ">feeds: {Number(stats.totalFeeds)}</div>{" "}
+                <div className="font-thin my-2  ">
+                  users: <span className="font-number">{Number(stats.totalUsers)}</span>
+                </div>
+                <div className="font-thin my-2 ">
+                  requests: <span className="font-number">{Number(stats.totalBayRequests)}</span>
+                </div>{" "}
+                <div className="font-thin my-2 ">
+                  feeds:<span className="font-number"> {Number(stats.totalFeeds)}</span>
+                </div>{" "}
               </div>
             </div>
           ) : null}
@@ -108,11 +114,11 @@ const Home: NextPage = () => {
         <div className="w-screen bg-sharding bg-cover bg-left">
           <div className="xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-gradient-to-bl from-slate-800 to-slate-950 ">
             <div className="p-10 my-20">
-              <h2 className="text-6xl sm:text-xl font-extrabold  ">Getting Started</h2>
-              <h2 className="text-5xl font-light  ">with Mecenate</h2>
-              <p className="mb-4 text-2xl font-bold ">Follow these steps to begin your journey:</p>
+              <h2 className="text-6xl sm:text-xl   ">Getting Started</h2>
+              <h2 className="text-5xl font-light   ">with Mecenate</h2>
+              <p className="mb-4 text-2xl font-semibold  ">Follow these steps to begin your journey:</p>
               <br />
-              <ol className="list-decimal ml-4 px-8 text-2xl font-regular ">
+              <ol className="list-decimal ml-4 px-8 text-xl font-extralight">
                 <li>Navigate to the "Identity" section</li>
                 <li>Connect with Sismo to generate your Zero-Knowledge Proof (ZKP)</li>
                 <li>Log into the Mecenate Protocol</li>
@@ -121,9 +127,9 @@ const Home: NextPage = () => {
             </div>
           </div>
           <div className="max-w-3xl bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95 p-10 flex-col mx-auto text-center  text-base-content">
-            <h1 className="text-7xl font-extrabold mb-20">Data Privacy and Security</h1>
+            <h1 className="text-7xl font-extrabold mb-20 font-heading">Data Privacy and Security</h1>
             <h1 className="text-3xl font-extralight mb-20">Redefined.</h1>
-            <p className="text-3xl mb-20 font-extralight text-left hover:font-semibold hover:text-base-content">
+            <p className="text-3xl mb-20 font-extralight text-left  hover:text-base-content font-heading ">
               <strong>Mecenate Feeds </strong> allows me to securely and privately post my information and receive
               payments directly from interested parties without any intermediaries.
             </p>

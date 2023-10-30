@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 /**
  * @title MecenateVerifier
  * @dev Contract that verifies user identity using SismoConnect and returns user's vaultId, twitterId and telegramId.

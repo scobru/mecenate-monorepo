@@ -7,8 +7,7 @@ import scaffoldConfig from "~~/scaffold.config";
 import { toUtf8String } from "ethers/lib/utils.js";
 import { Signer, ethers } from "ethers";
 import Link from "next/link";
-
-const ErasureHelper = require("@erasure/crypto-ipfs");
+import MecenateHelper from "@scobru/crypto-ipfs";
 
 type TAttestation = {
   id: string;
@@ -54,7 +53,7 @@ const Attestations = () => {
     const newAttestations = await apolloClient.query({
       query: getAttestationsGraphQl,
       variables: {
-        where: { schemaId: { equals: "0xb73edc40219f8224352f6d9c12364faadae4e09726e78d0e9e78bea456930b5a" } },
+        where: { schemaId: { equals: "0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a" } },
       },
     });
 
@@ -76,7 +75,7 @@ const Attestations = () => {
   }, scaffoldConfig.pollingInterval);
 
   async function getIPFSHash(data: string, index: number): Promise<void> {
-    const hash: string = await ErasureHelper.multihash({
+    const hash: string = await MecenateHelper.multihash({
       input: data,
       inputType: "sha2-256",
       outputType: "b58",

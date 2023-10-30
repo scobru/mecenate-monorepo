@@ -5,7 +5,9 @@ const db = new sqlite3.Database("./userKeys.db");
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS userKeys (
     wallet TEXT PRIMARY KEY,
-    encryptedPrivateKey TEXT NOT NULL
+    salt TEXT NOT NULL,
+    iv TEXT NOT NULL,
+    ciphertext TEXT NOT NULL
   )`);
 });
 

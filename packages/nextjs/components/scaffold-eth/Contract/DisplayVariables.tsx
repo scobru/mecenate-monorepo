@@ -1,4 +1,4 @@
-import { FunctionFragment } from "ethers";
+import { ethers } from "ethers";
 import React, { useEffect } from "react";
 import { useContractRead } from "wagmi";
 import { displayTxResult } from "./utilsDisplay";
@@ -7,7 +7,7 @@ import { getTargetNetwork, notification } from "~~/utils/scaffold-eth";
 import { useAnimationConfig } from "~~/hooks/scaffold-eth/useAnimationConfig";
 
 type TDisplayVariableProps = {
-  functionFragment: FunctionFragment;
+  functionFragment: ethers.utils.FunctionFragment;
   contractAddress: string;
   refreshDisplayVariables: boolean;
 };

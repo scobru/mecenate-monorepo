@@ -1,13 +1,12 @@
 import { TransactionRequest, TransactionResponse, TransactionReceipt } from "@ethersproject/abstract-provider";
 import { SendTransactionResult } from "@wagmi/core";
 import { Signer } from "ethers";
-import { Deferrable } from "ethers";
-import { useSigner } from "wagmi";
+import { utils } from "ethers";
 import { getParsedEthersError } from "~~/components/scaffold-eth/Contract/utilsContract";
 import { getBlockExplorerTxLink, notification } from "~~/utils/scaffold-eth";
 
 type TTransactionFunc = (
-  tx: Promise<SendTransactionResult> | Deferrable<TransactionRequest> | undefined,
+  tx: Promise<SendTransactionResult> | utils.Deferrable<TransactionRequest> | undefined,
   signer?: Signer | undefined,
   callback?: ((_param: any) => void) | undefined,
 ) => Promise<Record<string, any> | undefined>;
@@ -34,12 +33,6 @@ const TxnNotification = ({ message, blockExplorerLink }: { message: string; bloc
  * @dev If signer is provided => dev wants to send a raw tx.
  */
 export const useTransactor = (/* _signer?: Signer */): TTransactionFunc => {
-  /*  let signer = _signer;
-  const { data } = useSigner();
-  if (signer === undefined && data) {
-    signer = data;
-  } */
-
   const result: TTransactionFunc = async (tx, signer, callback) => {
     if (!signer) {
       notification.error("Wallet/Signer not connected");

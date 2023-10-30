@@ -26,7 +26,7 @@ export default function Faucet() {
   const { chain: ConnectedChain } = useNetwork();
   const provider = getLocalProvider(localhost);
   const signer = provider?.getSigner(FAUCET_ACCOUNT_INDEX);
-  const faucetTxn = useTransactor(signer);
+  const faucetTxn = useTransactor();
 
   useEffect(() => {
     const getFaucetAddress = async () => {
@@ -51,7 +51,7 @@ export default function Faucet() {
   const sendETH = async () => {
     try {
       setLoading(true);
-      await faucetTxn({ to: inputAddress, value: ethers.utils.parseEther(sendValue) });
+      await faucetTxn({ to: inputAddress, value: ethers.utils.parseEther(sendValue) }, signer);
       setLoading(false);
       setInputAddress("");
       setSendValue("");

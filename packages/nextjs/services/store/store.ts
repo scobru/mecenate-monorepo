@@ -13,21 +13,18 @@ import create from "zustand";
 type TAppStore = {
   ethPrice: number;
   setEthPrice: (newEthPriceState: number) => void;
-  sismoResponse: any;
-  setSismoResponse: (newSismoResponse: any) => void;
-  sismoData: any;
-  setSismoData: (newSismoData: any) => void;
-  verified: string;
-  setVerified: (newVerified: string) => void;
+
+  signer: any;
+  setSigner: (newSigner: any) => void;
 };
 
 export const useAppStore = create<TAppStore>(set => ({
   ethPrice: 0,
   setEthPrice: (newValue: number): void => set(() => ({ ethPrice: newValue })),
-  sismoResponse: [],
-  setSismoResponse: (newValue: any): void => set(() => ({ sismoResponse: newValue })),
-  sismoData: [],
-  setSismoData: (newValue: any): void => set(() => ({ sismoData: newValue })),
-  verified: "",
-  setVerified: (newValue: string): void => set(() => ({ verified: newValue })),
+  signer: null,
+  setSigner(newSigner: any): void {
+    set(() => ({ signer: newSigner }));
+  },
 }));
+
+// ...esistente Zustand store

@@ -1,4 +1,4 @@
-import { FunctionFragment } from "ethers";
+import { utils } from "ethers";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useContractWrite, useNetwork, useWaitForTransaction } from "wagmi";
 import InputUI from "./InputUI";
@@ -9,7 +9,7 @@ import { useTransactor } from "~~/hooks/scaffold-eth";
 import { notification, parseTxnValue, getTargetNetwork } from "~~/utils/scaffold-eth";
 
 // TODO set sensible initial state values to avoid error on first render, also put it in utilsContract
-const getInitialFormState = (functionFragment: FunctionFragment) => {
+const getInitialFormState = (functionFragment: utils.FunctionFragment) => {
   const initialForm: Record<string, any> = {};
   functionFragment.inputs.forEach((input, inputIndex) => {
     const key = getFunctionInputKey(functionFragment, input, inputIndex);
@@ -19,7 +19,7 @@ const getInitialFormState = (functionFragment: FunctionFragment) => {
 };
 
 type TWriteOnlyFunctionFormProps = {
-  functionFragment: FunctionFragment;
+  functionFragment: utils.FunctionFragment;
   contractAddress: string;
   setRefreshDisplayVariables: Dispatch<SetStateAction<boolean>>;
 };

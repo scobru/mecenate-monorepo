@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import React, { useEffect, useState } from "react";
-import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
+import { useContract, useNetwork } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { Contract, ContractInterface, Signer, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
@@ -13,21 +13,22 @@ import { saveAs } from "file-saver";
 import Spinner from "~~/components/Spinner";
 import { ScaleIcon, MegaphoneIcon, DocumentCheckIcon } from "@heroicons/react/20/solid";
 import { ApolloClient, InMemoryCache, createHttpLink, gql } from "@apollo/client";
-import Web3 from "web3";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { EAS, Offchain, SchemaEncoder, SchemaRegistry } from "@ethereum-attestation-service/eas-sdk";
-import MecenateHelper from "../../crypto-ipfs/index";
-import { SignerOrProvider } from "@ethereum-attestation-service/eas-sdk/dist/transaction";
-
+import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import MecenateHelper from "@scobru/crypto-ipfs";
+import { useWeb3auth } from "../components/Web3authProvider"; // Aggiusta il percorso in base alla tua struttura di cartelle
+import { useAppStore } from "~~/services/store/store";
 export const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia v0.26
 const eas = new EAS(EASContractAddress);
 
 // Initialize SchemaEncoder with the schema string
 const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes post,");
 
-const schemaUID = "0xb73edc40219f8224352f6d9c12364faadae4e09726e78d0e9e78bea456930b5a";
+const schemaUID = "0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a";
 
 const crypto = require("asymmetric-crypto");
+
+const version = "v2.0.0";
 
 const ViewFeed: NextPage = () => {
   const router = useRouter();
@@ -70,10 +71,9 @@ const ViewFeed: NextPage = () => {
   const deployedContractMUSE = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MUSE");
   const deployedContractMockDai = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MockDai");
   const [password, setPassword] = useState<any>("");
-
+  const { signer, setSigner } = useAppStore();
+  const { web3auth, setLoggedIn, getPrivateKey, loading, loggedIn, createWallet } = useWeb3auth(); // Aggiusta il percorso in base alla tua struttura di cartelle
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-
-  const [signer, setSigner] = React.useState<Signer | undefined>();
 
   const runTx = useTransactor();
 
@@ -138,7 +138,7 @@ const ViewFeed: NextPage = () => {
       query: getAttestationsGraphQl,
       variables: {
         where: {
-          schemaId: { equals: "0xb73edc40219f8224352f6d9c12364faadae4e09726e78d0e9e78bea456930b5a" },
+          schemaId: { equals: schemaUID },
           recipient: { equals: String(feedData[1][1].seller) },
         },
       },
@@ -156,14 +156,14 @@ const ViewFeed: NextPage = () => {
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
 
-      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi as ContractInterface, signer);
+      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi as ContractInterface, signer as Signer);
     } else if (tokenId == "2") {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
 
-      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi as ContractInterface, signer);
+      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi as ContractInterface, signer as Signer);
     }
 
-    runTx(token?.approve(feedCtx?.address, parseEther(postStake)), signer);
+    runTx(token?.approve(feedCtx?.address, parseEther(postStake)), signer as Signer);
   };
 
   const handleApproveBuyer = async () => {
@@ -171,10 +171,10 @@ const ViewFeed: NextPage = () => {
     let token;
     if (tokenId == "1") {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi as ContractInterface, signer);
+      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi as ContractInterface, signer as Signer);
     } else if (tokenId == "2") {
       _tokenAddress = String(process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE);
-      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi as ContractInterface, signer);
+      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi as ContractInterface, signer as Signer);
     }
 
     // Write Approval
@@ -329,7 +329,7 @@ const ViewFeed: NextPage = () => {
           value: tokenId == "0" ? parseEther(postStake) : 0,
         },
       ),
-      signer,
+      signer as Signer,
     );
   };
 
@@ -338,7 +338,7 @@ const ViewFeed: NextPage = () => {
       feedCtx?.acceptPost(feedData?.postdata?.settings?.tokenId, parseEther(postPayment), signer?.getAddress(), {
         value: feedData?.postdata?.settings?.tokenId == "0" ? parseEther(postPayment) : 0,
       }),
-      signer,
+      signer as Signer,
     );
   }
 
@@ -451,11 +451,11 @@ const ViewFeed: NextPage = () => {
       ciphertext: encrypted.data,
       ephemPubKey: sellerPublicKey,
       nonce: encrypted.nonce,
-      version: "v2.0.0",
+      version: version,
     };
 
     const json_selldata_v120 = {
-      msp_version: "v1.0.0",
+      msp_version: version,
       proofhash: proofhash,
       sender: sellerMetadata?.evmAddress,
       senderPubKey: sellerMetadata?.publicKey,
@@ -464,6 +464,7 @@ const ViewFeed: NextPage = () => {
       receiverPubKey: buyerMetadata?.publicKey,
       receiverVaultId: buyerMetadata?.sismoVaultId,
       encryptedSymKey: encryptedSymKey_Buyer,
+      postId: feedData[1][0].postId,
     };
 
     const pinata = await new pinataSDK(pinataApiKey, pinataApiSecret);
@@ -518,18 +519,18 @@ const ViewFeed: NextPage = () => {
         Accept: "text/plain",
       },
     });
-
+    console.log(responseIPFS.data);
     // check response is ipfs valid content
-    if (responseIPFS.data.esp_version !== "v2.0.0") {
+    if (responseIPFS.data.msp_version !== version) {
       console.log("Error with proof Hash.");
-      console.log(responseIPFS.data.esp_version);
+      console.log(responseIPFS.data.msp_version);
       return;
     }
 
     console.log("Data Retrieved.");
     console.log("Proof Hash Digest: ", proofHash58Digest);
 
-    runTx(feedCtx?.submitHash(proofHash58Digest), signer);
+    runTx(feedCtx?.submitHash(proofHash58Digest), signer as Signer);
 
     return {
       proofJson: json_selldata_v120,
@@ -701,7 +702,7 @@ const ViewFeed: NextPage = () => {
 
     feedCtx?.connect(signer as any);
 
-    runTx(feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)), signer);
+    runTx(feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)), signer as Signer);
 
     await fetchData();
   }
@@ -712,6 +713,7 @@ const ViewFeed: NextPage = () => {
       const encodedData = schemaEncoder.encodeData([
         { name: "verified", value: valid, type: "bool" },
         { name: "feed", value: feedCtx?.address, type: "address" },
+        { name: "postId", value: feedData[1][0].postId, type: "bytes32" },
         { name: "post", value: feedData[1][2].encryptedData, type: "bytes" },
       ]);
 
@@ -732,16 +734,16 @@ const ViewFeed: NextPage = () => {
       });
       const newAttestationUID = await tx.wait();
       console.log("New attestation UID:", newAttestationUID);
-      runTx(feedCtx?.finalizePost(valid, parseEther("0"), newAttestationUID), signer);
+      runTx(feedCtx?.finalizePost(valid, parseEther("0"), newAttestationUID), signer as Signer);
     } else {
-      runTx(feedCtx?.finalizePost(valid, parseEther(punishment), uid), signer);
+      runTx(feedCtx?.finalizePost(valid, parseEther(punishment), uid), signer as Signer);
     }
 
     await fetchData();
   }
 
   async function renounce() {
-    runTx(feedCtx?.renouncePost(), signer);
+    runTx(feedCtx?.renouncePost(), signer as Signer);
     notification.success("Refund successful");
   }
 
@@ -753,13 +755,13 @@ const ViewFeed: NextPage = () => {
       feedCtx?.addStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress(), parseEther(stakeAmount), {
         value: feedData?.postdata?.settings?.tokenId == 0 ? parseEther(stakeAmount) : 0,
       }),
-      signer,
+      signer as Signer,
     );
     await fetchData();
   }
 
   async function takeAll() {
-    runTx(feedCtx?.takeFullStake(feedData?.postdata?.settings?.tokenId, receiver), signer);
+    runTx(feedCtx?.takeFullStake(feedData?.postdata?.settings?.tokenId, receiver), signer as Signer);
     console.log("Take All Stake...");
     await fetchData();
   }
@@ -769,7 +771,10 @@ const ViewFeed: NextPage = () => {
 
     console.log("Take Stake...");
 
-    runTx(feedCtx?.takeStake(feedData?.postdata?.settings?.tokenId, receiver, parseEther(stakeAmount)), signer);
+    runTx(
+      feedCtx?.takeStake(feedData?.postdata?.settings?.tokenId, receiver, parseEther(stakeAmount)),
+      signer as Signer,
+    );
 
     await fetchData();
   }
@@ -1011,37 +1016,6 @@ const ViewFeed: NextPage = () => {
   }
 
   //******************** useEffects *********************//
-
-  useEffect(() => {
-    const run = async () => {
-      try {
-        let _signer;
-        const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
-        if (cachedAdapter !== "metamask") {
-          const pk = localStorage.getItem("pk");
-          if (pk) {
-            _signer = new ethers.Wallet(pk, publicProvider);
-          } else {
-            throw new Error("Private key not found in local storage.");
-          }
-        } else {
-          const web3Auth = JSON.parse(String(localStorage.getItem("web3AuthProvider")));
-          if (web3Auth) {
-            const web3 = new Web3(web3Auth as any);
-            const ethersProvider = new ethers.providers.Web3Provider(web3.givenProvider);
-            _signer = ethersProvider.getSigner();
-          } else {
-            throw new Error("Invalid web3Auth object in local storage.");
-          }
-        }
-        setSigner(_signer);
-      } catch (error) {
-        console.error("Failed to initialize signer:", error);
-      }
-    };
-
-    run();
-  }, []);
 
   useEffect(() => {
     const fetchDataAsync = async () => {
@@ -1775,6 +1749,10 @@ const ViewFeed: NextPage = () => {
                   <p>
                     <span className="font-bold">Duration</span> <br />
                     {Number(feedData[1][0].duration.toString() * 1000) / 86400000} days{" "}
+                  </p>
+                  <p>
+                    <span className="font-bold">postID</span> <br />
+                    {feedData[1][0].postId.toString()}
                   </p>
                   <p>
                     <span className="font-bold">File Type</span> <br />

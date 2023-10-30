@@ -37,9 +37,9 @@ module.exports = {
     extend: {
       fontFamily: {
         "bai-jamjuree": ["Bai Jamjuree", "sans-serif"],
-        inter: ["Inter", "sans-serif"],
-        roboto: ["Roboto", "sans-serif"],
-        opensans: ["Open Sans", "sans-serif"],
+        ui: ["Lato", "sans-serif"],
+        heading: ["Roboto", "sans-serif"],
+        number: ["Roboto Mono"],
       },
       boxShadow: {
         center: "0 0 12px -2px rgb(0 0 0 / 0.05)",

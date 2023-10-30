@@ -1,4 +1,3 @@
-import { FunctionFragment } from "ethers";
 import { Contract, utils } from "ethers";
 import DisplayVariable from "~~/components/scaffold-eth/Contract/DisplayVariables";
 import { ReadOnlyFunctionForm } from "./ReadOnlyFunctionForm";
@@ -33,23 +32,23 @@ const getDeployedContract = (
 
 /**
  * @param {Contract} contract
- * @returns {FunctionFragment[]} array of function fragments
+ * @returns {utils.FunctionFragment[]} array of function fragments
  */
-const getAllContractFunctions = (contract: Contract | null): FunctionFragment[] => {
+const getAllContractFunctions = (contract: Contract | null): utils.FunctionFragment[] => {
   return contract ? Object.values(contract.interface.functions).filter(fn => fn.type === "function") : [];
 };
 
 /**
  * @dev used to filter all readOnly functions with zero params
  * @param {Contract} contract
- * @param {FunctionFragment[]} contractMethodsAndVariables - array of all functions in the contract
+ * @param {utils.FunctionFragment[]} contractMethodsAndVariables - array of all functions in the contract
  * @param {boolean} refreshDisplayVariables refetch values
  * @returns { methods: (JSX.Element | null)[] } array of DisplayVariable component
  * which has corresponding input field for param type and button to read
  */
 const getContractVariablesAndNoParamsReadMethods = (
   contract: Contract | null,
-  contractMethodsAndVariables: FunctionFragment[],
+  contractMethodsAndVariables: utils.FunctionFragment[],
   refreshDisplayVariables: boolean,
 ): { methods: (JSX.Element | null)[] } => {
   return {
@@ -78,13 +77,13 @@ const getContractVariablesAndNoParamsReadMethods = (
 /**
  * @dev used to filter all readOnly functions with greater than or equal to 1 params
  * @param {Contract} contract
- * @param {FunctionFragment[]} contractMethodsAndVariables - array of all functions in the contract
+ * @param {utils.FunctionFragment[]} contractMethodsAndVariables - array of all functions in the contract
  * @returns { methods: (JSX.Element | null)[] } array of ReadOnlyFunctionForm component
  * which has corresponding input field for param type and button to read
  */
 const getContractReadOnlyMethodsWithParams = (
   contract: Contract | null,
-  contractMethodsAndVariables: FunctionFragment[],
+  contractMethodsAndVariables: utils.FunctionFragment[],
 ): { methods: (JSX.Element | null)[] } => {
   return {
     methods: contract
@@ -105,14 +104,14 @@ const getContractReadOnlyMethodsWithParams = (
 /**
  * @dev used to filter all write functions
  * @param {Contract} contract
- * @param {FunctionFragment[]} contractMethodsAndVariables - array of all functions in the contract
+ * @param {utils.FunctionFragment[]} contractMethodsAndVariables - array of all functions in the contract
  * @param {Dispatch<SetStateAction<boolean>>} setRefreshDisplayVariables - trigger variable refresh
  * @returns {  methods: (JSX.Element | null)[] } array of WriteOnlyFunctionForm component
  * which has corresponding input field for param type, txnValue input if required and button to send transaction
  */
 const getContractWriteMethods = (
   contract: Contract | null,
-  contractMethodsAndVariables: FunctionFragment[],
+  contractMethodsAndVariables: utils.FunctionFragment[],
   setRefreshDisplayVariables: Dispatch<SetStateAction<boolean>>,
 ): { methods: (JSX.Element | null)[] } => {
   return {
@@ -139,12 +138,16 @@ const getContractWriteMethods = (
 
 /**
  * @dev utility function to generate key corresponding to function metaData
- * @param {FunctionFragment} functionInfo
+ * @param {utils.FunctionFragment} functionInfo
  * @param {utils.ParamType} input - object containing function name and input type corresponding to index
  * @param {number} inputIndex
  * @returns {string} key
  */
-const getFunctionInputKey = (functionInfo: FunctionFragment, input: utils.ParamType, inputIndex: number): string => {
+const getFunctionInputKey = (
+  functionInfo: utils.FunctionFragment,
+  input: utils.ParamType,
+  inputIndex: number,
+): string => {
   const name = input?.name || `input_${inputIndex}_`;
   return functionInfo.name + "_" + name + "_" + input.type;
 };

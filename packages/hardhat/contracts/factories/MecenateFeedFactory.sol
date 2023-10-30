@@ -81,8 +81,8 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     function changeMultipleSettings(
         address treasury,
         address usersModule,
-        address easContract,
-        bytes32 easSchema,
+        address newEasContract,
+        bytes32 newEasSchema,
         address wethTokenAddr,
         address museTokenAddr,
         address daiTokenAddr,
@@ -90,8 +90,8 @@ contract MecenateFeedFactory is Ownable, FeedViewer {
     ) external onlyOwner {
         settings.treasuryContract = treasury;
         settings.usersModuleContract = usersModule;
-        settings.easContract = easContract;
-        settings.easSchema = easSchema;
+        settings.easContract = newEasContract;
+        settings.easSchema = newEasSchema;
         settings.wethToken = wethTokenAddr;
         settings.museToken = museTokenAddr;
         settings.daiToken = daiTokenAddr;

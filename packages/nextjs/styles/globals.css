@@ -1,5 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap");
+
 @import url("https://use.typekit.net/abd7ahl.css");
 @import "tailwindcss/base";
 @import "tailwindcss/components";
@@ -35,35 +39,19 @@ p {
   @apply shadow-none;
 }
 
-.btn.btn-large {
-  @apply shadow-md;
-  @apply capitalize;
-  @apply text-lg;
-  @apply rounded-lg;
-  @apply my-5;
-  @apply border-0;
-  @layer hover: bg-slate-800;
-  @apply w-full;
-  @apply text-white;
-  @layer disabled: bg-slate-800;
-  @layer disabled: cursor-not-allowed;
-  @layer disabled: opacity-50;
-  background-color: #311c31;
-}
-
 .btn.btn-custom {
   @apply shadow-md;
-  @apply capitalize;
   @apply rounded-lg;
   @apply my-5;
   @apply border-0;
-  @layer hover: bg-slate-800;
   @apply w-full;
   @apply text-white;
-  @layer disabled: bg-slate-800;
-  @layer disabled: cursor-not-allowed;
-  @layer disabled: opacity-50;
+  @apply font-ui;
+  @apply font-light;
+  @apply text-sm;
   background-color: #311c31;
+  @layer focus:outline-none;
+  @layer focus:shadow-outline;
 }
 
 .card.card-shadow {
@@ -75,4 +63,52 @@ p {
   @apply shadow-slate-900;
   @apply my-5;
   @apply border-2;
+}
+
+.input-text {
+  @apply border;
+  @apply rounded;
+  @apply w-full;
+  @apply py-2;
+  @apply px-3;
+  @apply text-white;
+  @apply leading-tight;
+  @apply focus:outline-none;
+  @apply bg-transparent;
+  @apply border-slate-700;
+  @apply border-2;
+}
+
+.input-text:focus {
+  @apply border-blue-500;
+}
+
+.input-text:disabled {
+  @apply bg-gray-300;
+  @apply cursor-not-allowed;
+}
+
+.input-textarea {
+  @apply border;
+  @apply rounded;
+  @apply w-full;
+  @apply py-2;
+  @apply px-3;
+  @apply text-gray-700;
+  @apply leading-tight;
+  @apply focus:outline-none;
+  @apply h-24;
+}
+
+.input-textarea:focus {
+  @apply border-blue-500;
+}
+
+.input-textarea:disabled {
+  @apply bg-gray-300;
+  @apply cursor-not-allowed;
+}
+
+.input-error {
+  @apply border-red-500;
 }

@@ -6,7 +6,7 @@ import { ContractInterface, Signer, Wallet, ethers } from "ethers";
 import Link from "next/link";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { formatEther } from "ethers/lib/utils.js";
-import Web3 from "web3";
+import { useAppStore } from "~~/services/store/store";
 
 const Feeds: NextPage = () => {
   const deployedContractFactory = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateFeedFactory");
@@ -16,39 +16,9 @@ const Feeds: NextPage = () => {
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
   const [sismoData, setSismoData] = React.useState<any>(null);
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const [signer, setSigner] = React.useState<Signer | undefined>();
   const runTx = useTransactor();
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        let _signer;
-        const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
-        if (cachedAdapter !== "metamask") {
-          const pk = localStorage.getItem("pk");
-          if (pk) {
-            _signer = new ethers.Wallet(pk, publicProvider);
-          } else {
-            throw new Error("Private key not found in local storage.");
-          }
-        } else {
-          const web3Auth = JSON.parse(String(localStorage.getItem("web3AuthProvider")));
-          if (web3Auth) {
-            const web3 = new Web3(web3Auth as any);
-            const ethersProvider = new ethers.providers.Web3Provider(web3.givenProvider);
-            _signer = ethersProvider.getSigner();
-          } else {
-            throw new Error("Invalid web3Auth object in local storage.");
-          }
-        }
-        setSigner(_signer);
-      } catch (error) {
-        console.error("Failed to initialize signer:", error);
-      }
-    };
-
-    run();
-  }, []);
+  const { signer } = useAppStore();
 
   type Feed = {
     operator: string;
@@ -197,12 +167,12 @@ const Feeds: NextPage = () => {
         <p className="text-xl  mb-20">Create your feed and sell your data</p>
       </div> */}
       <div className="mx-auto  w-fit text-center items-center"></div>
-      <div className="flex flex-row items-center mb-5  gap-4 text-lg p-5">
-        <button className="link-hover font-bold" onClick={buildFeed}>
+      <div className="flex flex-row items-center mb-5  gap-4 text-lg p-5 font-heading">
+        <button className="link-hover " onClick={buildFeed}>
           Create
         </button>
         <button
-          className="link-hover font-bold"
+          className="link-hover "
           onClick={async () => {
             setOnlyYourFeeds(true);
           }}
@@ -210,7 +180,7 @@ const Feeds: NextPage = () => {
           <i className="fas fa-user-alt mr-2"></i> Your Feeds
         </button>
         <button
-          className="link-hover  font-bold"
+          className="link-hover  "
           onClick={async () => {
             setOnlyYourFeeds(false);
           }}
