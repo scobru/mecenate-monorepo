@@ -349,12 +349,13 @@ const Connect: NextPage = () => {
   const loggedInView = (
     <>
       <div className="flex flex-auto flex-wrap gap-4 text-heading">
-        <button onClick={showWCM} className="link link-hover flex items-center">
-          <FaWallet className="mr-2" />
-          Wallet Connect
-        </button>
+
         {web3auth?.cachedAdapter !== "metamask" && (
           <div>
+            <button onClick={showWCM} className="link link-hover flex items-center">
+              <FaWallet className="mr-2" />
+              Wallet Connect
+            </button>
             <button onClick={initiateTopUp} className="link link-hover flex items-center">
               <FaMoneyBillAlt className="mr-2" />
               TopUp Wallet

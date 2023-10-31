@@ -17,7 +17,6 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
     using ClonesUpgradeable for address;
     using StringsUpgradeable for uint256;
-
     using AddressUpgradeable for address;
     using AddressUpgradeable for address payable;
 
@@ -28,8 +27,6 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
 
     EnumerableSetUpgradeable.AddressSet internal feeds;
     Structures.FactorySettings internal settings;
-
-    bytes internal feedByteCode;
 
     mapping(uint256 => uint24) internal routerFee;
     mapping(address => EnumerableSetUpgradeable.AddressSet) internal feedStore;
@@ -43,12 +40,10 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
     uint256 public patch;
 
     event FeedCreated(address indexed addr);
-
     event ImplementationUpdated(
         address indexed implementation,
         uint256 indexed version
     );
-
     event ProxyCallContractUpdated(address indexed _proxyCallContract);
 
     function initialize(
@@ -85,11 +80,14 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
 
     function adminUpdateImplementation(
         address _implementation,
-        uint256 major,
-        uint256 minor,
-        uint256 patch
+        uint256 majorN,
+        uint256 minorN,
+        uint256 patchN
     ) external onlyOwner {
-        _updateImplementation(_implementation, major, minor, patch);
+        _updateImplementation(_implementation, majorN, minorN, patchN);
+        major = majorN;
+        minor = minorN;
+        patch = patchN;
     }
 
     function adminUpdateProxyCallContract(

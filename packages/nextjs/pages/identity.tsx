@@ -158,15 +158,10 @@ const Identity: NextPage = () => {
 
   /* *************************  Reset state *****************************/
   function resetApp() {
-    window.location.href = "/";
+    window.location.href = "/identity";
   }
 
   async function createPair() {
-    if (password != confirmPassword) {
-      notification.error("Password is not the same");
-      return;
-    }
-
     const kp = MecenateHelper.crypto.asymmetric.keyPair();
 
     if (!kp) return;
@@ -175,31 +170,6 @@ const Identity: NextPage = () => {
     const keyPairJSON = JSON.stringify(kp);
 
     console.log("KeyPairJson", keyPairJSON);
-
-    // encrypt KeyPair With password and save into db
-    if (typeof keyPairJSON === "string" && keyPairJSON !== null && keyPairJSON !== undefined) {
-      const encryptedKeyPair = await MecenateHelper.crypto.aes.encryptObject(kp, password);
-      console.log("await signer?.getAddress()", await signer?.getAddress());
-      console.log(encryptedKeyPair);
-
-      const verifiedResult = await fetch("/api/storeKey", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          wallet: await signer?.getAddress(),
-          salt: encryptedKeyPair.salt,
-          iv: encryptedKeyPair.iv,
-          ciphertext: encryptedKeyPair.ciphertext,
-        }),
-      });
-
-      console.log(verifiedResult);
-    } else {
-      // handle the case where keypairJSON is not a string, or is null or undefined
-      notification.error("Error creating key pair");
-    }
 
     notification.success("Key pair created");
 
@@ -282,6 +252,48 @@ const Identity: NextPage = () => {
 
     uiConsole(JSON.parse(JSON.stringify(keyPairJSON)));
   }
+
+  async function storeKey() {
+    if (password != confirmPassword) {
+      notification.error("Password is not the same");
+      return;
+    }
+
+    const kp = MecenateHelper.crypto.asymmetric.keyPair();
+
+    if (!kp) return;
+
+    setPubKey(kp?.publicKey.toString());
+    const keyPairJSON = JSON.stringify(kp);
+
+    console.log("KeyPairJson", keyPairJSON);
+
+    // encrypt KeyPair With password and save into db
+    if (typeof keyPairJSON === "string" && keyPairJSON !== null && keyPairJSON !== undefined) {
+      const encryptedKeyPair = await MecenateHelper.crypto.aes.encryptObject(kp, password);
+      console.log("await signer?.getAddress()", await signer?.getAddress());
+      console.log(encryptedKeyPair);
+
+      const verifiedResult = await fetch("/api/storeKey", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wallet: await signer?.getAddress(),
+          salt: encryptedKeyPair.salt,
+          iv: encryptedKeyPair.iv,
+          ciphertext: encryptedKeyPair.ciphertext,
+        }),
+      });
+
+      console.log(verifiedResult);
+    } else {
+      // handle the case where keypairJSON is not a string, or is null or undefined
+      notification.error("Error creating key pair");
+    }
+  }
+
 
   async function decryptPair() {
     const walletAddress = await signer?.getAddress();
@@ -549,7 +561,10 @@ const Identity: NextPage = () => {
                                       }}
                                     />
                                     <button className="btn btn-custom" onClick={createPair}>
-                                      Create{" "}
+                                      Generate{" "}
+                                    </button>
+                                     <button className="btn btn-custom" onClick={storeKey}>
+                                      Store{" "}
                                     </button>
                                     <div id="console" className="p-4 break-all">
                                       <pre className="whitespace-pre-line mt-3"></pre>

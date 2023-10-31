@@ -62,7 +62,7 @@ export class MecenateClient {
   }
 
   public async createPair() {
-    const kp = await crypto.keyPair();
+    const kp = await MecenateHelper.crypto.asymmetric.keyPair();
     console.log("KeyPair: ", JSON.stringify(kp));
     // Save into folders
     fs.writeFileSync("./keypair.json", JSON.stringify(kp));
@@ -90,7 +90,6 @@ export class MecenateClient {
 
   public async buildFeed() {
     const fee = await this.treasuryCtx.fixedFee();
-
     const tx = await this.factoryCtx.buildFeed({ value: fee });
     const receipt = await tx.wait();
 
@@ -314,7 +313,7 @@ export class MecenateClient {
     };
 
     const json_selldata_v120 = {
-      msp_version: "v1.0.0",
+      msp_version: "v2.0.0",
       proofhash: proofhash,
       sender: sellerMetadata?.evmAddress,
       senderPubKey: sellerMetadata?.publicKey,

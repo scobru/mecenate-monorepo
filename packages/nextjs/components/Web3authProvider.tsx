@@ -52,7 +52,6 @@ export const useWeb3auth = () => {
 
 export const Web3authProvider: React.FC = ({ children }) => {
   const { signer, setSigner } = useAppStore();
-
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
   const [torusPlugin, setTorusPlugin] = useState<TorusWalletConnectorPlugin | null>(null);
   const [provider, setProvider] = useState<IProvider | null>(null);
@@ -60,6 +59,7 @@ export const Web3authProvider: React.FC = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [ethersProvider, setEthersProvider] = useState<ethers.providers.JsonRpcProvider | null>(null);
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  
   const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
 
   useEffect(() => {
@@ -350,7 +350,7 @@ export const Web3authProvider: React.FC = ({ children }) => {
     // fetch baance with public provider
     const account = await rpc.getAccounts();
     const balance = await publicProvider.getBalance(account);
-    uiConsole(formatEther(balance));
+    uiConsole(formatEther(balance) + " ETH");
   };
 
   const sendTransaction = async () => {

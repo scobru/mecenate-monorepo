@@ -19,13 +19,10 @@ contract MecenateBay is Ownable, FeedViewer {
     Structures.BayRequest[] public allRequests;
 
     address public usersMouduleContract;
-
     address public museToken;
-
     address public daiToken;
 
     mapping(address => Structures.BayRequest[]) public requests;
-
     mapping(uint256 => bytes) private sismoResponseMapping;
 
     uint256 public contractCounter;
@@ -35,7 +32,6 @@ contract MecenateBay is Ownable, FeedViewer {
         Structures.BayRequest,
         uint256 indexed index
     );
-
     event RequestAccepted(
         address indexed user,
         Structures.BayRequest,
@@ -76,14 +72,12 @@ contract MecenateBay is Ownable, FeedViewer {
         }
 
         require(request.payment > 0, "BAY:payment is not enough");
-
         require(
             IMecenateUsers(usersMouduleContract).checkifUserExist(msg.sender),
             "user does not exist"
         );
 
         require(request.stake > 0, "BAY:stake is not enough");
-
         require(request.payment > 0, "BAY:payment is not enough");
 
         requests[msg.sender].push(request);
@@ -102,12 +96,10 @@ contract MecenateBay is Ownable, FeedViewer {
             allRequests[index].payment >= newFeed.paymentRequested,
             "BAY:payment is not the same of the feed"
         );
-
         require(
             newFeed.stakeRequested >= allRequests[index].stake,
             "BAY:stake is not the same of the feed"
         );
-
         require(
             IMecenateUsers(usersMouduleContract).checkifUserExist(msg.sender),
             "BAY:user does not exist"
@@ -136,11 +128,8 @@ contract MecenateBay is Ownable, FeedViewer {
         }
 
         allRequests[index].accepted = true;
-
         allRequests[index].postAddress = feed;
-
         allRequests[index].postCount = newFeed.postCount;
-
         allRequests[index].postId = IMecenateFeed(feed).getPostId();
 
         emit RequestAccepted(msg.sender, allRequests[index], index);

@@ -53,7 +53,7 @@ export default function WalletBadge() {
   return (
     <>
       <div className="relative group inline-block align-baseline mx-5 font-heading">
-        <Link href="/wallet">
+        <Link href="/connect">
           {" "}
           {signerAddress && <Blockies className="rounded-full" seed={String(signerAddress) as string} />}
         </Link>

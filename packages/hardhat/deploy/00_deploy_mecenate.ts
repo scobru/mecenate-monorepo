@@ -165,7 +165,7 @@ const deployYourContract: DeployFunction = async function (
 
     args: [
       users.address,
-      feedFactory.address,
+      factory.address,
       mecenateBay.address,
       treasury.address,
     ],

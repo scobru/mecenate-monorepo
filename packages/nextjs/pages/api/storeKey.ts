@@ -1,4 +1,17 @@
 import db from "../../db";
+import fs from "fs";
+
+import PinataSDK from '@pinata/sdk';
+
+// Crea un client Pinata
+const pinata = new PinataSDK(process.env.NEXT_PUBLIC_PINATA_API_KEY, process.env.NEXT_PUBLIC_PINATA_API_SECRET);
+
+// La funzione per aggiungere un file JSON a IPFS tramite Pinata
+const pinJsonToIpfs = async (data: any) => {
+  const result = await pinata.pinJSONToIPFS(data);
+  return result.IpfsHash;
+};
+
 interface IResponse {
   error?: string;
   message?: string;
@@ -16,6 +29,51 @@ export default async function handler(
     };
   },
 ) {
+  if (req.method === 'POST') {
+    const { wallet, salt, iv, ciphertext } = req.body;
+
+    // Leggi il file JSON esistente (se esiste)
+    let existingData = {};
+    if (fs.existsSync('./userKeys.json')) {
+      const rawData = fs.readFileSync('./userKeys.json', 'utf8');
+      existingData = JSON.parse(rawData);
+    }
+
+    // Aggiorna i dati
+    existingData[wallet] = { salt, iv, ciphertext };
+
+    // Pin i dati aggiornati su IPFS utilizzando Pinata
+    const newCid = await pinJsonToIpfs(existingData);
+
+    // Se desideri, puoi anche rimuovere il pin precedente (unpin)
+    if (existingData.previousCid) {
+      await pinata.unpin(existingData.previousCid);
+    }
+
+    // Aggiorna il CID precedente nel file JSON
+    existingData.previousCid = newCid;
+    fs.writeFileSync('./userKeys.json', JSON.stringify(existingData));
+
+    res.status(200).json({ message: 'Key stored and pinned to IPFS via Pinata successfully', cid: newCid });
+  } else if (req.method === 'GET') {
+    const { wallet } = req.query;
+
+    // Leggi il file JSON esistente (se esiste)
+    let existingData = {};
+    if (fs.existsSync('./userKeys.json')) {
+      const rawData = fs.readFileSync('./userKeys.json', 'utf8');
+      existingData = JSON.parse(rawData);
+    }
+
+    // Se esiste una chiave per questo indirizzo, restituiscila
+    if (existingData[wallet]) {
+      res.status(200).json({ data: existingData[wallet] });
+    } else {
+      res.status(404).json({ message: 'No private key found for this contract address' });
+    }
+  }
+
+
   if (req.method === "POST") {
     const { wallet, salt, iv, ciphertext } = req.body; // Usa req.query invece di req.body
 

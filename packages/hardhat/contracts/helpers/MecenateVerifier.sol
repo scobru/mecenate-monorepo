@@ -32,14 +32,6 @@ contract MecenateVerifier is SismoConnect {
             signature: buildSignature({message: "I Love Sismo!"})
         });
 
-        // bytes memory signedMessage = SismoConnectHelper.getSignedMessage(
-        //     result
-        // );
-
-        // string memory message = abi.decode(signedMessage, (string));
-
-        // Store the verified auths
-
         VerifiedAuth[] memory _verifiedAuths = new VerifiedAuth[](
             result.auths.length
         );
