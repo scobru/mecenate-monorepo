@@ -1,5 +1,6 @@
 import db from "../../db";
 import fs from "fs";
+import axios from "axios"
 
 import PinataSDK from '@pinata/sdk';
 
@@ -8,9 +9,16 @@ const pinata = new PinataSDK(process.env.NEXT_PUBLIC_PINATA_API_KEY, process.env
 
 // La funzione per aggiungere un file JSON a IPFS tramite Pinata
 const pinJsonToIpfs = async (data: any) => {
-  const result = await pinata.pinJSONToIPFS(data);
-  return result.IpfsHash;
+  try {
+    const result = await pinata.pinJSONToIPFS(data);
+    console.log("Pinata Result: ", result); // Log per debug
+    return result.IpfsHash;
+  } catch (error) {
+    console.log("Pinata Error: ", error); // Log per debug
+    throw error;
+  }
 };
+
 
 interface IResponse {
   error?: string;
@@ -18,54 +26,104 @@ interface IResponse {
   data?: any;
 }
 
+interface IExistingData {
+  [key: string]: {
+    salt: string;
+    iv: string;
+    ciphertext: string;
+  };
+  previousCid?: any;
+}
+
+ const fetchFromIpfs = async (cid: string): Promise<any> => {
+  try {
+    const url = `https://sapphire-financial-fish-885.mypinata.cloud/ipfs/${cid}`;
+    const response = await axios.get(url);
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error('Failed to fetch from IPFS via Pinata');
+    }
+  } catch (err) {
+    console.error(`Error fetching from IPFS via Pinata: ${err}`);
+    throw err;
+  }
+};
+
 export default async function handler(
   req: { method: string; body: { wallet: any; salt: any; iv: any; ciphertext: any }; query: { wallet: any } },
   res: {
     status: (arg0: any) => {
       (): any;
-      new (): any;
-      json: { (arg0: IResponse): void; new (): any }; // Usa IResponse qui
-      end: { (): void; new (): any };
+      new(): any;
+      json: { (arg0: IResponse): void; new(): any }; // Usa IResponse qui
+      end: { (): void; new(): any };
     };
   },
 ) {
   if (req.method === 'POST') {
     const { wallet, salt, iv, ciphertext } = req.body;
 
-    // Leggi il file JSON esistente (se esiste)
-    let existingData = {};
+    // Step 1: Leggi il CID esistente da userKeys.json
+    let existingData: IExistingData = {};
+
+    let previousCid = null;
+
     if (fs.existsSync('./userKeys.json')) {
       const rawData = fs.readFileSync('./userKeys.json', 'utf8');
       existingData = JSON.parse(rawData);
+      previousCid = existingData.previousCid;
     }
 
-    // Aggiorna i dati
+    console.log("Previous Cid", previousCid)
+
+    // Step 2: Scarica il contenuto utilizzando quel CID
+    if (previousCid) {
+      const existingIpfsData = await fetchFromIpfs(previousCid); // Supponiamo che fetchFromIpfs sia una funzione che ritorna dati da IPFS
+      existingData = { ...existingIpfsData };
+    }
+
+    // Step 3: Aggiorna i dati
     existingData[wallet] = { salt, iv, ciphertext };
 
-    // Pin i dati aggiornati su IPFS utilizzando Pinata
+    // Step 4: Nuovo pin su IPFS
     const newCid = await pinJsonToIpfs(existingData);
 
-    // Se desideri, puoi anche rimuovere il pin precedente (unpin)
-    if (existingData.previousCid) {
-      await pinata.unpin(existingData.previousCid);
-    }
+    console.log("New Cid", newCid)
 
-    // Aggiorna il CID precedente nel file JSON
+    // Step 5: Aggiorna userKeys.json con il nuovo CID
     existingData.previousCid = newCid;
+
     fs.writeFileSync('./userKeys.json', JSON.stringify(existingData));
 
-    res.status(200).json({ message: 'Key stored and pinned to IPFS via Pinata successfully', cid: newCid });
-  } else if (req.method === 'GET') {
-    const { wallet } = req.query;
+    // Rimuovi il vecchio pin (unpin)
+    if (previousCid) {
+      await pinata.unpin(previousCid);
+    }
 
-    // Leggi il file JSON esistente (se esiste)
-    let existingData = {};
+    res.status(200).json({ message: 'Key stored and pinned to IPFS via Pinata successfully', data: newCid });
+  }
+
+  // GET Section
+  if (req.method === 'GET') {
+    const { wallet } = req.query;
+    let existingData: IExistingData = {};
+
+    // Step 1: Leggi il CID da userKeys.json
     if (fs.existsSync('./userKeys.json')) {
       const rawData = fs.readFileSync('./userKeys.json', 'utf8');
       existingData = JSON.parse(rawData);
     }
 
-    // Se esiste una chiave per questo indirizzo, restituiscila
+    const cid = existingData.previousCid;
+
+    // Step 2: Scarica il contenuto utilizzando quel CID
+    if (cid) {
+      const dataFromIpfs = await fetchFromIpfs(cid); // Supponiamo che fetchFromIpfs sia una funzione che ritorna dati da IPFS
+      existingData = { ...dataFromIpfs };
+    }
+
+    // Step 3: Utilizza i dati per la richiesta GET
     if (existingData[wallet]) {
       res.status(200).json({ data: existingData[wallet] });
     } else {
@@ -73,8 +131,9 @@ export default async function handler(
     }
   }
 
+ 
 
-  if (req.method === "POST") {
+  /* if (req.method === "POST") {
     const { wallet, salt, iv, ciphertext } = req.body; // Usa req.query invece di req.body
 
     db.run(
@@ -110,5 +169,5 @@ export default async function handler(
     });
   } else {
     res.status(405).end(); // Method Not Allowed
-  }
+  } */
 }
