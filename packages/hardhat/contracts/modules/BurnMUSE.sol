@@ -1,3 +1,4 @@
+// SPDX LICENSE: MIT
 pragma solidity 0.8.19;
 import "../interfaces/IMUSE.sol";
 import "../interfaces/IMecenateFeedFactory.sol";

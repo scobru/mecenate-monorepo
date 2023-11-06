@@ -125,7 +125,7 @@ const Bay: NextPage = () => {
       postCount: 0,
       tokenId: tokenId,
       buyerAddress: signer?.getAddress(),
-      postId: keccak256("0"),
+      postId: ethers.constants.HashZero,
     };
 
     bayCtx?.connect(signer as Signer);

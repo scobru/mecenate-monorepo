@@ -2,7 +2,6 @@ import { EthereumProvider, HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers, run } from "hardhat";
 
-import { deployPool, encodePriceSqrt } from "./01_deployPools";
 const eas = "0x4200000000000000000000000000000000000021";
 
 async function main() {

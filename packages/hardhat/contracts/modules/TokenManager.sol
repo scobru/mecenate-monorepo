@@ -21,7 +21,7 @@ abstract contract TokenManager is BurnDAI {
     ) internal view {
         address tokenAddress = _getTokenAddress(tokenID);
         require(
-            IERC20(tokenAddress).allowance(from, to) >= value,
+            IERC20Upgradeable(tokenAddress).allowance(from, to) >= value,
             "INSUFFICIENT_ALLOWANCE"
         );
     }
@@ -50,7 +50,7 @@ abstract contract TokenManager is BurnDAI {
         uint256 value
     ) internal onlyValidTokenID(tokenID) {
         require(
-            IERC20(_getTokenAddress(tokenID)).transfer(to, value),
+            IERC20Upgradeable(_getTokenAddress(tokenID)).transfer(to, value),
             "TRANSFER_FAILED"
         );
     }
@@ -64,7 +64,7 @@ abstract contract TokenManager is BurnDAI {
         address tokenAddress = _getTokenAddress(tokenID);
         _checkAllowance(tokenID, from, to, value);
         require(
-            IERC20(tokenAddress).transferFrom(from, to, value),
+            IERC20Upgradeable(tokenAddress).transferFrom(from, to, value),
             "TRANSFER_FAILED"
         );
     }
@@ -106,8 +106,9 @@ abstract contract TokenManager is BurnDAI {
             .treasuryContract();
 
         if (tokenID == Structures.Tokens.DAI) {
-            IERC20(IMecenateFeedFactory(settings.factoryContract).daiToken())
-                .transferFrom(from, treasury, value);
+            IERC20Upgradeable(
+                IMecenateFeedFactory(settings.factoryContract).daiToken()
+            ).transferFrom(from, treasury, value);
         } else if (tokenID == Structures.Tokens.MUSE) {
             BurnMUSE._burnFrom(from, value);
         }
@@ -120,7 +121,7 @@ abstract contract TokenManager is BurnDAI {
     ) internal onlyValidTokenID(tokenID) {
         if (tokenID == Structures.Tokens.DAI) {
             require(
-                IERC20(
+                IERC20Upgradeable(
                     IMecenateFeedFactory(settings.factoryContract).daiToken()
                 ).approve(spender, value),
                 "APPROVE_FAILED"
@@ -142,14 +143,14 @@ abstract contract TokenManager is BurnDAI {
     function totalSupply(
         Structures.Tokens tokenID
     ) internal view onlyValidTokenID(tokenID) returns (uint256 value) {
-        return IERC20(_getTokenAddress(tokenID)).totalSupply();
+        return IERC20Upgradeable(_getTokenAddress(tokenID)).totalSupply();
     }
 
     function balanceOf(
         Structures.Tokens tokenID,
         address who
     ) internal view onlyValidTokenID(tokenID) returns (uint256 value) {
-        return IERC20(_getTokenAddress(tokenID)).balanceOf(who);
+        return IERC20Upgradeable(_getTokenAddress(tokenID)).balanceOf(who);
     }
 
     function allowance(
@@ -157,6 +158,10 @@ abstract contract TokenManager is BurnDAI {
         address owner,
         address spender
     ) internal view onlyValidTokenID(tokenID) returns (uint256 value) {
-        return IERC20(_getTokenAddress(tokenID)).allowance(owner, spender);
+        return
+            IERC20Upgradeable(_getTokenAddress(tokenID)).allowance(
+                owner,
+                spender
+            );
     }
 }

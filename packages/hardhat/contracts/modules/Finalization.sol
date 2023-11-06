@@ -9,6 +9,7 @@ abstract contract Finalization is Staking {
         bytes32 uid
     ) external virtual {
         require(msg.sender == post.postdata.escrow.buyer, "NOT_SELLER");
+
         require(locked == true, "NOT_LOCKED");
 
         require(
@@ -38,13 +39,14 @@ abstract contract Finalization is Staking {
             "INVALID_SCHEMA"
         );
 
-        (bool easResult, address feed, bytes memory postBytes) = abi.decode(
-            attestation.data,
-            (bool, address, bytes)
-        );
+        (
+            bool easResult,
+            address feed,
+            bytes32 postId,
+            bytes memory postBytes
+        ) = abi.decode(attestation.data, (bool, address, bytes32, bytes));
 
         require(feed == address(this), "INVALID_FEED");
-
         require(
             keccak256(abi.encode(postBytes)) ==
                 keccak256(abi.encode(post.postdata.data.encryptedData)),

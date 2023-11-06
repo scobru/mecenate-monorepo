@@ -2,19 +2,20 @@ pragma solidity 0.8.19;
 
 import "./BurnMUSE.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../interfaces/IWETH.sol";
 
 abstract contract BurnDAI is BurnMUSE {
-    using SafeMath for uint256;
+    using SafeMathUpgradeable for uint256;
 
     function _burnFrom(
         address from,
         uint256 value
     ) internal override returns (bool success) {
-        IERC20(IMecenateFeedFactory(settings.factoryContract).daiToken())
-            .transferFrom(from, address(this), value);
+        IERC20Upgradeable(
+            IMecenateFeedFactory(settings.factoryContract).daiToken()
+        ).transferFrom(from, address(this), value);
 
         _burn(value);
 
@@ -23,8 +24,9 @@ abstract contract BurnDAI is BurnMUSE {
 
     function _burnDai(uint256 value) internal returns (bool success) {
         // approve uniswap for token transfer
-        IERC20(IMecenateFeedFactory(settings.factoryContract).daiToken())
-            .approve(settings.router, value);
+        IERC20Upgradeable(
+            IMecenateFeedFactory(settings.factoryContract).daiToken()
+        ).approve(settings.router, value);
 
         // swap IMecenateFeedFactory(settings.factoryContract).daiToken() for MUSE
         uint256 tokens_sold = value;
@@ -43,8 +45,9 @@ abstract contract BurnDAI is BurnMUSE {
             tokens_bought
         );
 
-        IERC20(IMecenateFeedFactory(settings.factoryContract).museToken())
-            .approve(
+        IERC20Upgradeable(
+            IMecenateFeedFactory(settings.factoryContract).museToken()
+        ).approve(
                 IMecenateFeedFactory(settings.factoryContract).museToken(),
                 tokens_sold_to_muse
             );
@@ -61,8 +64,9 @@ abstract contract BurnDAI is BurnMUSE {
             .deposit{value: value}();
 
         // approve uniswap for token transfer
-        IERC20(IMecenateFeedFactory(settings.factoryContract).wethToken())
-            .approve(settings.router, value);
+        IERC20Upgradeable(
+            IMecenateFeedFactory(settings.factoryContract).wethToken()
+        ).approve(settings.router, value);
 
         // swap IMecenateFeedFactory(settings.factoryContract).wethToken() for MUSE
         uint256 tokens_sold = value;
@@ -74,8 +78,9 @@ abstract contract BurnDAI is BurnMUSE {
             tokens_sold
         );
 
-        IERC20(IMecenateFeedFactory(settings.factoryContract).museToken())
-            .approve(
+        IERC20Upgradeable(
+            IMecenateFeedFactory(settings.factoryContract).museToken()
+        ).approve(
                 IMecenateFeedFactory(settings.factoryContract).museToken(),
                 tokens_bought
             );
@@ -112,12 +117,15 @@ abstract contract BurnDAI is BurnMUSE {
         uint256 amountIn
     ) internal returns (uint256 amountOut) {
         // Check and approve allowance
-        uint256 allowance = IERC20(tokenIn).allowance(
+        uint256 allowance = IERC20Upgradeable(tokenIn).allowance(
             address(this),
             settings.router
         );
         if (allowance < amountIn) {
-            IERC20(tokenIn).approve(settings.router, type(uint256).max);
+            IERC20Upgradeable(tokenIn).approve(
+                settings.router,
+                type(uint256).max
+            );
         }
 
         // Prepare parameters

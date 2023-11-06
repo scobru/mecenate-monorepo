@@ -11,9 +11,13 @@ import { notification } from "~~/utils/scaffold-eth";
 import { toUtf8Bytes, toUtf8String } from "ethers/lib/utils.js";
 import Web3 from "web3";
 import MecenateHelper from "@scobru/crypto-ipfs";
+
 import type { IBaseProvider, IProvider } from "@web3auth/base";
 import { useWeb3auth } from "../components/Web3authProvider"; // Aggiusta il percorso in base alla tua struttura di cartelle
 import { useAppStore } from "~~/services/store/store";
+import { parse } from "path";
+
+
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
@@ -25,11 +29,9 @@ const Identity: NextPage = () => {
   const [pageState, setPageState] = React.useState<string>("init");
   const [error, setError] = React.useState<string>();
   const [fee, setFee] = React.useState(0);
-
   const deployedContractUser = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateUsers");
   const deployedContractTreasury = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateTreasury");
   const deployedContractVault = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateVault");
-
   const [userExists, setUserExists] = React.useState<boolean>(false);
   const [verified, setVerified] = React.useState<any>(null);
   const [userName, setUserName] = React.useState<any>(null);
@@ -37,21 +39,16 @@ const Identity: NextPage = () => {
   const [password, setPassword] = React.useState<any>(null);
   const [confirmPassword, setConfirmPassword] = React.useState<any>(null);
   const [userData, setUserData] = React.useState<any>(null);
-
   const [pubKey, setPubKey] = React.useState<any>(null);
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-
   const runTx = useTransactor();
-
   const { signer } = useAppStore();
 
   console.log(signer);
   let UsersAddress!: string;
   let UsersAbi: ContractInterface[] = [];
-
   let treasuryAddress!: string;
   let treasuryAbi: ContractInterface[] = [];
-
   let vaultAddress!: string;
   let vaultAbi: ContractInterface[] = [];
 
@@ -120,11 +117,10 @@ const Identity: NextPage = () => {
     const _userExists = await usersCtx?.checkifUserExist(await signer?.getAddress());
     console.log("User exists", _userExists);
     setUserExists(_userExists);
-    if (_userExists && signer) {
-      const user = await usersCtx?.getUserMetadata(await signer?.getAddress());
-      console.log("User", user);
-      setUserData(user);
-    }
+    const user = await usersCtx?.getUserMetadata(await signer?.getAddress());
+    console.log("User", user);
+    setUserData(user);
+
   };
 
   const resetLocalStorage = async function resetLocalStorage() {
@@ -167,6 +163,7 @@ const Identity: NextPage = () => {
     if (!kp) return;
 
     setPubKey(kp?.publicKey.toString());
+
     const keyPairJSON = JSON.stringify(kp);
 
     console.log("KeyPairJson", keyPairJSON);
@@ -270,8 +267,9 @@ const Identity: NextPage = () => {
 
     // encrypt KeyPair With password and save into db
     if (typeof keyPairJSON === "string" && keyPairJSON !== null && keyPairJSON !== undefined) {
+
       const encryptedKeyPair = await MecenateHelper.crypto.aes.encryptObject(kp, password);
-      console.log("await signer?.getAddress()", await signer?.getAddress());
+
       console.log(encryptedKeyPair);
 
       const verifiedResult = await fetch("/api/storeKey", {
@@ -318,20 +316,24 @@ const Identity: NextPage = () => {
     // Converti la risposta in JSON
     const resultJson = await verifiedResult.json();
 
-    const parsedResult = JSON.parse(JSON.stringify(resultJson.data));
+    const parsedResult = JSON.parse(resultJson.data);
+    let result = JSON.parse(JSON.stringify(parsedResult[0].content))
+    console.log(result)
+    result = JSON.parse(result)
+
+    console.log(result.salt)
+    console.log(result.iv)
+    console.log(result.ciphertext)
 
     const decryptedPair = await MecenateHelper.crypto.aes.decryptObject(
-      parsedResult.salt,
-      parsedResult.iv,
-      parsedResult.ciphertext,
+      result.salt,
+      result.iv,
+      result.ciphertext,
       password,
     );
 
-    uiConsole(JSON.parse(JSON.stringify(decryptedPair)));
 
-    // Mostra una notifica con il risultato
-
-    // Gestisci ulteriormente la risposta qui, se necessario
+    uiConsole(await decryptedPair);
   }
 
   const downloadFile = ({ data, fileName, fileType }: { data: BlobPart; fileName: string; fileType: string }): void => {
@@ -500,7 +502,7 @@ const Identity: NextPage = () => {
                             </button>
                           </div>
                           <div className="font-headgin text-sl">Go to Connect</div>
-                          {userExists && userData && (
+                          {userData && (
                             <div>
                               {userData[0] && (
                                 <div className="card card-shadow break-all">
@@ -560,43 +562,26 @@ const Identity: NextPage = () => {
                                         setConfirmPassword(e.target.value);
                                       }}
                                     />
+                                    Generate your key pair
                                     <button className="btn btn-custom" onClick={createPair}>
                                       Generate{" "}
                                     </button>
-                                     <button className="btn btn-custom" onClick={storeKey}>
-                                      Store{" "}
+                                    Encrypt and Store on IPFS.
+                                    <button className="btn btn-custom" onClick={storeKey}>
+                                      Store {" "}
                                     </button>
                                     <div id="console" className="p-4 break-all">
                                       <pre className="whitespace-pre-line mt-3"></pre>
                                     </div>
+                                    Change your Public Key on Mecenate Protocol
                                     <button className="btn btn-custom" onClick={changePublicKey}>
-                                      Change pubKey{" "}
+                                      Change{" "}
                                     </button>
                                   </div>
                                 </div>
                                 <div className="card  card-shadow mb-10">
-                                  <div className="text-center font-heading text-xl">Recover Key Pair</div>
-                                  <div>
-                                    <input
-                                      type="password"
-                                      name="password"
-                                      id="password"
-                                      placeholder="Password"
-                                      className="input input-text my-5"
-                                      onChange={e => {
-                                        setPassword(e.target.value);
-                                      }}
-                                    />
-                                    <button className="btn btn-custom" onClick={decryptPair}>
-                                      Recover{" "}
-                                    </button>
-                                    <div id="console" className="p-4 break-all">
-                                      <pre className="whitespace-pre-line mt-3"></pre>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="card  card-shadow mb-10">
-                                  <div className="text-center font-heading text-xl">Sign in</div>
+                                  <div className="text-center font-heading text-xl mb-5">Sign in</div>
+                                  Record your pubkey, address and zkproof into Mecenate.
                                   <button
                                     className="btn btn-custom"
                                     onClick={signIn}
@@ -606,7 +591,30 @@ const Identity: NextPage = () => {
                                   </button>
                                 </div>
                               </div>
+                              <div className="card  card-shadow mb-10">
+                                <div className="text-center font-heading text-xl mb-5">Recover Key Pair</div>
+                                <div>
+                                  Recover your keypair from IPFS.
+                                  <input
+                                    type="password"
+                                    name="password"
+                                    id="password"
+                                    placeholder="Password"
+                                    className="input input-text my-5"
+                                    onChange={e => {
+                                      setPassword(e.target.value);
+                                    }}
+                                  />
+                                  <button className="btn btn-custom" onClick={decryptPair}>
+                                    Recover{" "}
+                                  </button>
+                                  <div id="console" className="p-4 break-all">
+                                    <pre className="whitespace-pre-line mt-3"></pre>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
+
                           )}
                         </div>
                       )}

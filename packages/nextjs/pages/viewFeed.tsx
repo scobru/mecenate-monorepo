@@ -5,7 +5,7 @@ import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsCo
 import { Contract, ContractInterface, Signer, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { useRouter } from "next/router";
-import { formatEther, keccak256, parseEther, toUtf8String } from "ethers/lib/utils.js";
+import { formatEther, keccak256, parseEther, toUtf8Bytes, toUtf8String } from "ethers/lib/utils.js";
 import pinataSDK from "@pinata/sdk";
 import axios from "axios";
 import Dropzone from "react-dropzone";
@@ -22,7 +22,7 @@ export const EASContractAddress = "0x4200000000000000000000000000000000000021"; 
 const eas = new EAS(EASContractAddress);
 
 // Initialize SchemaEncoder with the schema string
-const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes post,");
+const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes32 postId, bytes post,");
 
 const schemaUID = "0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a";
 
@@ -40,13 +40,8 @@ const ViewFeed: NextPage = () => {
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
   const [tokenId, setTokenId] = React.useState<string>("");
   const [uid, setUid] = React.useState<string>("");
-
-  const { chain } = useNetwork();
-
   const { addr } = router?.query;
-
   const [useStake, setUseStake] = useState<boolean>(false);
-
   const [postType, setPostType] = useState<any>([]);
   const [postDuration, setPostDuration] = useState<any>([]);
   const [postStake, setPostStake] = useState<any>([]);
@@ -74,11 +69,8 @@ const ViewFeed: NextPage = () => {
   const { signer, setSigner } = useAppStore();
   const { web3auth, setLoggedIn, getPrivateKey, loading, loggedIn, createWallet } = useWeb3auth(); // Aggiusta il percorso in base alla tua struttura di cartelle
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-
   const runTx = useTransactor();
-
   const [receiver, setReceiver] = useState<any>("");
-
   const allStatuses = ["Waiting for Creator", "Proposed", "Accepted", "Submitted", "Finalized", "Punished", "Revealed"];
 
   let feedAddress!: string;
@@ -335,7 +327,7 @@ const ViewFeed: NextPage = () => {
 
   async function acceptPost() {
     runTx(
-      feedCtx?.acceptPost(feedData?.postdata?.settings?.tokenId, parseEther(postPayment), signer?.getAddress(), {
+      feedCtx?.acceptPost(feedData?.postdata?.settings?.tokenId, parseEther(postPayment), signer?.getAddress(), signer?.getAddress(), useStake, {
         value: feedData?.postdata?.settings?.tokenId == "0" ? parseEther(postPayment) : 0,
       }),
       signer as Signer,
@@ -347,6 +339,8 @@ const ViewFeed: NextPage = () => {
     try {
       const symmetricKey = MecenateHelper.crypto.symmetric.generateKey();
       const encryptedFile = MecenateHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
+
+
 
       const symmetricKeyHash = await MecenateHelper.multihash({
         input: symmetricKey,
@@ -709,17 +703,24 @@ const ViewFeed: NextPage = () => {
 
   async function finalizePost() {
     console.log("Finalizing Data...");
+    console.log(valid)
+    console.log(feedCtx?.address)
+    console.log(feedData[1][0].postId)
+    console.log(feedData[1][2].encryptedData)
+
+
     if (valid == true) {
       const encodedData = schemaEncoder.encodeData([
-        { name: "verified", value: valid, type: "bool" },
-        { name: "feed", value: feedCtx?.address, type: "address" },
-        { name: "postId", value: feedData[1][0].postId, type: "bytes32" },
-        { name: "post", value: feedData[1][2].encryptedData, type: "bytes" },
+        { name: "verified", value: true, type: "bool" },
+        { name: "feed", value: String(feedCtx?.address), type: "address" },
+        { name: "postId", value: String(feedData[1][0].postId), type: "bytes32" },
+        { name: "post", value: String(feedData[1][2].encryptedData), type: "bytes" },
       ]);
 
       const data = {
-        recipient: feedData?.postdata?.escrow?.seller,
+        recipient: String(feedData?.postdata?.escrow?.seller),
         revocable: false, // Be aware that if your schema is not revocable, this MUST be false
+        expirationTime: 0,
         data: encodedData,
       };
 
@@ -728,13 +729,18 @@ const ViewFeed: NextPage = () => {
       eas.connect(signer as any);
 
       console.log("Encoded Data: ", encodedData);
+
       const tx = await eas.attest({
         schema: schemaUID,
         data: data,
       });
+
       const newAttestationUID = await tx.wait();
       console.log("New attestation UID:", newAttestationUID);
+      notification.success("UID: " + newAttestationUID)
+
       runTx(feedCtx?.finalizePost(valid, parseEther("0"), newAttestationUID), signer as Signer);
+
     } else {
       runTx(feedCtx?.finalizePost(valid, parseEther(punishment), uid), signer as Signer);
     }
@@ -1174,16 +1180,16 @@ const ViewFeed: NextPage = () => {
             {feedData.postdata.settings.status === 6
               ? "Waiting for Seller"
               : feedData.postdata.settings.status === 5
-              ? "Waiting for Seller"
-              : feedData.postdata.settings.status === 4
-              ? "Waiting for Seller"
-              : feedData.postdata.settings.status === 3
-              ? "Waiting for buyer validate the data"
-              : feedData.postdata.settings.status === 2
-              ? "Waiting for submission from seller"
-              : feedData.postdata.settings.status === 1
-              ? "Waiting for Acceptance from a buyer"
-              : "Waiting for Seller"}
+                ? "Waiting for Seller"
+                : feedData.postdata.settings.status === 4
+                  ? "Waiting for Seller"
+                  : feedData.postdata.settings.status === 3
+                    ? "Waiting for buyer validate the data"
+                    : feedData.postdata.settings.status === 2
+                      ? "Waiting for submission from seller"
+                      : feedData.postdata.settings.status === 1
+                        ? "Waiting for Acceptance from a buyer"
+                        : "Waiting for Seller"}
           </div>
           <div className="mx-10  font-base text-lg">
             Smart Contract address is <strong>{addr}</strong>{" "}
@@ -1195,10 +1201,10 @@ const ViewFeed: NextPage = () => {
               {feedData?.postdata?.settings?.tokenId == 0
                 ? "ETH"
                 : feedData?.postdata?.settings?.tokenId == 1
-                ? "MUSE"
-                : feedData?.postdata?.settings?.tokenId == 2
-                ? "DAI"
-                : "ETH"}
+                  ? "MUSE"
+                  : feedData?.postdata?.settings?.tokenId == 2
+                    ? "DAI"
+                    : "ETH"}
             </strong>
           </div>
           <div className="mx-10  mb-5 font-base text-lg">
@@ -1535,6 +1541,17 @@ const ViewFeed: NextPage = () => {
                     value={postPayment}
                     onChange={e => setPostPayment(e.target.value)}
                   />
+                  use stake: {""}
+                  <input
+                    type="checkbox"
+                    name="useStake"
+                    placeholder="Use Stake"
+                    id=""
+                    onClick={async e => {
+                      const target = e.target as HTMLInputElement;
+                      setUseStake(target.checked);
+                    }}
+                  />
                   <br />
                   <button
                     className="btn  w-full"
@@ -1707,16 +1724,16 @@ const ViewFeed: NextPage = () => {
                     {feedData.postdata.settings.status === 6
                       ? "Revealed"
                       : feedData.postdata.settings.status === 5
-                      ? "Punished"
-                      : feedData.postdata.settings.status === 4
-                      ? "Finalized"
-                      : feedData.postdata.settings.status === 3
-                      ? "Submitted"
-                      : feedData.postdata.settings.status === 2
-                      ? "Accepted"
-                      : feedData.postdata.settings.status === 1
-                      ? "Proposed"
-                      : "Waiting for Creator"}
+                        ? "Punished"
+                        : feedData.postdata.settings.status === 4
+                          ? "Finalized"
+                          : feedData.postdata.settings.status === 3
+                            ? "Submitted"
+                            : feedData.postdata.settings.status === 2
+                              ? "Accepted"
+                              : feedData.postdata.settings.status === 1
+                                ? "Proposed"
+                                : "Waiting for Creator"}
                   </p>
                   <div className="w-fit">
                     <p className="text-base">
@@ -1759,14 +1776,14 @@ const ViewFeed: NextPage = () => {
                     {feedData[1][0].postType.toString() == 0
                       ? "Text"
                       : feedData[1][0].postType.toString() == 1
-                      ? "Image"
-                      : feedData[1][0].postType.toString() == 2
-                      ? "Video"
-                      : feedData[1][0].postType.toString() == 3
-                      ? "Audio"
-                      : feedData[1][0].postType.toString() == 4
-                      ? "File"
-                      : null}
+                        ? "Image"
+                        : feedData[1][0].postType.toString() == 2
+                          ? "Video"
+                          : feedData[1][0].postType.toString() == 3
+                            ? "Audio"
+                            : feedData[1][0].postType.toString() == 4
+                              ? "File"
+                              : null}
                   </p>
                   <p>
                     <span className="font-bold">Status</span>
@@ -1774,18 +1791,18 @@ const ViewFeed: NextPage = () => {
                     {feedData[1][0].status.toString() == 0
                       ? "Waiting"
                       : feedData[1][0].status.toString() == 1
-                      ? "Proposed"
-                      : feedData[1][0].status.toString() == 2
-                      ? "Accepted"
-                      : feedData[1][0].status.toString() == 3
-                      ? "Submitted"
-                      : feedData[1][0].status.toString() == 4
-                      ? "Finalized"
-                      : feedData[1][0].status.toString() == 5
-                      ? "Punished"
-                      : feedData[1][0].status.toString() == 6
-                      ? "Revealed"
-                      : null}
+                        ? "Proposed"
+                        : feedData[1][0].status.toString() == 2
+                          ? "Accepted"
+                          : feedData[1][0].status.toString() == 3
+                            ? "Submitted"
+                            : feedData[1][0].status.toString() == 4
+                              ? "Finalized"
+                              : feedData[1][0].status.toString() == 5
+                                ? "Punished"
+                                : feedData[1][0].status.toString() == 6
+                                  ? "Revealed"
+                                  : null}
                   </p>
                 </div>
               </div>

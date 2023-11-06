@@ -130,8 +130,8 @@ abstract contract Swapper is Ownable {
         IERC20(tokenB).approve(address(positionManager), amountB);
 
         // Parameters for adding liquidity
-        INonfungiblePositionManager.MintParams
-            memory params = INonfungiblePositionManager.MintParams(
+        INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager
+            .MintParams(
                 tokenA,
                 tokenB,
                 fee,

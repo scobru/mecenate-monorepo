@@ -9,8 +9,8 @@ pragma solidity 0.8.19;
 import "./Deposit.sol";
 import "./Events.sol";
 
-abstract contract Staking is Events, Deposit, TokenManager {
-    using SafeMath for uint256;
+abstract contract Staking is Events, Deposit {
+    using SafeMathUpgradeable for uint256;
 
     event StakeBurned(address staker, uint256 amount);
 

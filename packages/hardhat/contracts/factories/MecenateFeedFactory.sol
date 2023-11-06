@@ -31,7 +31,7 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
     mapping(uint256 => uint24) internal routerFee;
     mapping(address => EnumerableSetUpgradeable.AddressSet) internal feedStore;
 
-    bool public burnEnabled = false;
+    bool public burnEnabled;
 
     uint256 public contractCounter;
 
@@ -63,6 +63,7 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
         transferOwnership(msg.sender);
         _updateProxyCallContract(_proxyCallContract);
 
+        burnEnabled = false;
         settings.usersModuleContract = _usersModuleContract;
         settings.treasuryContract = _treasuryContract;
         settings.easContract = _easContract;
@@ -171,8 +172,8 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
 
         IFeedInitializer(ctx).initialize(
             msg.sender,
-            address(this),
             settings.usersModuleContract,
+            address(this),
             major,
             minor,
             patch
@@ -184,7 +185,6 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
             ),
             "user does not exist"
         );
-
         require(msg.value >= getCreationFee(), "NOT_ENOUGH_FEE");
 
         (bool _result, ) = payable(settings.treasuryContract).call{
@@ -198,7 +198,6 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
         address feed = ctx;
 
         feeds.add(address(feed));
-
         feedStore[msg.sender].add(address(feed));
 
         emit FeedCreated(address(feed));
@@ -260,26 +259,28 @@ contract MecenateFeedFactory is Initializable, OwnableUpgradeable, FeedViewer {
     ) private {
         require(
             _implementation.isContract(),
-            "nali: implementation is not a contract"
+            "implementation is not a contract"
         );
 
         implementation = _implementation;
 
-        unchecked {
-            // Version cannot overflow 256 bits.
-            major = majorNew;
-            minor = minorNew;
-            patch = patchNew;
-        }
+        // unchecked {
+        //     // Version cannot overflow 256 bits.
+        //     major = majorNew;
+        //     minor = minorNew;
+        //     patch = patchNew;
+        // }
 
-        IFeedInitializer(implementation).initialize(
+        bool result = IFeedInitializer(implementation).initialize(
             msg.sender,
-            address(this),
             settings.usersModuleContract,
+            address(this),
             major,
             minor,
             patch
         );
+
+        require(result == true, "Failed to initialize feed");
 
         uint256 version = majorNew * 10000 + minorNew * 100 + patchNew;
 

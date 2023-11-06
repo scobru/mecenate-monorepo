@@ -116,14 +116,16 @@ contract MecenateBay is Ownable, FeedViewer {
                 allRequests[index].tokenId,
                 allRequests[index].payment,
                 address(this),
-                allRequests[index].buyerAddress
+                allRequests[index].buyerAddress,
+                false
             );
         } else {
             IMecenateFeed(feed).acceptPost{value: allRequests[index].payment}(
                 allRequests[index].tokenId,
                 allRequests[index].payment,
                 address(this),
-                allRequests[index].buyerAddress
+                allRequests[index].buyerAddress,
+                false
             );
         }
 

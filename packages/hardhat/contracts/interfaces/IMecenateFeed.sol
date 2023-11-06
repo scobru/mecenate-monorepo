@@ -13,7 +13,8 @@ interface IMecenateFeed {
         Structures.Tokens,
         uint256 _amount,
         address _funder,
-        address _buyer
+        address _buyer,
+        bool _useStake
     ) external payable;
 
     function getSellerStake() external view returns (uint256);

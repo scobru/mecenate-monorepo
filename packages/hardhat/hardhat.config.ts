@@ -3,11 +3,11 @@ dotenv.config();
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
+import "@openzeppelin/hardhat-upgrades";
 import "hardhat-deploy";
 import "ipfs-http-client";
 import "hardhat-contract-sizer";
 import "hardhat-docgen";
-import "hardhat-upgrades";
 
 // If not set, it uses ours Alchemy's default API key.
 // You can get your own at https://dashboard.alchemyapi.io
@@ -48,7 +48,9 @@ const config: HardhatUserConfig = {
     overrides: {
       "@uniswap/v3-core/contracts/libraries/FullMath.sol": UNISWAP_SETTING,
       "@uniswap/v3-core/contracts/libraries/TickMath.sol": UNISWAP_SETTING,
-      "@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol":
+      "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol":
+        UNISWAP_SETTING,
+      "@uniswap/v3-periphery/contracts/library/PoolAddress.sol":
         UNISWAP_SETTING,
     },
   },

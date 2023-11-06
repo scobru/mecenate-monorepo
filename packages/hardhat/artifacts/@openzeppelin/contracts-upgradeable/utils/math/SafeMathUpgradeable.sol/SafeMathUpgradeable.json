@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "SafeMathUpgradeable",
+  "sourceName": "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea2646970667358221220a358e5a2acb741308b069285760e1c25b9086db0ef80cfbacf7a0b26b5f83f3064736f6c63430008130033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220a358e5a2acb741308b069285760e1c25b9086db0ef80cfbacf7a0b26b5f83f3064736f6c63430008130033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

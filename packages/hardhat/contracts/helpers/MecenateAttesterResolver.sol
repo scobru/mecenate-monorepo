@@ -11,12 +11,16 @@ import "../interfaces/IMecenateFeed.sol";
 contract MecenateAttesterResolver is SchemaResolver {
     constructor(IEAS eas) SchemaResolver(eas) {}
 
+    mapping(bytes32 => bool) public postIds;
+
     function onAttest(
         Attestation calldata attestation,
         uint256 /*value*/
     ) internal view override returns (bool) {
         (bool valid, address feed, bytes32 postId, bytes memory postBytes) = abi
             .decode(attestation.data, (bool, address, bytes32, bytes));
+
+        require(postIds[postId] == false, "POST_ALREADY_ATTESTED");
 
         // Check if the post is valid
         IMecenateFeed mecenateFeed = IMecenateFeed(feed);
@@ -44,6 +48,8 @@ contract MecenateAttesterResolver is SchemaResolver {
         require(fetchedPostId == postId, "POST ID DOES NOT MATCH");
 
         require(valid, "WRONG VALIDATION");
+
+        postIds[postId] = true;
 
         return true;
     }

@@ -3,14 +3,12 @@ import { Web3Auth } from "@web3auth/modal";
 import { IProvider } from "@web3auth/base";
 import { formatEther, id } from "ethers/lib/utils.js";
 import { Signer, Wallet, ethers } from "ethers";
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-shadow */
-("use client");
+
 import { CHAIN_NAMESPACES, IAdapter } from "@web3auth/base";
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
 import { useAppStore } from "~~/services/store/store";
+
 // Plugins
 import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
 
@@ -59,7 +57,7 @@ export const Web3authProvider: React.FC = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [ethersProvider, setEthersProvider] = useState<ethers.providers.JsonRpcProvider | null>(null);
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  
+
   const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
 
   useEffect(() => {
@@ -407,7 +405,7 @@ export const Web3authProvider: React.FC = ({ children }) => {
       const rpc = new RPC(provider);
       const ethersProvider = new ethers.providers.Web3Provider(provider);
       setSigner(ethersProvider.getSigner());
-    } else if (cachedAdapter == "openlogin" && providerr) {
+    } else if (cachedAdapter == "openlogin" && provider) {
       const rpc = new RPC(provider);
       const privateKey = await rpc.getPrivateKey();
 

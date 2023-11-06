@@ -10,19 +10,21 @@
   "devDependencies": {
     "@types/fernet": "^0",
     "@types/figlet": "^1",
+    "@types/file-saver": "^2",
     "@types/progress": "^2",
     "typescript": "^4.0.0"
   },
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^1.2.1-beta.1",
     "@pinata/sdk": "^2.1.0",
-    "@scobru/crypto-ipfs": "1.0.9",
+    "@scobru/crypto-ipfs": "1.1.6",
     "axios": "^1.6.0",
     "cmd-ts": "^0.13.0",
     "dotenv": "^16.3.1",
     "ethers": "^5.0.0",
     "fernet": "^0.3.1",
     "figlet": "^1.7.0",
+    "file-saver": "^2.0.5",
     "get-random-values": "^1.2.0",
     "ipfs-only-hash": "^1.0.2",
     "multihashes": "^0.4.15",

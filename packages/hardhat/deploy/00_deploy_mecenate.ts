@@ -1,8 +1,13 @@
-import { EthereumProvider, HardhatRuntimeEnvironment } from "hardhat/types";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers, run, upgrades } from "hardhat";
 
-import { deployPool, encodePriceSqrt } from "../scripts/01_deployPools";
+import {
+  MecenateFeedFactory__factory,
+  MecenateFeedFactory,
+  MecenateFeed__factory,
+  MecenateFeed,
+} from '../typechain-types'
 
 // Goerli Base
 const router = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d";
@@ -17,6 +22,7 @@ const deployYourContract: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
 ) {
   const { deployer } = await hre.getNamedAccounts();
+  const signers = await ethers.getSigners();
 
   const { deploy } = hre.deployments;
 
@@ -89,7 +95,7 @@ const deployYourContract: DeployFunction = async function (
   });
 
   verifier.receipt &&
-    console.log("Feed Factory deployed at:", verifier.receipt.contractAddress);
+    console.log("Verifier deployed at:", verifier.receipt.contractAddress);
 
   const users = await deploy("MecenateUsers", {
     from: deployer,
@@ -101,14 +107,15 @@ const deployYourContract: DeployFunction = async function (
   users.receipt &&
     console.log("Users deployed at:", users.receipt.contractAddress);
 
-  const Factory = await ethers.getContractFactory("MecenateFeedFactory");
+  // Deploy Factory
+  console.log("Deploying Factory...");
 
-  const factory = await upgrades.deployProxy(
-    Factory,
+  const factory = (await upgrades.deployProxy(
+    await ethers.getContractFactory('MecenateFeedFactory'),
     [
       externalProxyCall.address,
-      treasury.address,
       users.address,
+      treasury.address,
       eas,
       schema,
       mockWeth.address,
@@ -117,38 +124,42 @@ const deployYourContract: DeployFunction = async function (
       router,
     ],
     {
-      initializer: "initialize",
-    },
-  );
+      initializer: 'initialize',
+      kind: 'transparent'
+    }
+  )) as MecenateFeedFactory;
 
-  console.log("Factory Deployed: " + factory.address);
+  await factory.deployed()
 
-  const feed = await deploy("MecenateFeed", {
-    from: deployer,
-    args: [
-      ethers.constants.AddressZero,
-      users.address,
-      factory.address,
-      2,
-      0,
-      0,
-    ],
-    log: true,
+  const implementationAddress = await upgrades.erc1967.getImplementationAddress(
+    factory.address
+  )
 
-    autoMine: true,
-  });
+  await new Promise((r) => setTimeout(r, 10000))
 
-  feed.receipt &&
-    console.log("Feed deployed at:", feed.receipt.contractAddress);
+  console.log("MecenateFeedFactory:", factory?.address)
 
-  await factory.adminUpdateImplementation(feed.address, 2, 0, 0);
+  console.log('MecenateFeedFactory Implementation:', implementationAddress)
+
+  // Deploy Feed
+  console.log("Deploying Feed...");
+
+  const feed = await new MecenateFeed__factory(signers[0]).deploy()
+
+  await feed.deployed()
+
+  await new Promise((r) => setTimeout(r, 5000))
+
+  console.log("MecenateFeed:", feed.address);
+
+  console.log("Update Factory Implementation")
+
+  await factory.adminUpdateImplementation(feed.address, 2, 0, 0, { gasLimit: 1000000 });
 
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
-
     args: [users.address],
     log: true,
-
     autoMine: true,
   });
 

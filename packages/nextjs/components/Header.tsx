@@ -26,9 +26,8 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       passHref
-      className={`${
-        isActive ? "bg-secondary shadow-md" : ""
-      } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm font-heading rounded-full gap-2`}
+      className={`${isActive ? "bg-secondary shadow-md" : ""
+        } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm font-heading rounded-full gap-2`}
     >
       {children}
     </Link>
@@ -139,7 +138,7 @@ export default function Header() {
 
       <div className="navbar-end flex-grow mr-4">
         <WalletBadge />
-        {/* <RainbowKitCustomConnectButton /> */}
+        <RainbowKitCustomConnectButton />
         {/* <FaucetButton /> */}
       </div>
     </div>

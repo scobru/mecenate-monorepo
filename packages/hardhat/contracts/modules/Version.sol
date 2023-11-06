@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {StringsUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 
 /// @title Semver
 /// @notice A simple contract for managing contract versions.
@@ -21,11 +21,11 @@ abstract contract Version {
         return
             string(
                 abi.encodePacked(
-                    Strings.toString(major),
+                    StringsUpgradeable.toString(major),
                     ".",
-                    Strings.toString(minor),
+                    StringsUpgradeable.toString(minor),
                     ".",
-                    Strings.toString(patch)
+                    StringsUpgradeable.toString(patch)
                 )
             );
     }
@@ -34,11 +34,11 @@ abstract contract Version {
         return
             string(
                 abi.encodePacked(
-                    Strings.toString(major),
+                    StringsUpgradeable.toString(major),
                     ".",
-                    Strings.toString(minor),
+                    StringsUpgradeable.toString(minor),
                     ".",
-                    Strings.toString(patch)
+                    StringsUpgradeable.toString(patch)
                 )
             );
     }

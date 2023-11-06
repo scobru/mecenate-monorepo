@@ -16,10 +16,9 @@ import "../modules/Submission.sol";
 import "../modules/Finalization.sol";
 import "../modules/Renounce.sol";
 import "../modules/Version.sol";
-
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract MecenateFeed is
+contract MecenateFeed is
     Initializable,
     Events,
     Creation,
@@ -36,19 +35,15 @@ abstract contract MecenateFeed is
         uint256 _maj,
         uint256 _min,
         uint256 _pat
-    ) public initializer {
-        require(owner == address(0), "ALREADY_INITIALIZED");
+    ) public initializer returns (bool) {
         owner = _owner;
-
         settings.punishmentRatio = 100000000000000000; // Constant value
         settings.postCount = 0; // Initialize postCount to 0
         settings.usersModuleContract = _usersModuleContract;
         settings.factoryContract = msg.sender;
         settings.router = IMecenateFeedFactory(_factoryContract).router();
         settings.version = _version();
-
         post.postdata.settings.status = Structures.PostStatus.Waiting;
-
         postDurationToDays[uint8(Structures.PostDuration.OneDay)] = 1 days;
         postDurationToDays[uint8(Structures.PostDuration.ThreeDays)] = 3 days;
         postDurationToDays[uint8(Structures.PostDuration.OneWeek)] = 7 days;
@@ -60,5 +55,7 @@ abstract contract MecenateFeed is
         major = _maj;
         minor = _min;
         patch = _pat;
+
+        return true;
     }
 }

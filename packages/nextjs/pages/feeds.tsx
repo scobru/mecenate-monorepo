@@ -96,6 +96,7 @@ const Feeds: NextPage = () => {
   }, [onlyYourFeeds]);
 
   const buildFeed = async () => {
+    console.log(factoryCtx?.address, treasuryCtx?.address, sismoData)
     if (!factoryCtx || !treasuryCtx || !runTx || !sismoData) return;
     const fee = await treasuryCtx?.fixedFee();
     runTx(factoryCtx?.buildFeed({ value: fee }), signer);
@@ -138,16 +139,16 @@ const Feeds: NextPage = () => {
                 {Number(feedsInfos[i].status) === 6
                   ? "Revealed"
                   : Number(feedsInfos[i].status) === 5
-                  ? "Punished"
-                  : Number(feedsInfos[i].status) === 4
-                  ? "Finalized"
-                  : Number(feedsInfos[i].status) === 3
-                  ? "Submitted"
-                  : Number(feedsInfos[i].status) === 2
-                  ? "Accepted"
-                  : Number(feedsInfos[i].status) === 1
-                  ? "Proposed"
-                  : "Waiting for Creator"}
+                    ? "Punished"
+                    : Number(feedsInfos[i].status) === 4
+                      ? "Finalized"
+                      : Number(feedsInfos[i].status) === 3
+                        ? "Submitted"
+                        : Number(feedsInfos[i].status) === 2
+                          ? "Accepted"
+                          : Number(feedsInfos[i].status) === 1
+                            ? "Proposed"
+                            : "Waiting for Creator"}
               </div>
               <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Version:</div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">

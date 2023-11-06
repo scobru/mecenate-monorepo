@@ -24,6 +24,11 @@
           "internalType": "address",
           "name": "_buyer",
           "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "_useStake",
+          "type": "bool"
         }
       ],
       "name": "acceptPost",

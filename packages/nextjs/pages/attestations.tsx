@@ -22,7 +22,7 @@ const Attestations = () => {
   const [attestations, setAttestations] = useState<TAttestation[]>([]);
   const [ipfsHashes, setIpfsHashes] = useState<string[]>([]);
 
-  const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes post,");
+  const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes32 postId, bytes post,");
 
   const graphUri = "https://base-goerli-predeploy.easscan.org/graphql";
 

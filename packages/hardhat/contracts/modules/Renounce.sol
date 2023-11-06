@@ -54,6 +54,8 @@ abstract contract Renounce is Staking {
             })
         );
 
+        locked = false;
+
         // Emit event
         emit Renounced(post);
     }

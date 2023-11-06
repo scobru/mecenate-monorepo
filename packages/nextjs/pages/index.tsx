@@ -1,27 +1,18 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import Image from "next/image"
 import { Square3Stack3DIcon, MegaphoneIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useEffect } from "react";
-import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
+import { useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, ethers } from "ethers";
 
 const Home: NextPage = () => {
-  const { chain } = useNetwork();
-  const { data: signer } = useSigner();
-  const provider = useProvider();
-  const deployedContractIdentity = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateIdentity");
   const deployedContractStats = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateStats");
   const [stats, setStats] = React.useState<any>([]);
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  let identityAddress = "";
-  let identityAbi: ContractInterface[] = [];
   let statsAddress = "";
   let statsAbi: ContractInterface[] = [];
-
-  if (deployedContractIdentity) {
-    ({ address: identityAddress, abi: identityAbi } = deployedContractIdentity);
-  }
 
   if (deployedContractStats) {
     ({ address: statsAddress, abi: statsAbi } = deployedContractStats);
@@ -56,21 +47,28 @@ const Home: NextPage = () => {
          */}{" "}
       </Head>
 
-      <div className="flex w-full  items-center flex-col rounded-sm ">
-        <div className="w-full p-5 bg-union bg-fixed bg-cover bg-center mx-auto ">
+      <div className="flex w-full items-center flex-col rounded-sm bg-gradient-to-tl from-blue-950 to-slate-950 ">
+        <div className="w-full p-5  bg-fixed bg-cover bg-center mx-auto ">
           <h1 className="text-center my-20 ">
-            <span className="block text-2xl mx-auto bg-base-300 w-fit mb-2">Welcome to</span>
-            <span className="block text-4xl  mx-auto bg-base-300 w-fit lg:text-7xl md:text-6xl sm:text-4xl xl:text-8xl font-bold">
+            <span className="block text-4xl  mx-auto  w-fit lg:text-7xl md:text-6xl sm:text-4xl xl:text-8xl font-bold">
               ℳ E C E N A T E
             </span>
           </h1>
+
+          <div className="flex justify-between  mx-auto w-96">
+            <Image src="/assets/sismo.png" width="50" height="50" />
+            <Image src="/assets/base.png" width="50" height="50" />
+            <Image src="/assets/eas.png" width="50" height="50" />
+          </div>
+
+
           {stats ? (
-            <div className="text-2xl font-semibold rounded-xl text-left my-5  p-2 bg-gradient-to-bl from-slate-800 to-slate-950 w-fit mx-auto ">
-              <div className="flex-wrap items-center min-w-fit  lg:text-5xl md:text-4xl text-xl ">
+            <div className="text-2xl font-semibold rounded-xl text-left my-5  p-2  w-fit mx-auto bg-gradient-to-br from-blue-950 to-slate-700 opacity-80 ">
+              <div className="flex-wrap items-center min-w-fit  lg:text-3xl md:text-4xl text-xl ">
                 <div className="stats  mx-2 min-w-fit bg-inherit  ">
                   <div className="stat gap-3">
-                    <div className="stat-title  lg:text-5xl md:text-4xl text-xl  ">TREASURY</div>
-                    <div className="stat-value lg:text-5xl md:text-4xl text-xl font-number ">
+                    <div className="stat-title  lg:text-3xl md:text-4xl text-xl  ">TREASURY</div>
+                    <div className="stat-value lg:text-3xl md:text-4xl text-xl font-number ">
                       {String(Number(Number(stats.treasuryBalance) / 1e18).toFixed(3))} ETH
                     </div>
                     <div className="stat-desc  text-base">earned across all fee&apos;s product.</div>
@@ -79,7 +77,7 @@ const Home: NextPage = () => {
                 <div className="stats  mx-2 min-w-fit bg-inherit ">
                   <div className="stat gap-3 ">
                     <div className="stat-title font-bold  ">FEE</div>
-                    <div className="stat-value lg:text-5xl md:text-4xl text-xl font-number">
+                    <div className="stat-value lg:text-3xl md:text-4xl text-xl font-number">
                       {String(Number(stats.globalFee) / 10000)}%
                     </div>
                     <div className="stat-desc text-base "> Percent Protocol Fee</div>
@@ -87,8 +85,8 @@ const Home: NextPage = () => {
                 </div>
                 <div className="stats  mx-2 min-w-fit bg-inherit">
                   <div className="stat gap-3">
-                    <div className="stat-title font-bold lg:text-5xl md:text-4xl text-xl  ">TAX</div>
-                    <div className="stat-value lg:text-5xl md:text-4xl text-xl font-number">
+                    <div className="stat-title font-bold lg:text-3xl md:text-4xl text-xl  ">TAX</div>
+                    <div className="stat-value lg:text-3xl md:text-4xl text-xl font-number">
                       {" "}
                       {String(Number(stats.fixedFee) / 1e18)} ETH
                     </div>
@@ -111,22 +109,22 @@ const Home: NextPage = () => {
           ) : null}
         </div>
 
-        <div className="w-screen bg-sharding bg-cover bg-left">
-          <div className="xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-gradient-to-bl from-slate-800 to-slate-950 ">
+        <div className="w-screen bg-doors bg-cover bg-fixed">
+          <div className="xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-gradient-to-br from-blue-950 to-slate-800 opacity-95 ">
             <div className="p-10 my-20 w-screen">
               <h2 className="text-6xl sm:text-xl   ">Getting Started</h2>
-              <h2 className="text-5xl font-light   ">with Mecenate</h2>
+              <h2 className="text-3xl font-light   ">with Mecenate</h2>
               <p className="mb-4 text-2xl font-semibold  ">Follow these steps to begin your journey:</p>
               <br />
               <ol className="list-decimal ml-4 px-8 text-xl font-extralight">
                 <li>Navigate to the "Identity" section</li>
                 <li>Connect with Sismo to generate your Zero-Knowledge Proof (ZKP)</li>
-                <li>Log into the Mecenate Protocol</li>
+                <li>Create your key pair and sign in</li>
                 <li>Set up your seller feed or browse requests in the marketplace</li>
               </ol>
             </div>
           </div>
-          <div className="max-w-3xl bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95 p-10 flex-col mx-auto text-center  text-base-content">
+          <div className="max-w-3xl my-5 bg-gradient-to-br from-blue-950 to-slate-700 p-10 flex-col mx-auto text-center  text-base-content">
             <h1 className="text-7xl font-extrabold mb-20 font-heading">Data Privacy and Security</h1>
             <h1 className="text-3xl font-extralight mb-20">Redefined.</h1>
             <p className="text-3xl mb-20 font-extralight text-left  hover:text-base-content font-heading ">
@@ -184,8 +182,8 @@ const Home: NextPage = () => {
             want.
           </p>
         </div>
-        <div className="w-screen p-5 bg-gradient-to-bl from-slate-800 to-slate-950">
-          <div className="flex p-5 flex-col items-center text-center py-10 xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95 ">
+        <div className="w-screen p-5 bg-cyborg bg-fixed">
+          <div className="flex p-5 flex-col bg-gradient-to-tl from-blue-950 to-slate-900 opacity-95 items-center text-center py-10 xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto ">
             <MegaphoneIcon className="h-20 w-20 fill-secondary" />
             <div className="p">
               <div className="font-base align-baseline text-justify-center my-5">
@@ -209,7 +207,7 @@ const Home: NextPage = () => {
             </div>
           </div>
         </div>
-        <div className="w-screen  bg-bazaar bg-cover bg-center ">
+        <div className="w-screen  bg-center ">
           <div className="flex flex-col xl:w-6/12 md:8/12 lg:10/12 sm:12/12  p-10  text-left  my-5  bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95 mx-auto">
             <h1 className="text-4xl font-extrabold mb-8 text-left ">INFORMATIONS FINDS YOU 🔮</h1>
             <p className="text-2xl  mb-8">
@@ -226,9 +224,9 @@ const Home: NextPage = () => {
             <h2 className="text-2xl font-semibold mb-4">Make a request 📣</h2>
           </div>
         </div>
-        <div className="w-screen backdrop-opacity-50 backdrop-blur-2xl bg-dev bg-cover">
+        <div className="w-screen backdrop-opacity-50 backdrop-blur-2xl bg-bazaar bg-cover bg-fixed">
           <div className="flex flex-col xl:w-6/12 md:8/12 lg:10/12 sm:12/12  p-10  text-left  my-5  bg-gradient-to-bl from-slate-800 to-slate-950 opacity-95 mx-auto">
-            <div className="text-5xl font-bold my-10">HOW IT WORKS?</div>
+            <div className="text-3xl font-bold my-10">HOW IT WORKS?</div>
             <p className="text-xl  mb-8">
               <strong>Question</strong> Enter a short explanation of what you&apos;re looking for. This can include
               links, Twitter handles and hastags. Make your descriptions as clear as possible.

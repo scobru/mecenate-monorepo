@@ -1,12 +1,10 @@
 pragma solidity 0.8.19;
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "./TokenManager.sol";
 
-contract Deposit {
-    using SafeMath for uint256;
-
+contract Deposit is TokenManager {
+    using SafeMathUpgradeable for uint256;
+    
     mapping(uint256 => mapping(address => uint256)) private _deposit;
 
     event DepositIncreased(
@@ -70,10 +68,8 @@ contract Deposit {
     ) internal returns (uint256 amountRemoved) {
         // get current deposit
         uint256 currentDeposit = _deposit[uint256(tokenID)][user];
-
         // remove deposit
         _decreaseDeposit(tokenID, user, currentDeposit);
-
         // return
         return currentDeposit;
     }

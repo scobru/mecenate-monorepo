@@ -9,5 +9,5 @@ interface IFeedInitializer {
         uint256 major,
         uint256 minor,
         uint256 patch
-    ) external;
+    ) external returns (bool);
 }
