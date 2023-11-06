@@ -4,6 +4,7 @@
 }
 
 .slider {
+  display: auto;
   height: 320px;
   width: 680px;
   margin: 40px auto 0;
@@ -13,7 +14,7 @@
 
 .mask {
   overflow: hidden;
-  height: 320px;
+  height: 220px;
 }
 
 .slider ul {

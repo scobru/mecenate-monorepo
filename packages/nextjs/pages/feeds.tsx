@@ -109,7 +109,7 @@ const Feeds: NextPage = () => {
       feeds.map((feed, i) => (
         <div key={i}>
           <Link href={`/viewFeed?addr=${feed}`} passHref>
-            <div className="card card-shadow grid grid-cols-12 gap-4 border rounded-xl p-4 hover:bg-opacity-90 transition-all duration-300 ease-in-out transform hover:scale-105  text-base-content ">
+            <div className="card card-shadow  bg-gradient-to-br from-blue-950 to-slate-900 opacity-80 grid grid-cols-12 gap-4 border rounded-xl p-4 hover:bg-opacity-95 transition-all duration-300 ease-in-out transform hover:scale-105  text-base-content ">
               <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Currency:</div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {Number(feedsInfos[i].tokenId) == 0 ? "ETH" : Number(feedsInfos[i].tokenId) == 1 ? "MUSE" : "DAI"}{" "}
@@ -162,7 +162,7 @@ const Feeds: NextPage = () => {
   }, [feeds, feedsInfos]);
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10  min-w-fit">
+    <div className="flex items-center flex-col flex-grow pt-10  min-w-fit bg-gradient-to-tl from-blue-950 to-slate-950">
       {/*  <div className="max-w-3xl text-center">
         <h1 className="text-6xl font-bold mb-8">FEEDS</h1>
         <p className="text-xl  mb-20">Create your feed and sell your data</p>

@@ -48,7 +48,7 @@ export const useWeb3auth = () => {
   return context;
 };
 
-export const Web3authProvider: React.FC = ({ children }) => {
+export const Web3authProvider: React.FC = (children: any) => {
   const { signer, setSigner } = useAppStore();
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
   const [torusPlugin, setTorusPlugin] = useState<TorusWalletConnectorPlugin | null>(null);
@@ -102,7 +102,7 @@ export const Web3authProvider: React.FC = ({ children }) => {
               logoLight: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
             },
             useWalletConnect: true,
-            enableLogging: false,
+            enableLogging: true,
           },
         });
         setTorusPlugin(torusPlugin);
@@ -176,8 +176,6 @@ export const Web3authProvider: React.FC = ({ children }) => {
         web3auth.configureAdapter(torusWalletAdapter as unknown as IAdapter<unknown>);
 
         setWeb3auth(web3auth);
-        console.log("TEEEEEEEEEEST");
-
         await createWallet();
 
         setProvider(web3auth.provider as IProvider);
@@ -218,8 +216,9 @@ export const Web3authProvider: React.FC = ({ children }) => {
       getPrivateKey();
       console.log(web3auth);
       console.log(web3auth.provider);
-      const ethersProvider = new ethers.providers.Web3Provider(web3auth.provider);
+      const ethersProvider = new ethers.providers.Web3Provider(web3auth?.provider as IProvider);
       setSigner(ethersProvider.getSigner());
+      setTorusPlugin(torusPlugin)
     } else if (web3auth?.status == "not_ready") {
       setLoggedIn(false);
     }

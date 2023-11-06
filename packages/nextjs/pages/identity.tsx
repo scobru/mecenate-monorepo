@@ -103,6 +103,7 @@ const Identity: NextPage = () => {
   const changePublicKey = async () => {
     console.log("Signing in...");
     runTx(usersCtx?.changePublicKey(responseBytes, toUtf8Bytes(String(pubKey))), signer as Signer);
+    return true;
   };
 
   const getContractData = async function getContractData() {
@@ -251,6 +252,7 @@ const Identity: NextPage = () => {
   }
 
   async function storeKey() {
+    const id = notification.loading("Store keypair on IPFS...")
     if (password != confirmPassword) {
       notification.error("Password is not the same");
       return;
@@ -285,15 +287,24 @@ const Identity: NextPage = () => {
         }),
       });
 
-      console.log(verifiedResult);
+      notification.remove(id)
+      notification.info(JSON.stringify(verifiedResult))
+
+      const id2 = notification.loading("Change Public Key On Chain")
+      const result = await changePublicKey();
+
+      if (result) {
+        notification.remove(id2)
+        notification.success("Public Key changed successful!")
+      }
     } else {
-      // handle the case where keypairJSON is not a string, or is null or undefined
       notification.error("Error creating key pair");
     }
   }
 
 
   async function decryptPair() {
+    const id = notification.loading("Recover...")
     const walletAddress = await signer?.getAddress();
 
     // Verifica che walletAddress sia stato ottenuto correttamente
@@ -318,13 +329,13 @@ const Identity: NextPage = () => {
 
     const parsedResult = JSON.parse(resultJson.data);
     let result = JSON.parse(JSON.stringify(parsedResult[0].content))
-    console.log(result)
     result = JSON.parse(result)
 
     console.log(result.salt)
     console.log(result.iv)
     console.log(result.ciphertext)
 
+    notification.remove(id)
     const decryptedPair = await MecenateHelper.crypto.aes.decryptObject(
       result.salt,
       result.iv,
@@ -332,8 +343,9 @@ const Identity: NextPage = () => {
       password,
     );
 
-
     uiConsole(await decryptedPair);
+    notification.success("Recovered")
+    notification.info(await decryptedPair)
   }
 
   const downloadFile = ({ data, fileName, fileType }: { data: BlobPart; fileName: string; fileType: string }): void => {
@@ -411,7 +423,7 @@ const Identity: NextPage = () => {
   }, [signer]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen ">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-tl from-blue-950 to-slate-950 ">
       <h1 className="text-2xl  mb-8 my-10 font-heading  ">
         <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
           JOIN MECENATE{" "}
@@ -505,8 +517,8 @@ const Identity: NextPage = () => {
                           {userData && (
                             <div>
                               {userData[0] && (
-                                <div className="card card-shadow break-all">
-                                  <div className="card card-title font-semibold font-heading">User Data</div>
+                                <div className="card card-shadow break-all bg-gradient-to-br from-blue-950 to-slate-700 opacity-60 ">
+                                  <div className="card card-title font-semibold font-heading ">User Data</div>
                                   <div className="card-body">
                                     <div className="grid grid-cols-2 gap-4 text-left">
                                       <div className="font-semibold">Address:</div>
@@ -520,7 +532,7 @@ const Identity: NextPage = () => {
                                 </div>
                               )}
                               <div>
-                                <div className="card  card-shadow  ">
+                                <div className="card  card-shadow  bg-gradient-to-br from-blue-950 to-slate-700 opacity-80 ">
                                   <div className="text-center font-heading text-xl">Faucet mDAI/MUSE</div>
                                   <button
                                     className="btn btn-custom"
@@ -539,7 +551,7 @@ const Identity: NextPage = () => {
                                     Mint MUSE
                                   </button>
                                 </div>
-                                <div className="card  card-shadow mb-10">
+                                <div className="card  card-shadow mb-10 bg-gradient-to-br from-blue-950 to-slate-700 opacity-80">
                                   <div className="text-center font-heading text-xl">Create Key Pair</div>
                                   <div>
                                     <input
@@ -563,35 +575,35 @@ const Identity: NextPage = () => {
                                       }}
                                     />
                                     Generate your key pair
-                                    <button className="btn btn-custom" onClick={createPair}>
+                                    <button className="btn btn-custom" onClick={createPair} disabled={!Boolean(password === confirmPassword)}>
                                       Generate{" "}
                                     </button>
                                     Encrypt and Store on IPFS.
-                                    <button className="btn btn-custom" onClick={storeKey}>
+                                    <button className="btn btn-custom" onClick={storeKey} disabled={!Boolean(password === confirmPassword)}>
                                       Store {" "}
                                     </button>
                                     <div id="console" className="p-4 break-all">
                                       <pre className="whitespace-pre-line mt-3"></pre>
                                     </div>
                                     Change your Public Key on Mecenate Protocol
-                                    <button className="btn btn-custom" onClick={changePublicKey}>
+                                    <button className="btn btn-custom" onClick={changePublicKey} disabled={!Boolean(password === confirmPassword)}>
                                       Change{" "}
                                     </button>
                                   </div>
                                 </div>
-                                <div className="card  card-shadow mb-10">
+                                <div className="card  card-shadow mb-10 bg-gradient-to-br from-blue-950 to-slate-950 opacity-90">
                                   <div className="text-center font-heading text-xl mb-5">Sign in</div>
                                   Record your pubkey, address and zkproof into Mecenate.
                                   <button
-                                    className="btn btn-custom"
+                                    className="btn btn-custom "
                                     onClick={signIn}
-                                    disabled={userExists && withdrawalAddress != "" && userName != ""}
+                                    disabled={Boolean(userExists === true) || !Boolean(password === confirmPassword)}
                                   >
                                     Join{" "}
                                   </button>
                                 </div>
                               </div>
-                              <div className="card  card-shadow mb-10">
+                              <div className="card  card-shadow mb-10  bg-gradient-to-br from-blue-950 to-slate-900 opacity-80">
                                 <div className="text-center font-heading text-xl mb-5">Recover Key Pair</div>
                                 <div>
                                   Recover your keypair from IPFS.

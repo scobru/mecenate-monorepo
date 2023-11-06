@@ -63,8 +63,8 @@ export default function Footer() {
                 BuidlGuidl
               </a>{" "}
               and{" "}
-              <a href="https://100.builders/" target="_blank" rel="noreferrer" className="underline underline-offset-2">
-                100Builders
+              <a href="https://backdrop.so/" target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                Backdrop
               </a>{" "}
               <a
                 href="https://github.com/scobru/mecenate-monorepo"

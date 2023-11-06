@@ -7,16 +7,13 @@ import {
   MecenateFeedFactory,
   MecenateFeed__factory,
   MecenateFeed,
-} from '../typechain-types'
+} from "../typechain-types";
 
 // Goerli Base
 const router = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d";
 const eas = "0x4200000000000000000000000000000000000021";
 const schema =
   "0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a";
-
-// Version
-const version = "v2.0.0";
 
 const deployYourContract: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
@@ -111,7 +108,7 @@ const deployYourContract: DeployFunction = async function (
   console.log("Deploying Factory...");
 
   const factory = (await upgrades.deployProxy(
-    await ethers.getContractFactory('MecenateFeedFactory'),
+    await ethers.getContractFactory("MecenateFeedFactory"),
     [
       externalProxyCall.address,
       users.address,
@@ -124,37 +121,39 @@ const deployYourContract: DeployFunction = async function (
       router,
     ],
     {
-      initializer: 'initialize',
-      kind: 'transparent'
-    }
+      initializer: "initialize",
+      kind: "transparent",
+    },
   )) as MecenateFeedFactory;
 
-  await factory.deployed()
+  await factory.deployed();
 
   const implementationAddress = await upgrades.erc1967.getImplementationAddress(
-    factory.address
-  )
+    factory.address,
+  );
 
-  await new Promise((r) => setTimeout(r, 10000))
+  await new Promise((r) => setTimeout(r, 10000));
 
-  console.log("MecenateFeedFactory:", factory?.address)
+  console.log("MecenateFeedFactory:", factory?.address);
 
-  console.log('MecenateFeedFactory Implementation:', implementationAddress)
+  console.log("MecenateFeedFactory Implementation:", implementationAddress);
 
   // Deploy Feed
   console.log("Deploying Feed...");
 
-  const feed = await new MecenateFeed__factory(signers[0]).deploy()
+  const feed = await new MecenateFeed__factory(signers[0]).deploy();
 
-  await feed.deployed()
+  await feed.deployed();
 
-  await new Promise((r) => setTimeout(r, 5000))
+  await new Promise((r) => setTimeout(r, 5000));
 
   console.log("MecenateFeed:", feed.address);
 
-  console.log("Update Factory Implementation")
+  console.log("Update Factory Implementation");
 
-  await factory.adminUpdateImplementation(feed.address, 2, 0, 0, { gasLimit: 1000000 });
+  await factory.adminUpdateImplementation(feed.address, 2, 0, 0, {
+    gasLimit: 1000000,
+  });
 
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,

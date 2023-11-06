@@ -720,7 +720,6 @@ const ViewFeed: NextPage = () => {
       const data = {
         recipient: String(feedData?.postdata?.escrow?.seller),
         revocable: false, // Be aware that if your schema is not revocable, this MUST be false
-        expirationTime: 0,
         data: encodedData,
       };
 
@@ -1080,284 +1079,286 @@ const ViewFeed: NextPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center pt-2 p-2 w-10/12 mx-auto ">
-      {feedData[0] != null ? (
-        <div className="flex flex-col text-left rounded-lg  mt-5">
-          <div className="flex flex-col mb-5  min-w-fit items-left justify-center w-full">
-            <div className="flex flex-row gap-5 mx-10 my-5">
-              <div className="dropdown dropdown-bottom  ">
-                <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
-                  <DocumentCheckIcon className="h-8 w-8 mx-2" /> Seller
-                </label>
-                <ul
-                  tabIndex={0}
-                  className="dropdown-content z-[1] menu p-2 shadow  rounded-box w-52  bg-gradient-to-tr from-slate-700 to-slate-800  "
-                >
-                  <li>
-                    {" "}
-                    <label htmlFor="modal-create" className="feedData.postData font-semibold ">
-                      Create
-                    </label>
-                  </li>
-                  <li>
-                    <label htmlFor="modal-submit" className="feedData.postData font-semibold ">
-                      Submit
-                    </label>
-                  </li>
-                  <li>
-                    <label htmlFor="modal-reveal" className="feedData.postData font-semibold ">
-                      Reveal
-                    </label>
-                  </li>
-                  <li>
-                    <label
-                      className="feedData.postData font-semibold "
-                      onClick={async () => {
-                        await renounce();
-                      }}
-                    >
-                      Renounce
-                    </label>
-                  </li>
-                </ul>
-              </div>
-              <div className="dropdown dropdown-bottom ">
-                <label tabIndex={0} className="hover:bg-secondary-focus  btn btn-custom bg-inherit">
-                  <MegaphoneIcon className="h-8 w-8 mx-2" /> Buyer
-                </label>
-                <ul
-                  tabIndex={0}
-                  className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
-                >
-                  <li>
-                    {" "}
-                    <label htmlFor="modal-accept" className=" font-semibold">
-                      Accept
-                    </label>
-                  </li>
-                  <li>
-                    <label htmlFor="modal-retrieve" className="font-semibold">
-                      Retrieve
-                    </label>
-                  </li>
-                  <li>
-                    <label htmlFor="modal-finalize" className="font-semibold">
-                      Finalize
-                    </label>
-                  </li>
-                </ul>
-              </div>
-              <div className="dropdown dropdown-bottom ">
-                <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
-                  <ScaleIcon className="h-8 w-8 mx-2" /> Stake
-                </label>
-                <ul
-                  tabIndex={0}
-                  className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
-                >
-                  <li>
-                    {" "}
-                    <label htmlFor="modal-stake" className="feedData.postData font-semibold">
-                      Stake
-                    </label>
-                  </li>
-                  <li>
-                    <label
-                      className="feedData.postData font-semibold"
-                      onClick={() => {
-                        decodeData();
-                      }}
-                    >
-                      Decode
-                    </label>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+    <div className="flex items-center flex-col flex-grow pt-10  min-w-fit bg-gradient-to-tl from-blue-950 to-slate-950">
 
-          <div className="flex flex-wrap text-xl mb-5 mx-10 font-bold hover:text-success animate-pulse">
-            {feedData.postdata.settings.status === 6
-              ? "Waiting for Seller"
-              : feedData.postdata.settings.status === 5
-                ? "Waiting for Seller"
-                : feedData.postdata.settings.status === 4
-                  ? "Waiting for Seller"
-                  : feedData.postdata.settings.status === 3
-                    ? "Waiting for buyer validate the data"
-                    : feedData.postdata.settings.status === 2
-                      ? "Waiting for submission from seller"
-                      : feedData.postdata.settings.status === 1
-                        ? "Waiting for Acceptance from a buyer"
-                        : "Waiting for Seller"}
-          </div>
-          <div className="mx-10  font-base text-lg">
-            Smart Contract address is <strong>{addr}</strong>{" "}
-          </div>
-          <div className="mx-10  font-base text-lg">
-            Your current deposit is{" "}
-            <strong>
-              {formatEther(yourStake)}{" "}
-              {feedData?.postdata?.settings?.tokenId == 0
-                ? "ETH"
-                : feedData?.postdata?.settings?.tokenId == 1
-                  ? "MUSE"
-                  : feedData?.postdata?.settings?.tokenId == 2
-                    ? "DAI"
-                    : "ETH"}
-            </strong>
-          </div>
-          <div className="mx-10  mb-5 font-base text-lg">
-            This seller had received <strong>{attestations && <>{attestations.length}</>}</strong> attestations
-          </div>
-
-          <div className="flex flex-col  my-20  min-w-fit items-left justify-center w-full">
-            <ul className="steps">
-              {allStatuses.map((statusText, index) => {
-                const currentStatus = feedData?.postdata?.settings?.status;
-                const currentStatusText = getStatusText(currentStatus);
-
-                return (
-                  <li className={`step ${statusText === currentStatusText ? "step-info" : ""}`} key={index}>
-                    {statusText}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-          <div>
-            <input type="checkbox" id="modal-create" className="modal-toggle " />
-            <div className="modal ">
-              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
-                <div className="modal-header">
-                  <div className="modal-title text-2xl font-bold">Create Post</div>
-                  <label htmlFor="modal-create" className="btn btn-ghost">
-                    <i className="fas fa-times"></i>
+      <div className="flex flex-col items-center pt-2 p-2 w-10/12 mx-auto   ">
+        {feedData[0] != null ? (
+          <div className="flex flex-col text-left rounded-lg  mt-5">
+            <div className="flex flex-col mb-5  min-w-fit items-left justify-center w-full">
+              <div className="flex flex-row gap-5 mx-10 my-5">
+                <div className="dropdown dropdown-bottom  ">
+                  <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
+                    <DocumentCheckIcon className="h-8 w-8 mx-2" /> Seller
                   </label>
-                </div>
-                <div className="modal-body w-auto space-y-6 text-left">
-                  <label className="block text-base-500">Duration</label>
-                  <select
-                    key={5}
-                    className="select select-text w-full mb-8 text-black bg-white"
-                    value={postDuration}
-                    onChange={e => setPostDuration(e.target.value)}
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content z-[1] menu p-2 shadow  rounded-box w-52  bg-gradient-to-tr from-slate-700 to-slate-800  "
                   >
-                    <option className="bg-transparent">Select Duration</option>
-                    <option className="bg-transparent" value="0">
-                      1 Days
-                    </option>
-                    <option className="bg-transparent" value="1">
-                      3 Days
-                    </option>
-                    <option className="bg-transparent" value="2">
-                      1 Week
-                    </option>
-                    <option className="bg-transparent" value="3">
-                      2 Weeks
-                    </option>
-                    <option className="bg-transparent" value="4">
-                      1 Month
-                    </option>
-                  </select>
-                  <label className="block text-base-500 mt-8">Stake</label>
-                  <input
-                    type="text"
-                    className="input w-full"
-                    placeholder="Amount"
-                    value={postStake}
-                    onChange={e => setPostStake(e.target.value)}
-                  />
-                  <label className="block text-base-500 mt-8">Use Staked Balance</label>
-                  <input
-                    type="checkbox"
-                    name="useStake"
-                    placeholder="Use Stake"
-                    id=""
-                    onClick={async e => {
-                      const target = e.target as HTMLInputElement;
-                      setUseStake(target.checked);
-                    }}
-                  />
-                  <br />
-                  <select
-                    className="select select-text bg-transparent my-4 text-black bg-white"
-                    name="tokens"
-                    id="tokens"
-                    onChange={e => handleSelectToken(e.target.value)}
-                  >
-                    <option value="Nan">Select Token</option>
-                    <option value="ETH">ETH</option>
-                    <option value="MUSE">MUSE</option>
-                    <option value="DAI">DAI</option>
-                  </select>
-
-                  {tokenId == "1" || tokenId == "2" ? (
-                    <div>
-                      <button
-                        className="btn btn-primary w-full mt-4"
+                    <li>
+                      {" "}
+                      <label htmlFor="modal-create" className="feedData.postData font-semibold ">
+                        Create
+                      </label>
+                    </li>
+                    <li>
+                      <label htmlFor="modal-submit" className="feedData.postData font-semibold ">
+                        Submit
+                      </label>
+                    </li>
+                    <li>
+                      <label htmlFor="modal-reveal" className="feedData.postData font-semibold ">
+                        Reveal
+                      </label>
+                    </li>
+                    <li>
+                      <label
+                        className="feedData.postData font-semibold "
                         onClick={async () => {
-                          await handleApproveSeller();
+                          await renounce();
                         }}
                       >
-                        Approve
-                      </button>
-                    </div>
-                  ) : null}
-                  <label className="block text-base-500 mt-8">Buyer Payment </label>
-
-                  <input
-                    type="text"
-                    className="input w-full"
-                    placeholder="Put 0 to allow buyer decide the payment"
-                    value={buyerPayment}
-                    onChange={e => setBuyerPayment(e.target.value)}
-                  />
-
-                  <label className="block text-base-500">Type</label>
-                  <select
-                    className="select select-text w-full text-black bg-white"
-                    value={postType}
-                    onChange={e => setPostType(e.target.value)}
+                        Renounce
+                      </label>
+                    </li>
+                  </ul>
+                </div>
+                <div className="dropdown dropdown-bottom ">
+                  <label tabIndex={0} className="hover:bg-secondary-focus  btn btn-custom bg-inherit">
+                    <MegaphoneIcon className="h-8 w-8 mx-2" /> Buyer
+                  </label>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
                   >
-                    <option>Select Type</option>
-                    <option value="0">Text</option>
-                    <option value="1">Image</option>
-                    <option value="2">Video</option>
-                    <option value="3">Audio</option>
-                    <option value="4">File</option>
-                  </select>
-                  {postType == 0 ? (
-                    <div>
-                      <label className="block text-base-500">Message</label>
-                      <input
-                        type="text"
-                        className="input w-full my-4"
-                        placeholder="Data"
-                        value={postRawData}
-                        onChange={e => setPostRawData(e.target.value)}
-                      />
-                    </div>
-                  ) : postType == 1 || 2 || 3 || 4 ? (
-                    <div>
-                      <Dropzone onDrop={handleImageDrop}>
-                        {({ getRootProps, getInputProps }) => (
-                          <div
-                            {...getRootProps()}
-                            className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
-                          >
-                            <input {...getInputProps()} />
-                            {imageFile ? (
-                              <p>{imageFile?.name}</p>
-                            ) : (
-                              <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
-                            )}
-                          </div>
-                        )}
-                      </Dropzone>
-                    </div>
-                  ) : null}
-                  {/* <input
+                    <li>
+                      {" "}
+                      <label htmlFor="modal-accept" className=" font-semibold">
+                        Accept
+                      </label>
+                    </li>
+                    <li>
+                      <label htmlFor="modal-retrieve" className="font-semibold">
+                        Retrieve
+                      </label>
+                    </li>
+                    <li>
+                      <label htmlFor="modal-finalize" className="font-semibold">
+                        Finalize
+                      </label>
+                    </li>
+                  </ul>
+                </div>
+                <div className="dropdown dropdown-bottom ">
+                  <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
+                    <ScaleIcon className="h-8 w-8 mx-2" /> Stake
+                  </label>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
+                  >
+                    <li>
+                      {" "}
+                      <label htmlFor="modal-stake" className="feedData.postData font-semibold">
+                        Stake
+                      </label>
+                    </li>
+                    <li>
+                      <label
+                        className="feedData.postData font-semibold"
+                        onClick={() => {
+                          decodeData();
+                        }}
+                      >
+                        Decode
+                      </label>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap text-xl mb-5 mx-10 font-bold hover:text-success animate-pulse">
+              {feedData.postdata.settings.status === 6
+                ? "Waiting for Seller"
+                : feedData.postdata.settings.status === 5
+                  ? "Waiting for Seller"
+                  : feedData.postdata.settings.status === 4
+                    ? "Waiting for Seller"
+                    : feedData.postdata.settings.status === 3
+                      ? "Waiting for buyer validate the data"
+                      : feedData.postdata.settings.status === 2
+                        ? "Waiting for submission from seller"
+                        : feedData.postdata.settings.status === 1
+                          ? "Waiting for Acceptance from a buyer"
+                          : "Waiting for Seller"}
+            </div>
+            <div className="mx-10  font-base text-lg">
+              Smart Contract address is <strong>{addr}</strong>{" "}
+            </div>
+            <div className="mx-10  font-base text-lg">
+              Your current deposit is{" "}
+              <strong>
+                {formatEther(yourStake)}{" "}
+                {feedData?.postdata?.settings?.tokenId == 0
+                  ? "ETH"
+                  : feedData?.postdata?.settings?.tokenId == 1
+                    ? "MUSE"
+                    : feedData?.postdata?.settings?.tokenId == 2
+                      ? "DAI"
+                      : "ETH"}
+              </strong>
+            </div>
+            <div className="mx-10  mb-5 font-base text-lg">
+              This seller had received <strong>{attestations && <>{attestations.length}</>}</strong> attestations
+            </div>
+
+            <div className="flex flex-col  my-20  min-w-fit items-left justify-center w-full">
+              <ul className="steps">
+                {allStatuses.map((statusText, index) => {
+                  const currentStatus = feedData?.postdata?.settings?.status;
+                  const currentStatusText = getStatusText(currentStatus);
+
+                  return (
+                    <li className={`step ${statusText === currentStatusText ? "step-info" : ""}`} key={index}>
+                      {statusText}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <div>
+              <input type="checkbox" id="modal-create" className="modal-toggle " />
+              <div className="modal ">
+                <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
+                  <div className="modal-header">
+                    <div className="modal-title text-2xl font-bold">Create Post</div>
+                    <label htmlFor="modal-create" className="btn btn-ghost">
+                      <i className="fas fa-times"></i>
+                    </label>
+                  </div>
+                  <div className="modal-body w-auto space-y-6 text-left">
+                    <label className="block text-base-500">Duration</label>
+                    <select
+                      key={5}
+                      className="select select-text w-full mb-8 text-black bg-white"
+                      value={postDuration}
+                      onChange={e => setPostDuration(e.target.value)}
+                    >
+                      <option className="bg-transparent">Select Duration</option>
+                      <option className="bg-transparent" value="0">
+                        1 Days
+                      </option>
+                      <option className="bg-transparent" value="1">
+                        3 Days
+                      </option>
+                      <option className="bg-transparent" value="2">
+                        1 Week
+                      </option>
+                      <option className="bg-transparent" value="3">
+                        2 Weeks
+                      </option>
+                      <option className="bg-transparent" value="4">
+                        1 Month
+                      </option>
+                    </select>
+                    <label className="block text-base-500 mt-8">Stake</label>
+                    <input
+                      type="text"
+                      className="input w-full"
+                      placeholder="Amount"
+                      value={postStake}
+                      onChange={e => setPostStake(e.target.value)}
+                    />
+                    <label className="block text-base-500 mt-8">Use Staked Balance</label>
+                    <input
+                      type="checkbox"
+                      name="useStake"
+                      placeholder="Use Stake"
+                      id=""
+                      onClick={async e => {
+                        const target = e.target as HTMLInputElement;
+                        setUseStake(target.checked);
+                      }}
+                    />
+                    <br />
+                    <select
+                      className="select select-text bg-transparent my-4 text-black bg-white"
+                      name="tokens"
+                      id="tokens"
+                      onChange={e => handleSelectToken(e.target.value)}
+                    >
+                      <option value="Nan">Select Token</option>
+                      <option value="ETH">ETH</option>
+                      <option value="MUSE">MUSE</option>
+                      <option value="DAI">DAI</option>
+                    </select>
+
+                    {tokenId == "1" || tokenId == "2" ? (
+                      <div>
+                        <button
+                          className="btn btn-primary w-full mt-4"
+                          onClick={async () => {
+                            await handleApproveSeller();
+                          }}
+                        >
+                          Approve
+                        </button>
+                      </div>
+                    ) : null}
+                    <label className="block text-base-500 mt-8">Buyer Payment </label>
+
+                    <input
+                      type="text"
+                      className="input w-full"
+                      placeholder="Put 0 to allow buyer decide the payment"
+                      value={buyerPayment}
+                      onChange={e => setBuyerPayment(e.target.value)}
+                    />
+
+                    <label className="block text-base-500">Type</label>
+                    <select
+                      className="select select-text w-full text-black bg-white"
+                      value={postType}
+                      onChange={e => setPostType(e.target.value)}
+                    >
+                      <option>Select Type</option>
+                      <option value="0">Text</option>
+                      <option value="1">Image</option>
+                      <option value="2">Video</option>
+                      <option value="3">Audio</option>
+                      <option value="4">File</option>
+                    </select>
+                    {postType == 0 ? (
+                      <div>
+                        <label className="block text-base-500">Message</label>
+                        <input
+                          type="text"
+                          className="input w-full my-4"
+                          placeholder="Data"
+                          value={postRawData}
+                          onChange={e => setPostRawData(e.target.value)}
+                        />
+                      </div>
+                    ) : postType == 1 || 2 || 3 || 4 ? (
+                      <div>
+                        <Dropzone onDrop={handleImageDrop}>
+                          {({ getRootProps, getInputProps }) => (
+                            <div
+                              {...getRootProps()}
+                              className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
+                            >
+                              <input {...getInputProps()} />
+                              {imageFile ? (
+                                <p>{imageFile?.name}</p>
+                              ) : (
+                                <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
+                              )}
+                            </div>
+                          )}
+                        </Dropzone>
+                      </div>
+                    ) : null}
+                    {/* <input
                     type="password"
                     className="input w-full my-4"
                     placeholder="Password to save the symmetric key"
@@ -1366,504 +1367,506 @@ const ViewFeed: NextPage = () => {
                     }}
                   /> */}
 
-                  <button
-                    className="btn btn-primary w-full mt-4"
-                    onClick={async () => {
-                      createPost();
-                    }}
-                  >
-                    Create Post
-                  </button>
-                </div>
-                <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-create" className="btn">
-                    Close
-                  </label>
-                </div>
-              </div>
-            </div>
-            <input type="checkbox" id="modal-submit" className="modal-toggle " />
-            <div className="modal">
-              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
-                <div className="modal-header">
-                  <div className="modal-title text-2xl font-bold">Submit encrypted key</div>
-                  <label htmlFor="modal-submit" className="btn btn-ghost">
-                    <i className="fas fa-times"></i>
-                  </label>
-                </div>
-                <div className="modal-body space-y-4 text-left">
-                  <input
-                    type="password"
-                    className="input w-full"
-                    placeholder="Symmetric Key"
-                    value={symmetricKey}
-                    onChange={e => setSymmetricKey(e.target.value)}
-                  />
-                  <br />
-                  <input
-                    type="password"
-                    className="input w-full"
-                    placeholder="Secret Key"
-                    value={secretKey}
-                    onChange={e => setSecretKey(e.target.value)}
-                  />
-                  <button
-                    className="btn  w-full"
-                    onClick={async () => {
-                      const postData = await submitData();
-                      console.log(postData);
-                    }}
-                  >
-                    Submit
-                  </button>
-                </div>
-                <div className="modal-action space-x-2 mt-4">
-                  <label
-                    htmlFor="modal-submit"
-                    className="btn"
-                    onClick={async () => {
-                      setSecretKey("");
-                      setSymmetricKey("");
-                    }}
-                  >
-                    Close
-                  </label>
-                </div>
-              </div>
-            </div>
-            <input type="checkbox" id="modal-reveal" className="modal-toggle" />
-            <div className="modal">
-              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
-                <div className="modal-header">
-                  <div className="modal-title text-2xl font-bold">Reveal Post</div>
-                  <label htmlFor="modal-reveal" className="btn btn-ghost">
-                    <i className="fas fa-times"></i>
-                  </label>
-                </div>
-                <div className="modal-body space-y-4 text-left">
-                  <br />
-                  <input
-                    type="password"
-                    className="input w-full"
-                    placeholder="Symmetric Key"
-                    value={symmetricKey}
-                    onChange={e => setSymmetricKey(e.target.value)}
-                  />
-                  <br />
-                  <label className="block text-base-500">Type</label>
-                  <select
-                    key={5}
-                    className="form-select w-full"
-                    value={postType}
-                    onChange={e => setPostType(e.target.value)}
-                  >
-                    <option value="0">Text</option>
-                    <option value="1">Image</option>
-                    <option value="2">Video</option>
-                    <option value="3">Audio</option>
-                    <option value="4">File</option>
-                  </select>
-                  {postType == 0 ? (
-                    <div>
-                      <label className="block text-base-500">Message</label>
-                      <input
-                        type="text"
-                        className="input w-full"
-                        placeholder="Data"
-                        value={postRawData}
-                        onChange={e => setPostRawData(e.target.value)}
-                      />
-                    </div>
-                  ) : postType == 1 || 2 || 3 || 4 ? (
-                    <div>
-                      <Dropzone onDrop={handleImageDrop}>
-                        {({ getRootProps, getInputProps }) => (
-                          <div
-                            {...getRootProps()}
-                            className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
-                          >
-                            <input {...getInputProps()} />
-                            {imageFile ? (
-                              <p>{imageFile?.name}</p>
-                            ) : (
-                              <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
-                            )}
-                          </div>
-                        )}
-                      </Dropzone>
-                    </div>
-                  ) : null}
-                  <button
-                    className="btn  w-full"
-                    onClick={async () => {
-                      const postData = await revealPost();
-                      console.log(postData);
-                    }}
-                  >
-                    Submit
-                  </button>
-                </div>
-                <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-reveal" className="btn">
-                    Close
-                  </label>
-                </div>
-              </div>
-            </div>
-            <input type="checkbox" id="modal-accept" className="modal-toggle" />
-            <div className="modal">
-              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
-                <div className="modal-header">
-                  <div className="modal-title text-2xl font-bold">Accept Post</div>
-                  <label htmlFor="modal-accept" className="btn btn-ghost">
-                    <i className="fas fa-times"></i>
-                  </label>
-                </div>
-                {feedData.postdata.settings.tokenId == 1 || feedData.postdata.settings.tokenId == 2 ? (
-                  <div>
                     <button
-                      className="btn btn-primary w-full mt-4 my-2"
+                      className="btn btn-primary w-full mt-4"
                       onClick={async () => {
-                        await handleApproveBuyer();
+                        createPost();
                       }}
                     >
-                      Approve
+                      Create Post
                     </button>
                   </div>
-                ) : null}
-                <div className="modal-body space-y-4 my-2 text-left">
-                  min required: {""}
-                  {formatEther(feedData[1][1].payment.toString())} {""}
-                  <input
-                    type="text"
-                    className="input w-full mt-8"
-                    placeholder="Amount"
-                    value={postPayment}
-                    onChange={e => setPostPayment(e.target.value)}
-                  />
-                  use stake: {""}
-                  <input
-                    type="checkbox"
-                    name="useStake"
-                    placeholder="Use Stake"
-                    id=""
-                    onClick={async e => {
-                      const target = e.target as HTMLInputElement;
-                      setUseStake(target.checked);
-                    }}
-                  />
-                  <br />
-                  <button
-                    className="btn  w-full"
-                    onClick={async () => {
-                      await acceptPost();
-                    }}
-                  >
-                    Accept Post
-                  </button>
-                </div>
-                <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-accept" className="btn">
-                    Close
-                  </label>
+                  <div className="modal-action space-x-2 mt-4">
+                    <label htmlFor="modal-create" className="btn">
+                      Close
+                    </label>
+                  </div>
                 </div>
               </div>
-            </div>
-            <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
-            <div className="modal">
-              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
-                <div className="modal-header">
-                  <div className="modal-title text-2xl font-bold">Retrieve Post</div>
-                  <label htmlFor="modal-retrieve" className="btn btn-ghost">
-                    <i className="fas fa-times"></i>
-                  </label>
-                </div>
-                <div className="modal-body space-y-4 text-left">
-                  <input
-                    type="password"
-                    className="input w-full"
-                    placeholder="Secret Key"
-                    value={secretKey}
-                    onChange={e => setSecretKey(e.target.value)}
-                  />
-                  <button
-                    className="btn  w-full"
-                    onClick={async () => {
-                      const postData = await retrievePost();
-                      console.log(postData);
-                    }}
-                  >
-                    Submit
-                  </button>
-                </div>
-                <div className="modal-action space-x-2 mt-4">
-                  <label
-                    htmlFor="modal-retrieve"
-                    className="btn"
-                    onClick={async () => {
-                      setSecretKey("");
-                    }}
-                  >
-                    Close
-                  </label>
+              <input type="checkbox" id="modal-submit" className="modal-toggle " />
+              <div className="modal">
+                <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
+                  <div className="modal-header">
+                    <div className="modal-title text-2xl font-bold">Submit encrypted key</div>
+                    <label htmlFor="modal-submit" className="btn btn-ghost">
+                      <i className="fas fa-times"></i>
+                    </label>
+                  </div>
+                  <div className="modal-body space-y-4 text-left">
+                    <input
+                      type="password"
+                      className="input w-full"
+                      placeholder="Symmetric Key"
+                      value={symmetricKey}
+                      onChange={e => setSymmetricKey(e.target.value)}
+                    />
+                    <br />
+                    <input
+                      type="password"
+                      className="input w-full"
+                      placeholder="Secret Key"
+                      value={secretKey}
+                      onChange={e => setSecretKey(e.target.value)}
+                    />
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        const postData = await submitData();
+                        console.log(postData);
+                      }}
+                    >
+                      Submit
+                    </button>
+                  </div>
+                  <div className="modal-action space-x-2 mt-4">
+                    <label
+                      htmlFor="modal-submit"
+                      className="btn"
+                      onClick={async () => {
+                        setSecretKey("");
+                        setSymmetricKey("");
+                      }}
+                    >
+                      Close
+                    </label>
+                  </div>
                 </div>
               </div>
-            </div>
-            <input type="checkbox" id="modal-finalize" className="modal-toggle" />
-            <div className="modal">
-              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
-                <div className="modal-header">
-                  <div className="modal-title text-2xl font-bold">Finalize Post</div>
+              <input type="checkbox" id="modal-reveal" className="modal-toggle" />
+              <div className="modal">
+                <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
+                  <div className="modal-header">
+                    <div className="modal-title text-2xl font-bold">Reveal Post</div>
+                    <label htmlFor="modal-reveal" className="btn btn-ghost">
+                      <i className="fas fa-times"></i>
+                    </label>
+                  </div>
+                  <div className="modal-body space-y-4 text-left">
+                    <br />
+                    <input
+                      type="password"
+                      className="input w-full"
+                      placeholder="Symmetric Key"
+                      value={symmetricKey}
+                      onChange={e => setSymmetricKey(e.target.value)}
+                    />
+                    <br />
+                    <label className="block text-base-500">Type</label>
+                    <select
+                      key={5}
+                      className="form-select w-full"
+                      value={postType}
+                      onChange={e => setPostType(e.target.value)}
+                    >
+                      <option value="0">Text</option>
+                      <option value="1">Image</option>
+                      <option value="2">Video</option>
+                      <option value="3">Audio</option>
+                      <option value="4">File</option>
+                    </select>
+                    {postType == 0 ? (
+                      <div>
+                        <label className="block text-base-500">Message</label>
+                        <input
+                          type="text"
+                          className="input w-full"
+                          placeholder="Data"
+                          value={postRawData}
+                          onChange={e => setPostRawData(e.target.value)}
+                        />
+                      </div>
+                    ) : postType == 1 || 2 || 3 || 4 ? (
+                      <div>
+                        <Dropzone onDrop={handleImageDrop}>
+                          {({ getRootProps, getInputProps }) => (
+                            <div
+                              {...getRootProps()}
+                              className="flex items-center justify-center w-full h-32 rounded-md border-2 border-gray-300 border-dashed cursor-pointer"
+                            >
+                              <input {...getInputProps()} />
+                              {imageFile ? (
+                                <p>{imageFile?.name}</p>
+                              ) : (
+                                <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
+                              )}
+                            </div>
+                          )}
+                        </Dropzone>
+                      </div>
+                    ) : null}
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        const postData = await revealPost();
+                        console.log(postData);
+                      }}
+                    >
+                      Submit
+                    </button>
+                  </div>
+                  <div className="modal-action space-x-2 mt-4">
+                    <label htmlFor="modal-reveal" className="btn">
+                      Close
+                    </label>
+                  </div>
                 </div>
+              </div>
+              <input type="checkbox" id="modal-accept" className="modal-toggle" />
+              <div className="modal">
+                <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
+                  <div className="modal-header">
+                    <div className="modal-title text-2xl font-bold">Accept Post</div>
+                    <label htmlFor="modal-accept" className="btn btn-ghost">
+                      <i className="fas fa-times"></i>
+                    </label>
+                  </div>
+                  {feedData.postdata.settings.tokenId == 1 || feedData.postdata.settings.tokenId == 2 ? (
+                    <div>
+                      <button
+                        className="btn btn-primary w-full mt-4 my-2"
+                        onClick={async () => {
+                          await handleApproveBuyer();
+                        }}
+                      >
+                        Approve
+                      </button>
+                    </div>
+                  ) : null}
+                  <div className="modal-body space-y-4 my-2 text-left">
+                    min required: {""}
+                    {formatEther(feedData[1][1].payment.toString())} {""}
+                    <input
+                      type="text"
+                      className="input w-full mt-8"
+                      placeholder="Amount"
+                      value={postPayment}
+                      onChange={e => setPostPayment(e.target.value)}
+                    />
+                    use stake: {""}
+                    <input
+                      type="checkbox"
+                      name="useStake"
+                      placeholder="Use Stake"
+                      id=""
+                      onClick={async e => {
+                        const target = e.target as HTMLInputElement;
+                        setUseStake(target.checked);
+                      }}
+                    />
+                    <br />
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        await acceptPost();
+                      }}
+                    >
+                      Accept Post
+                    </button>
+                  </div>
+                  <div className="modal-action space-x-2 mt-4">
+                    <label htmlFor="modal-accept" className="btn">
+                      Close
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
+              <div className="modal">
+                <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
+                  <div className="modal-header">
+                    <div className="modal-title text-2xl font-bold">Retrieve Post</div>
+                    <label htmlFor="modal-retrieve" className="btn btn-ghost">
+                      <i className="fas fa-times"></i>
+                    </label>
+                  </div>
+                  <div className="modal-body space-y-4 text-left">
+                    <input
+                      type="password"
+                      className="input w-full"
+                      placeholder="Secret Key"
+                      value={secretKey}
+                      onChange={e => setSecretKey(e.target.value)}
+                    />
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        const postData = await retrievePost();
+                        console.log(postData);
+                      }}
+                    >
+                      Submit
+                    </button>
+                  </div>
+                  <div className="modal-action space-x-2 mt-4">
+                    <label
+                      htmlFor="modal-retrieve"
+                      className="btn"
+                      onClick={async () => {
+                        setSecretKey("");
+                      }}
+                    >
+                      Close
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <input type="checkbox" id="modal-finalize" className="modal-toggle" />
+              <div className="modal">
+                <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
+                  <div className="modal-header">
+                    <div className="modal-title text-2xl font-bold">Finalize Post</div>
+                  </div>
 
-                <div className="modal-body space-y-4 text-left">
-                  <br />
-                  ETH to destroy from seller stake if your data is not valid
-                  <input
-                    type="text"
-                    className="input w-full"
-                    placeholder="Punishment"
-                    disabled={valid}
-                    value={punishment}
-                    onChange={e => setPunishment(e.target.value)}
-                  />
-                  <span className="divider my-5"></span>
-                  Validate and send your payment to seller
-                  <br />
-                  <input
-                    type="checkbox"
-                    className="form-checkbox"
-                    checked={valid}
-                    onChange={e => {
-                      setValid(e.target.checked);
-                    }}
-                  />
-                  <label className="ml-2">Valid</label>
-                  <br />
-                  <button
-                    className="btn  w-full"
-                    onClick={async () => {
-                      const postData = await finalizePost();
-                      console.log(postData);
-                    }}
-                  >
-                    Submit
-                  </button>
+                  <div className="modal-body space-y-4 text-left">
+                    <br />
+                    ETH to destroy from seller stake if your data is not valid
+                    <input
+                      type="text"
+                      className="input w-full"
+                      placeholder="Punishment"
+                      disabled={valid}
+                      value={punishment}
+                      onChange={e => setPunishment(e.target.value)}
+                    />
+                    <span className="divider my-5"></span>
+                    Validate and send your payment to seller
+                    <br />
+                    <input
+                      type="checkbox"
+                      className="form-checkbox"
+                      checked={valid}
+                      onChange={e => {
+                        setValid(e.target.checked);
+                      }}
+                    />
+                    <label className="ml-2">Valid</label>
+                    <br />
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        const postData = await finalizePost();
+                        console.log(postData);
+                      }}
+                    >
+                      Submit
+                    </button>
+                  </div>
+                  <div className="modal-action space-x-2 mt-4">
+                    <label htmlFor="modal-finalize" className="btn">
+                      Close
+                    </label>
+                  </div>
                 </div>
-                <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-finalize" className="btn">
-                    Close
-                  </label>
+              </div>
+              <input type="checkbox" id="modal-stake" className="modal-toggle" />
+              <div className="modal">
+                <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
+                  <div className="modal-header">
+                    <div className="modal-title text-2xl font-bold">Stake</div>
+                    <label htmlFor="modal-stake" className="btn btn-ghost">
+                      <i className="fas fa-times"></i>
+                    </label>
+                  </div>
+                  <div className="modal-body space-y-4 text-left">
+                    <br />
+                    <input
+                      type="text"
+                      className="input w-full"
+                      placeholder="Stake Amount"
+                      value={stakeAmount}
+                      onChange={e => setStakeAmount(e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      className="input w-full"
+                      placeholder="Receivert"
+                      onChange={e => setReceiver(e.target.value)}
+                    />
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        addStake();
+                      }}
+                    >
+                      Add Stake
+                    </button>
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        takeStake();
+                      }}
+                    >
+                      Take Stake
+                    </button>
+                    <button
+                      className="btn  w-full"
+                      onClick={async () => {
+                        takeAll();
+                      }}
+                    >
+                      Take All
+                    </button>
+                  </div>
+                  <div className="modal-action space-x-2 mt-4">
+                    <label htmlFor="modal-stake" className="btn">
+                      Close
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
-            <input type="checkbox" id="modal-stake" className="modal-toggle" />
-            <div className="modal">
-              <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
-                <div className="modal-header">
-                  <div className="modal-title text-2xl font-bold">Stake</div>
-                  <label htmlFor="modal-stake" className="btn btn-ghost">
-                    <i className="fas fa-times"></i>
-                  </label>
+            <div className="flex flex-col mb-16  min-w-fit items-left justify-center w-full  p-10  rounded-2xl">
+              <div className="card w-fit">
+                <div className="card-body">
+                  <h2 className="text-2xl font-bold">Feed Info</h2>
+                  <div className="mt-2">
+                    <p className="text-base">
+                      <span className="font-bold">Post Status</span> <br />
+                      {feedData.postdata.settings.status === 6
+                        ? "Revealed"
+                        : feedData.postdata.settings.status === 5
+                          ? "Punished"
+                          : feedData.postdata.settings.status === 4
+                            ? "Finalized"
+                            : feedData.postdata.settings.status === 3
+                              ? "Submitted"
+                              : feedData.postdata.settings.status === 2
+                                ? "Accepted"
+                                : feedData.postdata.settings.status === 1
+                                  ? "Proposed"
+                                  : "Waiting for Creator"}
+                    </p>
+                    <div className="w-fit">
+                      <p className="text-base">
+                        <span className="font-bold">Stake</span> <br /> {formatEther(feedData[1][1].stake.toString())} ETH
+                      </p>
+                    </div>
+                    <div className="w-fit">
+                      <p className="text-base">
+                        <span className="font-bold">Reward</span> <br />
+                        {formatEther(feedData[1][1].payment.toString())} ETH
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="modal-body space-y-4 text-left">
-                  <br />
-                  <input
-                    type="text"
-                    className="input w-full"
-                    placeholder="Stake Amount"
-                    value={stakeAmount}
-                    onChange={e => setStakeAmount(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    className="input w-full"
-                    placeholder="Receivert"
-                    onChange={e => setReceiver(e.target.value)}
-                  />
-                  <button
-                    className="btn  w-full"
-                    onClick={async () => {
-                      addStake();
-                    }}
-                  >
-                    Add Stake
-                  </button>
-                  <button
-                    className="btn  w-full"
-                    onClick={async () => {
-                      takeStake();
-                    }}
-                  >
-                    Take Stake
-                  </button>
-                  <button
-                    className="btn  w-full"
-                    onClick={async () => {
-                      takeAll();
-                    }}
-                  >
-                    Take All
-                  </button>
+              </div>
+              <div className="divider" />
+              <div className="card w-full md:w-fit">
+                <div className="card-body">
+                  <h2 className="text-2xl font-bold">Post Settings</h2>
+                  <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 break-all">
+                    <p>
+                      <span className="font-bold">Creation</span> <br />
+                      {new Date(Number(feedData[1][0].creationTimeStamp) * 1000).toUTCString()}
+                    </p>
+                    <p>
+                      <span className="font-bold">Expire</span>
+                      <br />
+                      {new Date(Number(feedData[1][0].endTimeStamp) * 1000).toString()}
+                    </p>
+                    <p>
+                      <span className="font-bold">Duration</span> <br />
+                      {Number(feedData[1][0].duration.toString() * 1000) / 86400000} days{" "}
+                    </p>
+                    <p>
+                      <span className="font-bold">postID</span> <br />
+                      {feedData[1][0].postId.toString()}
+                    </p>
+                    <p>
+                      <span className="font-bold">File Type</span> <br />
+                      {feedData[1][0].postType.toString() == 0
+                        ? "Text"
+                        : feedData[1][0].postType.toString() == 1
+                          ? "Image"
+                          : feedData[1][0].postType.toString() == 2
+                            ? "Video"
+                            : feedData[1][0].postType.toString() == 3
+                              ? "Audio"
+                              : feedData[1][0].postType.toString() == 4
+                                ? "File"
+                                : null}
+                    </p>
+                    <p>
+                      <span className="font-bold">Status</span>
+                      <br />
+                      {feedData[1][0].status.toString() == 0
+                        ? "Waiting"
+                        : feedData[1][0].status.toString() == 1
+                          ? "Proposed"
+                          : feedData[1][0].status.toString() == 2
+                            ? "Accepted"
+                            : feedData[1][0].status.toString() == 3
+                              ? "Submitted"
+                              : feedData[1][0].status.toString() == 4
+                                ? "Finalized"
+                                : feedData[1][0].status.toString() == 5
+                                  ? "Punished"
+                                  : feedData[1][0].status.toString() == 6
+                                    ? "Revealed"
+                                    : null}
+                    </p>
+                  </div>
                 </div>
-                <div className="modal-action space-x-2 mt-4">
-                  <label htmlFor="modal-stake" className="btn">
-                    Close
-                  </label>
+              </div>
+              <div className="divider" />
+              <div className="card w-fit">
+                <div className="card-body">
+                  <h2 className="text-2xl font-bold">Punishment</h2>
+                  <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 break-all">
+                    <p>
+                      <span className="font-bold">Buyer </span> <br /> {feedData[1][1].buyer.toString()}
+                    </p>
+                    <p>
+                      <span className="font-bold">Seller</span> <br /> {feedData[1][1].seller.toString()}
+                    </p>
+                    <p>
+                      <span className="font-bold">Buyer Penalty</span> <br />{" "}
+                      {formatEther(feedData[1][1].penalty.toString())}
+                    </p>
+                    <p>
+                      <span className="font-bold">Seller Punishment</span> <br />{" "}
+                      {formatEther(feedData[1][1].punishment.toString())}
+                    </p>
+                    <p>
+                      <span className="font-bold">Seller Stake</span> <br />{" "}
+                      {formatEther(feedData[1][1].stake.toString())}
+                    </p>
+                    <p>
+                      <span className="font-bold">Buyer Payment</span> <br />{" "}
+                      {formatEther(feedData[1][1].payment.toString())}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="divider" />
+              <div className="card w-fit">
+                <div className="card-body">
+                  <h2 className="text-2xl font-bold">Data</h2>
+                  <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <p>
+                      <span className="font-bold">Encrypted Data</span> <br />{" "}
+                      <span className="break-all">{feedData[1][2].encryptedData.toString()}</span>
+                    </p>
+                    <p>
+                      <span className="font-bold">Encrypted Key</span> <br />{" "}
+                      <span className="break-all"> {feedData[1][2].encryptedKey.toString()}</span>
+                    </p>
+
+                    <p>
+                      <span className="font-bold">Decrypted Data IPFS Hash</span> <br />
+                      <span className="break-all"> {feedData[1][2].decryptedData.toString()}</span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex flex-col mb-16  min-w-fit items-left justify-center w-full  p-10  rounded-2xl">
-            <div className="card w-fit">
-              <div className="card-body">
-                <h2 className="text-2xl font-bold">Feed Info</h2>
-                <div className="mt-2">
-                  <p className="text-base">
-                    <span className="font-bold">Post Status</span> <br />
-                    {feedData.postdata.settings.status === 6
-                      ? "Revealed"
-                      : feedData.postdata.settings.status === 5
-                        ? "Punished"
-                        : feedData.postdata.settings.status === 4
-                          ? "Finalized"
-                          : feedData.postdata.settings.status === 3
-                            ? "Submitted"
-                            : feedData.postdata.settings.status === 2
-                              ? "Accepted"
-                              : feedData.postdata.settings.status === 1
-                                ? "Proposed"
-                                : "Waiting for Creator"}
-                  </p>
-                  <div className="w-fit">
-                    <p className="text-base">
-                      <span className="font-bold">Stake</span> <br /> {formatEther(feedData[1][1].stake.toString())} ETH
-                    </p>
-                  </div>
-                  <div className="w-fit">
-                    <p className="text-base">
-                      <span className="font-bold">Reward</span> <br />
-                      {formatEther(feedData[1][1].payment.toString())} ETH
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="divider" />
-            <div className="card w-full md:w-fit">
-              <div className="card-body">
-                <h2 className="text-2xl font-bold">Post Settings</h2>
-                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 break-all">
-                  <p>
-                    <span className="font-bold">Creation</span> <br />
-                    {new Date(Number(feedData[1][0].creationTimeStamp) * 1000).toUTCString()}
-                  </p>
-                  <p>
-                    <span className="font-bold">Expire</span>
-                    <br />
-                    {new Date(Number(feedData[1][0].endTimeStamp) * 1000).toString()}
-                  </p>
-                  <p>
-                    <span className="font-bold">Duration</span> <br />
-                    {Number(feedData[1][0].duration.toString() * 1000) / 86400000} days{" "}
-                  </p>
-                  <p>
-                    <span className="font-bold">postID</span> <br />
-                    {feedData[1][0].postId.toString()}
-                  </p>
-                  <p>
-                    <span className="font-bold">File Type</span> <br />
-                    {feedData[1][0].postType.toString() == 0
-                      ? "Text"
-                      : feedData[1][0].postType.toString() == 1
-                        ? "Image"
-                        : feedData[1][0].postType.toString() == 2
-                          ? "Video"
-                          : feedData[1][0].postType.toString() == 3
-                            ? "Audio"
-                            : feedData[1][0].postType.toString() == 4
-                              ? "File"
-                              : null}
-                  </p>
-                  <p>
-                    <span className="font-bold">Status</span>
-                    <br />
-                    {feedData[1][0].status.toString() == 0
-                      ? "Waiting"
-                      : feedData[1][0].status.toString() == 1
-                        ? "Proposed"
-                        : feedData[1][0].status.toString() == 2
-                          ? "Accepted"
-                          : feedData[1][0].status.toString() == 3
-                            ? "Submitted"
-                            : feedData[1][0].status.toString() == 4
-                              ? "Finalized"
-                              : feedData[1][0].status.toString() == 5
-                                ? "Punished"
-                                : feedData[1][0].status.toString() == 6
-                                  ? "Revealed"
-                                  : null}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="divider" />
-            <div className="card w-fit">
-              <div className="card-body">
-                <h2 className="text-2xl font-bold">Punishment</h2>
-                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 break-all">
-                  <p>
-                    <span className="font-bold">Buyer </span> <br /> {feedData[1][1].buyer.toString()}
-                  </p>
-                  <p>
-                    <span className="font-bold">Seller</span> <br /> {feedData[1][1].seller.toString()}
-                  </p>
-                  <p>
-                    <span className="font-bold">Buyer Penalty</span> <br />{" "}
-                    {formatEther(feedData[1][1].penalty.toString())}
-                  </p>
-                  <p>
-                    <span className="font-bold">Seller Punishment</span> <br />{" "}
-                    {formatEther(feedData[1][1].punishment.toString())}
-                  </p>
-                  <p>
-                    <span className="font-bold">Seller Stake</span> <br />{" "}
-                    {formatEther(feedData[1][1].stake.toString())}
-                  </p>
-                  <p>
-                    <span className="font-bold">Buyer Payment</span> <br />{" "}
-                    {formatEther(feedData[1][1].payment.toString())}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="divider" />
-            <div className="card w-fit">
-              <div className="card-body">
-                <h2 className="text-2xl font-bold">Data</h2>
-                <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <p>
-                    <span className="font-bold">Encrypted Data</span> <br />{" "}
-                    <span className="break-all">{feedData[1][2].encryptedData.toString()}</span>
-                  </p>
-                  <p>
-                    <span className="font-bold">Encrypted Key</span> <br />{" "}
-                    <span className="break-all"> {feedData[1][2].encryptedKey.toString()}</span>
-                  </p>
-
-                  <p>
-                    <span className="font-bold">Decrypted Data IPFS Hash</span> <br />
-                    <span className="break-all"> {feedData[1][2].decryptedData.toString()}</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <Spinner />
-      )}
+        ) : (
+          <Spinner />
+        )}
+      </div>
     </div>
+
   );
 };
 

@@ -94,7 +94,7 @@ const Connect: NextPage = () => {
               logoLight: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
             },
             useWalletConnect: true,
-            enableLogging: false,
+            enableLogging: true,
           },
         });
         setTorusPlugin(torusPlugin);
@@ -158,7 +158,7 @@ const Connect: NextPage = () => {
         }); */
 
         // it will add/update  the metamask adapter in to web3auth class
-        // web3auth.configureAdapter(metamaskAdapter as any);
+        web3auth.configureAdapter(metamaskAdapter as any);
 
         const torusWalletAdapter = new TorusWalletAdapter({
           clientId,
@@ -177,10 +177,6 @@ const Connect: NextPage = () => {
         const account = await rpc.getAccounts();
         const accountAddress = account;
 
-        /*     localStorage.setItem("accountAddress", JSON.stringify(accountAddress));
-
-        if (accountAddress) setLoggedIn(true); */
-
         if (web3auth?.status === "connected") {
           setLoggedIn(true);
           createWallet();
@@ -198,6 +194,7 @@ const Connect: NextPage = () => {
     if (web3auth?.status == "connected") {
       setLoggedIn(true);
       getPrivateKey();
+      setTorusPlugin(torusPlugin)
     } else if (web3auth?.status == "not_ready") {
       setLoggedIn(false);
     }
@@ -348,29 +345,30 @@ const Connect: NextPage = () => {
 
   const loggedInView = (
     <>
-      <div className="flex flex-auto flex-wrap gap-4 text-heading">
+      <div className="flex flex-auto flex-wrap gap-4 text-heading  ">
 
-        {web3auth?.cachedAdapter !== "metamask" && (
+        {/* {web3auth?.cachedAdapter !== "metamask" && (
           <div>
-            <button onClick={showWCM} className="link link-hover flex items-center">
+            <button onClick={showWCM} className="link link-hover flex items-center" disabled={Boolean(torusPlugin)}>
               <FaWallet className="mr-2" />
               Wallet Connect
             </button>
-            <button onClick={initiateTopUp} className="link link-hover flex items-center">
+            <button onClick={initiateTopUp} className="link link-hover flex items-center" disabled={torusPlugin}>
               <FaMoneyBillAlt className="mr-2" />
               TopUp Wallet
             </button>
           </div>
-        )}
-        <button onClick={getAccounts} className="link link-hover flex items-center">
+        )} */}
+
+        <button onClick={getAccounts} className="link link-hover flex items-center text-lg">
           <FaUser className="mr-2" />
           Get Accounts
         </button>
-        <button onClick={getBalance} className="link link-hover flex items-center">
+        <button onClick={getBalance} className="link link-hover flex items-center text-lg">
           <FaMoneyBillAlt className="mr-2" />
           Get Balance
         </button>
-        <button onClick={getPrivateKey} className="link link-hover flex items-center">
+        <button onClick={getPrivateKey} className="link link-hover flex items-center text-lg">
           <FaKey className="mr-2" />
           Get Private Key
         </button>
@@ -378,7 +376,7 @@ const Connect: NextPage = () => {
           <FaKey className="mr-2" />
           Send Tx
         </button> */}
-        <button onClick={logout} className="link link-hover flex items-center">
+        <button onClick={logout} className="link link-hover flex items-center text-lg">
           <FaSignOutAlt className="mr-2" />
           Log Out
         </button>
@@ -396,7 +394,7 @@ const Connect: NextPage = () => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen font-heading no-border">
+    <div className="flex flex-col items-center justify-center min-h-screen font-heading no-border bg-gradient-to-tl from-blue-950 to-slate-950 ">
       <h1 className="text-2xl font-light mb-8 ">
         <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
           CREATE YOUR ADDRESS{" "}
@@ -404,7 +402,7 @@ const Connect: NextPage = () => {
         WITH YOUR SOCIAL ACCOUNT
       </h1>
 
-      <div className="p-8 rounded-lg shadow-lg w-full max-w-lg mb-8 text-left justify-center">
+      <div className="p-8 rounded-lg shadow-lg w-full max-w-lg mb-8 text-left justify-center bg-gradient-to-br from-blue-950 to-slate-700 opacity-80">
         {loggedIn ? loggedInView : unloggedInView}
       </div>
     </div>

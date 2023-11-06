@@ -11,8 +11,6 @@ import "../interfaces/IMecenateFeed.sol";
 contract MecenateAttesterResolver is SchemaResolver {
     constructor(IEAS eas) SchemaResolver(eas) {}
 
-    mapping(bytes32 => bool) public postIds;
-
     function onAttest(
         Attestation calldata attestation,
         uint256 /*value*/
@@ -48,8 +46,6 @@ contract MecenateAttesterResolver is SchemaResolver {
         require(fetchedPostId == postId, "POST ID DOES NOT MATCH");
 
         require(valid, "WRONG VALIDATION");
-
-        postIds[postId] = true;
 
         return true;
     }

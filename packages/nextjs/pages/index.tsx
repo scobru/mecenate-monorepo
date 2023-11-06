@@ -6,6 +6,7 @@ import React, { useCallback, useEffect } from "react";
 import { useContract } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
 import { ContractInterface, ethers } from "ethers";
+import Link from "next/link";
 
 const Home: NextPage = () => {
   const deployedContractStats = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateStats");
@@ -47,21 +48,14 @@ const Home: NextPage = () => {
          */}{" "}
       </Head>
 
-      <div className="flex w-full items-center flex-col rounded-sm bg-gradient-to-tl from-blue-950 to-slate-950 ">
+      <div className="flex w-screen items-center flex-col rounded-sm bg-gradient-to-tl from-blue-950 to-slate-950 ">
         <div className="w-full p-5  bg-fixed bg-cover bg-center mx-auto ">
           <h1 className="text-center my-20 ">
             <span className="block text-4xl  mx-auto  w-fit lg:text-7xl md:text-6xl sm:text-4xl xl:text-8xl font-bold">
               ℳ E C E N A T E
             </span>
+            <span className="text-2xl font-number">v2</span>
           </h1>
-
-          <div className="flex justify-between  mx-auto w-96">
-            <Image src="/assets/sismo.png" width="50" height="50" />
-            <Image src="/assets/base.png" width="50" height="50" />
-            <Image src="/assets/eas.png" width="50" height="50" />
-          </div>
-
-
           {stats ? (
             <div className="text-2xl font-semibold rounded-xl text-left my-5  p-2  w-fit mx-auto bg-gradient-to-br from-blue-950 to-slate-700 opacity-80 ">
               <div className="flex-wrap items-center min-w-fit  lg:text-3xl md:text-4xl text-xl ">
@@ -107,9 +101,41 @@ const Home: NextPage = () => {
               </div>
             </div>
           ) : null}
+          <h1 className="text-center mt-20 mb-5 text-xl font-light">
+            build with:
+          </h1>
+          <div className="flex gap-10 mt-5 mx-auto text-center w-fit my-10 p-5 opacity-90 rounded-lgjustify-between justify-self-auto">
+            <Link href="https://sismo.io" target="_blank" rel="noopener noreferrer">
+              <Image src="/assets/sismo.png" width="60" height="60" alt="sismo" />
+            </Link>
+            <Link href="https://base.org" target="_blank" rel="noopener noreferrer">
+
+              <Image src="/assets/base.svg" width="100" height="100" alt="base" />
+            </Link>
+            <Link href="https://attest.sh" target="_blank" rel="noopener noreferrer">
+
+              <Image src="/assets/eas.png" width="60" height="60" alt="eas" />
+            </Link>
+            <Link href="https://github.com/scobru/mogu" target="_blank" rel="noopener noreferrer">
+
+              <Image src="/assets/mogu.png" width="60" height="60" alt="mogu" />
+            </Link>
+            <Link href="https://scaffoldeth.io" target="_blank" rel="noopener noreferrer">
+              <Image src="/assets/scaffold.svg" width="60" height="60" alt="scaffoldeth" />
+            </Link>
+            <Link href="https://web3auth.io" target="_blank" rel="noopener noreferrer">
+              <Image src="/assets/web3auth.svg" width="100" height="100" alt="web3auth" />
+            </Link>
+            <Link href="https://backdrop.so/" target="_blank" rel="noopener noreferrer" >
+              <Image className="bg-white  rounded-lg" src="/assets/backdrop.jpg" width="60" height="60" alt="backdrop" />
+            </Link>
+            <Link href="https://buidlguidl.com/" target="_blank" rel="noopener noreferrer">
+              <Image className="bg-white p-2 rounded-lg" src="/assets/buidlguild.svg" width="120" height="120" alt="buildguild" />
+            </Link>
+          </div>
         </div>
 
-        <div className="w-screen bg-doors bg-cover bg-fixed">
+        <div className="w-screen bg-doors bg-cover bg-fixed ">
           <div className="xl:w-6/12 md:8/12 lg:10/12 sm:12/12 mx-auto bg-gradient-to-br from-blue-950 to-slate-800 opacity-95 ">
             <div className="p-10 my-20 w-screen">
               <h2 className="text-6xl sm:text-xl   ">Getting Started</h2>
@@ -137,9 +163,10 @@ const Home: NextPage = () => {
             </p>
           </div>
         </div>
-        <div className="min-w-fit mx-auto text-center my-20 text-base-content">
+
+        <div className="w-screen mx-auto text-center my-20 text-base-content">
           <h1 className="text-6xl font-bold">Request</h1>
-          <div className="content-slider w-52 ">
+          <div className="content-slider w-40 ">
             <div className="slider">
               <div className="mask">
                 <ul>

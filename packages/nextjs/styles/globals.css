@@ -50,8 +50,16 @@ p {
   @apply font-light;
   @apply text-sm;
   background-color: #311c31;
-  @layer focus:outline-none;
-  @layer focus:shadow-outline;
+}
+
+.btn.btn-custom:disabled {
+  background-color: #381738;
+  @apply text-gray-600
+}
+
+.btn.btn-custom:focus {
+  @layer outline-none;
+  @layer shadow-outline;
 }
 
 .card.card-shadow {

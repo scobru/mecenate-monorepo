@@ -17,6 +17,7 @@ abstract contract Acceptance is Events, Staking {
         bool useStake
     ) external payable virtual {
         require(locked == false, "LOCKED");
+
         require(
             validStatuses[uint8(Structures.PostStatus.Proposed)],
             "INVALID_STATUS"

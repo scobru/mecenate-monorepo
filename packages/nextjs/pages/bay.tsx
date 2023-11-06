@@ -189,7 +189,7 @@ const Bay: NextPage = () => {
   };
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10 text-black min-w-fit">
+    <div className="flex items-center flex-col flex-grow pt-10 text-black min-w-fit bg-gradient-to-tl from-blue-950 to-slate-950">
       <div className="text-center my-2 text-base-content mx-auto">
         {/* <div className=" text-center">
           <h1 className="text-6xl font-bold mb-8">BAY</h1>
@@ -205,7 +205,7 @@ const Bay: NextPage = () => {
         </div>
  */}
         <div className="flex flex-col min-w-fit mx-auto items-center mb-20 ">
-          <div className="card bg-slate-200 rounded-lg shadow-2xl shadow-primary py-2   p-4 m-4 text-black">
+          <div className="card bg-slate-400 rounded-lg shadow-2xl shadow-primary py-2   p-4 m-4 text-black">
             <label className="text-black font-semibold text-sm" htmlFor="request">
               What do you want?
             </label>
@@ -271,13 +271,13 @@ const Bay: NextPage = () => {
             </button>
           </div>
         </div>
-        <div className="grid  sm:grid-cols-1 xl:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid sm:grid-cols-1 xl:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {requests.map((request, index) => {
             return (
               <div
                 key={index}
                 tabIndex={0}
-                className="card card-bordered w-96 rounded-2xl grid-cols-3 my-5 bg-gradient-to-bl from-slate-500 to-slate-500 hover:bg-base-300 shadow-lg shadow-primary hover:shadow-2xl hover:scale-105 transform transition-all duration-500"
+                className="card  w-96 rounded-2xl grid-cols-3 my-5 bg-gradient-to-br from-blue-950 to-slate-700  hover:bg-base-300 shadow-lg shadow-primary hover:shadow-2xl hover:scale-105 transform transition-all duration-500"
               >
                 <div className=" bg-gradient-to-tl from-slate-700 to-slate-900rounded-t-xl break-all">
                   <div className="text-left p-5">
@@ -297,7 +297,7 @@ const Bay: NextPage = () => {
                     <div className=" text-md font-light">PostID</div>
                   </div>
                 </div>
-                <div className=" bg-gradient-to-tl from-slate-700 to-slate-900  rounded-b-xl ">
+                <div className="bg-gradient-to-tl from-blue-950 to-slate-900  rounded-b-xl ">
                   <div className="text-left p-5 space-y-">
                     <div className="font-medium">
                       Fulfiller must stake{" "}
