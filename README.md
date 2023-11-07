@@ -1,22 +1,70 @@
 # Mecenate v2.0.0
 
+<div align="left">
+
+<figure><img src=".gitbook/assets/banner.png" alt=""><figcaption></figcaption></figure>
+
+</div>
+
 ## #100builders #backdrop #sismo #scaffold-eth #buildguild
 
 We are thrilled to announce version 2 of Mecenate with the following enhancements:
 
-enjoy the beta on : <https://mecenate.vercel.app/>
+enjoy the beta on : [https://mecenate.vercel.app/](https://mecenate.vercel.app/)
 
-## What is this?
+## SUMMARY
+
+***
+
+* [NEW IN V2](./#new-in-v2)
+* [WHAT'S IS THIS?](./#whats-this)
+* [HOW IT WORKS?](./#how-it-works)
+* [WORKFLOW](./#workflow)
+* [STANDARDS](./#standards)
+* [PACKAGES](./#packages)
+* [QUICK START](./#quick-start)
+
+
+
+## NEW IN V2
+
+***
+
+### Smart Contract
+
+* [x] **Multi-Token Usage**: Now supports ETH, DAI, and MUSE (the protocol token) as currencies for feeds.
+* [x] **Security and Gas Fee Optimization**: Improved security measures and optimized gas fees for better performance.
+* [x] **Mecenate EAS Resolver Contract**: Introduced the Mecenate EAS Resolver contract to ensure the attestations are genuinely valid.
+* [x] **Attestation Mechanism**: Implemented an attestation mechanism via eas during the post finalization stage. When the Buyer confirms the data validity, they also attest to the seller's reliability on-chain.
+* [x] **MUSE Token Burning Mechanism**: Implemented a mechanism for burning the native MUSE tokens to control the supply and increase scarcity.
+* [x] **Uniswap Purchase and Burning**: Enabled the purchase of native MUSE tokens on Uniswap using DAI and ETH, followed by a burning mechanism to further manage the token economics.
+
+### UI
+
+* [x] **Account Abstraction and Social Login**: Implemented Account Abstraction and social login functionalities using Web3Auth.
+* [x] **Sismo Implementation**: Integrated Sismo to verify user identity via zkproof without requiring the user to provide any data to the platform.
+* [x] **Brand new style in the UI**
+
+Documentation: [https://scobru.gitbook.io/mecenatedocs/](https://scobru.gitbook.io/mecenatedocs/)
+
+
+
+## WHAT'S THIS?
+
+***
 
 Mecenate is a protocol composed by a set of smart contracts that assicure the user's privacy and the integrity of the data. The protocol would to be open source and decentralized. All the fees are distributed to the Mecenate users.
 
 Mecenate consists of several applications, including:
 
-- **📄Mecenate Feed:**  Mecenate Feeds Mecenate Feeds allows anyone to publish data and stake capital behind the accuracy of that information. Users can build a verifiable track record and stake their predictions with ETH. By staking ETH, the seller of a prediction puts value at risk if the prediction goes wrong. When a seller stakes behind their prediction they choose a "griefing factor". Griefing factor = degree (e.g. 1:10) to which the buyer is able to destroy their stake. If the seller stakes ETH, the buyer can destroy both their stakes for ETH .
+* **📄Mecenate Feed:** Mecenate Feeds Mecenate Feeds allows anyone to publish data and stake capital behind the accuracy of that information. Users can build a verifiable track record and stake their predictions with ETH. By staking ETH, the seller of a prediction puts value at risk if the prediction goes wrong. When a seller stakes behind their prediction they choose a "griefing factor". Griefing factor = degree (e.g. 1:10) to which the buyer is able to destroy their stake. If the seller stakes ETH, the buyer can destroy both their stakes for ETH .
+* **📣Mecenate Bay:** A marketplace build on top of Mecenate Feeds for sourcing ANY kind of information (secrets, predictions etc). Requests for information are matched with a stake by "fulfillers" who get paid if the information meets the set parameters. ETH is used for staking. Ethers from punished fulfillers are sent to the Mecenate treasury and distributed between users protocol.
 
-- **📣Mecenate Bay:** A marketplace build on top of Mecenate Feeds for sourcing ANY kind of information (secrets, predictions etc). Requests for information are matched with a stake by "fulfillers" who get paid if the information meets the set parameters. ETH is used for staking. Ethers from punished fulfillers are sent to the Mecenate treasury and distributed between users protocol.
 
-## How it works?
+
+## HOW IT WORKS?
+
+***
 
 **QUESTION** Enter a short explanation of what you're looking for. This can include links, Twitter handles and hastags. Make your descriptions as clear as possible.
 
@@ -26,34 +74,13 @@ Mecenate consists of several applications, including:
 
 **PUNISH RATIO** How many ETH it will cost you to destroy one dollar of the fulfiller's stake. For example; if you set the ratio to 0.1 and punish a fulfiller who staked 100 ETH, it will cost you 10 ETH to destroy their entire stake. This protects the fulfiller from reckless punishment. The default value is good for most requests.
 
-**PUNISH PERIOD**  How many days after your request is fulfilled you have to verify the quality of the information provided. Within this window, you may punish the fulfiller. After this time their stake and reward are released. You may decide to release it early if you are satisfied with the submission. The default value is good for most requests.
+**PUNISH PERIOD** How many days after your request is fulfilled you have to verify the quality of the information provided. Within this window, you may punish the fulfiller. After this time their stake and reward are released. You may decide to release it early if you are satisfied with the submission. The default value is good for most requests.
 
-## </u>New in V2</u>
 
-- Scaffold-Eth2 (UI and Smart Contract)
-- OpenZeppelin
-- Uniswap SDK
-- EAS (Attestation)
-- Sismo (ZKP commitment)
-- Web3Auth (Account Abstraction)
 
-### Smart Contract
+## WORKFLOW
 
-- [x] **Multi-Token Usage**: Now supports ETH, DAI, and MUSE (the protocol token) as currencies for feeds.
-- [x] **Security and Gas Fee Optimization**: Improved security measures and optimized gas fees for better performance.
-- [x] **Mecenate EAS Resolver Contract**: Introduced the Mecenate EAS Resolver contract to ensure the attestations are genuinely valid.
-- [x] **Attestation Mechanism**: Implemented an attestation mechanism via eas during the post finalization stage. When the Buyer confirms the data validity, they also attest to the seller's reliability on-chain.
-- [x] **MUSE Token Burning Mechanism**: Implemented a mechanism for burning the native MUSE tokens to control the supply and increase scarcity.
-- [x] **Uniswap Purchase and Burning**: Enabled the purchase of native MUSE tokens on Uniswap using DAI and ETH, followed by a burning mechanism to further manage the token economics.
-
-### UI
-
-- [x] **Account Abstraction and Social Login**: Implemented Account Abstraction and social login functionalities using Web3Auth.
-- [x] **Sismo Implementation**: Integrated Sismo to verify user identity via zkproof without requiring the user to provide any data to the platform.
-
-Documentation: <https://scobru.gitbook.io/mecenatedocs/>
-
-## Mecenate Platform Workflow
+***
 
 ### New User Registration
 
@@ -70,16 +97,16 @@ Documentation: <https://scobru.gitbook.io/mecenatedocs/>
 3. **Symmetric Key**: `MecenateClient_Seller` generates symmetric encryption key `SymKey`.
 4. **Data Encryption**: `MecenateClient_Seller` computes `encryptedData = SymKey.encrypt(rawdata)`.
 5. **Hash Computations**:
-    - `keyhash = sha256(SymKey)`
-    - `datahash = sha256(rawdata)`
-    - `encryptedDatahash = sha256(encryptedData)`
+   * `keyhash = sha256(SymKey)`
+   * `datahash = sha256(rawdata)`
+   * `encryptedDatahash = sha256(encryptedData)`
 6. **JSON and Proof**:
-    - `json_proofhash_v120 = JSON(address_seller, multihashformat(datahash), multihashformat(keyhash), multihashformat(encryptedDatahash))`
-    - `proofhash = sha256(json_proofhash_v120)`
+   * `json_proofhash_v120 = JSON(address_seller, multihashformat(datahash), multihashformat(keyhash), multihashformat(encryptedDatahash))`
+   * `proofhash = sha256(json_proofhash_v120)`
 7. **Blockchain Interaction**:
-    - Submits `proofhash` to their Feed contract
-    - Uploads `json_proofhash_v120` to IPFS at `multihashformat(proofhash)`
-    - Uploads `encryptedData` to IPFS at `multihashformat(encryptedDatahash)`
+   * Submits `proofhash` to their Feed contract
+   * Uploads `json_proofhash_v120` to IPFS at `multihashformat(proofhash)`
+   * Uploads `encryptedData` to IPFS at `multihashformat(encryptedDatahash)`
 8. **Post Submission**: Creates a Post using `Feed.submitHash(proofhash)`.
 
 ### Selling a Post
@@ -88,8 +115,8 @@ Documentation: <https://scobru.gitbook.io/mecenatedocs/>
 2. **Key Retrieval**: `MecenateClient_Seller` retrieves `PubKey_Buyer` from `Mecenate_Users` contract.
 3. **Encryption**: `MecenateClient_Seller` computes `encryptedSymKey_Buyer = PubKey_Buyer.encrypt(SymKey)`.
 4. **Sell Data**:
-    - `json_selldata_v120 = JSON(encryptedSymKey_Buyer, multihashformat(proofhash))`
-    - Uploads `json_selldata_v120` to IPFS at `multihashformat(sha256(json_selldata_v120))`
+   * `json_selldata_v120 = JSON(encryptedSymKey_Buyer, multihashformat(proofhash))`
+   * Uploads `json_selldata_v120` to IPFS at `multihashformat(sha256(json_selldata_v120))`
 5. **Submission**: Submits `json_selldata_v120` to buyer using `Feed.submitHash(multihashformat(sha256(json_selldata_v120)))`.
 
 ### Revealing a Post
@@ -97,26 +124,85 @@ Documentation: <https://scobru.gitbook.io/mecenatedocs/>
 1. **SymKey Upload**: `MecenateClient_Seller` uploads `SymKey` to IPFS at `multihashformat(keyhash)`.
 2. **Raw Data Upload**: `MecenateClient_Seller` uploads `rawdata` to IPFS at `multihashformat(datahash)`.
 
+
+
+## STANDARDS
+
+***
+
+This standard outlines how to encode data for transfering access to an mecenate data proof. Transfering access occurs when the creator of the proof allows an other party to access the data.
+
+```
+Buffer(JSON.stringify({
+  msp_version: <v1.0.0>,
+  proofhash: <ipld_sha2_256 proof>,
+  sender: <0x1234...>,
+  senderPubKey: <0x1234...>,
+  senderVaultId: <0x1234...>,
+  receiver: <0x1234...>,
+  receiverPubKey: <0x1234...>,
+  receiverVaultId: <0x1234...>,
+  encryptedSymKey: ipld_sha2_256(Buffer(<raw data>))),
+  postId: <0x1234...>,
+  ... <extra fields>
+}))
+```
+
+more infos [here](standards/MSP\_1000.md)
+
+
+
+## PACKAGES
+
+***
+
+**packages/nextjs** - package for the UI build in nextJS&#x20;
+
+**packages/hardhat** - package with smart contracts build with Hardhat
+
+**packages/client** - SDK and command line interface, usefull to interact with the protocol.
+
+
+
 ## QUICK START
 
----
-To get started with Scaffold-Eth 2, follow the steps below:
+***
 
-1. Clone this repo & install dependencies
+1.  Clone this repo & install dependencies
 
-   ```bash
-   git clone https://github.com/scobru/mecenate-monorepo.git
-   cd mecenate-monorepo
-   yarn
-   ```
+    ```bash
+    git clone https://github.com/scobru/mecenate-monorepo.git
+    cd mecenate-monorepo
+    yarn
+    ```
+2.  Example .env file for Base Goerli
 
-2. On a third terminal, start your NextJS app:
+    ```dotenv
+    NEXT_PUBLIC_NETWORK=baseGoerli
+    NEXT_PUBLIC_RPC_URL=https://goerli.base.org
+    NEXT_PUBLIC_CHAIN_ID=84531
+    NEXT_PUBLIC_RPC_POLLING_INTERVAL=5000
+    NEXT_PUBLIC_PINATA_API_KEY=
+    NEXT_PUBLIC_PINATA_API_SECRET=
+    NEXT_PUBLIC_PINATA_GATEWAY=
+    NEXT_PUBLIC_IGNORE_BUILD_ERROR=true
+    NEXT_PUBLIC_ALCHEMY_SECRET=
+    NEXT_PUBLIC_INFURA_API_KEY=
+    NEXT_PUBLIC_TELEGRAM_TOKEN=
+    NEXT_PUBLIC_DAI_ADDRESS_BASE=0x7B027042374F2002614A71e5FF2228B1c862B67b  # BaseGoerli
+    NEXT_PUBLIC_MUSE_ADDRESS_BASE=0x614cA0b2fFde43704BD122B732dAF9a2B953594d # BaseGoerli
+    NEXT_PUBLIC_WETH_ADDRESS_BASE=0xa3a0460606Bb07A44Ff47fB90f2532F99de99534 # BaseGoerli
+    NEXT_PUBLIC_APP_KEY=""
+    NEXT_PUBLIC_APP_NONCE=""
+    ```
+3.  On a third terminal, start your NextJS app:
 
-   ```bash
-   yarn start
-   ```
+    ```bash
+    yarn start
+    ```
+
+###
 
 ### Contribution
 
-Other developers who share a passion for decentralized data exchange are invited to join this project and help it reach its full potential.
-Thank you for taking the time to read about Mecenate, and we look forward to sharing more updates soon.
+Other developers who share a passion for decentralized data exchange are invited to join this project and help it reach its full potential. Thank you for taking the time to read about Mecenate, and we look forward to sharing more updates soon.
