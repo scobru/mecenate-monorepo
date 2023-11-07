@@ -39,7 +39,7 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
               Live on <strong>Base Goerli</strong> 🎉
             </div>{" "}
             <Header />
-            <main className="relative flex flex-col flex-1 min-w-fit bg-gradient-to-tl from-slate-700 to-slate-900">
+            <main className="relative flex flex-col flex-1 min-w-fit bg-gradient-to-tl from-blue-950 to-slate-950 ">
               <Component {...pageProps} />
               <Analytics />
             </main>

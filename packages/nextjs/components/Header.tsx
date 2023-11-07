@@ -17,6 +17,8 @@ import {
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import { ArchiveBoxIcon, InboxIcon, SparklesIcon } from "@heroicons/react/20/solid";
+import { FaRegTimesCircle } from "react-icons/fa";
+import { ClockIcon } from "@heroicons/react/24/solid";
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const router = useRouter();
@@ -92,6 +94,12 @@ export default function Header() {
         </NavLink>
       </li>
       <li>
+        <NavLink href="/timestamps">
+          <ClockIcon className="h-4 w-4" />
+          Timestamps
+        </NavLink>
+      </li>
+      <li>
         <NavLink href="https://scobru.gitbook.io/mecenatedocs/">
           <DocumentIcon className="h-4 w-4" />
           Docs
@@ -101,7 +109,7 @@ export default function Header() {
   );
 
   return (
-    <div className="sticky lg:static top-0 navbar bg-gradient-to-bl from-slate-700 to-slate-900 min-h-0 flex-shrink-0 justify-between z-20 ">
+    <div className="sticky lg:static top-0 navbar bg-gradient-to-bl from-blue-950 to-slate-950 min-h-0 flex-shrink-0 justify-between z-20 ">
       <div className="navbar-start w-auto lg:w-1/2">
         <div className="lg:hidden dropdown" ref={burgerMenuRef}>
           <button
@@ -138,7 +146,7 @@ export default function Header() {
 
       <div className="navbar-end flex-grow mr-4">
         <WalletBadge />
-        <RainbowKitCustomConnectButton />
+        {/*  <RainbowKitCustomConnectButton /> */}
         {/* <FaucetButton /> */}
       </div>
     </div>

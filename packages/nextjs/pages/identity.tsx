@@ -18,7 +18,6 @@ import { useAppStore } from "~~/services/store/store";
 import { parse } from "path";
 
 
-
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
   const { data: customSigner } = useSigner();
@@ -37,9 +36,11 @@ const Identity: NextPage = () => {
   const [userName, setUserName] = React.useState<any>(null);
   const [withdrawalAddress, setWithdrawalAddress] = React.useState<any>("");
   const [password, setPassword] = React.useState<any>(null);
-  const [confirmPassword, setConfirmPassword] = React.useState<any>(null);
+  const [confirmPassword, setConfirmPassword] = React.useState<any>("");
+  const [recoverPassword, setRecoverPass] = React.useState<any>("");
   const [userData, setUserData] = React.useState<any>(null);
   const [pubKey, setPubKey] = React.useState<any>(null);
+  const [kp, setKp] = React.useState<any>(null);
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
   const runTx = useTransactor();
   const { signer } = useAppStore();
@@ -161,9 +162,11 @@ const Identity: NextPage = () => {
   async function createPair() {
     const kp = MecenateHelper.crypto.asymmetric.keyPair();
 
+    setKp(kp)
+
     if (!kp) return;
 
-    setPubKey(kp?.publicKey.toString());
+    setPubKey(kp?.publicKey);
 
     const keyPairJSON = JSON.stringify(kp);
 
@@ -238,8 +241,8 @@ const Identity: NextPage = () => {
     );
 
     const data = {
-      publicKey: await JSON.parse(keyPairJSON).publicKey.toString(),
-      secretKey: await JSON.parse(keyPairJSON).secretKey.toString(),
+      publicKey: await JSON.parse(keyPairJSON).publicKey,
+      secretKey: await JSON.parse(keyPairJSON).secretKey,
     };
 
     downloadFile({
@@ -253,16 +256,14 @@ const Identity: NextPage = () => {
 
   async function storeKey() {
     const id = notification.loading("Store keypair on IPFS...")
+
     if (password != confirmPassword) {
       notification.error("Password is not the same");
       return;
     }
 
-    const kp = MecenateHelper.crypto.asymmetric.keyPair();
+    if (!kp) notification.error("Generate Pair First")
 
-    if (!kp) return;
-
-    setPubKey(kp?.publicKey.toString());
     const keyPairJSON = JSON.stringify(kp);
 
     console.log("KeyPairJson", keyPairJSON);
@@ -287,10 +288,13 @@ const Identity: NextPage = () => {
         }),
       });
 
+      const verified = await verifiedResult.json()
+
       notification.remove(id)
-      notification.info(JSON.stringify(verifiedResult))
+      notification.info(verified.data)
 
       const id2 = notification.loading("Change Public Key On Chain")
+
       const result = await changePublicKey();
 
       if (result) {
@@ -302,8 +306,7 @@ const Identity: NextPage = () => {
     }
   }
 
-
-  async function decryptPair() {
+  async function recover() {
     const id = notification.loading("Recover...")
     const walletAddress = await signer?.getAddress();
 
@@ -324,23 +327,24 @@ const Identity: NextPage = () => {
         "Content-Type": "application/json",
       },
     });
+
     // Converti la risposta in JSON
     const resultJson = await verifiedResult.json();
-
     const parsedResult = JSON.parse(resultJson.data);
+
     let result = JSON.parse(JSON.stringify(parsedResult[0].content))
+
     result = JSON.parse(result)
 
-    console.log(result.salt)
-    console.log(result.iv)
-    console.log(result.ciphertext)
-
     notification.remove(id)
+
+    console.log(result)
+
     const decryptedPair = await MecenateHelper.crypto.aes.decryptObject(
       result.salt,
       result.iv,
       result.ciphertext,
-      password,
+      recoverPassword,
     );
 
     uiConsole(await decryptedPair);
@@ -517,7 +521,7 @@ const Identity: NextPage = () => {
                           {userData && (
                             <div>
                               {userData[0] && (
-                                <div className="card card-shadow break-all bg-gradient-to-br from-blue-950 to-slate-700 opacity-60 ">
+                                <div className="card card-shadow break-all bg-gradient-to-br from-blue-950 to-slate-700 opacity-95 ">
                                   <div className="card card-title font-semibold font-heading ">User Data</div>
                                   <div className="card-body">
                                     <div className="grid grid-cols-2 gap-4 text-left">
@@ -614,10 +618,10 @@ const Identity: NextPage = () => {
                                     placeholder="Password"
                                     className="input input-text my-5"
                                     onChange={e => {
-                                      setPassword(e.target.value);
+                                      setRecoverPass(e.target.value);
                                     }}
                                   />
-                                  <button className="btn btn-custom" onClick={decryptPair}>
+                                  <button className="btn btn-custom" onClick={recover} disabled={!recoverPassword}>
                                     Recover{" "}
                                   </button>
                                   <div id="console" className="p-4 break-all">

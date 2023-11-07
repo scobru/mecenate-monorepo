@@ -18,8 +18,6 @@ contract MecenateAttesterResolver is SchemaResolver {
         (bool valid, address feed, bytes32 postId, bytes memory postBytes) = abi
             .decode(attestation.data, (bool, address, bytes32, bytes));
 
-        require(postIds[postId] == false, "POST_ALREADY_ATTESTED");
-
         // Check if the post is valid
         IMecenateFeed mecenateFeed = IMecenateFeed(feed);
 

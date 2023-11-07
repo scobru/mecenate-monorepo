@@ -96,7 +96,7 @@ const Attestations = () => {
 
   return (
     <div className="flex flex-col justify-center items-center py-10 px-5 sm:px-0 lg:py-auto max-w-[100vw] ">
-      <div className="flex justify-center overflow-x-auto md:overflow-visible">
+      <div className="flex justify-center overflow-x-auto md:overflow-visible ">
         <div className="w-full md:min-w-full shadow-lg">
           <table className="table-auto md:table-zebra w-full">
             <thead>

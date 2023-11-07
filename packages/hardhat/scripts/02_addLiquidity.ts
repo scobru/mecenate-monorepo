@@ -12,10 +12,8 @@ const WETH_ADDRESS = "0xa3a0460606Bb07A44Ff47fB90f2532F99de99534";
 
 const POSITION_MANAGER_ADDRESS = "0x3c61369ef0D1D2AFa70d8feC2F31C5D6Ce134F30";
 
-const MUSE_WETH_POOL_500 = "0xb2155eF7B25741cA05C551A7F7568743AAC122D9";
-const MUSE_WETH_POOL_3000 = "0x0dcEB51e39D38aAD0ef0361EE1f06e95341B8b38";
-const DAI_WETH_POOL_500 = "0x51dB5E40418c16Ec33c60c9c7eEA43bE644De398";
-const DAI_WETH_POOL_3000 = "0x5a12a8E77f3D8C1E1D4b6dc4d070148083faE298";
+const MUSE_WETH_POOL_500 = "0xE919AaE29798042af656853F01D1e051fc5EF53d";
+const DAI_WETH_POOL_500 = "0xf7C12b19B607f35f8325e330C1Afb35efAF07cDB";
 
 // Import ABIs
 const NonfungiblePositionManagerABI =
@@ -92,7 +90,7 @@ async function main() {
     .approve(POSITION_MANAGER_ADDRESS, ethers.utils.parseEther("1000000"));
 
   const poolContract = new Contract(
-    MUSE_WETH_POOL_500,
+    DAI_WETH_POOL_500,
     UniswapV3PoolABI,
     owner,
   );
@@ -103,7 +101,7 @@ async function main() {
 
   // Create tokens and pool
   const pool = new Pool(
-    MuseToken,
+    DaiToken,
     WethToken,
     poolData.fee,
     poolData.sqrtPriceX96.toString(),
@@ -128,7 +126,7 @@ async function main() {
 
   // Minting parameters
   const params = {
-    token0: MUSE_ADDRESS,
+    token0: DAI_ADDRESS,
     token1: WETH_ADDRESS,
     fee: poolData?.fee,
     tickLower:

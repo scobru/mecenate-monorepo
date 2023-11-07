@@ -48,7 +48,11 @@ export const useWeb3auth = () => {
   return context;
 };
 
-export const Web3authProvider: React.FC = (children: any) => {
+interface Web3authProviderProps {
+  children: React.ReactNode;
+}
+
+export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) => {
   const { signer, setSigner } = useAppStore();
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
   const [torusPlugin, setTorusPlugin] = useState<TorusWalletConnectorPlugin | null>(null);
@@ -58,7 +62,7 @@ export const Web3authProvider: React.FC = (children: any) => {
   const [ethersProvider, setEthersProvider] = useState<ethers.providers.JsonRpcProvider | null>(null);
   const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
 
-  const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
+  const clientId = "BNtxg-XlYHBoZ0hMJtxcVx0t23BVW8ndPR2QSLusYQmU1kFJZwvps8WxTXxNJOKuHorgaBk0f1d8mZl0JlHwUgI"; // get from https://dashboard.web3auth.io
 
   useEffect(() => {
     const init = async () => {
@@ -72,7 +76,7 @@ export const Web3authProvider: React.FC = (children: any) => {
           },
           // uiConfig refers to the whitelabeling options, which is available only on Growth Plan and above
           // Please remove this parameter if you're on the Base Plan
-          uiConfig: {
+          /* uiConfig: {
             appName: "Mecenate Protocol",
             mode: "light",
             //loginMethodsOrder: ["apple", "google", "twitter"],
@@ -82,8 +86,8 @@ export const Web3authProvider: React.FC = (children: any) => {
             loginGridCol: 3,
             primaryButton: "socialLogin", // "externalLogin" | "socialLogin" | "emailLogin"
             displayErrorsOnModal: true,
-          },
-          web3AuthNetwork: "cyan",
+          }, */
+          web3AuthNetwork: "sapphire_mainnet",
         });
 
         // plugins and adapters are optional and can be added as per your requirement

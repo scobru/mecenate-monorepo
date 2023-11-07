@@ -1,17 +1,12 @@
 import fs from "fs";
 import axios from "axios";
+import fse from "fs-extra"
 
 import PinataSDK from "@pinata/sdk";
 import { Mogu } from "@scobru/mogu";
 import { EncryptedNode } from "@scobru/mogu/dist/db/db";
 
-const mogu = new Mogu(
-  undefined,
-  process.env.NEXT_PUBLIC_APP_KEY,
-  process.env.NEXT_PUBLIC_APP_NONCE,
-  process.env.NEXT_PUBLIC_PINATA_API_KEY,
-  process.env.NEXT_PUBLIC_PINATA_API_SECRET,
-);
+
 const pinata = new PinataSDK(process.env.NEXT_PUBLIC_PINATA_API_KEY, process.env.NEXT_PUBLIC_PINATA_API_SECRET);
 
 // La funzione per aggiungere un file JSON a IPFS tramite Pinata
@@ -56,58 +51,114 @@ export default async function handler(
   res: {
     status: (arg0: any) => {
       (): any;
-      new (): any;
-      json: { (arg0: IResponse): void; new (): any }; // Usa IResponse qui
-      end: { (): void; new (): any };
+      new(): any;
+      json: { (arg0: IResponse): void; new(): any }; // Usa IResponse qui
+      end: { (): void; new(): any };
     };
   },
 ) {
   if (req.method === "POST") {
+    const mogu = new Mogu(
+      undefined,
+      process.env.NEXT_PUBLIC_APP_KEY,
+      process.env.NEXT_PUBLIC_APP_NONCE,
+      process.env.NEXT_PUBLIC_PINATA_API_KEY,
+      process.env.NEXT_PUBLIC_PINATA_API_SECRET,
+    );
+
     let { wallet, salt, iv, ciphertext } = req.body;
     let state;
+    let cid;
 
-    const node: EncryptedNode = {
-      id: String(wallet),
-      type: "FILE",
-      name: wallet,
-      parent: "",
-      children: [],
-      content: JSON.stringify({ salt, iv, ciphertext }),
-    };
-
-    try {
-      state = await mogu.addNode(node);
-      console.log(state);
-    } catch (error) {
-      console.log(error);
+    if (fse.existsSync("./data/cids.json")) {
+      const rawData = fse.readFileSync("./data/cids.json", "utf8");
+      cid = JSON.parse(rawData);
     }
 
-    const hash = await mogu.store();
-    console.log("Hash");
-    fs.writeFileSync("./cids.json", JSON.stringify(hash));
-    res.status(200).json({
-      message: "Key stored and pinned to IPFS via Pinata successfully",
-      data: hash,
-    });
+    if (cid == null) {
+      const node: EncryptedNode = {
+        id: String(wallet),
+        type: "FILE",
+        name: wallet,
+        parent: "",
+        children: [],
+        content: JSON.stringify({ salt, iv, ciphertext }),
+      };
+
+      try {
+        state = await mogu.addNode(node);
+        console.log(state);
+      } catch (error) {
+        console.log(error);
+      }
+
+      const hash = await mogu.store();
+      console.log(hash);
+
+      fse.writeFileSync("./data/cids.json", JSON.stringify(hash));
+
+      return res.status(200).json({
+        message: "Key stored and pinned to IPFS via Pinata successfully",
+        data: hash,
+      });
+
+    } else {
+      console.log("Old CID", cid)
+      state = await mogu.load(String(cid));
+
+      console.log("State:", state);
+
+      const node: EncryptedNode = {
+        id: String(wallet),
+        type: "FILE",
+        name: wallet,
+        parent: "",
+        children: [],
+        content: JSON.stringify({ salt, iv, ciphertext }),
+      };
+
+      try {
+        state = mogu.updateNode(node);
+        console.log(state);
+
+        const hash = await mogu.store();
+        console.log("New CID", hash);
+
+        fse.writeFileSync("./data/cids.json", JSON.stringify(hash));
+        return res.status(200).json({
+          message: "Key stored and pinned to IPFS via Pinata successfully",
+          data: hash,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
 
   // GET Section
   if (req.method === "GET") {
+    const mogu = new Mogu(
+      undefined,
+      process.env.NEXT_PUBLIC_APP_KEY,
+      process.env.NEXT_PUBLIC_APP_NONCE,
+      process.env.NEXT_PUBLIC_PINATA_API_KEY,
+      process.env.NEXT_PUBLIC_PINATA_API_SECRET,
+    );
+
     const { wallet } = req.query;
-    let data;
+    let cid;
     let state;
 
-    if (fs.existsSync("./cids.json")) {
-      const rawData = fs.readFileSync("./cids.json", "utf8");
-      data = JSON.parse(rawData);
+    if (fse.existsSync("./data/cids.json")) {
+      const rawData = fse.readFileSync("./data/cids.json", "utf8");
+      cid = JSON.parse(rawData);
     }
-    console.log("IPFS hash", data);
+
+    console.log("IPFS hash", cid);
 
     try {
-      state = await mogu.load(String(data));
-      console.log(state)
-      state = await mogu.queryByName(wallet);
-      console.log("State:", state);
+      state = await mogu.load(String(cid));
+      state = mogu.queryByName(wallet);
     } catch (error) {
       console.log(error);
     }

@@ -27,7 +27,7 @@ import Spinner from "~~/components/Spinner";
 import { useWeb3auth } from "../components/Web3authProvider"; // Aggiusta il percorso in base alla tua struttura di cartelle
 import { useAppStore } from "~~/services/store/store";
 
-const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io
+const clientId = "BNtxg-XlYHBoZ0hMJtxcVx0t23BVW8ndPR2QSLusYQmU1kFJZwvps8WxTXxNJOKuHorgaBk0f1d8mZl0JlHwUgI"; // get from https://dashboard.web3auth.io
 
 const Connect: NextPage = () => {
   const {
@@ -64,18 +64,8 @@ const Connect: NextPage = () => {
           },
           // uiConfig refers to the whitelabeling options, which is available only on Growth Plan and above
           // Please remove this parameter if you're on the Base Plan
-          uiConfig: {
-            appName: "Mecenate Protocol",
-            mode: "light",
-            //loginMethodsOrder: ["apple", "google", "twitter"],
-            logoLight: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
-            logoDark: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
-            defaultLanguage: "en", // en, de, ja, ko, zh, es, fr, pt, nl
-            loginGridCol: 3,
-            primaryButton: "socialLogin", // "externalLogin" | "socialLogin" | "emailLogin"
-            displayErrorsOnModal: true,
-          },
-          web3AuthNetwork: "cyan",
+
+          web3AuthNetwork: "sapphire_mainnet",
         });
 
         // plugins and adapters are optional and can be added as per your requirement

@@ -3,8 +3,8 @@ import { config } from "hardhat";
 import hre from "hardhat";
 
 // Token addresses
-const DAI_ADDRESS = "0xCFA79Ce44e410a05c6C271bb2F95084Db6D52b33";
-const MUSE_ADDRESS = "0x100d7c197a9EF83258C888cb0Fb2d8e0Be2A0584";
+const DAI_ADDRESS = "0x7B027042374F2002614A71e5FF2228B1c862B67b";
+const MUSE_ADDRESS = "0x614cA0b2fFde43704BD122B732dAF9a2B953594d";
 const WETH_ADDRESS = "0xa3a0460606Bb07A44Ff47fB90f2532F99de99534";
 
 const FACTORY_ADDRESS = "0x9323c1d6D800ed51Bd7C6B216cfBec678B7d0BC2";
@@ -100,7 +100,7 @@ export async function deployPool(
 
 async function main(): Promise<void> {
   const pool = await deployPool(
-    MUSE_ADDRESS,
+    DAI_ADDRESS,
     WETH_ADDRESS,
     500,
     encodePriceSqrt(1, 2000),
