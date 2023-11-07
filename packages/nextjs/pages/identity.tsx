@@ -270,9 +270,7 @@ const Identity: NextPage = () => {
 
     // encrypt KeyPair With password and save into db
     if (typeof keyPairJSON === "string" && keyPairJSON !== null && keyPairJSON !== undefined) {
-
       const encryptedKeyPair = await MecenateHelper.crypto.aes.encryptObject(kp, password);
-
       console.log(encryptedKeyPair);
 
       const verifiedResult = await fetch("/api/storeKey", {
@@ -330,15 +328,22 @@ const Identity: NextPage = () => {
 
     // Converti la risposta in JSON
     const resultJson = await verifiedResult.json();
+
+    if (resultJson?.status == 200) {
+      notification.success("Recovered")
+    } else if (resultJson?.status == 404) {
+      notification.error("Error Decrypting Key Pair")
+      return;
+    }
+
     const parsedResult = JSON.parse(resultJson.data);
 
     let result = JSON.parse(JSON.stringify(parsedResult[0].content))
 
     result = JSON.parse(result)
+    console.log(result)
 
     notification.remove(id)
-
-    console.log(result)
 
     const decryptedPair = await MecenateHelper.crypto.aes.decryptObject(
       result.salt,
@@ -348,8 +353,8 @@ const Identity: NextPage = () => {
     );
 
     uiConsole(await decryptedPair);
-    notification.success("Recovered")
     notification.info(await decryptedPair)
+
   }
 
   const downloadFile = ({ data, fileName, fileType }: { data: BlobPart; fileName: string; fileType: string }): void => {

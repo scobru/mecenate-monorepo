@@ -1,25 +1,7 @@
-import fs from "fs";
 import axios from "axios";
 import fse from "fs-extra"
-
-import PinataSDK from "@pinata/sdk";
 import { Mogu } from "@scobru/mogu";
 import { EncryptedNode } from "@scobru/mogu/dist/db/db";
-
-
-const pinata = new PinataSDK(process.env.NEXT_PUBLIC_PINATA_API_KEY, process.env.NEXT_PUBLIC_PINATA_API_SECRET);
-
-// La funzione per aggiungere un file JSON a IPFS tramite Pinata
-const pinJsonToIpfs = async (data: any) => {
-  try {
-    const result = await pinata.pinJSONToIPFS(data);
-    console.log("Pinata Result: ", result); // Log per debug
-    return result.IpfsHash;
-  } catch (error) {
-    console.log("Pinata Error: ", error); // Log per debug
-    throw error;
-  }
-};
 
 interface IResponse {
   error?: string;
@@ -70,8 +52,8 @@ export default async function handler(
     let state;
     let cid;
 
-    if (fse.existsSync("./data/cids.json")) {
-      const rawData = fse.readFileSync("./data/cids.json", "utf8");
+    if (fse.existsSync(process.cwd() + "/pages/api/data/cids.json")) {
+      const rawData = fse.readFileSync(process.cwd() + "/pages/api/data/cids.json", "utf8");
       cid = JSON.parse(rawData);
     }
 
@@ -95,7 +77,7 @@ export default async function handler(
       const hash = await mogu.store();
       console.log(hash);
 
-      fse.writeFileSync("./data/cids.json", JSON.stringify(hash));
+      fse.writeFileSync(process.cwd() + "/pages/api/data/cids.json", JSON.stringify(hash));
 
       return res.status(200).json({
         message: "Key stored and pinned to IPFS via Pinata successfully",
@@ -103,9 +85,8 @@ export default async function handler(
       });
 
     } else {
-      console.log("Old CID", cid)
       state = await mogu.load(String(cid));
-
+      console.log("Old CID", cid)
       console.log("State:", state);
 
       const node: EncryptedNode = {
@@ -124,7 +105,7 @@ export default async function handler(
         const hash = await mogu.store();
         console.log("New CID", hash);
 
-        fse.writeFileSync("./data/cids.json", JSON.stringify(hash));
+        fse.writeFileSync(process.cwd() + "/pages/api/data/cids.json", JSON.stringify(hash));
         return res.status(200).json({
           message: "Key stored and pinned to IPFS via Pinata successfully",
           data: hash,
@@ -149,8 +130,8 @@ export default async function handler(
     let cid;
     let state;
 
-    if (fse.existsSync("./data/cids.json")) {
-      const rawData = fse.readFileSync("./data/cids.json", "utf8");
+    if (fse.existsSync(process.cwd() + "/pages/api/data/cids.json")) {
+      const rawData = fse.readFileSync(process.cwd() + "/pages/api/data/cids.json", "utf8");
       cid = JSON.parse(rawData);
     }
 

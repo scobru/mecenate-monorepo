@@ -6,8 +6,8 @@ import hre from "hardhat";
 const bn = require("bignumber.js");
 
 // Uniswap contract addresses
-const DAI_ADDRESS = "0xCFA79Ce44e410a05c6C271bb2F95084Db6D52b33";
-const MUSE_ADDRESS = "0x100d7c197a9EF83258C888cb0Fb2d8e0Be2A0584";
+const DAI_ADDRESS = "0x7B027042374F2002614A71e5FF2228B1c862B67b";
+const MUSE_ADDRESS = "0x614cA0b2fFde43704BD122B732dAF9a2B953594d";
 const WETH_ADDRESS = "0xa3a0460606Bb07A44Ff47fB90f2532F99de99534";
 
 const POSITION_MANAGER_ADDRESS = "0x3c61369ef0D1D2AFa70d8feC2F31C5D6Ce134F30";
@@ -90,7 +90,7 @@ async function main() {
     .approve(POSITION_MANAGER_ADDRESS, ethers.utils.parseEther("1000000"));
 
   const poolContract = new Contract(
-    DAI_WETH_POOL_500,
+    MUSE_WETH_POOL_500,
     UniswapV3PoolABI,
     owner,
   );
@@ -101,7 +101,7 @@ async function main() {
 
   // Create tokens and pool
   const pool = new Pool(
-    DaiToken,
+    MuseToken,
     WethToken,
     poolData.fee,
     poolData.sqrtPriceX96.toString(),
