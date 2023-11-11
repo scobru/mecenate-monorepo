@@ -229,8 +229,8 @@ const Bay: NextPage = () => {
               <option value="Nan">Select Token</option>
               <option value="ETH">ETH</option>
               <option value="DAI">DAI</option>
-              <option value="MUSE">MUSE</option>
-            </select>
+              {/*               <option value="MUSE">MUSE</option>
+ */}            </select>
 
             <label className="text-black font-semibold text-sm" htmlFor="request">
               Reward

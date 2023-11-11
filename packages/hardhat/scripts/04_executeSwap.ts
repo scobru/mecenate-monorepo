@@ -14,8 +14,8 @@ const artifacts = {
   Muse: require("./ERC20ABI.json"),
 };
 
-const DAI_ADDRESS = "0xCFA79Ce44e410a05c6C271bb2F95084Db6D52b33";
-const MUSE_ADDRESS = "0x100d7c197a9EF83258C888cb0Fb2d8e0Be2A0584";
+const DAI_ADDRESS = "0x7B027042374F2002614A71e5FF2228B1c862B67b";
+const MUSE_ADDRESS = "0x614cA0b2fFde43704BD122B732dAF9a2B953594d";
 const WETH_ADDRESS = "0xa3a0460606Bb07A44Ff47fB90f2532F99de99534";
 
 const SWAP_ROUTER_ADDRESS = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d"; // Inserisci l'indirizzo del SwapRouter
@@ -23,6 +23,7 @@ const QUOTERV2 = "0xedf539058e28E5937dAef3f69cEd0b25fbE66Ae9";
 
 const MUSE_WETH_POOL_500 = "0xE919AaE29798042af656853F01D1e051fc5EF53d";
 const DAI_WETH_POOL_500 = "0xf7C12b19B607f35f8325e330C1Afb35efAF07cDB";
+
 
 async function main() {
   // Importa ABI
@@ -40,19 +41,19 @@ async function main() {
   log(`Executing swap as ${owner.address}`);
   log("SwapRouter address:", SWAP_ROUTER_ADDRESS);
 
-  const poolContract = new Contract(DAI_WETH_POOL_500, UniswapV3PoolABI, owner);
+  const poolContract = new Contract(MUSE_WETH_POOL_500, UniswapV3PoolABI, owner);
 
   const poolData = await getPoolData(poolContract);
 
-  const daiCtx = new Contract(DAI_ADDRESS, artifacts.Dai.abi, owner);
   const wethCtx = new Contract(WETH_ADDRESS, artifacts.Weth.abi, owner);
 
   const DaiToken = new Token(84531, DAI_ADDRESS, 18, "mDAI", "mDAI");
   const WethToken = new Token(84531, WETH_ADDRESS, 18, "mWETH", "mWETH");
+  const MuseToken = new Token(84531, MUSE_ADDRESS, 18, "MUSE", "MUSE");
 
   const pool = new Pool(
     WethToken,
-    DaiToken,
+    MuseToken,
     poolData.fee,
     poolData.sqrtPriceX96.toString(),
     poolData.liquidity.toString(),
@@ -75,24 +76,18 @@ async function main() {
 
   log(`mWETH Balance: ${ethers.utils.formatEther(balance)}`);
 
-  const approveTxDai = await wethCtx.approve(
+  const approve = await wethCtx.approve(
     SWAP_ROUTER_ADDRESS,
     ethers.utils.parseEther("100000"),
   );
 
-  await approveTxDai.wait();
-
-  log(`Approved mDAI transfer to ${SWAP_ROUTER_ADDRESS}.`);
-
-  const balanceDai = await daiCtx.balanceOf(owner.address);
-
-  log(`mDAI Balance: ${ethers.utils.formatEther(balanceDai)}`);
+  await approve.wait();
 
   // Use ExactInputSingleParams to swap 0.001 WETH for DAI
   const deadline = block.timestamp + 1000 * 20;
   const exactInputSingleParams = {
     tokenIn: WETH_ADDRESS,
-    tokenOut: DAI_ADDRESS,
+    tokenOut: MUSE_ADDRESS,
     fee: pool.fee,
     recipient: owner.address,
     deadline: deadline,

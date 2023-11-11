@@ -24,8 +24,6 @@ enjoy the beta on : [https://mecenate.vercel.app/](https://mecenate.vercel.app/)
 * [PACKAGES](./#packages)
 * [QUICK START](./#quick-start)
 
-
-
 ## NEW IN V2
 
 ***
@@ -43,11 +41,10 @@ enjoy the beta on : [https://mecenate.vercel.app/](https://mecenate.vercel.app/)
 
 * [x] **Account Abstraction and Social Login**: Implemented Account Abstraction and social login functionalities using Web3Auth.
 * [x] **Sismo Implementation**: Integrated Sismo to verify user identity via zkproof without requiring the user to provide any data to the platform.
+* [x] **Payment with DAI**: We add DAI as payment for feeds
 * [x] **Brand new style in the UI**
 
 Documentation: [https://scobru.gitbook.io/mecenatedocs/](https://scobru.gitbook.io/mecenatedocs/)
-
-
 
 ## WHAT'S THIS?
 
@@ -59,8 +56,6 @@ Mecenate consists of several applications, including:
 
 * **📄Mecenate Feed:** Mecenate Feeds Mecenate Feeds allows anyone to publish data and stake capital behind the accuracy of that information. Users can build a verifiable track record and stake their predictions with ETH. By staking ETH, the seller of a prediction puts value at risk if the prediction goes wrong. When a seller stakes behind their prediction they choose a "griefing factor". Griefing factor = degree (e.g. 1:10) to which the buyer is able to destroy their stake. If the seller stakes ETH, the buyer can destroy both their stakes for ETH .
 * **📣Mecenate Bay:** A marketplace build on top of Mecenate Feeds for sourcing ANY kind of information (secrets, predictions etc). Requests for information are matched with a stake by "fulfillers" who get paid if the information meets the set parameters. ETH is used for staking. Ethers from punished fulfillers are sent to the Mecenate treasury and distributed between users protocol.
-
-
 
 ## HOW IT WORKS?
 
@@ -75,8 +70,6 @@ Mecenate consists of several applications, including:
 **PUNISH RATIO** How many ETH it will cost you to destroy one dollar of the fulfiller's stake. For example; if you set the ratio to 0.1 and punish a fulfiller who staked 100 ETH, it will cost you 10 ETH to destroy their entire stake. This protects the fulfiller from reckless punishment. The default value is good for most requests.
 
 **PUNISH PERIOD** How many days after your request is fulfilled you have to verify the quality of the information provided. Within this window, you may punish the fulfiller. After this time their stake and reward are released. You may decide to release it early if you are satisfied with the submission. The default value is good for most requests.
-
-
 
 ## WORKFLOW
 
@@ -124,8 +117,6 @@ Mecenate consists of several applications, including:
 1. **SymKey Upload**: `MecenateClient_Seller` uploads `SymKey` to IPFS at `multihashformat(keyhash)`.
 2. **Raw Data Upload**: `MecenateClient_Seller` uploads `rawdata` to IPFS at `multihashformat(datahash)`.
 
-
-
 ## STANDARDS
 
 ***
@@ -150,8 +141,6 @@ Buffer(JSON.stringify({
 
 more infos [here](standards/MSP\_1000.md)
 
-
-
 ## PACKAGES
 
 ***
@@ -162,20 +151,19 @@ more infos [here](standards/MSP\_1000.md)
 
 **packages/client** - SDK and command line interface, usefull to interact with the protocol.
 
-
-
 ## QUICK START
 
 ***
 
-1.  Clone this repo & install dependencies
+1. Clone this repo & install dependencies
 
     ```bash
     git clone https://github.com/scobru/mecenate-monorepo.git
     cd mecenate-monorepo
     yarn
     ```
-2.  Example .env file for Base Goerli
+
+2. Example .env file for Base Goerli
 
     ```dotenv
     NEXT_PUBLIC_NETWORK=baseGoerli
@@ -195,7 +183,8 @@ more infos [here](standards/MSP\_1000.md)
     NEXT_PUBLIC_APP_KEY=""
     NEXT_PUBLIC_APP_NONCE=""
     ```
-3.  On a third terminal, start your NextJS app:
+
+3. On a third terminal, start your NextJS app:
 
     ```bash
     yarn start

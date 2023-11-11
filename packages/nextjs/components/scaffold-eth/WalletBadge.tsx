@@ -71,12 +71,12 @@ export default function WalletBadge() {
               <span>{depositedEth.toFixed(3)}</span>
             </div>
 
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <span>
                 <strong>MUSE</strong>
               </span>
               <span>{depositedMuse.toFixed(3)}</span>
-            </div>
+            </div> */}
             <div className="flex justify-between">
               <span>
                 <strong>DAI</strong>

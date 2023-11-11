@@ -1289,8 +1289,8 @@ const ViewFeed: NextPage = () => {
                     >
                       <option value="Nan">Select Token</option>
                       <option value="ETH">ETH</option>
-                      <option value="MUSE">MUSE</option>
-                      <option value="DAI">DAI</option>
+                      {/*                       <option value="MUSE">MUSE</option>
+ */}                      <option value="DAI">DAI</option>
                     </select>
 
                     {tokenId == "1" || tokenId == "2" ? (

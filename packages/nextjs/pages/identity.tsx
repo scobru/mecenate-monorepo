@@ -17,7 +17,6 @@ import { useWeb3auth } from "../components/Web3authProvider"; // Aggiusta il per
 import { useAppStore } from "~~/services/store/store";
 import { parse } from "path";
 
-
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
   const { data: customSigner } = useSigner();
@@ -269,39 +268,38 @@ const Identity: NextPage = () => {
     console.log("KeyPairJson", keyPairJSON);
 
     // encrypt KeyPair With password and save into db
-    if (typeof keyPairJSON === "string" && keyPairJSON !== null && keyPairJSON !== undefined) {
-      const encryptedKeyPair = await MecenateHelper.crypto.aes.encryptObject(kp, password);
-      console.log(encryptedKeyPair);
 
-      const verifiedResult = await fetch("/api/storeKey", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          wallet: await signer?.getAddress(),
-          salt: encryptedKeyPair.salt,
-          iv: encryptedKeyPair.iv,
-          ciphertext: encryptedKeyPair.ciphertext,
-        }),
-      });
+    const encryptedKeyPair = await MecenateHelper.crypto.aes.encryptObject(kp, password);
+    console.log(encryptedKeyPair);
+    console.log("Signer", await signer?.getAddress())
 
-      const verified = await verifiedResult.json()
+    const verifiedResult = await fetch("/api/storeKey", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        wallet: await signer?.getAddress(),
+        salt: encryptedKeyPair.salt,
+        iv: encryptedKeyPair.iv,
+        ciphertext: encryptedKeyPair.ciphertext,
+      }),
+    });
 
-      notification.remove(id)
-      notification.info(verified.data)
+    const verified = await verifiedResult.json()
 
-      const id2 = notification.loading("Change Public Key On Chain")
+    notification.remove(id)
+    notification.info(verified.data)
 
-      const result = await changePublicKey();
+    const id2 = notification.loading("Change Public Key On Chain")
 
-      if (result) {
-        notification.remove(id2)
-        notification.success("Public Key changed successful!")
-      }
-    } else {
-      notification.error("Error creating key pair");
+    const result = await changePublicKey();
+
+    if (result) {
+      notification.remove(id2)
+      notification.success("Public Key changed successful!")
     }
+
   }
 
   async function recover() {
@@ -551,14 +549,14 @@ const Identity: NextPage = () => {
                                   >
                                     Mint test DAI
                                   </button>
-                                  <button
+                                  {/* <button
                                     className="btn btn-custom"
                                     onClick={async () => {
                                       await mintMuse();
                                     }}
                                   >
                                     Mint MUSE
-                                  </button>
+                                  </button> */}
                                 </div>
                                 <div className="card  card-shadow mb-10 bg-gradient-to-br from-blue-950 to-slate-700 opacity-80">
                                   <div className="text-center font-heading text-xl">Create Key Pair</div>

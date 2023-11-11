@@ -4,16 +4,6 @@ description: How To
 
 # Feeds
 
-###
-
-* [#sign-in](feeds.md#sign-in "mention")
-* [#create-a-feed-seller](feeds.md#create-a-feed-seller "mention")
-* [#create-post-seller](feeds.md#create-post-seller "mention")
-* [#accept-post-buyer](feeds.md#accept-post-buyer "mention")
-* [#submit-post-seller](feeds.md#submit-post-seller "mention")
-* [#reveal-and-renounce-seller](feeds.md#reveal-and-renounce-seller "mention")
-* [#add-and-take-stake-or-payment-seller-and-buyer](feeds.md#add-and-take-stake-or-payment-seller-and-buyer "mention")
-
 ### SIGN IN
 
 Go to the Identity page and click the 'Join with sismo' button. After your zk-proof has been verified, click 'Sign In' to register your ID into the protocol.
