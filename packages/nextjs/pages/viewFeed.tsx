@@ -1191,7 +1191,6 @@ const ViewFeed: NextPage = () => {
                 </div>
               </div>
             </div>
-
             <div className="flex flex-wrap text-xl mb-5 mx-10 font-bold hover:text-success animate-pulse">
               {feedData.postdata.settings.status === 6
                 ? "Waiting for Seller"

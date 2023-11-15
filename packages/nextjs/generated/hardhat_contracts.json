@@ -934,7 +934,7 @@
           ]
         },
         "MecenateBay": {
-          "address": "0x00380183a7cFcA44cA3B8A095aaAA3Ce7f1231c8",
+          "address": "0x9A13ff0515E8DF7C446D1c814518f65B44d2d578",
           "abi": [
             {
               "inputs": [
@@ -1815,8 +1815,192 @@
             }
           ]
         },
+        "MecenateSend": {
+          "address": "0x7f4Abf7026DE4C3C3AF4AC6e67585249B094c32B",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_usersContract",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_usersContract",
+                  "type": "address"
+                }
+              ],
+              "name": "changeUsersContract",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                }
+              ],
+              "name": "encryptedKeys",
+              "outputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "fixedFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "pubKey",
+                  "type": "bytes"
+                }
+              ],
+              "name": "getHash",
+              "outputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "encryptedData",
+                  "type": "bytes"
+                }
+              ],
+              "name": "submitHash",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newUsersContract",
+                  "type": "address"
+                }
+              ],
+              "name": "updateUsersContract",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "usersContract",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_receiver",
+                  "type": "address"
+                }
+              ],
+              "name": "withdrawETH",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
         "MecenateStats": {
-          "address": "0x6a4943aCeFd5fadC478507F973EFF76dfCc32041",
+          "address": "0xfbAb91EC44773DF7D9890f1c1A9A77B4D0197607",
           "abi": [
             {
               "inputs": [
@@ -2601,7 +2785,7 @@
           ]
         },
         "MecenateUsers": {
-          "address": "0x9F3f112e06F1685daeFe84DEBd3E98C0DC7E6C78",
+          "address": "0x92792054d2Fb584397A27aA71CE4A6b246b713Cc",
           "abi": [
             {
               "inputs": [
@@ -2683,88 +2867,6 @@
               ],
               "name": "UserRegistered",
               "type": "event"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "address",
-                  "name": "newAddress",
-                  "type": "address"
-                }
-              ],
-              "name": "changeEVMAddress",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "evmAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bytes",
-                      "name": "sismoVaultId",
-                      "type": "bytes"
-                    },
-                    {
-                      "internalType": "bytes",
-                      "name": "publicKey",
-                      "type": "bytes"
-                    }
-                  ],
-                  "internalType": "struct Structures.User",
-                  "name": "",
-                  "type": "tuple"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "sismoConnectResponse",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "pubKey",
-                  "type": "bytes"
-                }
-              ],
-              "name": "changePublicKey",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "evmAddress",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bytes",
-                      "name": "sismoVaultId",
-                      "type": "bytes"
-                    },
-                    {
-                      "internalType": "bytes",
-                      "name": "publicKey",
-                      "type": "bytes"
-                    }
-                  ],
-                  "internalType": "struct Structures.User",
-                  "name": "",
-                  "type": "tuple"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "function"
             },
             {
               "inputs": [

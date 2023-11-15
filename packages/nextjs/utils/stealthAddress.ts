@@ -4,14 +4,6 @@ import MecenateHelper from "@scobru/crypto-ipfs";
 
 const nacl = require('tweetnacl');
 
-import {
-    getSharedSecret as nobleGetSharedSecret,
-    utils as nobleUtils,
-    getPublicKey,
-    Point,
-    CURVE,
-} from '@noble/secp256k1';
-
 export const lengths = {
     address: 42, // 20 bytes + 0x prefix
     txHash: 66, // 32 bytes + 0x prefix
@@ -21,35 +13,49 @@ export const lengths = {
 
 
 export default async function generateStealthAddress(receiverPublicKey: string, senderSecretKey: string, senderPublicKey: string) {
-
     const theirPublicKey = Buffer.from(receiverPublicKey, "base64")
     const theirPublicKeyR32 = theirPublicKey.slice(0, 32)
+
+    console.log("Their Public Key", theirPublicKey)
+
     const mySecretKey = Buffer.from(senderSecretKey, "base64").slice(0, 32)
+    const myPublcKey = Buffer.from(senderPublicKey, "base64")
 
     const r = nacl.randomBytes(32); // Numero casuale
     const r32 = new Uint8Array(r).slice(0, 32);
 
     const pk = hexlify(nacl.scalarMult(theirPublicKeyR32, r32));
+    const newWallet = new Wallet(pk);
+
     const nonce = new Uint8Array(nacl.randomBytes(24));
 
-    const newWallet = new Wallet(pk);
     const encryptedR = MecenateHelper.crypto.asymmetric.encryptMessage(r32, nonce, theirPublicKey, mySecretKey)
+
     const encryptedRBase64 = Buffer.from(encryptedR, "base64")
+    const nonceBase64 = Buffer.from(nonce as any, "base64")
 
     return {
         encryptedR: encryptedRBase64,
-        nonce: nonce,
-        address: newWallet.address
+        nonce: nonceBase64,
+        address: newWallet.address,
+        bPubKey: theirPublicKey,
+        sPubKey: myPublcKey,
     };
 }
 
-export async function verifyStealthAddress(encryptedR: string, senderPublicKey: string, receiverSecretKey: string, receiverPublicKey: string, nonce: Uint8Array) {
-    const theirPublicKey = Buffer.from(senderPublicKey, "base64");
+export async function verifyStealthAddress(encryptedR: string, senderPublicKey: string, receiverPublicKey: string, receiverSecretKey: string, nonce: string) {
     const mySecretKey = Buffer.from(receiverSecretKey, "base64").slice(0, 32)
-
-    const decryptedR = MecenateHelper.crypto.asymmetric.decryptMessage(encryptedR, nonce, theirPublicKey, mySecretKey)
-
     const myPubKey32 = Buffer.from(receiverPublicKey, "base64").slice(0, 32);
+
+    // new uint8array from buffer
+    const nonceArray = Buffer.from(nonce, "base64");
+    const encryptedArray = Buffer.from(encryptedR, "base64");
+    const theirPublicKey = Buffer.from(senderPublicKey, "base64")
+
+    console.log(nonce, encryptedR, senderPublicKey)
+    console.log(encryptedArray, nonceArray, theirPublicKey, mySecretKey)
+
+    const decryptedR = MecenateHelper.crypto.asymmetric.decryptMessage(encryptedArray, nonceArray, theirPublicKey, mySecretKey)
 
     const decryptedRBytes = decryptedR.split(',').map(Number);
     const r32 = new Uint8Array(decryptedRBytes);

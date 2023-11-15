@@ -18,7 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { ArchiveBoxIcon, InboxIcon, SparklesIcon } from "@heroicons/react/20/solid";
 import { FaDollarSign, FaRegTimesCircle } from "react-icons/fa";
-import { ClockIcon } from "@heroicons/react/24/solid";
+import { BoltIcon, ClockIcon } from "@heroicons/react/24/solid";
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const router = useRouter();
@@ -82,9 +82,9 @@ export default function Header() {
         </NavLink>
       </li>
       <li>
-        <NavLink href="/pay">
-          <FaDollarSign className="h-4 w-4" />
-          Pay
+        <NavLink href="/send">
+          <BoltIcon className="h-4 w-4" />
+          Send
         </NavLink>
       </li>
       <li>
@@ -152,7 +152,7 @@ export default function Header() {
 
       <div className="navbar-end flex-grow mr-4">
         <WalletBadge />
-        {/*  <RainbowKitCustomConnectButton /> */}
+        <RainbowKitCustomConnectButton />
         {/* <FaucetButton /> */}
       </div>
     </div>

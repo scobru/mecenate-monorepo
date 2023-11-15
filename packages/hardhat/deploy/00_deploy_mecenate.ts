@@ -105,105 +105,106 @@ const deployYourContract: DeployFunction = async function (
     console.log("Users deployed at:", users.receipt.contractAddress);
 
   // Deploy Factory
-  /* 
-  console.log("Deploying Factory...");
 
-  const factory = (await upgrades.deployProxy(
-    await ethers.getContractFactory("MecenateFeedFactory"),
-    [
-      externalProxyCall.address,
-      users.address,
-      treasury.address,
-      eas,
-      schema,
-      mockWeth.address,
-      muse.address,
-      mockDai.address,
-      router,
-    ],
-    {
-      initializer: "initialize",
-      kind: "transparent",
-    },
-  )) as MecenateFeedFactory;
-
-  await factory.deployed();
-
-  const implementationAddress = await upgrades.erc1967.getImplementationAddress(
-    factory.address,
-  );
-
-  await new Promise((r) => setTimeout(r, 10000));
-
-  console.log("MecenateFeedFactory:", factory?.address);
-
-  console.log("MecenateFeedFactory Implementation:", implementationAddress);
-
-  // Deploy Feed
-  console.log("Deploying Feed...");
-
-  const feed = await new MecenateFeed__factory(signers[0]).deploy();
-
-  await feed.deployed();
-
-  await new Promise((r) => setTimeout(r, 5000));
-
-  console.log("MecenateFeed:", feed.address);
-
-  console.log("Update Factory Implementation");
-
-  await factory.adminUpdateImplementation(feed.address, 2, 0, 0, {
-    gasLimit: 1000000,
-  });
+  /*  console.log("Deploying Factory...");
+ 
+   const factory = (await upgrades.deployProxy(
+     await ethers.getContractFactory("MecenateFeedFactory"),
+     [
+       externalProxyCall.address,
+       users.address,
+       treasury.address,
+       eas,
+       schema,
+       mockWeth.address,
+       muse.address,
+       mockDai.address,
+       router,
+     ],
+     {
+       initializer: "initialize",
+       kind: "transparent",
+     },
+   )) as MecenateFeedFactory;
+ 
+   await factory.deployed();
+ 
+   const implementationAddress = await upgrades.erc1967.getImplementationAddress(
+     factory.address,
+   );
+ 
+   await new Promise((r) => setTimeout(r, 10000));
+ 
+   console.log("MecenateFeedFactory:", factory?.address);
+ 
+   console.log("MecenateFeedFactory Implementation:", implementationAddress);
+ 
+   // Deploy Feed
+   console.log("Deploying Feed...");
+ 
+   const feed = await new MecenateFeed__factory(signers[0]).deploy();
+ 
+   await feed.deployed();
+ 
+   await new Promise((r) => setTimeout(r, 5000));
+ 
+   console.log("MecenateFeed:", feed.address);
+ 
+   console.log("Update Factory Implementation");
+ 
+   await factory.adminUpdateImplementation(feed.address, 2, 0, 0, {
+     gasLimit: 1000000,
+   });
+ 
+   const mecenateBay = await deploy("MecenateBay", {
+     from: deployer,
+     args: [users.address],
+     log: true,
+     autoMine: true,
+   });
+ 
+   mecenateBay.receipt &&
+     console.log(
+       "Mecenate Bay deployed at:",
+       mecenateBay.receipt.contractAddress,
+     );
+ 
+   console.log("Setting Mecenate Bay...");
+ 
+   const mecenateStats = await deploy("MecenateStats", {
+     from: deployer,
+ 
+     args: [
+       users.address,
+       factory.address,
+       mecenateBay.address,
+       treasury.address,
+     ],
+     log: true,
+ 
+     autoMine: true,
+   });
+ 
+   mecenateStats.receipt &&
+     console.log(
+       "Mecenate Stats Factory deployed at:",
+       mecenateStats.receipt.contractAddress,
+     );
   */
-  const mecenateBay = await deploy("MecenateBay", {
+
+  const mecenateSend = await deploy("MecenateSend", {
     from: deployer,
+
     args: [users.address],
     log: true,
-    autoMine: true,
-  });
-
-  mecenateBay.receipt &&
-    console.log(
-      "Mecenate Bay deployed at:",
-      mecenateBay.receipt.contractAddress,
-    );
-
-  console.log("Setting Mecenate Bay...");
-
-  /*  const mecenateStats = await deploy("MecenateStats", {
-    from: deployer,
-
-    args: [
-      users.address,
-      factory.address,
-      mecenateBay.address,
-      treasury.address,
-    ],
-    log: true,
 
     autoMine: true,
   });
 
-  mecenateStats.receipt &&
-    console.log(
-      "Mecenate Stats Factory deployed at:",
-      mecenateStats.receipt.contractAddress,
-    );
- */
-  const mecenatePay = await deploy("MecenatePay", {
-    from: deployer,
-
-    args: [users.address, treasury.address],
-    log: true,
-
-    autoMine: true,
-  });
-
-  mecenatePay.receipt &&
+  mecenateSend.receipt &&
     console.log(
       "Mecenate Pay  deployed at:",
-      mecenatePay.receipt.contractAddress,
+      mecenateSend.receipt.contractAddress,
     );
 };
 
