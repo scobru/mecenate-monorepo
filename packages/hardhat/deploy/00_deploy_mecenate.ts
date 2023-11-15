@@ -105,6 +105,7 @@ const deployYourContract: DeployFunction = async function (
     console.log("Users deployed at:", users.receipt.contractAddress);
 
   // Deploy Factory
+  /* 
   console.log("Deploying Factory...");
 
   const factory = (await upgrades.deployProxy(
@@ -154,7 +155,7 @@ const deployYourContract: DeployFunction = async function (
   await factory.adminUpdateImplementation(feed.address, 2, 0, 0, {
     gasLimit: 1000000,
   });
-
+  */
   const mecenateBay = await deploy("MecenateBay", {
     from: deployer,
     args: [users.address],
@@ -170,7 +171,7 @@ const deployYourContract: DeployFunction = async function (
 
   console.log("Setting Mecenate Bay...");
 
-  const mecenateStats = await deploy("MecenateStats", {
+  /*  const mecenateStats = await deploy("MecenateStats", {
     from: deployer,
 
     args: [
@@ -188,6 +189,21 @@ const deployYourContract: DeployFunction = async function (
     console.log(
       "Mecenate Stats Factory deployed at:",
       mecenateStats.receipt.contractAddress,
+    );
+ */
+  const mecenatePay = await deploy("MecenatePay", {
+    from: deployer,
+
+    args: [users.address, treasury.address],
+    log: true,
+
+    autoMine: true,
+  });
+
+  mecenatePay.receipt &&
+    console.log(
+      "Mecenate Pay  deployed at:",
+      mecenatePay.receipt.contractAddress,
     );
 };
 

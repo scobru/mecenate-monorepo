@@ -17,7 +17,7 @@ import {
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import { ArchiveBoxIcon, InboxIcon, SparklesIcon } from "@heroicons/react/20/solid";
-import { FaRegTimesCircle } from "react-icons/fa";
+import { FaDollarSign, FaRegTimesCircle } from "react-icons/fa";
 import { ClockIcon } from "@heroicons/react/24/solid";
 
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
@@ -79,6 +79,12 @@ export default function Header() {
         <NavLink href="/bay">
           <MegaphoneIcon className="h-4 w-4" />
           Bay
+        </NavLink>
+      </li>
+      <li>
+        <NavLink href="/pay">
+          <FaDollarSign className="h-4 w-4" />
+          Pay
         </NavLink>
       </li>
       <li>

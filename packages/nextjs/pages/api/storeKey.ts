@@ -27,6 +27,7 @@ const mogu = new Mogu(
   process.env.NEXT_PUBLIC_APP_KEY,
   process.env.NEXT_PUBLIC_PINATA_API_KEY,
   process.env.NEXT_PUBLIC_PINATA_API_SECRET,
+  process.env.NEXT_PUBLIC_DB_NAME
 );
 
 export default async function handler(
@@ -53,8 +54,6 @@ export default async function handler(
   }
 
   if (req.method === "POST") {
-
-
     const { wallet, salt, iv, ciphertext } = req.body;
 
     const node: EncryptedNode = {
@@ -67,16 +66,19 @@ export default async function handler(
       encrypted: true,
     };
 
+    // Cid not exists
     if (cid == null) {
+      console.log("CID not exists!")
+
       try {
         state = mogu.addNode(node);
-        console.log(state);
       } catch (error) {
         console.log(error);
       }
 
       const hash = await mogu.store();
-      console.log(hash);
+
+      console.log("CID:", hash)
 
       fse.writeFileSync(process.cwd() + "/pages/api/data/cids.json", JSON.stringify(hash));
 
@@ -86,6 +88,8 @@ export default async function handler(
       });
 
     } else {
+      console.log("CID exists!")
+
       state = await mogu.load(String(cid));
 
       console.log("Old CID", cid)
@@ -168,6 +172,7 @@ export default async function handler(
     }
 
     state = JSON.stringify(state);
+    console.log(state)
 
     if (state) {
       res.status(200).json({ data: state });

@@ -28,7 +28,9 @@ contract MecenateTreasury is Ownable, Swapper {
     uint256 public ownerFee;
 
     mapping(address => uint256) public userReward;
+
     mapping(address => mapping(address => uint256)) public userRewardERC20;
+    
     mapping(address => uint256) public distributableERC20Balance;
 
     function addFunds() external payable {

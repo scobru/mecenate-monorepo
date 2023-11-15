@@ -263,6 +263,7 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
     await web3auth.logout();
     setProvider(null);
     setLoggedIn(false);
+    localStorage.removeItem("kp");
   };
 
   const showWCM = async () => {

@@ -21,7 +21,7 @@ const WETH_ADDRESS = "0xa3a0460606Bb07A44Ff47fB90f2532F99de99534";
 const SWAP_ROUTER_ADDRESS = "0x8357227D4eDc78991Db6FDB9bD6ADE250536dE1d"; // Inserisci l'indirizzo del SwapRouter
 const QUOTERV2 = "0xedf539058e28E5937dAef3f69cEd0b25fbE66Ae9";
 
-const MUSE_WETH_POOL_500 = "0xE919AaE29798042af656853F01D1e051fc5EF53d";
+const MUSE_WETH_POOL_500 = "";
 const DAI_WETH_POOL_500 = "0xf7C12b19B607f35f8325e330C1Afb35efAF07cDB";
 
 
@@ -41,7 +41,7 @@ async function main() {
   log(`Executing swap as ${owner.address}`);
   log("SwapRouter address:", SWAP_ROUTER_ADDRESS);
 
-  const poolContract = new Contract(MUSE_WETH_POOL_500, UniswapV3PoolABI, owner);
+  const poolContract = new Contract(DAI_WETH_POOL_500, UniswapV3PoolABI, owner);
 
   const poolData = await getPoolData(poolContract);
 
@@ -53,7 +53,7 @@ async function main() {
 
   const pool = new Pool(
     WethToken,
-    MuseToken,
+    DaiToken,
     poolData.fee,
     poolData.sqrtPriceX96.toString(),
     poolData.liquidity.toString(),
@@ -87,7 +87,7 @@ async function main() {
   const deadline = block.timestamp + 1000 * 20;
   const exactInputSingleParams = {
     tokenIn: WETH_ADDRESS,
-    tokenOut: MUSE_ADDRESS,
+    tokenOut: DAI_ADDRESS,
     fee: pool.fee,
     recipient: owner.address,
     deadline: deadline,

@@ -3695,8 +3695,8 @@ __metadata:
     "@pinata/sdk": ^2.1.0
     "@radix-ui/react-radio-group": ^1.1.3
     "@rainbow-me/rainbowkit": ^0.11.0
-    "@scobru/crypto-ipfs": ^1.1.8
-    "@scobru/mogu": ^1.1.18
+    "@scobru/crypto-ipfs": ^1.1.10
+    "@scobru/mogu": ^1.2.2
     "@sismo-core/sismo-connect-react": ^0.0.23
     "@sismo-core/sismo-connect-server": ^0.0.23
     "@types/call-bind": ^1
@@ -5360,6 +5360,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scobru/crypto-ipfs@npm:^1.1.10":
+  version: 1.1.10
+  resolution: "@scobru/crypto-ipfs@npm:1.1.10"
+  dependencies:
+    asymmetric-crypto: ^1.0.2
+    crypto-js: ^4.2.0
+    ethers: ^5.0.0
+    fernet: ^0.3.1
+    get-random-values: ^1.2.0
+    ipfs-only-hash: ^1.0.2
+    multihashes: ^0.4.15
+    pbkdf2: ^3.0.17
+    tweetnacl: ^1.0.1
+  checksum: a0847a1995e546624c0202faf670eca0b1c36c1922dd6d0ed696116d0c1069bd0efb7cbdabfb5ffff4b696e91a91bb1057772cd889591905883fb872df79c035
+  languageName: node
+  linkType: hard
+
 "@scobru/crypto-ipfs@npm:^1.1.8":
   version: 1.1.8
   resolution: "@scobru/crypto-ipfs@npm:1.1.8"
@@ -5377,9 +5394,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scobru/mogu@npm:^1.1.18":
-  version: 1.1.18
-  resolution: "@scobru/mogu@npm:1.1.18"
+"@scobru/crypto-ipfs@npm:^1.1.9":
+  version: 1.1.9
+  resolution: "@scobru/crypto-ipfs@npm:1.1.9"
+  dependencies:
+    asymmetric-crypto: ^1.0.2
+    crypto-js: ^4.2.0
+    ethers: ^5.0.0
+    fernet: ^0.3.1
+    get-random-values: ^1.2.0
+    ipfs-only-hash: ^1.0.2
+    multihashes: ^0.4.15
+    pbkdf2: ^3.0.17
+    tweetnacl: ^1.0.1
+  checksum: 55620a2665dae838946fc91298588687101b2d2b69148316b173e3bed363a653068352d263498c35860349e66aecfd86ed9634dc7c7b43989cdbd10dd3c0b0f6
+  languageName: node
+  linkType: hard
+
+"@scobru/mogu@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "@scobru/mogu@npm:1.2.2"
   dependencies:
     "@scobru/crypto-ipfs": ^1.1.8
     "@types/express": ^4.17.20
@@ -5399,7 +5433,7 @@ __metadata:
     typescript: ^5.2.2
     winston: ^3.11.0
     ws: ^8.14.2
-  checksum: 3c482fa2aebd250218dd40f9eb5e297b08cd3c53d86e1379722f28c3a08e6fa0ac2f11972c11e9b16715329969ac8f9135c31d6ea228e025b0b3d6e40f4a7dd9
+  checksum: 16b52a945744a8913647032d64c9fdccf91c32676aa11e9ea6f49f8217f813bb95499ec1aea27ba57da521cb2f4c07d683338712f67a968002015eee0d18e231
   languageName: node
   linkType: hard
 
@@ -24577,6 +24611,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "mecenate@workspace:."
   dependencies:
+    "@scobru/crypto-ipfs": ^1.1.9
     husky: ^8.0.1
     lint-staged: ^13.0.3
   languageName: unknown

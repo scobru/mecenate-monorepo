@@ -56,6 +56,8 @@ abstract contract Renounce is Staking {
 
         locked = false;
 
+        _changeStatus(Structures.PostStatus.Renounced);
+
         // Emit event
         emit Renounced(post);
     }

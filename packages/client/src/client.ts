@@ -1,11 +1,26 @@
 import { ethers, Contract } from "ethers";
-import { formatEther, parseEther, toUtf8String } from "ethers/lib/utils.js";
+import {
+  formatEther,
+  hexlify,
+  isHexString,
+  parseEther,
+  toUtf8Bytes,
+  toUtf8String,
+} from "ethers/lib/utils.js";
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { saveAs } from "file-saver";
 import MecenateHelper from "@scobru/crypto-ipfs";
 import ABIS from "../../nextjs/generated/hardhat_contracts.json";
 import axios from "axios";
 import fs from "fs";
+
+import {
+  getSharedSecret as nobleGetSharedSecret,
+  utils as nobleUtils,
+  getPublicKey,
+  Point,
+  CURVE,
+} from "@noble/secp256k1";
 
 // encoding & decoding
 
@@ -67,6 +82,84 @@ export class MecenateClient {
     // Save into folders
     fs.writeFileSync("./keypair.json", JSON.stringify(kp));
     return kp;
+  }
+
+  public async generatePrivateKeys() {
+    // Base message that will be signed
+    const baseMessage = 'Sign this message to access your Umbra account.\n\nOnly sign this message for a trusted client!'; // prettier-ignore
+
+    // Append chain ID if not mainnet to mitigate replay attacks
+    const { chainId } = await this.provider.getNetwork();
+    const message =
+      chainId === 1 ? baseMessage : `${baseMessage}\n\nChain ID: ${chainId}`;
+
+    // Get 65 byte signature from user using personal_sign
+    const userAddress = await signer.getAddress();
+    const formattedMessage = hexlify(toUtf8Bytes(message));
+    const signature = String(
+      await this.signer.send("personal_sign", [
+        formattedMessage,
+        userAddress.toLowerCase(),
+      ])
+    );
+
+    // If a user can no longer access funds because their wallet was using eth_sign before this update, stand up a
+    // special "fund recovery login page" which uses the commented out code below to sign with eth_sign
+    //     const signature = await signer.signMessage(message);
+
+    // Verify signature
+    const isValidSignature = (sig: string) =>
+      isHexString(sig) && sig.length === 132;
+
+    if (!isValidSignature(signature)) {
+      throw new Error(`Invalid signature: ${signature}`);
+    }
+
+    // Split hex string signature into two 32 byte chunks
+    const startIndex = 2; // first two characters are 0x, so skip these
+    const length = 64; // each 32 byte chunk is in hex, so 64 characters
+    const portion1 = signature.slice(startIndex, startIndex + length);
+    const portion2 = signature.slice(
+      startIndex + length,
+      startIndex + length + length
+    );
+    const lastByte = signature.slice(signature.length - 2);
+
+    if (`0x${portion1}${portion2}${lastByte}` !== signature) {
+      throw new Error("Signature incorrectly generated or parsed");
+    }
+
+    // Hash the signature pieces to get the two private keys
+    const spendingPrivateKey = sha256(`0x${portion1}`);
+    const viewingPrivateKey = sha256(`0x${portion2}`);
+
+    // Create KeyPair instances from the private keys and return them
+
+    const spendingPrivateKeySlim = spendingPrivateKey
+      ? spendingPrivateKey.slice(2)
+      : null;
+    const viewingPrivateKeySlim = viewingPrivateKey
+      ? viewingPrivateKey.slice(2)
+      : null;
+    const spendingPublicKey = getPublicKey(spendingPrivateKeySlim);
+    const viewingPublicKey = getPublicKey(viewingPrivateKeySlim);
+
+    const spendingKeyPair = {
+      publicKey: spendingPublicKey,
+      secretKey: spendingPrivateKey,
+    };
+
+    const viewingKeyPair = {
+      publicKey: viewingPublicKey,
+      secretKey: viewingPrivateKey,
+    };
+
+    const keyPair = [spendingKeyPair, viewingKeyPair];
+
+    // Save into folders
+    fs.writeFileSync("./keypair.json", JSON.stringify(keyPair));
+
+    return keyPair;
   }
 
   public verifyIdentity() {

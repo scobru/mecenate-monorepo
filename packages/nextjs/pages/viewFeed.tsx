@@ -5,7 +5,7 @@ import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsCo
 import { Contract, ContractInterface, Signer, ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 import { useRouter } from "next/router";
-import { formatEther, keccak256, parseEther, toUtf8Bytes, toUtf8String } from "ethers/lib/utils.js";
+import { arrayify, formatEther, hexlify, keccak256, parseEther, toUtf8Bytes, toUtf8String } from "ethers/lib/utils.js";
 import pinataSDK from "@pinata/sdk";
 import axios from "axios";
 import Dropzone from "react-dropzone";
@@ -20,6 +20,9 @@ import { useWeb3auth } from "../components/Web3authProvider"; // Aggiusta il per
 import { useAppStore } from "~~/services/store/store";
 export const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia v0.26
 const eas = new EAS(EASContractAddress);
+
+const nacl = require('tweetnacl');
+const util = require('tweetnacl-util');
 
 // Initialize SchemaEncoder with the schema string
 const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes32 postId, bytes post,");
@@ -443,7 +446,7 @@ const ViewFeed: NextPage = () => {
 
     const encryptedSymKey_Buyer = {
       ciphertext: encrypted.data,
-      ephemPubKey: sellerPublicKey,
+      ephemPubKey: toUtf8String(sellerPublicKey),
       nonce: encrypted.nonce,
       version: version,
     };
@@ -563,11 +566,14 @@ const ViewFeed: NextPage = () => {
     const encryptedSymKey = await JSON.parse(JSON.stringify(responseDecodeHahJSON.encryptedSymKey));
     console.log("Encrypted Symmetric Key: ", encryptedSymKey);
 
+    const secretKeyUint8Array = util.encodeBase64(secretKey);
+    console.log("PubKey:", encryptedSymKey.ephemPubKey)
+
     const decrypted = crypto.decrypt(
       encryptedSymKey.ciphertext,
       encryptedSymKey.nonce,
-      toUtf8String(encryptedSymKey.ephemPubKey),
-      secretKey,
+      encryptedSymKey.ephemPubKey,
+      secretKey
     );
 
     console.log("Decrypted", decrypted);

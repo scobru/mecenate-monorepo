@@ -1,21 +1,18 @@
 import type { NextPage } from "next";
 import React, { useEffect } from "react";
-import { useContract, useProvider, useNetwork, useSigner } from "wagmi";
+import { useContract, useNetwork, useSigner } from "wagmi";
 import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, Signer, Wallet, ethers } from "ethers";
+import { BigNumber, ContractInterface, Signer, Wallet, ethers } from "ethers";
 import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
 import { CONFIG, AUTHS, SIGNATURE_REQUEST } from "../sismo.config";
-import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
+import { useTransactor } from "~~/hooks/scaffold-eth";
 import Spinner from "~~/components/Spinner";
 import { notification } from "~~/utils/scaffold-eth";
 import { toUtf8Bytes, toUtf8String } from "ethers/lib/utils.js";
-import Web3 from "web3";
 import MecenateHelper from "@scobru/crypto-ipfs";
-
-import type { IBaseProvider, IProvider } from "@web3auth/base";
-import { useWeb3auth } from "../components/Web3authProvider"; // Aggiusta il percorso in base alla tua struttura di cartelle
 import { useAppStore } from "~~/services/store/store";
-import { parse } from "path";
+import generateStealthAddress from "~~/utils/stealthAddress";
+import { verifyStealthAddress, generateKeyPairFromSeed } from "~~/utils/stealthAddress";
 
 const Identity: NextPage = () => {
   const { chain } = useNetwork();
@@ -97,6 +94,43 @@ const Identity: NextPage = () => {
 
   const signIn = async () => {
     console.log("Signing in...");
+    const id = notification.loading("Store keypair on IPFS...")
+
+    if (password != confirmPassword) {
+      notification.error("Password is not the same");
+      return;
+    }
+
+    if (!kp) notification.error("Generate Pair First")
+
+    const keyPairJSON = JSON.stringify(kp);
+
+    console.log("KeyPairJson", keyPairJSON);
+
+    // encrypt KeyPair With password and save into db
+
+    const encryptedKeyPair = await MecenateHelper.crypto.aes.encryptObject(kp, password);
+    console.log(encryptedKeyPair);
+    console.log("Signer", await signer?.getAddress())
+
+    const verifiedResult = await fetch("/api/storeKey", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        wallet: await signer?.getAddress(),
+        salt: encryptedKeyPair.salt,
+        iv: encryptedKeyPair.iv,
+        ciphertext: encryptedKeyPair.ciphertext,
+      }),
+    });
+
+    const verified = await verifiedResult.json()
+
+    notification.remove(id)
+    notification.info(verified.data)
+
     runTx(usersCtx?.registerUser(responseBytes, toUtf8Bytes(String(pubKey))), signer as Signer);
   };
 
@@ -158,8 +192,18 @@ const Identity: NextPage = () => {
     window.location.href = "/identity";
   }
 
+
   async function createPair() {
-    const kp = MecenateHelper.crypto.asymmetric.keyPair();
+    generateKeyPairFromSeed(publicProvider, signer)
+
+    let kp = await generateKeyPairFromSeed(publicProvider, signer)
+
+    if (kp) {
+      kp.publicKey = ethers.utils.base64.encode(kp.publicKey)
+      kp.secretKey = ethers.utils.base64.encode(kp.secretKey)
+    }
+
+    localStorage.setItem("kp", JSON.stringify(kp));
 
     setKp(kp)
 
@@ -167,88 +211,91 @@ const Identity: NextPage = () => {
 
     setPubKey(kp?.publicKey);
 
+    console.log("PublicKey:", pubKey)
+
     const keyPairJSON = JSON.stringify(kp);
 
     console.log("KeyPairJson", keyPairJSON);
 
     notification.success("Key pair created");
 
-    notification.warning(
-      <div
-        id="alert-additional-content-3"
-        className="p-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
-        role="alert"
-      >
-        <div className="flex items-center">
-          <svg
-            aria-hidden="true"
-            className="w-5 h-5 mr-2"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-          <span className="sr-only">Info</span>
-          <h3 className="text-lg font-medium">Save Your Key Pair!</h3>
-        </div>
-        <div className="mt-2 mb-4 text-sm">
-          <div>
-            <p>
-              PUBLIC KEY : <br /> {JSON.parse(keyPairJSON).publicKey.toString()}
-            </p>
-            <p>
-              SECRET KEY : <br /> {JSON.parse(keyPairJSON).secretKey.toString()}
-            </p>
-          </div>
-        </div>
-        <div className="flex">
-          <button
-            type="button"
-            className="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-            onClick={async () => {
-              const data = {
-                publicKey: await JSON.parse(keyPairJSON).publicKey.toString(),
-                secretKey: await JSON.parse(keyPairJSON).secretKey.toString(),
-              };
-              navigator.clipboard.writeText(JSON.stringify(data));
-              notification.success("Public key copied to clipboard");
-            }}
-          >
-            <svg
-              aria-hidden="true"
-              className="-ml-0.5 mr-2 h-4 w-4"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-              <path
-                fill-rule="evenodd"
-                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-            Copy to clipboard
-          </button>
-        </div>
-      </div>,
-    );
 
-    const data = {
-      publicKey: await JSON.parse(keyPairJSON).publicKey,
-      secretKey: await JSON.parse(keyPairJSON).secretKey,
-    };
+    // notification.warning(
+    //   <div
+    //     id="alert-additional-content-3"
+    //     className="p-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
+    //     role="alert"
+    //   >
+    //     <div className="flex items-center">
+    //       <svg
+    //         aria-hidden="true"
+    //         className="w-5 h-5 mr-2"
+    //         fill="currentColor"
+    //         viewBox="0 0 20 20"
+    //         xmlns="http://www.w3.org/2000/svg"
+    //       >
+    //         <path
+    //           fill-rule="evenodd"
+    //           d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+    //           clip-rule="evenodd"
+    //         ></path>
+    //       </svg>
+    //       <span className="sr-only">Info</span>
+    //       <h3 className="text-lg font-medium">Save Your Key Pair!</h3>
+    //     </div>
+    //     <div className="mt-2 mb-4 text-sm">
+    //       <div>
+    //         <p>
+    //           PUBLIC KEY : <br /> {JSON.parse(keyPairJSON).publicKey.toString()}
+    //         </p>
+    //         <p>
+    //           SECRET KEY : <br /> {JSON.parse(keyPairJSON).secretKey.toString()}
+    //         </p>
+    //       </div>
+    //     </div>
+    //     <div className="flex">
+    //       <button
+    //         type="button"
+    //         className="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+    //         onClick={async () => {
+    //           const data = {
+    //             publicKey: await JSON.parse(keyPairJSON).publicKey.toString(),
+    //             secretKey: await JSON.parse(keyPairJSON).secretKey.toString(),
+    //           };
+    //           navigator.clipboard.writeText(JSON.stringify(data));
+    //           notification.success("Public key copied to clipboard");
+    //         }}
+    //       >
+    //         <svg
+    //           aria-hidden="true"
+    //           className="-ml-0.5 mr-2 h-4 w-4"
+    //           fill="currentColor"
+    //           viewBox="0 0 20 20"
+    //           xmlns="http://www.w3.org/2000/svg"
+    //         >
+    //           <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+    //           <path
+    //             fill-rule="evenodd"
+    //             d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+    //             clip-rule="evenodd"
+    //           ></path>
+    //         </svg>
+    //         Copy to clipboard
+    //       </button>
+    //     </div>
+    //   </div>,
+    // ); 
 
-    downloadFile({
-      data: JSON.stringify(data),
-      fileName: (await signer?.getAddress()) + "_keyPair.json",
-      fileType: "text/json",
-    });
+    // const data = {
+    //   publicKey: await JSON.parse(keyPairJSON).publicKey,
+    //   secretKey: await JSON.parse(keyPairJSON).secretKey,
+    // };
+
+    // downloadFile({
+    //    data: JSON.stringify(data),
+    //    fileName: (await signer?.getAddress()) + "_keyPair.json",
+    //    fileType: "text/json",
+    // });
 
     uiConsole(JSON.parse(JSON.stringify(keyPairJSON)));
   }
@@ -327,6 +374,7 @@ const Identity: NextPage = () => {
     // Converti la risposta in JSON
     const resultJson = await verifiedResult.json();
 
+
     if (resultJson?.status == 200) {
       notification.success("Recovered")
     } else if (resultJson?.status == 404) {
@@ -339,7 +387,8 @@ const Identity: NextPage = () => {
     let result = JSON.parse(JSON.stringify(parsedResult[0].content))
 
     result = JSON.parse(result)
-    console.log(result)
+
+    console.log(result.salt, result.iv, result.ciphertext)
 
     notification.remove(id)
 
@@ -349,6 +398,8 @@ const Identity: NextPage = () => {
       result.ciphertext,
       recoverPassword,
     );
+
+    console.log(decryptedPair)
 
     uiConsole(await decryptedPair);
     notification.info(await decryptedPair)
@@ -374,48 +425,6 @@ const Identity: NextPage = () => {
     a.dispatchEvent(clickEvt);
     a.remove();
   };
-
-  /*   useEffect(() => {
-    const run = async () => {
-      console.log("Initializing signer...");
-      try {
-        let _signer;
-        const cachedAdapter = String(localStorage.getItem("Web3Auth-cachedAdapter"));
-
-        if (cachedAdapter !== "metamask") {
-          const pk = localStorage.getItem("pk");
-          if (pk) {
-            _signer = new ethers.Wallet(pk, publicProvider);
-            console.log("Signer", _signer);
-          } else {
-            throw new Error("Private key not found in local storage.");
-          }
-        } else {
-          const webauthProvider: IProvider = JSON.parse(String(localStorage.getItem("web3AuthProvider"))) as IProvider;
-          console.log("webauthProvider", webauthProvider);
-          const signer = JSON.parse(String(localStorage.getItem("signer")));
-          console.log("signer", signer);
-          const ethersProvider = new ethers.providers.Web3Provider(webauthProvider as IBaseProvider<unknown>);
-          console.log("ethersProvider", ethersProvider);
-
-          if (signer) {
-            _signer = signer;
-            console.log("Signer", signer);
-          } else {
-            throw new Error("Invalid web3Auth object in local storage.");
-          }
-        }
-        setSigner(_signer);
-        setawait signer?.getAddress()(String(localStorage.getItem("accountAddress")));
-      } catch (error) {
-        console.error("Failed to initialize signer:", error);
-      }
-
-      initializeState();
-    };
-
-    run();
-  }, []); */
 
   useEffect(() => {
     if (signer) {
@@ -506,7 +515,7 @@ const Identity: NextPage = () => {
                       {Boolean(error) ? (
                         <div className="text-red-500 font-bold">Error verifying ZK Proofs: {error}</div>
                       ) : (
-                        <div className="flex flex-col ">
+                        <div className="flex flex-col">
                           <div className="status-wrapper">
                             <button
                               className="btn btn-custom  hover:bg-red-700  font-semibold py-2 px-4 hover:text-white focus:outline-none focus:shadow-outline"
@@ -520,9 +529,9 @@ const Identity: NextPage = () => {
                               RESET ZKP{" "}
                             </button>
                           </div>
-                          <div className="font-headgin text-sl">Go to Connect</div>
+                          <div className="text-sl">Go to Connect</div>
                           {userData && (
-                            <div>
+                            <div className="flex flex-col gap-5">
                               {userData[0] && (
                                 <div className="card card-shadow break-all bg-gradient-to-br from-blue-950 to-slate-700 opacity-95 ">
                                   <div className="card card-title font-semibold font-heading ">User Data</div>
@@ -539,26 +548,7 @@ const Identity: NextPage = () => {
                                 </div>
                               )}
                               <div>
-                                <div className="card  card-shadow  bg-gradient-to-br from-blue-950 to-slate-700 opacity-80 ">
-                                  <div className="text-center font-heading text-xl">Faucet mDAI/MUSE</div>
-                                  <button
-                                    className="btn btn-custom"
-                                    onClick={async () => {
-                                      await mintDai();
-                                    }}
-                                  >
-                                    Mint test DAI
-                                  </button>
-                                  {/* <button
-                                    className="btn btn-custom"
-                                    onClick={async () => {
-                                      await mintMuse();
-                                    }}
-                                  >
-                                    Mint MUSE
-                                  </button> */}
-                                </div>
-                                <div className="card  card-shadow mb-10 bg-gradient-to-br from-blue-950 to-slate-700 opacity-80">
+                                <div className="card  card-shadow my-10 bg-gradient-to-br from-blue-950 to-slate-700 opacity-80 ">
                                   <div className="text-center font-heading text-xl">Create Key Pair</div>
                                   <div>
                                     <input
@@ -581,33 +571,49 @@ const Identity: NextPage = () => {
                                         setConfirmPassword(e.target.value);
                                       }}
                                     />
-                                    Generate your key pair
+                                    Generate your key pair, you don't need to save it!
                                     <button className="btn btn-custom" onClick={createPair} disabled={!Boolean(password === confirmPassword)}>
                                       Generate{" "}
                                     </button>
                                     Encrypt and Store on IPFS.
-                                    <button className="btn btn-custom" onClick={storeKey} disabled={!Boolean(password === confirmPassword)}>
-                                      Store {" "}
-                                    </button>
+                                    {!userExists ?
+                                      <button
+                                        className="btn btn-custom "
+                                        onClick={signIn}
+                                        disabled={Boolean(userExists === true) || !Boolean(password === confirmPassword)}
+                                      >
+                                        Join{" "}
+                                      </button>
+                                      : <button className="btn btn-custom" onClick={storeKey} disabled={!Boolean(password === confirmPassword)}>
+                                        Store {" "}
+                                      </button>}
                                     <div id="console" className="p-4 break-all">
                                       <pre className="whitespace-pre-line mt-3"></pre>
                                     </div>
-                                    Change your Public Key on Mecenate Protocol
+                                    {/*  Change your Public Key on Mecenate Protocol
                                     <button className="btn btn-custom" onClick={changePublicKey} disabled={!Boolean(password === confirmPassword)}>
                                       Change{" "}
-                                    </button>
+                                    </button> */}
                                   </div>
                                 </div>
-                                <div className="card  card-shadow mb-10 bg-gradient-to-br from-blue-950 to-slate-950 opacity-90">
-                                  <div className="text-center font-heading text-xl mb-5">Sign in</div>
-                                  Record your pubkey, address and zkproof into Mecenate.
+                                <div className="card  card-shadow  bg-gradient-to-br from-blue-950 to-slate-700 opacity-80 ">
+                                  <div className="text-center font-heading text-xl">Faucet mDAI/MUSE</div>
                                   <button
-                                    className="btn btn-custom "
-                                    onClick={signIn}
-                                    disabled={Boolean(userExists === true) || !Boolean(password === confirmPassword)}
+                                    className="btn btn-custom"
+                                    onClick={async () => {
+                                      await mintDai();
+                                    }}
                                   >
-                                    Join{" "}
+                                    Mint test DAI
                                   </button>
+                                  {/* <button
+                                    className="btn btn-custom"
+                                    onClick={async () => {
+                                      await mintMuse();
+                                    }}
+                                  >
+                                    Mint MUSE
+                                  </button> */}
                                 </div>
                               </div>
                               <div className="card  card-shadow mb-10  bg-gradient-to-br from-blue-950 to-slate-900 opacity-80">
