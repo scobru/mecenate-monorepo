@@ -28,6 +28,8 @@ const Pay: NextPage = () => {
   const [amount, setAmount] = React.useState<string>("");
   const [hash, setHash] = React.useState<string>("");
 
+  const [encrypted, setEncrypted] = React.useState<any>("");
+
   const [needSetup, setNeedSetup] = React.useState<boolean>(true);
 
   const [kp, setKP] = React.useState<string>("")
@@ -108,13 +110,13 @@ const Pay: NextPage = () => {
     // get Public Key of address from MecenateUser
     const pubKey = await userCtx?.getUserPublicKey(receiver);
 
-    console.log("Receiver PubKey: " + pubKey)
+    const stealthResponse = await generateStealthAddress(toUtf8String(pubKey), JSON.parse(kp).secretKey, JSON.parse(kp).publicKey);
 
-    const stealthResponse = await generateStealthAddress(toUtf8String(pubKey), JSON.parse(kp).secretKey);
+    setEncrypted(stealthResponse)
 
-    console.log("Nonce: " + stealthResponse.nonce)
-    console.log("Encrypted R: " + stealthResponse.encryptedR)
-    console.log("Stealth Address: " + stealthResponse.address)
+    console.log(stealthResponse)
+
+    return
 
     // send payment to computedAddress
     const tx = {
@@ -145,6 +147,7 @@ const Pay: NextPage = () => {
     }
 
     console.log("Saving proof JSON...");
+
     notification.success("Saving proof JSON...");
 
     const pin = await pinata.pinJSONToIPFS(json_payData_v100);
@@ -172,24 +175,31 @@ const Pay: NextPage = () => {
 
   const receivePayment = async () => {
     console.log(hexlify(toUtf8Bytes(JSON.parse(kp).publicKey)))
+
     const hash = await payCtx?.getHash(toUtf8Bytes(JSON.parse(kp).publicKey));
     const parsedHash = toUtf8String(hash);
     console.log("Parsed Hash:", parsedHash);
+
     // fetch from ipfs
     const proof = await axios.get("https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + parsedHash, {
       headers: {
         Accept: "text/plain",
       },
     });
-    const senderPubKey = proof.data.pubKey;
-    const senderNonce = proof.data.nonce;
-    const senderEncryptedR = proof.data.encryptedData;
 
-    console.log(proof)
+    // const senderPubKey = proof.data.pubKey;
+    // const senderNonce = proof.data.nonce;
+    // const senderEncryptedR = proof.data.encryptedData;
+
+    const senderPubKey = JSON.parse(kp).publicKey;
+    const senderNonce = encrypted.nonce;
+    const senderEncryptedR = encrypted.encryptedR;
 
     const wallet = await verifyStealthAddress(senderEncryptedR, senderPubKey, JSON.parse(kp).secretKey, JSON.parse(kp).publicKey, senderNonce);
 
-    const balance = await publicProvider.getBalance(wallet.address);
+    console.log(wallet)
+
+    const balance = await publicProvider.getBalance(wallet?.address);
 
     if (balance.gt(0)) {
       const tx = {

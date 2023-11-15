@@ -62,6 +62,10 @@ const ViewFeed: NextPage = () => {
   const [postCount, setPostCount] = useState<any>("");
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [yourStake, setYourStake] = useState<any>(0);
+  const [yourStakeETH, setYourStakeETH] = useState<any>(0);
+  const [yourStakeDAI, setYourStakeDAI] = useState<any>(0);
+  const [yourStakeMUSE, setYourStakeMUSE] = useState<any>(0);
+
   const [feedData, setFeedData] = useState<any>([]);
   const deployedContractFeed = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateFeed");
   const deployedContractUsers = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateUsers");
@@ -342,8 +346,6 @@ const ViewFeed: NextPage = () => {
     try {
       const symmetricKey = MecenateHelper.crypto.symmetric.generateKey();
       const encryptedFile = MecenateHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
-
-
 
       const symmetricKeyHash = await MecenateHelper.multihash({
         input: symmetricKey,
@@ -763,8 +765,8 @@ const ViewFeed: NextPage = () => {
   async function addStake() {
     console.log("Adding Stake...");
     runTx(
-      feedCtx?.addStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress(), parseEther(stakeAmount), {
-        value: feedData?.postdata?.settings?.tokenId == 0 ? parseEther(stakeAmount) : 0,
+      feedCtx?.addStake(Number(tokenId), signer?.getAddress(), parseEther(stakeAmount), {
+        value: Number(tokenId) == 0 ? parseEther(stakeAmount) : 0,
       }),
       signer as Signer,
     );
@@ -772,7 +774,7 @@ const ViewFeed: NextPage = () => {
   }
 
   async function takeAll() {
-    runTx(feedCtx?.takeFullStake(feedData?.postdata?.settings?.tokenId, receiver), signer as Signer);
+    runTx(feedCtx?.takeFullStake(Number(tokenId), receiver), signer as Signer);
     console.log("Take All Stake...");
     await fetchData();
   }
@@ -783,7 +785,7 @@ const ViewFeed: NextPage = () => {
     console.log("Take Stake...");
 
     runTx(
-      feedCtx?.takeStake(feedData?.postdata?.settings?.tokenId, receiver, parseEther(stakeAmount)),
+      feedCtx?.takeStake(Number(tokenId), receiver, parseEther(stakeAmount)),
       signer as Signer,
     );
 
@@ -1058,8 +1060,15 @@ const ViewFeed: NextPage = () => {
       if (signer && feedData.length != 0) {
         feedCtx?.connect(signer as Signer);
         const yourStake = await feedCtx?.getStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress());
+        const yourStakeETH = await feedCtx?.getStake(0, signer?.getAddress());
+        const yourStakeMUSE = await feedCtx?.getStake(1, signer?.getAddress());
+        const yourStakeDAI = await feedCtx?.getStake(2, signer?.getAddress());
+
         console.log("Your Stake: ", yourStake);
         setYourStake(yourStake);
+        setYourStakeETH(yourStakeETH);
+        setYourStakeDAI(yourStakeDAI);
+        setYourStakeMUSE(yourStakeMUSE)
       }
     }, 5000); // call every 5 seconds
 
@@ -1204,14 +1213,9 @@ const ViewFeed: NextPage = () => {
             <div className="mx-10  font-base text-lg">
               Your current deposit is{" "}
               <strong>
-                {formatEther(yourStake)}{" "}
-                {feedData?.postdata?.settings?.tokenId == 0
-                  ? "ETH"
-                  : feedData?.postdata?.settings?.tokenId == 1
-                    ? "MUSE"
-                    : feedData?.postdata?.settings?.tokenId == 2
-                      ? "DAI"
-                      : "ETH"}
+                <p> {formatEther(yourStakeETH)}{" "} "ETH"</p>
+                <p> {formatEther(yourStakeDAI)}{" "} "DAI"</p>
+                {/* <p> {formatEther(yourStakeMUSE)}{" "} "MUSE"</p> */}
               </strong>
             </div>
             <div className="mx-10  mb-5 font-base text-lg">
@@ -1364,15 +1368,6 @@ const ViewFeed: NextPage = () => {
                         </Dropzone>
                       </div>
                     ) : null}
-                    {/* <input
-                    type="password"
-                    className="input w-full my-4"
-                    placeholder="Password to save the symmetric key"
-                    onChange={async e => {
-                      setPassword(e.target.value);
-                    }}
-                  /> */}
-
                     <button
                       className="btn btn-primary w-full mt-4"
                       onClick={async () => {
@@ -1685,9 +1680,22 @@ const ViewFeed: NextPage = () => {
                     <input
                       type="text"
                       className="input w-full"
-                      placeholder="Receivert"
+                      placeholder="Receiver"
                       onChange={e => setReceiver(e.target.value)}
                     />
+                    <select
+                      className="select select-text bg-transparent my-4 text-black bg-white"
+                      name="tokens"
+                      id="tokens"
+                      onChange={e => handleSelectToken(e.target.value)}
+                    >
+                      <option value="Nan">Select Token</option>
+                      <option value="ETH">ETH</option>
+                      {/*                       
+                      <option value="MUSE">MUSE</option>
+                      */}
+                      <option value="DAI">DAI</option>
+                    </select>
                     <button
                       className="btn  w-full"
                       onClick={async () => {
