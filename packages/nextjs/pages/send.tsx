@@ -113,13 +113,14 @@ const Send: NextPage = () => {
 
   const sendPayment = async () => {
     // get Public Key of address from MecenateUser
-    const receiverPubKey = await userCtx?.getUserPublicKey(receiver);
+    const receiverPubKey = toUtf8String(await userCtx?.getUserPublicKey(receiver));
+    console.log("Receiver Public Key", toUtf8Bytes(receiverPubKey));
+
     const senderPubKey = JSON.parse(kp).publicKey
     const senderSecretKey = JSON.parse(kp).secretKey
+    console.log("Sender Public Key", senderPubKey);
 
-    const stealthResponse = await generateStealthAddress(toUtf8String(receiverPubKey), senderSecretKey, senderPubKey);
-
-    setEncrypted(stealthResponse);
+    const stealthResponse = await generateStealthAddress(receiverPubKey, senderSecretKey, senderPubKey);
     console.log("Wallet Address", stealthResponse.address);
 
     const json_payData_v100 = {
@@ -157,8 +158,17 @@ const Send: NextPage = () => {
       return;
     }
 
-    const encoded = ethers.utils.defaultAbiCoder.encode(["bytes", "bytes", "address", "address", "uint256"], [toUtf8Bytes(pin.IpfsHash), receiverPubKey, stealthResponse.address, ZERO_ADDRESS, parseEther(amount)]);
+    const encoded = ethers.utils.defaultAbiCoder.encode(["bytes", "bytes", "address", "address", "uint256"],
+      [
+        toUtf8Bytes(pin.IpfsHash),
+        toUtf8Bytes(receiverPubKey),
+        stealthResponse.address,
+        ZERO_ADDRESS,
+        parseEther(amount)
+      ]);
+
     const msgValue = Number(formatEther(await sendCtx?.fixedFee())) + Number(amount);
+
 
     console.log(Buffer.from(senderPubKey, "base64"), Buffer.from(toUtf8String(receiverPubKey), "base64"), Buffer.from(senderSecretKey, "base64"), Buffer.from(stealthResponse.encryptedR as any, "base64"), Buffer.from(stealthResponse.nonce as any, "base64"))
     runTx(sendCtx?.submitHash(encoded, { value: parseEther(String(msgValue)) }), signer);
@@ -166,6 +176,7 @@ const Send: NextPage = () => {
 
   const receivePayment = async () => {
     notification.info("Fetching proof JSON...")
+
     const receiverSecretKey = JSON.parse(kp).secretKey
     const receiverPubKey = JSON.parse(kp).publicKey
 
