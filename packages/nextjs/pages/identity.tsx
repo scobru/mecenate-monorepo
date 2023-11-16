@@ -134,11 +134,6 @@ const Identity: NextPage = () => {
     runTx(usersCtx?.registerUser(responseBytes, toUtf8Bytes(String(pubKey))), signer as Signer);
   };
 
-  const changePublicKey = async () => {
-    console.log("Signing in...");
-    runTx(usersCtx?.changePublicKey(responseBytes, toUtf8Bytes(String(pubKey))), signer as Signer);
-    return true;
-  };
 
   const getContractData = async function getContractData() {
     if (signer) {
@@ -337,15 +332,6 @@ const Identity: NextPage = () => {
 
     notification.remove(id)
     notification.info(verified.data)
-
-    const id2 = notification.loading("Change Public Key On Chain")
-
-    const result = await changePublicKey();
-
-    if (result) {
-      notification.remove(id2)
-      notification.success("Public Key changed successful!")
-    }
 
   }
 
@@ -590,10 +576,6 @@ const Identity: NextPage = () => {
                                     <div id="console" className="p-4 break-all">
                                       <pre className="whitespace-pre-line mt-3"></pre>
                                     </div>
-                                    {/*  Change your Public Key on Mecenate Protocol
-                                    <button className="btn btn-custom" onClick={changePublicKey} disabled={!Boolean(password === confirmPassword)}>
-                                      Change{" "}
-                                    </button> */}
                                   </div>
                                 </div>
                                 <div className="card  card-shadow  bg-gradient-to-br from-blue-950 to-slate-700 opacity-80 ">

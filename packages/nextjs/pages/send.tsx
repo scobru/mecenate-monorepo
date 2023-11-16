@@ -73,11 +73,11 @@ const Send: NextPage = () => {
     ({ address: museAddress, abi: museAbi } = deployedContractMUSE);
   }
 
-  useEffect(() => {
-    if (signer) {
-      setNeedSetup(true);
-    }
-  }, [signer]);
+  /*  useEffect(() => {
+     if (signer) {
+       setNeedSetup(true);
+     }
+   }, [signer]); */
 
   const sendCtx = useContract({
     address: sendAddress,
@@ -112,22 +112,25 @@ const Send: NextPage = () => {
   }
 
   const sendPayment = async () => {
+    const id = notification.loading("Sending payment...");
+
     // get Public Key of address from MecenateUser
     const receiverPubKey = toUtf8String(await userCtx?.getUserPublicKey(receiver));
-    console.log("Receiver Public Key", toUtf8Bytes(receiverPubKey));
-
     const senderPubKey = JSON.parse(kp).publicKey
     const senderSecretKey = JSON.parse(kp).secretKey
+
     console.log("Sender Public Key", senderPubKey);
+    console.log("Receiver Public Key", receiverPubKey);
+    console.log("Sender Secret Key", senderSecretKey);
 
     const stealthResponse = await generateStealthAddress(receiverPubKey, senderSecretKey, senderPubKey);
+
     console.log("Wallet Address", stealthResponse.address);
 
     const json_payData_v100 = {
       encryptedR: stealthResponse.encryptedR,
       nonce: stealthResponse.nonce,
-      sPubKey: stealthResponse.sPubKey,
-      bPubKey: stealthResponse.bPubKey,
+      ephemeralPubKey: stealthResponse.ephemeralPubKey
     };
 
     const pinata = await new pinataSDK(pinataApiKey, pinataApiSecret);
@@ -138,8 +141,7 @@ const Send: NextPage = () => {
       return;
     }
 
-    console.log("Saving proof JSON...");
-    notification.success("Saving proof JSON...");
+
 
     const pin = await pinata.pinJSONToIPFS(json_payData_v100);
 
@@ -160,8 +162,8 @@ const Send: NextPage = () => {
 
     const encoded = ethers.utils.defaultAbiCoder.encode(["bytes", "bytes", "address", "address", "uint256"],
       [
-        toUtf8Bytes(pin.IpfsHash),
-        toUtf8Bytes(receiverPubKey),
+        toUtf8Bytes(String(pin.IpfsHash)),
+        await userCtx?.getUserPublicKey(receiver),
         stealthResponse.address,
         ZERO_ADDRESS,
         parseEther(amount)
@@ -169,8 +171,8 @@ const Send: NextPage = () => {
 
     const msgValue = Number(formatEther(await sendCtx?.fixedFee())) + Number(amount);
 
+    notification.remove(id)
 
-    console.log(Buffer.from(senderPubKey, "base64"), Buffer.from(toUtf8String(receiverPubKey), "base64"), Buffer.from(senderSecretKey, "base64"), Buffer.from(stealthResponse.encryptedR as any, "base64"), Buffer.from(stealthResponse.nonce as any, "base64"))
     runTx(sendCtx?.submitHash(encoded, { value: parseEther(String(msgValue)) }), signer);
   }
 
@@ -191,14 +193,15 @@ const Send: NextPage = () => {
       },
     });
 
-    const receiverPubKeyArray = proof.data.rPubKey
-    const senderPubKey = proof.data.sPubKey;
+    const ephemeralPubKey = proof.data.ephemeralPubKey;
     const nonce = proof.data.nonce;
     const encryptedR = proof.data.encryptedR;
 
+    console.log(proof.data)
+
     notification.info("Verifying Sthealth Address...")
 
-    const wallet = await verifyStealthAddress(encryptedR, senderPubKey, receiverPubKeyArray, receiverSecretKey, nonce);
+    const wallet = await verifyStealthAddress(encryptedR, nonce, ephemeralPubKey, receiverPubKey, receiverSecretKey,);
 
     console.log("Wallet Address", wallet.address);
     const balance = await publicProvider.getBalance(wallet?.address);
@@ -241,6 +244,7 @@ const Send: NextPage = () => {
     }
   }
 
+
   return (
     <div className="flex items-center justify-center flex-col flex-grow pt-10 text-black bg-gradient-to-tl from-blue-950 to-slate-950 min-w-fit">
       {needSetup ? (
@@ -250,39 +254,39 @@ const Send: NextPage = () => {
           </button>
         </div>
       ) : signer ? (
-        <div className="p-4 mt-5 bg-gradient-to-br from-blue-950 to-slate-800 rounded-lg shadow-md">
-          <div className="font-light text-2xl text-white mb-2">
-            Send
-          </div>
-          <div className="mb-4">
-            <label htmlFor="address" className="block text-sm font-medium text-gray-500 my-2">Receiver's Address</label>
-            <input id="address" placeholder="Enter Address" className="input input-text w-full text-black" type="text" onChange={(e) => { setReceiver(String(e.target.value)) }} />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-500 my-2">Amount to Send</label>
-            <input id="amount" placeholder="Enter Amount" className="input input-text w-full" type="text" onChange={(e) => { setAmount(String(e.target.value)) }} />
-          </div>
+        <div>
+          <div className="p-4 mt-5 bg-gradient-to-br from-blue-950 to-slate-800 rounded-lg shadow-md mb-4">
+            <div className="font-light text-2xl text-white mb-2">
+              Send
+            </div>
+            <div className="mb-4">
+              <label htmlFor="address" className="block text-sm font-medium text-gray-500 my-2">Receiver's Address</label>
+              <input id="address" placeholder="Enter Address" className="input input-text w-full text-black" type="text" onChange={(e) => { setReceiver(String(e.target.value)) }} />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="amount" className="block text-sm font-medium text-gray-500 my-2">Amount to Send</label>
+              <input id="amount" placeholder="Enter Amount" className="input input-text w-full" type="text" onChange={(e) => { setAmount(String(e.target.value)) }} />
+            </div>
 
-          <button className="btn btn-custom w-full mb-3  hover:bg-secondary" onClick={sendPayment} disabled={!receiver}>
-            Send
-          </button>
-          <div className="divider" />
-          <div className="font-light text-2xl text-white mb-2">
-            Scan
+            <button className="btn btn-custom w-full mb-3  hover:bg-secondary" onClick={sendPayment} disabled={!receiver}>
+              Send
+            </button>
           </div>
-
-
-          <div className="mb-4">
-            <label htmlFor="receiver" className="block text-sm font-medium text-gray-500 my-2">Receiver for Payment</label>
-            <input id="receiver" placeholder="Receiver" className="input input-text w-full" type="text" onChange={(e) => { setReceiver(String(e.target.value)) }} />
+          <div className="p-4 mt-5 bg-gradient-to-br from-blue-950 to-slate-800 rounded-lg shadow-md">
+            <div className="font-light text-2xl text-white mb-2">
+              Scan
+            </div>
+            <div className="mb-4">
+              <label htmlFor="receiver" className="block text-sm font-medium text-gray-500 my-2">Receiver for Payment</label>
+              <input id="receiver" placeholder="Receiver" className="input input-text w-full" type="text" onChange={(e) => { setReceiver(String(e.target.value)) }} />
+            </div>
+            <button className="btn btn-custom w-full hover:bg-secondary" onClick={receivePayment} disabled={!receiver}>
+              Receive
+            </button>
           </div>
-          <button className="btn btn-custom w-full hover:bg-secondary" onClick={receivePayment} disabled={!receiver}>
-            Receive
-          </button>
         </div>
       ) : null}
     </div>
-
   );
 };
 

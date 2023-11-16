@@ -2,7 +2,9 @@ import { Wallet, ethers } from "ethers";
 import { hexlify, isHexString, sha256, toUtf8Bytes, toUtf8String } from "ethers/lib/utils.js";
 import MecenateHelper from "@scobru/crypto-ipfs";
 
+const getRandomValues = require("get-random-values");
 const nacl = require('tweetnacl');
+const crypto = require('asymmetric-crypto')
 
 export const lengths = {
     address: 42, // 20 bytes + 0x prefix
@@ -11,56 +13,66 @@ export const lengths = {
     publicKey: 132, // 64 bytes + 0x04 prefix
 };
 
+const MAX_UINT32 = Math.pow(2, 32) - 1;
+const MAX_UINT8 = Math.pow(2, 8) - 1;
+const FERNET_SECRET_LENGTH = 32;
+
+
+const randomNumber = () => {
+    if (typeof window === "undefined") {
+        return getRandomValues(new Uint8Array(1))[0] / MAX_UINT8;
+    }
+    return getRandomValues(new Uint32Array(1))[0] / MAX_UINT32;
+};
+
+const randomString = () => {
+    let result = "";
+    const characters =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const charactersLength = characters.length;
+    for (let i = 0; i < FERNET_SECRET_LENGTH; i++) {
+        result += characters.charAt(Math.floor(randomNumber() * charactersLength));
+    }
+    return result;
+};
+
 
 export default async function generateStealthAddress(receiverPublicKey: string, senderSecretKey: string, senderPublicKey: string) {
     const theirPublicKey = Buffer.from(receiverPublicKey, "base64")
     const theirPublicKeyR32 = theirPublicKey.slice(0, 32)
 
-    console.log("Their Public Key", theirPublicKey)
+    const r = randomString() as string;
+    // convert r to uint8array
+    const rBytes = Buffer.from(r, "utf8");
 
-    const mySecretKey = Buffer.from(senderSecretKey, "base64").slice(0, 32)
-    const myPublcKey = Buffer.from(senderPublicKey, "base64")
+    if (typeof r !== 'string') throw new TypeError('expected string');
 
-    const r = nacl.randomBytes(32); // Numero casuale
-    const r32 = new Uint8Array(r).slice(0, 32);
+    const pk = hexlify(nacl.scalarMult(theirPublicKeyR32, rBytes));
+    console.log(pk)
 
-    const pk = hexlify(nacl.scalarMult(theirPublicKeyR32, r32));
     const newWallet = new Wallet(pk);
 
-    const nonce = new Uint8Array(nacl.randomBytes(24));
+    const encryptedR = crypto.encrypt(r, String(receiverPublicKey), String(senderSecretKey))
 
-    const encryptedR = MecenateHelper.crypto.asymmetric.encryptMessage(r32, nonce, theirPublicKey, mySecretKey)
-
-    const encryptedRBase64 = Buffer.from(encryptedR, "base64")
-    const nonceBase64 = Buffer.from(nonce as any, "base64")
+    console.log(encryptedR.data, encryptedR.nonce, newWallet.address)
 
     return {
-        encryptedR: encryptedRBase64,
-        nonce: nonceBase64,
+        encryptedR: encryptedR.data,
+        nonce: encryptedR.nonce,
         address: newWallet.address,
-        bPubKey: theirPublicKey,
-        sPubKey: myPublcKey,
+        ephemeralPubKey: senderPublicKey
     };
 }
 
-export async function verifyStealthAddress(encryptedR: string, senderPublicKey: string, receiverPublicKey: string, receiverSecretKey: string, nonce: string) {
-    const mySecretKey = Buffer.from(receiverSecretKey, "base64").slice(0, 32)
+export async function verifyStealthAddress(encryptedR: string, nonce: string, ephemeralPubKey: string, receiverPublicKey: string, receiverSecretKey: string) {
     const myPubKey32 = Buffer.from(receiverPublicKey, "base64").slice(0, 32);
 
-    // new uint8array from buffer
-    const nonceArray = Buffer.from(nonce, "base64");
-    const encryptedArray = Buffer.from(encryptedR, "base64");
-    const theirPublicKey = Buffer.from(senderPublicKey, "base64")
+    const decryptedR = crypto.decrypt(encryptedR, nonce, ephemeralPubKey, receiverSecretKey)
 
-    console.log(nonce, encryptedR, senderPublicKey)
-    console.log(encryptedArray, nonceArray, theirPublicKey, mySecretKey)
+    const rBytes = Buffer.from(decryptedR, "utf8");
 
-    const decryptedR = MecenateHelper.crypto.asymmetric.decryptMessage(encryptedArray, nonceArray, theirPublicKey, mySecretKey)
+    const pk = hexlify(nacl.scalarMult(myPubKey32, rBytes));
 
-    const decryptedRBytes = decryptedR.split(',').map(Number);
-    const r32 = new Uint8Array(decryptedRBytes);
-
-    const pk = hexlify(nacl.scalarMult(myPubKey32, r32));
     const newWallet = new Wallet(pk);
 
     return newWallet
