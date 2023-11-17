@@ -27,9 +27,7 @@ const Send: NextPage = () => {
 
   const [receiver, setReceiver] = React.useState<string>("");
   const [amount, setAmount] = React.useState<string>("");
-  const [hash, setHash] = React.useState<string>("");
-
-  const [encrypted, setEncrypted] = React.useState<any>("");
+  const [decryptedWallet, setDecryptedWallet] = React.useState<any>(null);
 
   const [needSetup, setNeedSetup] = React.useState<boolean>(true);
 
@@ -177,7 +175,7 @@ const Send: NextPage = () => {
   }
 
   const receivePayment = async () => {
-    notification.info("Fetching proof JSON...")
+    const id = notification.loading("Receiving payment...");
 
     const receiverSecretKey = JSON.parse(kp).secretKey
     const receiverPubKey = JSON.parse(kp).publicKey
@@ -202,6 +200,9 @@ const Send: NextPage = () => {
     notification.info("Verifying Sthealth Address...")
 
     const wallet = await verifyStealthAddress(encryptedR, nonce, ephemeralPubKey, receiverPubKey, receiverSecretKey,);
+    setDecryptedWallet(wallet)
+
+
 
     console.log("Wallet Address", wallet.address);
     const balance = await publicProvider.getBalance(wallet?.address);
@@ -225,13 +226,20 @@ const Send: NextPage = () => {
     // Calcola il costo del gas stimato
     const estimatedGasCost = adjustedGas.mul(gasPrice);
 
+    notification.remove(id)
+
     // Calcola il saldo da inviare sottraendo il costo del gas stimato dal saldo totale
     let balanceToSend = balance.sub(estimatedGasCost);
     console.log("Balance to send", ethers.utils.formatEther(balanceToSend))
     console.log("Estimated Network Fee", ethers.utils.formatEther(estimatedGasCost))
-    notification.info("Retrieving balance...")
+
+    const id2 = notification.loading("Retrieving balance...")
+
+
 
     if (balance.gt(estimatedGasCost)) {
+      notification.remove(id2);
+
       // Set the value of the transaction to the balance to send
       tx.value = balanceToSend;
 
@@ -240,23 +248,33 @@ const Send: NextPage = () => {
       });
       notification.success("Payment received")
     } else {
+      notification.remove(id2);
+
       notification.error("No balance to withdraw");
     }
   }
 
 
   return (
-    <div className="flex items-center justify-center flex-col flex-grow pt-10 text-black bg-gradient-to-tl from-blue-950 to-slate-950 min-w-fit">
+    <div className="flex items-center justify-center flex-col flex-grow pt-10 text-black bg-gradient-to-tl from-blue-950 to-slate-950 min-w-fit mx-5">
+      <h1 className="text-4xl mb-3 font-light text-white">
+        SEND STEALTH{" "}
+        PAYMENT
+      </h1>
+      <h1 className="text-lg  mb-8  font-light text-white">
+        Only the sender and recipient know who received funds
+
+      </h1>
       {needSetup ? (
-        <div className="mt-5">
-          <button className="btn btn-primary text-lg" onClick={setup}>
-            Initialize Setup
+        <div className="w-min mx-auto mt-5">
+          <button className="btn btn-custom text-lg" onClick={setup}>
+            Setup
           </button>
         </div>
       ) : signer ? (
         <div>
-          <div className="p-4 mt-5 bg-gradient-to-br from-blue-950 to-slate-800 rounded-lg shadow-md mb-4">
-            <div className="font-light text-2xl text-white mb-2">
+          <div className="p-10 mt-5 bg-gradient-to-br from-blue-950 to-slate-800 rounded-lg shadow-md mb-4">
+            <div className="font-light text-2xl text-white mb-5">
               Send
             </div>
             <div className="mb-4">
@@ -267,13 +285,12 @@ const Send: NextPage = () => {
               <label htmlFor="amount" className="block text-sm font-medium text-gray-500 my-2">Amount to Send</label>
               <input id="amount" placeholder="Enter Amount" className="input input-text w-full" type="text" onChange={(e) => { setAmount(String(e.target.value)) }} />
             </div>
-
             <button className="btn btn-custom w-full mb-3  hover:bg-secondary" onClick={sendPayment} disabled={!receiver}>
               Send
             </button>
           </div>
-          <div className="p-4 mt-5 bg-gradient-to-br from-blue-950 to-slate-800 rounded-lg shadow-md">
-            <div className="font-light text-2xl text-white mb-2">
+          <div className="p-10 mt-5 bg-gradient-to-br from-blue-950 to-slate-800 rounded-lg shadow-md">
+            <div className="font-light text-2xl text-white mb-5">
               Scan
             </div>
             <div className="mb-4">
@@ -283,9 +300,48 @@ const Send: NextPage = () => {
             <button className="btn btn-custom w-full hover:bg-secondary" onClick={receivePayment} disabled={!receiver}>
               Receive
             </button>
+            <div className="mb-4 text-white font-light">
+              <div className="mb-4 text-white font-light">
+
+                Stealth Address
+              </div>
+
+              {decryptedWallet && (
+                <pre className="text-white">
+                  Address: {decryptedWallet.address}
+                  <br />
+                  PrivateKey: {decryptedWallet.privateKey}
+
+                </pre>
+              )}
+            </div>
+
           </div>
+          <div className="p-10 mt-5 bg-gradient-to-br from-blue-950  to-slate-800 text-white mb-4 rounded-lg shadow-lg text-center justify-normal ">
+            <h2 className="font-semibold text-5xl mb-5 text-center ">HOW TO</h2>
+            <div className="mb-10">
+              <h3 className="font-light text-2xl mb-4 underline decoration-purple-500">Receiving Funds</h3>
+              <ul className="list-disc list-inside pl-6 mb-4 text-lg text-left">
+                <li>Configure your account using the <strong>Identity</strong> page</li>
+                <li>Withdraw funds from the <strong>Scan</strong> box and send it to the receiver address</li>
+              </ul>
+              <p className="text-xl font-extrabold mt-10"> ⚠️ WARNING⚠️</p>
+              <p className="underline text-lg font-medium"> Use a different address  to receive the funds if you want to maintain anonymity.</p>
+            </div>
+
+            <div>
+              <h3 className="font-light text-2xl mb-5 underline decoration-purple-500">Sending Funds</h3>
+              <ul className="list-disc list-inside pl-6 text-lg text-left">
+                <li>Acquire the recipient's address, ENS, or CNS name</li>
+                <li>Fill out the form on the <strong>Send</strong> box to transfer funds</li>
+              </ul>
+            </div>
+          </div>
+
         </div>
+
       ) : null}
+
     </div>
   );
 };

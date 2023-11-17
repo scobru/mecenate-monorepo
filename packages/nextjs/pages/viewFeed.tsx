@@ -18,6 +18,7 @@ import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import MecenateHelper from "@scobru/crypto-ipfs";
 import { useWeb3auth } from "../components/Web3authProvider"; // Aggiusta il percorso in base alla tua struttura di cartelle
 import { useAppStore } from "~~/services/store/store";
+import { generateKeyPairFromSeed } from "~~/utils/stealthAddress";
 export const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia v0.26
 const eas = new EAS(EASContractAddress);
 
@@ -65,6 +66,8 @@ const ViewFeed: NextPage = () => {
   const [yourStakeETH, setYourStakeETH] = useState<any>(0);
   const [yourStakeDAI, setYourStakeDAI] = useState<any>(0);
   const [yourStakeMUSE, setYourStakeMUSE] = useState<any>(0);
+  const [kp, setKP] = useState<any>("");
+  const [needSetup, setNeedSetup] = useState<boolean>(true);
 
   const [feedData, setFeedData] = useState<any>([]);
   const deployedContractFeed = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateFeed");
@@ -106,6 +109,14 @@ const ViewFeed: NextPage = () => {
     abi: deployedContractUsers?.abi,
     signerOrProvider: signer,
   });
+
+  const setup = async () => {
+    const _kp = await generateKeyPairFromSeed(publicProvider, signer);
+    _kp.publicKey = ethers.utils.base64.encode(_kp.publicKey);
+    _kp.secretKey = ethers.utils.base64.encode(_kp.secretKey);
+    setKP(JSON.stringify(_kp));
+    setNeedSetup(false);
+  }
 
   const graphUri = "https://base-goerli-predeploy.easscan.org/graphql";
 
@@ -441,7 +452,7 @@ const ViewFeed: NextPage = () => {
     const buyerPublicKey = await usersCtx?.getUserPublicKey(buyerAddress);
     const sellerPublicKey = await usersCtx?.getUserPublicKey(sellerAddress);
 
-    const encrypted = crypto.encrypt(symmetricKey, toUtf8String(buyerPublicKey), secretKey);
+    const encrypted = crypto.encrypt(symmetricKey, toUtf8String(buyerPublicKey), JSON.parse(kp).secretKey);
 
     const buyerMetadata = await usersCtx?.getUserMetadata(buyerAddress);
     const sellerMetadata = await usersCtx?.getUserMetadata(sellerAddress);
@@ -1099,98 +1110,105 @@ const ViewFeed: NextPage = () => {
       <div className="flex flex-col items-center pt-2 p-2 w-10/12 mx-auto   ">
         {feedData[0] != null ? (
           <div className="flex flex-col text-left rounded-lg  mt-5">
-            <div className="flex flex-col mb-5  min-w-fit items-left justify-center w-full">
-              <div className="flex flex-row gap-5 mx-10 my-5">
-                <div className="dropdown dropdown-bottom  ">
-                  <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
-                    <DocumentCheckIcon className="h-8 w-8 mx-2" /> Seller
-                  </label>
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content z-[1] menu p-2 shadow  rounded-box w-52  bg-gradient-to-tr from-slate-700 to-slate-800  "
-                  >
-                    <li>
-                      {" "}
-                      <label htmlFor="modal-create" className="feedData.postData font-semibold ">
-                        Create
-                      </label>
-                    </li>
-                    <li>
-                      <label htmlFor="modal-submit" className="feedData.postData font-semibold ">
-                        Submit
-                      </label>
-                    </li>
-                    <li>
-                      <label htmlFor="modal-reveal" className="feedData.postData font-semibold ">
-                        Reveal
-                      </label>
-                    </li>
-                    <li>
-                      <label
-                        className="feedData.postData font-semibold "
-                        onClick={async () => {
-                          await renounce();
-                        }}
-                      >
-                        Renounce
-                      </label>
-                    </li>
-                  </ul>
-                </div>
-                <div className="dropdown dropdown-bottom ">
-                  <label tabIndex={0} className="hover:bg-secondary-focus  btn btn-custom bg-inherit">
-                    <MegaphoneIcon className="h-8 w-8 mx-2" /> Buyer
-                  </label>
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
-                  >
-                    <li>
-                      {" "}
-                      <label htmlFor="modal-accept" className=" font-semibold">
-                        Accept
-                      </label>
-                    </li>
-                    <li>
-                      <label htmlFor="modal-retrieve" className="font-semibold">
-                        Retrieve
-                      </label>
-                    </li>
-                    <li>
-                      <label htmlFor="modal-finalize" className="font-semibold">
-                        Finalize
-                      </label>
-                    </li>
-                  </ul>
-                </div>
-                <div className="dropdown dropdown-bottom ">
-                  <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
-                    <ScaleIcon className="h-8 w-8 mx-2" /> Stake
-                  </label>
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
-                  >
-                    <li>
-                      {" "}
-                      <label htmlFor="modal-stake" className="feedData.postData font-semibold">
-                        Stake
-                      </label>
-                    </li>
-                    <li>
-                      <label
-                        className="feedData.postData font-semibold"
-                        onClick={() => {
-                          decodeData();
-                        }}
-                      >
-                        Decode
-                      </label>
-                    </li>
-                  </ul>
+            {!needSetup ? (
+              <div className="flex flex-col mb-5  min-w-fit items-left justify-center w-full">
+                <div className="flex flex-row gap-5 mx-10 my-5">
+                  <div className="dropdown dropdown-bottom  ">
+                    <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
+                      <DocumentCheckIcon className="h-8 w-8 mx-2" /> Seller
+                    </label>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content z-[1] menu p-2 shadow  rounded-box w-52  bg-gradient-to-tr from-slate-700 to-slate-800  "
+                    >
+                      <li>
+                        {" "}
+                        <label htmlFor="modal-create" className="feedData.postData font-semibold ">
+                          Create
+                        </label>
+                      </li>
+                      <li>
+                        <label htmlFor="modal-submit" className="feedData.postData font-semibold ">
+                          Submit
+                        </label>
+                      </li>
+                      <li>
+                        <label htmlFor="modal-reveal" className="feedData.postData font-semibold ">
+                          Reveal
+                        </label>
+                      </li>
+                      <li>
+                        <label
+                          className="feedData.postData font-semibold "
+                          onClick={async () => {
+                            await renounce();
+                          }}
+                        >
+                          Renounce
+                        </label>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="dropdown dropdown-bottom ">
+                    <label tabIndex={0} className="hover:bg-secondary-focus  btn btn-custom bg-inherit">
+                      <MegaphoneIcon className="h-8 w-8 mx-2" /> Buyer
+                    </label>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
+                    >
+                      <li>
+                        {" "}
+                        <label htmlFor="modal-accept" className=" font-semibold">
+                          Accept
+                        </label>
+                      </li>
+                      <li>
+                        <label htmlFor="modal-retrieve" className="font-semibold">
+                          Retrieve
+                        </label>
+                      </li>
+                      <li>
+                        <label htmlFor="modal-finalize" className="font-semibold">
+                          Finalize
+                        </label>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="dropdown dropdown-bottom ">
+                    <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
+                      <ScaleIcon className="h-8 w-8 mx-2" /> Stake
+                    </label>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
+                    >
+                      <li>
+                        {" "}
+                        <label htmlFor="modal-stake" className="feedData.postData font-semibold">
+                          Stake
+                        </label>
+                      </li>
+                      <li>
+                        <label
+                          className="feedData.postData font-semibold"
+                          onClick={() => {
+                            decodeData();
+                          }}
+                        >
+                          Decode
+                        </label>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
+            )
+              :
+              <div className="w-min mx-auto">
+                <button className="btn btn-custom " onClick={setup}>Setup</button>
+              </div>
+            }
             <div className="flex flex-wrap text-xl mb-5 mx-10 font-bold hover:text-success animate-pulse">
               {feedData.postdata.settings.status === 6
                 ? "Waiting for Seller"
@@ -1209,13 +1227,12 @@ const ViewFeed: NextPage = () => {
             <div className="mx-10  font-base text-lg">
               Smart Contract address is <strong>{addr}</strong>{" "}
             </div>
-            <div className="mx-10  font-base text-lg">
+            <div className="mx-10 font-base text-lg">
               Your current deposit is{" "}
-              <strong>
-                <p> {formatEther(yourStakeETH)}{" "} "ETH"</p>
-                <p> {formatEther(yourStakeDAI)}{" "} "DAI"</p>
-                {/* <p> {formatEther(yourStakeMUSE)}{" "} "MUSE"</p> */}
-              </strong>
+              <strong>{formatEther(yourStakeETH)}{" "} </strong>ETH
+              {" "}
+              <strong>{formatEther(yourStakeDAI)}{" "} </strong>DAI
+              {/* <p> {formatEther(yourStakeMUSE)}{" "} "MUSE"</p> */}
             </div>
             <div className="mx-10  mb-5 font-base text-lg">
               This seller had received <strong>{attestations && <>{attestations.length}</>}</strong> attestations
@@ -1401,13 +1418,13 @@ const ViewFeed: NextPage = () => {
                       onChange={e => setSymmetricKey(e.target.value)}
                     />
                     <br />
-                    <input
+                    {/* <input
                       type="password"
                       className="input w-full"
                       placeholder="Secret Key"
                       value={secretKey}
                       onChange={e => setSecretKey(e.target.value)}
-                    />
+                    /> */}
                     <button
                       className="btn  w-full"
                       onClick={async () => {

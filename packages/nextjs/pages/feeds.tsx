@@ -167,6 +167,15 @@ const Feeds: NextPage = () => {
         <h1 className="text-6xl font-bold mb-8">FEEDS</h1>
         <p className="text-xl  mb-20">Create your feed and sell your data</p>
       </div> */}
+
+      <h1 className="text-4xl mb-3 font-light text-white   text-center mt-10">
+        POST YOUR DATA{" "}
+        AND SELL IT
+      </h1>
+      <h1 className="text-lg  mb-8  font-light text-white  text-center ">
+        Post your encrypted data and stake an amount of ETH or ERC20
+        {" "} to prove quality and value of your data.
+      </h1>
       <div className="mx-auto  w-fit text-center items-center"></div>
       <div className="flex flex-row items-center mb-5  gap-4 text-lg p-5 font-heading">
         <button className="link-hover " onClick={buildFeed}>

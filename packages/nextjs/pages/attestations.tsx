@@ -96,6 +96,12 @@ const Attestations = () => {
 
   return (
     <div className="flex flex-col justify-center items-center py-10 px-5 sm:px-0 lg:py-auto max-w-[100vw] ">
+      <h1 className="text-4xl mb-3 font-light text-white   text-center mt-10">
+        ATTESTATION FOR RIGHT DATA{" "}
+      </h1>
+      <h1 className="text-lg  mb-8  font-light text-white  text-center ">
+        The list of attestations made by buyer when seller has delivered correct data.
+      </h1>
       <div className="flex justify-center overflow-x-auto md:overflow-visible ">
         <div className="w-full md:min-w-full shadow-lg">
           <table className="table-auto md:table-zebra w-full">

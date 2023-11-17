@@ -385,11 +385,13 @@ const Connect: NextPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen font-heading no-border bg-gradient-to-tl from-blue-950 to-slate-950 ">
-      <h1 className="text-2xl font-light mb-8 ">
-        <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
-          CREATE YOUR ADDRESS{" "}
-        </a>
+      <h1 className="text-4xl mb-3 font-light text-white   text-center">
+        YOUR ETHEREUM ADDRESS{" "}
         WITH YOUR SOCIAL ACCOUNT
+      </h1>
+      <h1 className="text-lg  mb-8  font-light text-white  text-center ">
+        Use your favourite web3 wallet or social account to create your EVM address
+
       </h1>
 
       <div className="p-8 rounded-lg shadow-lg w-full max-w-lg mb-8 text-left justify-center bg-gradient-to-br from-blue-950 to-slate-700 opacity-80">

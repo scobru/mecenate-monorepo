@@ -1,0 +1,300 @@
+{
+  "address": "0x29F34330E9267CE13B4e7cDF7d9b80191979948B",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_feed",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_description",
+          "type": "bytes"
+        }
+      ],
+      "name": "createPost",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_postIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPost",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPostCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPosts",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "feed",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "description",
+              "type": "bytes"
+            },
+            {
+              "internalType": "enum Structures.Tokens",
+              "name": "tokenId",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "stake",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "payment",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "postId",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct Structures.MarketPost[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_postIndex",
+          "type": "uint256"
+        }
+      ],
+      "name": "isActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "posts",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "feed",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "description",
+          "type": "bytes"
+        },
+        {
+          "internalType": "enum Structures.Tokens",
+          "name": "tokenId",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "stake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "payment",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "postId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x32763b903d599e7ed9948b849c268483fb69dc306cbf6670fa268e888f826730",
+  "receipt": {
+    "to": null,
+    "from": "0x8aA5F726d9F868a21a8bd748E2f1E43bA31eb670",
+    "contractAddress": "0x29F34330E9267CE13B4e7cDF7d9b80191979948B",
+    "transactionIndex": 1,
+    "gasUsed": "626357",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x1eecdf272ddcc4a429b24468e0a5f23227417ec0c20b06d9ca655776b1321b49",
+    "transactionHash": "0x32763b903d599e7ed9948b849c268483fb69dc306cbf6670fa268e888f826730",
+    "logs": [],
+    "blockNumber": 12489192,
+    "cumulativeGasUsed": "673210",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "a02713a52329f928de1773dfc9b30324",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_feed\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"_description\",\"type\":\"bytes\"}],\"name\":\"createPost\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_postIndex\",\"type\":\"uint256\"}],\"name\":\"getPost\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPostCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPosts\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"feed\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"description\",\"type\":\"bytes\"},{\"internalType\":\"enum Structures.Tokens\",\"name\":\"tokenId\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"stake\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"payment\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"postId\",\"type\":\"bytes32\"}],\"internalType\":\"struct Structures.MarketPost[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_postIndex\",\"type\":\"uint256\"}],\"name\":\"isActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"posts\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"feed\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"description\",\"type\":\"bytes\"},{\"internalType\":\"enum Structures.Tokens\",\"name\":\"tokenId\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"stake\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"payment\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"postId\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/layer/MecenateMarket.sol\":\"MecenateMarket\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"contracts/interfaces/IMecenateFeed.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.19;\\nimport \\\"../library/Structures.sol\\\";\\n\\ninterface IMecenateFeed {\\n    function getPost() external view returns (Structures.Post memory);\\n\\n    function getTotalStaked() external view returns (uint256);\\n\\n    function postCount() external view returns (uint256);\\n\\n    function acceptPost(\\n        Structures.Tokens,\\n        uint256 _amount,\\n        address _funder,\\n        address _buyer,\\n        bool _useStake\\n    ) external payable;\\n\\n    function getSellerStake() external view returns (uint256);\\n\\n    function getBuyerStake() external view returns (uint256);\\n\\n    function getPaymentRequested() external view returns (uint256);\\n\\n    function getStakeRequested() external view returns (uint256);\\n\\n    function getStatus() external view returns (Structures.PostStatus status);\\n\\n    function getTokenId() external view returns (Structures.Tokens tokenId);\\n\\n    function getPostId() external view returns (bytes32);\\n\\n    function getAllPostIds() external view returns (bytes32[] memory);\\n\\n    function getPostTimestamp(\\n        bytes32 postId\\n    ) external view returns (Structures.PostTimestamp memory);\\n\\n    function owner() external view returns (address);\\n\\n    function version() external view returns (string memory);\\n\\n    function getEncryptedPost() external view returns (bytes memory);\\n}\\n\",\"keccak256\":\"0x4de6b9b41063fd5e078e0bc3f90a0bad490f93ee518c45cda6f7743a77bdce67\",\"license\":\"MIT\"},\"contracts/layer/MecenateMarket.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\nimport \\\"../library/Structures.sol\\\";\\nimport \\\"../interfaces/IMecenateFeed.sol\\\";\\nimport \\\"../modules/FeedViewer.sol\\\";\\n\\ncontract MecenateMarket is FeedViewer {\\n    Structures.MarketPost[] public posts;\\n\\n    // Funzione per creare un nuovo post\\n    function createPost(address _feed, bytes memory _description) public {\\n        posts.push(\\n            Structures.MarketPost({\\n                feed: _feed,\\n                description: _description,\\n                tokenId: IMecenateFeed(_feed).getTokenId(),\\n                stake: IMecenateFeed(_feed).getStakeRequested(),\\n                payment: IMecenateFeed(_feed).getPaymentRequested(),\\n                postId: IMecenateFeed(_feed).getPostId()\\n            })\\n        );\\n    }\\n\\n    function isActive(uint _postIndex) public view returns (bool) {\\n        bool result = posts[_postIndex].postId ==\\n            IMecenateFeed(posts[_postIndex].feed).getPostId();\\n\\n        return result;\\n    }\\n\\n    function getPost(\\n        uint _postIndex\\n    ) public view returns (address, bytes memory) {\\n        require(_postIndex < posts.length, \\\"Post non esistente\\\");\\n        return (posts[_postIndex].feed, posts[_postIndex].description);\\n    }\\n\\n    function getPostCount() public view returns (uint) {\\n        return posts.length;\\n    }\\n\\n    function getPosts() public view returns (Structures.MarketPost[] memory) {\\n        return posts;\\n    }\\n}\\n\",\"keccak256\":\"0x88f6bf63812bce46f99a0512e90dfe79ef86b2ddcb5077babb538012d2367cdb\",\"license\":\"MIT\"},\"contracts/library/Structures.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\n/**\\n * @title Structures\\n * @dev This library defines various data structures used in the Mecenate platform.\\n */\\npragma solidity 0.8.19;\\n\\nlibrary Structures {\\n    enum PostStatus {\\n        Waiting,\\n        Proposed,\\n        Accepted,\\n        Submitted,\\n        Finalized,\\n        Punished,\\n        Revealed,\\n        Renounced\\n    }\\n\\n    enum PostResult {\\n        None,\\n        Valid,\\n        Punished\\n    }\\n\\n    enum Tokens {\\n        NaN,\\n        MUSE,\\n        DAI\\n    }\\n\\n    enum PostType {\\n        Text,\\n        Image,\\n        Video,\\n        Audio,\\n        File\\n    }\\n    enum PostDuration {\\n        OneDay,\\n        ThreeDays,\\n        OneWeek,\\n        TwoWeeks,\\n        OneMonth\\n    }\\n\\n    struct PostTimestamp {\\n        PostResult postResult;\\n        uint256 creationTimeStamp;\\n        uint256 endTimeStamp;\\n    }\\n\\n    struct FeedSettings {\\n        uint256 punishmentRatio;\\n        uint256 postCount;\\n        address usersModuleContract;\\n        address factoryContract;\\n        address router;\\n        string version;\\n    }\\n\\n    struct FactorySettings {\\n        address treasuryContract;\\n        address usersModuleContract;\\n        address easContract;\\n        bytes32 easSchema;\\n        address museToken;\\n        address daiToken;\\n        address wethToken;\\n        address router;\\n    }\\n\\n    /**\\n     * @dev Struct representing a post on the Mecenate platform.\\n     */\\n    struct Post {\\n        User creator;\\n        PostData postdata;\\n    }\\n\\n    /**\\n     * @dev Struct representing the data of a post on the Mecenate platform.\\n     */\\n    struct PostData {\\n        PostSettings settings;\\n        PostEscrow escrow;\\n        PostEncryptedData data;\\n    }\\n\\n    /**\\n     * @dev Struct representing the encrypted data of a post on the Mecenate platform.\\n     */\\n    struct PostEncryptedData {\\n        bytes encryptedData;\\n        bytes encryptedKey;\\n        bytes decryptedData;\\n    }\\n\\n    /**\\n     * @dev Struct representing the settings of a post on the Mecenate platform.\\n     */\\n    struct PostSettings {\\n        PostStatus status;\\n        PostType postType;\\n        uint256 creationTimeStamp;\\n        uint256 endTimeStamp;\\n        uint256 duration;\\n        Tokens tokenId;\\n        bytes32 postId;\\n    }\\n\\n    /**\\n     * @dev Struct representing the escrow of a post on the Mecenate platform.\\n     */\\n    struct PostEscrow {\\n        address buyer;\\n        address seller;\\n        uint256 stake;\\n        uint256 payment;\\n        uint256 punishment;\\n        uint256 penalty;\\n    }\\n\\n    /**\\n     * @dev Struct representing a user on the Mecenate platform.\\n     */\\n    struct User {\\n        address evmAddress;\\n        bytes sismoVaultId;\\n        bytes publicKey;\\n    }\\n\\n    /**\\n     * @dev Struct representing a feed on the Mecenate platform.\\n     */\\n    struct Feed {\\n        address contractAddress;\\n        address owner;\\n        uint256 sellerStake;\\n        uint256 buyerStake;\\n        uint256 totalStake;\\n        uint256 postCount;\\n        uint256 paymentRequested;\\n        uint256 stakeRequested;\\n        PostStatus status;\\n        Tokens tokenId;\\n        string version;\\n        bytes32 postId;\\n    }\\n\\n    /**\\n     * @dev Struct representing a bay request on the Mecenate platform.\\n     */\\n    struct BayRequest {\\n        bytes request;\\n        uint256 payment;\\n        uint256 stake;\\n        address postAddress;\\n        bool accepted;\\n        uint256 postCount;\\n        Tokens tokenId;\\n        address buyerAddress;\\n        bytes32 postId;\\n    }\\n\\n    struct MarketPost {\\n        address feed;\\n        bytes description;\\n        Tokens tokenId;\\n        uint256 stake;\\n        uint256 payment;\\n        bytes32 postId;\\n    }\\n}\\n\",\"keccak256\":\"0x68b6a688a3bc40f1d8c83e88d73d9810e7d749d569f704d2ad46ce96f309ba0e\",\"license\":\"MIT\"},\"contracts/modules/FeedViewer.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.9;\\n\\nimport \\\"../library/Structures.sol\\\";\\nimport \\\"../interfaces/IMecenateFeed.sol\\\";\\n\\ncontract FeedViewer {\\n    function _getFeedInfo(\\n        address feed\\n    ) internal view returns (Structures.Feed memory) {\\n        Structures.Feed memory f;\\n\\n        IMecenateFeed mecenateFeed = IMecenateFeed(feed);\\n\\n        f.contractAddress = feed;\\n        f.owner = mecenateFeed.owner();\\n        f.sellerStake = mecenateFeed.getSellerStake();\\n        f.buyerStake = mecenateFeed.getBuyerStake();\\n        f.totalStake = mecenateFeed.getTotalStaked();\\n        f.postCount = mecenateFeed.postCount();\\n        f.paymentRequested = mecenateFeed.getPaymentRequested();\\n        f.stakeRequested = mecenateFeed.getStakeRequested();\\n        f.status = mecenateFeed.getStatus();\\n        f.tokenId = mecenateFeed.getTokenId();\\n        f.version = mecenateFeed.version();\\n        f.postId = mecenateFeed.getPostId();\\n\\n        return f;\\n    }\\n\\n    function _getFeedsInfo(\\n        address[] memory _feeds\\n    ) internal view returns (Structures.Feed[] memory) {\\n        uint256 len = _feeds.length;\\n        Structures.Feed[] memory f = new Structures.Feed[](len);\\n\\n        for (uint256 i = 0; i < len; i++) {\\n            f[i] = _getFeedInfo(_feeds[i]);\\n        }\\n\\n        return f;\\n    }\\n}\\n\",\"keccak256\":\"0x3d86a409594e5b7bfdcfe52c2cb5148594ff0f5ecff4f2ab98fe69143a2a69a3\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x6080806040523461001657610a5b908161001c8239f35b600080fdfe6040608081526004908136101561001557600080fd5b6000803560e01c80630b1e7f831461079e57806340731c241461070357806341f3004a1461056457806382afd23b146104c1578063bcc95407146104a05763ed02dcea1461006257600080fd5b3461049d578160031936011261049d576001600160a01b03928035848116919082900361049957602493843567ffffffffffffffff96878211610495573660238301121561049557818401359780891161048357835190602099601f19946100d18c87601f85011601856108ee565b818452368b838301011161042857818a928c8e93018387013784010152845163010a38f560e01b8152928a8488818b5afa93841561047957899461043d575b50855163faeb5e1760e01b8152948b8689818c5afa958615610433578a96610400575b50865163d24e0c8760e01b81529b808d8a818d5afa9788156103f7578b986103c1575b80516332946a8760e01b81529c9d509a9b999a818b8b818f5afa9a8b156103b757908d9594939291869c610376575b5080826101a892519e8f90610199826108bc565b8152019788528d019788610a19565b60608c0197885260808c0198895260a08c019a8b5284549268010000000000000000841015610353576101e16001948581018855610834565b9d909d6103655751166bffffffffffffffffffffffff60a01b8d5416178c55828c019551908151948511610353576102198754610882565b601f8111610301575b508092601f86116001146102a15750509083949184939294610296575b50501b916000199060031b1c19161790555b60028601905160038110156102845760059697985060ff8019835416911617905551600386015551908401555191015580f35b634e487b7160e01b8852602185528888fd5b01519250388061023f565b87875281872094968692918316915b888383106102e757505050106102ce575b505050811b019055610251565b015160001960f88460031b161c191690553880806102c1565b8587015188559096019594850194879350908101906102b0565b9086888294959697985220601f870160051c810191838810610349575b908f97969594939291601f0160051c01905b81811061033d5750610222565b9687558e968501610330565b909150819061031e565b634e487b7160e01b865260418b528e86fd5b634e487b7160e01b8752868c528f87fd5b828094959697508193929d503d83116103b0575b61039481836108ee565b810103126103ac5751998c94939291906101a8610185565b8c80fd5b503d61038a565b81513d8f823e3d90fd5b9750808d813d83116103f0575b6103d881836108ee565b810103126103ec579b519a9b8c9b97610156565b8a80fd5b503d6103ce565b513d8c823e3d90fd5b9095508b81813d831161042c575b61041881836108ee565b8101031261042857519438610133565b8980fd5b503d61040e565b87513d8c823e3d90fd5b9093508a81813d8311610472575b61045581836108ee565b8101031261046e5751600381101561046e579238610110565b8880fd5b503d61044b565b86513d8b823e3d90fd5b634e487b7160e01b8752604185528787fd5b8580fd5b8280fd5b80fd5b5090346104bd57816003193601126104bd57602091549051908152f35b5080fd5b5082903461049d57602092836003193601126104bd57823592846104f260056104e987610834565b50015495610834565b505483516332946a8760e01b815292839182906001600160a01b03165afa928315610559578093610527575b50505191148152f35b909192508482813d8311610552575b61054081836108ee565b8101031261049d57505190848061051e565b503d610536565b8251903d90823e3d90fd5b50913461049957826003193601126104995782549267ffffffffffffffff84116106f15782939251602060059461059f8282881b01846108ee565b80835281830180958580527f290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e5639086925b84841061067a57505050505085519481860192828752518093528683818801921b8701019493965b8388106106045786860387f35b90919293948380600192603f198a8203018652885190848060a01b03825116815261063b8383015160c080868501528301906109b6565b9161064c87820151888401906109f6565b606080820151908301526080808201519083015260a0809101519101529701930197019690939291936105f7565b6006866001928d8d9e9d6106c1829d9b9c9d5192610697846108bc565b878060a01b038a541684526106ad888b01610910565b8685015260ff60028b015416908401610a19565b6003880154606083015286880154608083015287015460a0820152815201930193019291999899969594966105cf565b6041602492634e487b7160e01b835252fd5b5082346104bd5760203660031901126104bd5780359154821015610766575061076261074d600161074661073685610834565b50828060a01b0390541694610834565b5001610910565b835193849384528060208501528301906109b6565b0390f35b606490602084519162461bcd60e51b83528201526012602482015271506f7374206e6f6e206573697374656e746560701b6044820152fd5b5082903461049d57602036600319011261049d57813590805482101561049d57506107c890610834565b509160018060a01b03835416916107e160018501610910565b9360ff600282015416916108216005600384015492840154930154936108188651988998895260c060208a015260c08901906109b6565b958701906109f6565b6060850152608084015260a08301520390f35b90600091825481101561086e57600690838052027f290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563019190565b634e487b7160e01b83526032600452602483fd5b90600182811c921680156108b2575b602083101461089c57565b634e487b7160e01b600052602260045260246000fd5b91607f1691610891565b60c0810190811067ffffffffffffffff8211176108d857604052565b634e487b7160e01b600052604160045260246000fd5b90601f8019910116810190811067ffffffffffffffff8211176108d857604052565b906040519182600082549261092484610882565b9081845260019485811690816000146109935750600114610950575b505061094e925003836108ee565b565b9093915060005260209081600020936000915b81831061097b57505061094e93508201013880610940565b85548884018501529485019487945091830191610963565b91505061094e94506020925060ff191682840152151560051b8201013880610940565b919082519283825260005b8481106109e2575050826000602080949584010152601f8019910116010190565b6020818301810151848301820152016109c1565b906003821015610a035752565b634e487b7160e01b600052602160045260246000fd5b6003821015610a03575256fea264697066735822122001ca403e8ba966726ac2acf8155eb5b70bd15bc7087aa947805f25bdbd8fc26564736f6c63430008130033",
+  "deployedBytecode": "0x6040608081526004908136101561001557600080fd5b6000803560e01c80630b1e7f831461079e57806340731c241461070357806341f3004a1461056457806382afd23b146104c1578063bcc95407146104a05763ed02dcea1461006257600080fd5b3461049d578160031936011261049d576001600160a01b03928035848116919082900361049957602493843567ffffffffffffffff96878211610495573660238301121561049557818401359780891161048357835190602099601f19946100d18c87601f85011601856108ee565b818452368b838301011161042857818a928c8e93018387013784010152845163010a38f560e01b8152928a8488818b5afa93841561047957899461043d575b50855163faeb5e1760e01b8152948b8689818c5afa958615610433578a96610400575b50865163d24e0c8760e01b81529b808d8a818d5afa9788156103f7578b986103c1575b80516332946a8760e01b81529c9d509a9b999a818b8b818f5afa9a8b156103b757908d9594939291869c610376575b5080826101a892519e8f90610199826108bc565b8152019788528d019788610a19565b60608c0197885260808c0198895260a08c019a8b5284549268010000000000000000841015610353576101e16001948581018855610834565b9d909d6103655751166bffffffffffffffffffffffff60a01b8d5416178c55828c019551908151948511610353576102198754610882565b601f8111610301575b508092601f86116001146102a15750509083949184939294610296575b50501b916000199060031b1c19161790555b60028601905160038110156102845760059697985060ff8019835416911617905551600386015551908401555191015580f35b634e487b7160e01b8852602185528888fd5b01519250388061023f565b87875281872094968692918316915b888383106102e757505050106102ce575b505050811b019055610251565b015160001960f88460031b161c191690553880806102c1565b8587015188559096019594850194879350908101906102b0565b9086888294959697985220601f870160051c810191838810610349575b908f97969594939291601f0160051c01905b81811061033d5750610222565b9687558e968501610330565b909150819061031e565b634e487b7160e01b865260418b528e86fd5b634e487b7160e01b8752868c528f87fd5b828094959697508193929d503d83116103b0575b61039481836108ee565b810103126103ac5751998c94939291906101a8610185565b8c80fd5b503d61038a565b81513d8f823e3d90fd5b9750808d813d83116103f0575b6103d881836108ee565b810103126103ec579b519a9b8c9b97610156565b8a80fd5b503d6103ce565b513d8c823e3d90fd5b9095508b81813d831161042c575b61041881836108ee565b8101031261042857519438610133565b8980fd5b503d61040e565b87513d8c823e3d90fd5b9093508a81813d8311610472575b61045581836108ee565b8101031261046e5751600381101561046e579238610110565b8880fd5b503d61044b565b86513d8b823e3d90fd5b634e487b7160e01b8752604185528787fd5b8580fd5b8280fd5b80fd5b5090346104bd57816003193601126104bd57602091549051908152f35b5080fd5b5082903461049d57602092836003193601126104bd57823592846104f260056104e987610834565b50015495610834565b505483516332946a8760e01b815292839182906001600160a01b03165afa928315610559578093610527575b50505191148152f35b909192508482813d8311610552575b61054081836108ee565b8101031261049d57505190848061051e565b503d610536565b8251903d90823e3d90fd5b50913461049957826003193601126104995782549267ffffffffffffffff84116106f15782939251602060059461059f8282881b01846108ee565b80835281830180958580527f290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e5639086925b84841061067a57505050505085519481860192828752518093528683818801921b8701019493965b8388106106045786860387f35b90919293948380600192603f198a8203018652885190848060a01b03825116815261063b8383015160c080868501528301906109b6565b9161064c87820151888401906109f6565b606080820151908301526080808201519083015260a0809101519101529701930197019690939291936105f7565b6006866001928d8d9e9d6106c1829d9b9c9d5192610697846108bc565b878060a01b038a541684526106ad888b01610910565b8685015260ff60028b015416908401610a19565b6003880154606083015286880154608083015287015460a0820152815201930193019291999899969594966105cf565b6041602492634e487b7160e01b835252fd5b5082346104bd5760203660031901126104bd5780359154821015610766575061076261074d600161074661073685610834565b50828060a01b0390541694610834565b5001610910565b835193849384528060208501528301906109b6565b0390f35b606490602084519162461bcd60e51b83528201526012602482015271506f7374206e6f6e206573697374656e746560701b6044820152fd5b5082903461049d57602036600319011261049d57813590805482101561049d57506107c890610834565b509160018060a01b03835416916107e160018501610910565b9360ff600282015416916108216005600384015492840154930154936108188651988998895260c060208a015260c08901906109b6565b958701906109f6565b6060850152608084015260a08301520390f35b90600091825481101561086e57600690838052027f290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563019190565b634e487b7160e01b83526032600452602483fd5b90600182811c921680156108b2575b602083101461089c57565b634e487b7160e01b600052602260045260246000fd5b91607f1691610891565b60c0810190811067ffffffffffffffff8211176108d857604052565b634e487b7160e01b600052604160045260246000fd5b90601f8019910116810190811067ffffffffffffffff8211176108d857604052565b906040519182600082549261092484610882565b9081845260019485811690816000146109935750600114610950575b505061094e925003836108ee565b565b9093915060005260209081600020936000915b81831061097b57505061094e93508201013880610940565b85548884018501529485019487945091830191610963565b91505061094e94506020925060ff191682840152151560051b8201013880610940565b919082519283825260005b8481106109e2575050826000602080949584010152601f8019910116010190565b6020818301810151848301820152016109c1565b906003821015610a035752565b634e487b7160e01b600052602160045260246000fd5b6003821015610a03575256fea264697066735822122001ca403e8ba966726ac2acf8155eb5b70bd15bc7087aa947805f25bdbd8fc26564736f6c63430008130033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 10358,
+        "contract": "contracts/layer/MecenateMarket.sol:MecenateMarket",
+        "label": "posts",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_array(t_struct(MarketPost)10869_storage)dyn_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_struct(MarketPost)10869_storage)dyn_storage": {
+        "base": "t_struct(MarketPost)10869_storage",
+        "encoding": "dynamic_array",
+        "label": "struct Structures.MarketPost[]",
+        "numberOfBytes": "32"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_bytes_storage": {
+        "encoding": "bytes",
+        "label": "bytes",
+        "numberOfBytes": "32"
+      },
+      "t_enum(Tokens)10696": {
+        "encoding": "inplace",
+        "label": "enum Structures.Tokens",
+        "numberOfBytes": "1"
+      },
+      "t_struct(MarketPost)10869_storage": {
+        "encoding": "inplace",
+        "label": "struct Structures.MarketPost",
+        "members": [
+          {
+            "astId": 10857,
+            "contract": "contracts/layer/MecenateMarket.sol:MecenateMarket",
+            "label": "feed",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 10859,
+            "contract": "contracts/layer/MecenateMarket.sol:MecenateMarket",
+            "label": "description",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes_storage"
+          },
+          {
+            "astId": 10862,
+            "contract": "contracts/layer/MecenateMarket.sol:MecenateMarket",
+            "label": "tokenId",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_enum(Tokens)10696"
+          },
+          {
+            "astId": 10864,
+            "contract": "contracts/layer/MecenateMarket.sol:MecenateMarket",
+            "label": "stake",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 10866,
+            "contract": "contracts/layer/MecenateMarket.sol:MecenateMarket",
+            "label": "payment",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 10868,
+            "contract": "contracts/layer/MecenateMarket.sol:MecenateMarket",
+            "label": "postId",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "192"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

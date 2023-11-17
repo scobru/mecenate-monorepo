@@ -163,4 +163,13 @@ library Structures {
         address buyerAddress;
         bytes32 postId;
     }
+
+    struct MarketPost {
+        address feed;
+        bytes description;
+        Tokens tokenId;
+        uint256 stake;
+        uint256 payment;
+        bytes32 postId;
+    }
 }

@@ -190,7 +190,7 @@ const Bay: NextPage = () => {
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 text-black min-w-fit bg-gradient-to-tl from-blue-950 to-slate-950">
-      <div className="text-center my-2 text-base-content mx-auto">
+      <div className="text-center text-base-content mx-auto">
         {/* <div className=" text-center">
           <h1 className="text-6xl font-bold mb-8">BAY</h1>
           <h1 className="text-base font-base mb-8">
@@ -204,6 +204,14 @@ const Bay: NextPage = () => {
           <p className="text-xl  mb-20">Request any data</p>
         </div>
  */}
+        <h1 className="text-4xl mb-3 font-light text-white   text-center mt-10">
+          MAKE YOUR REQUEST{" "}
+          FIND A SELLER AND GET YOUR DATA
+        </h1>
+        <h1 className="text-lg  mb-8  font-light text-white  text-center ">
+          Ask for a data, set a reward, a stake amount as warrancy and wait for a seller to fullfill your request
+        </h1>
+
         <div className="flex flex-col min-w-fit mx-auto items-center mb-20 ">
           <div className="card bg-slate-400 rounded-lg shadow-2xl shadow-primary py-2   p-4 m-4 text-black">
             <label className="text-black font-semibold text-sm" htmlFor="request">

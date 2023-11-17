@@ -426,11 +426,13 @@ const Identity: NextPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-tl from-blue-950 to-slate-950 ">
-      <h1 className="text-2xl  mb-8 my-10 font-heading  ">
-        <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
-          JOIN MECENATE{" "}
-        </a>
+
+      <h1 className="text-4xl mb-3 font-light text-white   text-center mt-10">
+        JOIN MECENATE{" "}
         WITHOUT REVEALING YOUR IDENTITY
+      </h1>
+      <h1 className="text-lg  mb-8  font-light text-white  text-center ">
+        Prove that your are real with ZK-Proofs, generate a unique keypair and sign-in
       </h1>
       <div className="max-w-3xl text-center my-2 text-base-content">
         <div className="flex flex-col  items-center mb-20">
@@ -515,8 +517,7 @@ const Identity: NextPage = () => {
                               RESET ZKP{" "}
                             </button>
                           </div>
-                          <div className="text-sl">Go to Connect</div>
-                          {userData && (
+                          {userData ? (
                             <div className="flex flex-col gap-5">
                               {userData[0] && (
                                 <div className="card card-shadow break-all bg-gradient-to-br from-blue-950 to-slate-700 opacity-95 ">
@@ -622,7 +623,9 @@ const Identity: NextPage = () => {
                               </div>
                             </div>
 
-                          )}
+                          ) : <div className="text-sl">Go to Connect</div>
+
+                          }
                         </div>
                       )}
                     </>

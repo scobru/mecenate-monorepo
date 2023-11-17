@@ -42,19 +42,12 @@ export default async function generateStealthAddress(receiverPublicKey: string, 
     const theirPublicKeyR32 = theirPublicKey.slice(0, 32)
 
     const r = randomString() as string;
-    // convert r to uint8array
     const rBytes = Buffer.from(r, "utf8");
 
-    if (typeof r !== 'string') throw new TypeError('expected string');
-
     const pk = hexlify(nacl.scalarMult(theirPublicKeyR32, rBytes));
-    console.log(pk)
-
     const newWallet = new Wallet(pk);
 
-    const encryptedR = crypto.encrypt(r, String(receiverPublicKey), String(senderSecretKey))
-
-    console.log(encryptedR.data, encryptedR.nonce, newWallet.address)
+    const encryptedR = MecenateHelper.crypto.asymmetric.encrypt(r, String(receiverPublicKey), String(senderSecretKey))
 
     return {
         encryptedR: encryptedR.data,
@@ -66,13 +59,11 @@ export default async function generateStealthAddress(receiverPublicKey: string, 
 
 export async function verifyStealthAddress(encryptedR: string, nonce: string, ephemeralPubKey: string, receiverPublicKey: string, receiverSecretKey: string) {
     const myPubKey32 = Buffer.from(receiverPublicKey, "base64").slice(0, 32);
-
-    const decryptedR = crypto.decrypt(encryptedR, nonce, ephemeralPubKey, receiverSecretKey)
+    const decryptedR = MecenateHelper.crypto.asymmetric.decrypt(encryptedR, nonce, ephemeralPubKey, receiverSecretKey)
 
     const rBytes = Buffer.from(decryptedR, "utf8");
 
     const pk = hexlify(nacl.scalarMult(myPubKey32, rBytes));
-
     const newWallet = new Wallet(pk);
 
     return newWallet

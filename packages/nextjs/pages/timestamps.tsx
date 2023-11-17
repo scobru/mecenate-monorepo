@@ -42,6 +42,12 @@ const Timestamps: NextPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center p-10 bg-gradient-to-tl from-blue-950 to-slate-950 min-w-full min-h-screen">
+      <h1 className="text-4xl mb-3 font-light text-white   text-center mt-10">
+        VERIFY TIMESTAMPS{" "}
+      </h1>
+      <h1 className="text-lg  mb-8  font-light text-white  text-center ">
+        Input the hash of the post that u want to verify.
+      </h1>
       <div className="w-1/4">
         <input
           type="text"

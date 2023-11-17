@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FaucetButton } from "~~/components/scaffold-eth";
 import { WalletBadge } from "~~/components/scaffold-eth";
 import RainbowKitCustomConnectButton from "~~/components/scaffold-eth/RainbowKitCustomConnectButton";
-import { Bars3Icon, BugAntIcon, DocumentIcon, KeyIcon } from "@heroicons/react/24/outline";
+import { ArrowPathRoundedSquareIcon, Bars3Icon, BugAntIcon, DocumentIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 import React, { useState, useRef, useCallback, useEffect } from "react";
@@ -16,7 +16,7 @@ import {
   MegaphoneIcon,
   HomeIcon,
 } from "@heroicons/react/24/outline";
-import { ArchiveBoxIcon, InboxIcon, SparklesIcon } from "@heroicons/react/20/solid";
+import { ArchiveBoxIcon, GifIcon, InboxIcon, SparklesIcon } from "@heroicons/react/20/solid";
 import { FaDollarSign, FaRegTimesCircle } from "react-icons/fa";
 import { BoltIcon, ClockIcon } from "@heroicons/react/24/solid";
 
@@ -29,7 +29,7 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
       href={href}
       passHref
       className={`${isActive ? "bg-secondary shadow-md" : ""
-        } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm font-heading rounded-full gap-2`}
+        } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm font-semibold rounded-full gap-2`}
     >
       {children}
     </Link>
@@ -76,15 +76,21 @@ export default function Header() {
         </NavLink>
       </li>
       <li>
+        <NavLink href="/send">
+          <BoltIcon className="h-4 w-4" />
+          Send
+        </NavLink>
+      </li>
+      <li>
         <NavLink href="/bay">
           <MegaphoneIcon className="h-4 w-4" />
           Bay
         </NavLink>
       </li>
       <li>
-        <NavLink href="/send">
-          <BoltIcon className="h-4 w-4" />
-          Send
+        <NavLink href="/market">
+          <ArrowPathRoundedSquareIcon className="h-4 w-4" />
+          Market
         </NavLink>
       </li>
       <li>

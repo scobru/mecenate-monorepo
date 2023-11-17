@@ -28,6 +28,7 @@ const Verify: NextPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen ">
+
       <div className="max-w-3xl text-center my-2 text-base-content">
         <div className="flex flex-col  items-center mb-20">
           <div className="text-center w-full">
