@@ -2035,8 +2035,7 @@
       "type": "receive"
     }
   ]
-}
-
+},
 "MecenateFeedFactory": {
   "address": "0x85438997aD02c1cEF6a6d8E917888C3D4A3F9755",
   "abi": [

@@ -1,5 +1,5 @@
-import type { IProvider } from "@web3auth/base";
-import Web3 from "web3";
+import type { IProvider } from '@web3auth/base';
+import Web3 from 'web3';
 
 export default class EthereumRpc {
   private provider: IProvider;
@@ -44,7 +44,7 @@ export default class EthereumRpc {
       // Get user's balance in ether
       const balance = web3.utils.fromWei(
         await web3.eth.getBalance(address), // Balance is in wei
-        "ether",
+        'ether',
       );
 
       return balance;
@@ -59,13 +59,13 @@ export default class EthereumRpc {
 
       // Get user's Ethereum public address
       const fromAddress = (await web3.eth.getAccounts())[0];
-      console.log("fromAddress", fromAddress);
+      console.log('fromAddress', fromAddress);
 
       const destination = fromAddress;
-      console.log("destination", destination);
+      console.log('destination', destination);
 
-      const amount = web3.utils.toWei("0.001", "ether"); // Convert 1 ether to wei
-      console.log("amount", amount);
+      const amount = web3.utils.toWei('0.001', 'ether'); // Convert 1 ether to wei
+      console.log('amount', amount);
 
       // Submit transaction to the blockchain and wait for it to be mined
       const receipt = await web3.eth.sendTransaction({
@@ -87,13 +87,13 @@ export default class EthereumRpc {
       // Get user's Ethereum public address
       const fromAddress = (await web3.eth.getAccounts())[0];
 
-      const originalMessage = "YOUR_MESSAGE";
+      const originalMessage = 'YOUR_MESSAGE';
 
       // Sign the message
       const signedMessage = await web3.eth.personal.sign(
         originalMessage,
         fromAddress,
-        "test password!", // configure your own password here.
+        'test password!', // configure your own password here.
       );
 
       return signedMessage;
@@ -105,7 +105,7 @@ export default class EthereumRpc {
   async getPrivateKey(): Promise<any> {
     try {
       const privateKey = await this.provider.request({
-        method: "eth_private_key",
+        method: 'eth_private_key',
       });
 
       return privateKey;

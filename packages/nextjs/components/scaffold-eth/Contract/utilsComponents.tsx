@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useState } from 'react';
 
 const NUMBER_REGEX = /^\.?\d+\.?\d*$/;
 
@@ -10,9 +10,9 @@ const removeRedundantZeroes = (num: string) => {
   return (
     num
       // leading
-      .replace(/^0+(0\.|[1-9]+)/, "$1")
+      .replace(/^0+(0\.|[1-9]+)/, '$1')
       // trailing
-      .replace(/(\.[0-9]*[1-9])0+$|\.0*$/, "$1")
+      .replace(/(\.[0-9]*[1-9])0+$|\.0*$/, '$1')
   );
 };
 
@@ -22,22 +22,30 @@ const removeRedundantZeroes = (num: string) => {
  * @param powerOf10 positive power of 10
  * @returns {string} result of multiplying
  */
-const multiplyStringifiedNumberToPowerOf10 = (numberValue: string, powerOf10: number): string => {
+const multiplyStringifiedNumberToPowerOf10 = (
+  numberValue: string,
+  powerOf10: number,
+): string => {
   if (!numberValue || !NUMBER_REGEX.test(numberValue)) {
-    return "";
+    return '';
   }
 
-  const numberParts = numberValue.split(".");
-  let result = "";
+  const numberParts = numberValue.split('.');
+  let result = '';
   if (numberParts.length === 1) {
     // numberValue is an integer number or a decimal number starting with "." (no leading 0)
-    result = `${numberValue}${"0".repeat(powerOf10)}`;
+    result = `${numberValue}${'0'.repeat(powerOf10)}`;
   } else if (numberParts[1] && powerOf10 < numberParts[1].length) {
     // numberValue is a decimal number AND the result is also a decimal.
-    result = `${numberParts[0]}${numberParts[1].slice(0, powerOf10)}.${numberParts[1].slice(powerOf10)}`;
+    result = `${numberParts[0]}${numberParts[1].slice(
+      0,
+      powerOf10,
+    )}.${numberParts[1].slice(powerOf10)}`;
   } else {
     // numberValue is a decimal number AND the result is an integer.
-    result = `${numberParts[0]}${numberParts[1]}${"0".repeat(powerOf10 - numberParts[1].length)}`;
+    result = `${numberParts[0]}${numberParts[1]}${'0'.repeat(
+      powerOf10 - numberParts[1].length,
+    )}`;
   }
 
   return removeRedundantZeroes(result);
@@ -46,13 +54,19 @@ const multiplyStringifiedNumberToPowerOf10 = (numberValue: string, powerOf10: nu
 /**
  * Input TX value component with wei conversion util.
  */
-const TxValueInput = ({ setTxValue, txValue }: { setTxValue: Dispatch<SetStateAction<string>>; txValue: string }) => {
+const TxValueInput = ({
+  setTxValue,
+  txValue,
+}: {
+  setTxValue: Dispatch<SetStateAction<string>>;
+  txValue: string;
+}) => {
   const [inputError, setInputError] = useState(false);
 
   return (
     <div
       className={`flex items-end border-2 bg-base-200 rounded-full text-primary justify-between ${
-        inputError ? "border-error" : "border-base-300"
+        inputError ? 'border-error' : 'border-base-300'
       }`}
     >
       <input
@@ -63,7 +77,7 @@ const TxValueInput = ({ setTxValue, txValue }: { setTxValue: Dispatch<SetStateAc
         onChange={e => {
           if (!e.target.value) {
             setInputError(false);
-            setTxValue("");
+            setTxValue('');
             return;
           }
 
@@ -86,7 +100,10 @@ const TxValueInput = ({ setTxValue, txValue }: { setTxValue: Dispatch<SetStateAc
             className="cursor-pointer text-xl font-semibold pt-1 px-4 text-accent"
             disabled={inputError}
             onClick={() => {
-              const multiplied = multiplyStringifiedNumberToPowerOf10(txValue, 18);
+              const multiplied = multiplyStringifiedNumberToPowerOf10(
+                txValue,
+                18,
+              );
               setTxValue(multiplied);
             }}
           >

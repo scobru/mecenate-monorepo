@@ -1,38 +1,58 @@
-import type { NextPage } from "next";
-import React, { useEffect, useState } from "react";
-import { useContract, useNetwork } from "wagmi";
-import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { Contract, ContractInterface, Signer, ethers } from "ethers";
-import { notification } from "~~/utils/scaffold-eth";
-import { useRouter } from "next/router";
-import { arrayify, formatEther, hexlify, keccak256, parseEther, toUtf8Bytes, toUtf8String } from "ethers/lib/utils.js";
-import pinataSDK from "@pinata/sdk";
-import axios from "axios";
-import Dropzone from "react-dropzone";
-import { saveAs } from "file-saver";
-import Spinner from "~~/components/Spinner";
-import { ScaleIcon, MegaphoneIcon, DocumentCheckIcon } from "@heroicons/react/20/solid";
-import { ApolloClient, InMemoryCache, createHttpLink, gql } from "@apollo/client";
-import { useTransactor } from "~~/hooks/scaffold-eth";
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import MecenateHelper from "@scobru/crypto-ipfs";
-import { useWeb3auth } from "../components/Web3authProvider"; // Aggiusta il percorso in base alla tua struttura di cartelle
-import { useAppStore } from "~~/services/store/store";
-import { generateKeyPairFromSeed } from "~~/utils/stealthAddress";
-export const EASContractAddress = "0x4200000000000000000000000000000000000021"; // Sepolia v0.26
+import type { NextPage } from 'next';
+import React, { useEffect, useState } from 'react';
+import { useContract, useNetwork } from 'wagmi';
+import { getDeployedContract } from '../components/scaffold-eth/Contract/utilsContract';
+import { Contract, ContractInterface, Signer, ethers } from 'ethers';
+import { notification } from '~~/utils/scaffold-eth';
+import { useRouter } from 'next/router';
+import {
+  arrayify,
+  formatEther,
+  hexlify,
+  keccak256,
+  parseEther,
+  toUtf8Bytes,
+  toUtf8String,
+} from 'ethers/lib/utils.js';
+import pinataSDK from '@pinata/sdk';
+import axios from 'axios';
+import Dropzone from 'react-dropzone';
+import { saveAs } from 'file-saver';
+import Spinner from '~~/components/Spinner';
+import {
+  ScaleIcon,
+  MegaphoneIcon,
+  DocumentCheckIcon,
+} from '@heroicons/react/20/solid';
+import {
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+  gql,
+} from '@apollo/client';
+import { useTransactor } from '~~/hooks/scaffold-eth';
+import { EAS, SchemaEncoder } from '@ethereum-attestation-service/eas-sdk';
+import MecenateHelper from '@scobru/crypto-ipfs';
+import { useWeb3auth } from '../components/Web3authProvider'; // Aggiusta il percorso in base alla tua struttura di cartelle
+import { useAppStore } from '~~/services/store/store';
+import { generateKeyPairFromSeed } from '~~/utils/stealthAddress';
+export const EASContractAddress = '0x4200000000000000000000000000000000000021'; // Sepolia v0.26
 const eas = new EAS(EASContractAddress);
 
 const nacl = require('tweetnacl');
 const util = require('tweetnacl-util');
 
 // Initialize SchemaEncoder with the schema string
-const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes32 postId, bytes post,");
+const schemaEncoder = new SchemaEncoder(
+  'bool verified ,address feed, bytes32 postId, bytes post,',
+);
 
-const schemaUID = "0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a";
+const schemaUID =
+  '0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a';
 
-const crypto = require("asymmetric-crypto");
+const crypto = require('asymmetric-crypto');
 
-const version = "v2.0.0";
+const version = 'v2.0.0';
 
 const ViewFeed: NextPage = () => {
   const router = useRouter();
@@ -40,10 +60,10 @@ const ViewFeed: NextPage = () => {
 
   const pinataApiSecret = process.env.NEXT_PUBLIC_PINATA_API_SECRET;
   const pinataApiKey = process.env.NEXT_PUBLIC_PINATA_API_KEY;
-  const [nonce, setNonce] = React.useState<string>("0");
-  const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>("");
-  const [tokenId, setTokenId] = React.useState<string>("");
-  const [uid, setUid] = React.useState<string>("");
+  const [nonce, setNonce] = React.useState<string>('0');
+  const [withdrawalAddress, setWithdrawalAddress] = React.useState<string>('');
+  const [tokenId, setTokenId] = React.useState<string>('');
+  const [uid, setUid] = React.useState<string>('');
   const { addr } = router?.query;
   const [useStake, setUseStake] = useState<boolean>(false);
   const [postType, setPostType] = useState<any>([]);
@@ -55,33 +75,62 @@ const ViewFeed: NextPage = () => {
   const [secretKey, setSecretKey] = useState<any>([]);
   const [valid, setValid] = useState<boolean>(false);
   const [punishment, setPunishment] = useState<any>(0);
-  const [buyerPayment, setBuyerPayment] = useState<any>("");
+  const [buyerPayment, setBuyerPayment] = useState<any>('');
   const [stakeAmount, setStakeAmount] = useState<any>(0);
-  const [buyer, setBuyer] = useState<any>("");
-  const [imageFile, setImageFile] = React.useState<any>("");
-  const [image, setImage] = React.useState("");
-  const [postCount, setPostCount] = useState<any>("");
+  const [buyer, setBuyer] = useState<any>('');
+  const [imageFile, setImageFile] = React.useState<any>('');
+  const [image, setImage] = React.useState('');
+  const [postCount, setPostCount] = useState<any>('');
   const [sismoData, setSismoData] = React.useState<any>(null);
   const [yourStake, setYourStake] = useState<any>(0);
   const [yourStakeETH, setYourStakeETH] = useState<any>(0);
   const [yourStakeDAI, setYourStakeDAI] = useState<any>(0);
   const [yourStakeMUSE, setYourStakeMUSE] = useState<any>(0);
-  const [kp, setKP] = useState<any>("");
+  const [kp, setKP] = useState<any>('');
   const [needSetup, setNeedSetup] = useState<boolean>(true);
 
   const [feedData, setFeedData] = useState<any>([]);
-  const deployedContractFeed = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateFeed");
-  const deployedContractUsers = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateUsers");
+  const deployedContractFeed = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MecenateFeed',
+  );
+  const deployedContractUsers = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MecenateUsers',
+  );
   const [attestations, setAttestations] = useState<any>([]);
-  const deployedContractMUSE = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MUSE");
-  const deployedContractMockDai = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MockDai");
-  const [password, setPassword] = useState<any>("");
+  const deployedContractMUSE = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MUSE',
+  );
+  const deployedContractMockDai = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MockDai',
+  );
+  const [password, setPassword] = useState<any>('');
   const { signer, setSigner } = useAppStore();
-  const { web3auth, setLoggedIn, getPrivateKey, loading, loggedIn, createWallet } = useWeb3auth(); // Aggiusta il percorso in base alla tua struttura di cartelle
-  const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const {
+    web3auth,
+    setLoggedIn,
+    getPrivateKey,
+    loading,
+    loggedIn,
+    createWallet,
+  } = useWeb3auth(); // Aggiusta il percorso in base alla tua struttura di cartelle
+  const publicProvider = new ethers.providers.JsonRpcProvider(
+    process.env.NEXT_PUBLIC_RPC_URL,
+  );
   const runTx = useTransactor();
-  const [receiver, setReceiver] = useState<any>("");
-  const allStatuses = ["Waiting for Creator", "Proposed", "Accepted", "Submitted", "Finalized", "Punished", "Revealed"];
+  const [receiver, setReceiver] = useState<any>('');
+  const allStatuses = [
+    'Waiting for Creator',
+    'Proposed',
+    'Accepted',
+    'Submitted',
+    'Finalized',
+    'Punished',
+    'Revealed',
+  ];
 
   let feedAddress!: string;
   let feedAbi: ContractInterface[] = [];
@@ -116,9 +165,9 @@ const ViewFeed: NextPage = () => {
     _kp.secretKey = ethers.utils.base64.encode(_kp.secretKey);
     setKP(JSON.stringify(_kp));
     setNeedSetup(false);
-  }
+  };
 
-  const graphUri = "https://base-goerli-predeploy.easscan.org/graphql";
+  const graphUri = 'https://base-goerli-predeploy.easscan.org/graphql';
 
   const httpLink = createHttpLink({
     uri: graphUri,
@@ -142,7 +191,7 @@ const ViewFeed: NextPage = () => {
   `;
 
   const fetchAttestations = async () => {
-    console.log("attests");
+    console.log('attests');
 
     const newAttestations = await apolloClient.query({
       query: getAttestationsGraphQl,
@@ -154,7 +203,7 @@ const ViewFeed: NextPage = () => {
       },
     });
 
-    console.log("newAttestations: ", newAttestations);
+    console.log('newAttestations: ', newAttestations);
 
     setAttestations(newAttestations.data.attestations);
   };
@@ -163,28 +212,47 @@ const ViewFeed: NextPage = () => {
     let _tokenAddress;
     let token;
 
-    if (tokenId == "1") {
+    if (tokenId == '1') {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
 
-      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi as ContractInterface, signer as Signer);
-    } else if (tokenId == "2") {
+      token = new Contract(
+        String(_tokenAddress),
+        deployedContractMUSE?.abi as ContractInterface,
+        signer as Signer,
+      );
+    } else if (tokenId == '2') {
       _tokenAddress = process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE;
 
-      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi as ContractInterface, signer as Signer);
+      token = new Contract(
+        String(_tokenAddress),
+        deployedContractMockDai?.abi as ContractInterface,
+        signer as Signer,
+      );
     }
 
-    runTx(token?.approve(feedCtx?.address, parseEther(postStake)), signer as Signer);
+    runTx(
+      token?.approve(feedCtx?.address, parseEther(postStake)),
+      signer as Signer,
+    );
   };
 
   const handleApproveBuyer = async () => {
     let _tokenAddress;
     let token;
-    if (tokenId == "1") {
+    if (tokenId == '1') {
       _tokenAddress = process.env.NEXT_PUBLIC_MUSE_ADDRESS_BASE;
-      token = new Contract(String(_tokenAddress), deployedContractMUSE?.abi as ContractInterface, signer as Signer);
-    } else if (tokenId == "2") {
+      token = new Contract(
+        String(_tokenAddress),
+        deployedContractMUSE?.abi as ContractInterface,
+        signer as Signer,
+      );
+    } else if (tokenId == '2') {
       _tokenAddress = String(process.env.NEXT_PUBLIC_DAI_ADDRESS_BASE);
-      token = new Contract(String(_tokenAddress), deployedContractMockDai?.abi as ContractInterface, signer as Signer);
+      token = new Contract(
+        String(_tokenAddress),
+        deployedContractMockDai?.abi as ContractInterface,
+        signer as Signer,
+      );
     }
 
     // Write Approval
@@ -203,13 +271,16 @@ const ViewFeed: NextPage = () => {
 
   async function storePrivateKey(privateKey: any, contractAddress: any) {
     try {
-      const encryptedKey = await encryptMessage(String(password), String(privateKey));
-      console.log("Encrypted Key: ", encryptedKey);
-      console.log("Contract Address: ", contractAddress);
-      const response = await fetch("/api/storeKey", {
-        method: "POST",
+      const encryptedKey = await encryptMessage(
+        String(password),
+        String(privateKey),
+      );
+      console.log('Encrypted Key: ', encryptedKey);
+      console.log('Contract Address: ', contractAddress);
+      const response = await fetch('/api/storeKey', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           encryptedPrivateKey: encryptedKey,
@@ -219,18 +290,18 @@ const ViewFeed: NextPage = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Success:", data);
+        console.log('Success:', data);
         return data;
       } else {
         const errorData = await response.json();
-        console.error("Error:", errorData);
-        throw new Error("Failed to store the private key");
+        console.error('Error:', errorData);
+        throw new Error('Failed to store the private key');
       }
     } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
+      console.error('There was a problem with the fetch operation:', error);
       throw error;
     } finally {
-      console.log("Store private key operation completed.");
+      console.log('Store private key operation completed.');
     }
   }
 
@@ -267,8 +338,10 @@ const ViewFeed: NextPage = () => {
             type="button"
             className="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             onClick={async () => {
-              navigator.clipboard.writeText(JSON.stringify(dataSaved?.symmetricKey));
-              notification.success("Symmetric key copied to clipboard");
+              navigator.clipboard.writeText(
+                JSON.stringify(dataSaved?.symmetricKey),
+              );
+              notification.success('Symmetric key copied to clipboard');
             }}
           >
             <svg
@@ -293,8 +366,8 @@ const ViewFeed: NextPage = () => {
 
     downloadFile({
       data: JSON.stringify(dataSaved),
-      fileName: String(postCount) + "_" + feedCtx?.address + "_sellData.json",
-      fileType: "text/json",
+      fileName: String(postCount) + '_' + feedCtx?.address + '_sellData.json',
+      fileType: 'text/json',
     });
 
     /*  const response = await storePrivateKey(dataSaved?.symmetricKey, feedCtx?.address);
@@ -308,17 +381,17 @@ const ViewFeed: NextPage = () => {
 
     const proofOfHashEncode = await MecenateHelper.multihash({
       input: dataSaved?.proofhash,
-      inputType: "b58",
-      outputType: "digest",
+      inputType: 'b58',
+      outputType: 'digest',
     });
 
-    console.log("ProofHash", proofOfHashEncode);
-    console.log("Start Tx...");
-    console.log("Signer Address: ", signer?.getAddress());
+    console.log('ProofHash', proofOfHashEncode);
+    console.log('Start Tx...');
+    console.log('Signer Address: ', signer?.getAddress());
 
     let _buyer;
 
-    if (buyer == "") {
+    if (buyer == '') {
       _buyer = ethers.constants.AddressZero;
     } else {
       _buyer = buyer;
@@ -336,7 +409,7 @@ const ViewFeed: NextPage = () => {
         signer?.getAddress(),
         useStake,
         {
-          value: tokenId == "0" ? parseEther(postStake) : 0,
+          value: tokenId == '0' ? parseEther(postStake) : 0,
         },
       ),
       signer as Signer,
@@ -345,31 +418,44 @@ const ViewFeed: NextPage = () => {
 
   async function acceptPost() {
     runTx(
-      feedCtx?.acceptPost(feedData?.postdata?.settings?.tokenId, parseEther(postPayment), signer?.getAddress(), signer?.getAddress(), useStake, {
-        value: feedData?.postdata?.settings?.tokenId == "0" ? parseEther(postPayment) : 0,
-      }),
+      feedCtx?.acceptPost(
+        feedData?.postdata?.settings?.tokenId,
+        parseEther(postPayment),
+        signer?.getAddress(),
+        signer?.getAddress(),
+        useStake,
+        {
+          value:
+            feedData?.postdata?.settings?.tokenId == '0'
+              ? parseEther(postPayment)
+              : 0,
+        },
+      ),
       signer as Signer,
     );
   }
 
   async function createPostData(RawData: any) {
-    console.log("Creating Data...");
+    console.log('Creating Data...');
     try {
       const symmetricKey = MecenateHelper.crypto.symmetric.generateKey();
-      const encryptedFile = MecenateHelper.crypto.symmetric.encryptMessage(symmetricKey, RawData);
+      const encryptedFile = MecenateHelper.crypto.symmetric.encryptMessage(
+        symmetricKey,
+        RawData,
+      );
 
       const symmetricKeyHash = await MecenateHelper.multihash({
         input: symmetricKey,
-        inputType: "raw",
-        outputType: "hex",
+        inputType: 'raw',
+        outputType: 'hex',
       });
 
       // datahash sha256(rawdata)
 
       const dataHash = await MecenateHelper.multihash({
         input: RawData,
-        inputType: "raw",
-        outputType: "hex",
+        inputType: 'raw',
+        outputType: 'hex',
       });
 
       // encryptedDatahash = sha256(encryptedData)
@@ -377,8 +463,8 @@ const ViewFeed: NextPage = () => {
       // This hash will match the IPFS pin hash
       const encryptedDataHash = await MecenateHelper.multihash({
         input: JSON.stringify({ encryptedData: encryptedFile }),
-        inputType: "raw",
-        outputType: "b58",
+        inputType: 'raw',
+        outputType: 'b58',
       });
 
       // jsonblob_v1_2_0 = JSON(multihashformat(datahash), multihashformat(keyhash), multihashformat(encryptedDatahash))
@@ -393,17 +479,17 @@ const ViewFeed: NextPage = () => {
       // This hash will match the IPFS pin hash. It should be saved to the users feed contract.
       const proofHash58 = await MecenateHelper.multihash({
         input: JSON.stringify(jsonblob_v1_2_0),
-        inputType: "raw",
-        outputType: "b58",
+        inputType: 'raw',
+        outputType: 'b58',
       });
 
-      console.log("RawData", RawData);
-      console.log("Encrypted File", encryptedFile);
-      console.log("Symmetric Key", symmetricKey);
-      console.log("Key Hash", symmetricKeyHash);
-      console.log("Datahash", dataHash);
-      console.log("Encrypted DataHash", encryptedDataHash);
-      console.log("ProofHash", proofHash58);
+      console.log('RawData', RawData);
+      console.log('Encrypted File', encryptedFile);
+      console.log('Symmetric Key', symmetricKey);
+      console.log('Key Hash', symmetricKeyHash);
+      console.log('Datahash', dataHash);
+      console.log('Encrypted DataHash', encryptedDataHash);
+      console.log('ProofHash', proofHash58);
 
       return {
         proofJson: jsonblob_v1_2_0,
@@ -418,33 +504,41 @@ const ViewFeed: NextPage = () => {
 
   async function fetchPrivateKey(contractAddress: string | undefined) {
     if (!contractAddress) {
-      console.error("Contract address is undefined");
+      console.error('Contract address is undefined');
       return;
     }
 
     try {
-      const response = await fetch(`/api/storeKey?contractAddress=${contractAddress}`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `/api/storeKey?contractAddress=${contractAddress}`,
+        {
+          method: 'GET',
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
         return data.encryptedPrivateKey;
       } else {
         const errorData = await response.json();
-        throw new Error(`Failed to fetch the private key: ${errorData.message || ""}`);
+        throw new Error(
+          `Failed to fetch the private key: ${errorData.message || ''}`,
+        );
       }
     } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
+      console.error('There was a problem with the fetch operation:', error);
       throw error;
     } finally {
-      console.log("Fetch private key operation completed.");
+      console.log('Fetch private key operation completed.');
     }
   }
 
   async function submitData() {
     const abiCoder = new ethers.utils.AbiCoder();
-    const proofhash = abiCoder.decode(["bytes32"], feedData[1][2].encryptedData);
+    const proofhash = abiCoder.decode(
+      ['bytes32'],
+      feedData[1][2].encryptedData,
+    );
 
     const buyerAddress = feedData[1][1].buyer;
     const sellerAddress = feedData[1][1].seller;
@@ -452,7 +546,11 @@ const ViewFeed: NextPage = () => {
     const buyerPublicKey = await usersCtx?.getUserPublicKey(buyerAddress);
     const sellerPublicKey = await usersCtx?.getUserPublicKey(sellerAddress);
 
-    const encrypted = crypto.encrypt(symmetricKey, toUtf8String(buyerPublicKey), JSON.parse(kp).secretKey);
+    const encrypted = crypto.encrypt(
+      symmetricKey,
+      toUtf8String(buyerPublicKey),
+      JSON.parse(kp).secretKey,
+    );
 
     const buyerMetadata = await usersCtx?.getUserMetadata(buyerAddress);
     const sellerMetadata = await usersCtx?.getUserMetadata(sellerAddress);
@@ -481,64 +579,67 @@ const ViewFeed: NextPage = () => {
     const pinataAuth = await pinata.testAuthentication();
 
     if (pinataAuth.authenticated !== true) {
-      console.log("Pinata Authentication Failed.");
+      console.log('Pinata Authentication Failed.');
       return;
     }
 
-    console.log("Saving proof JSON...");
-    notification.success("Saving proof JSON...");
+    console.log('Saving proof JSON...');
+    notification.success('Saving proof JSON...');
 
     const pin = await pinata.pinJSONToIPFS(json_selldata_v120);
     const proofHash58 = await MecenateHelper.multihash({
       input: JSON.stringify(json_selldata_v120),
-      inputType: "raw",
-      outputType: "b58",
+      inputType: 'raw',
+      outputType: 'b58',
     });
 
     const proofHash58Digest = await MecenateHelper.multihash({
       input: proofHash58,
-      inputType: "b58",
-      outputType: "digest",
+      inputType: 'b58',
+      outputType: 'digest',
     });
 
-    console.group("Subimt Data");
-    console.log("Buyer Address: ", buyerAddress);
-    console.log("Seller Address: ", sellerAddress);
-    console.log("Buyer Public Key: ", buyerPublicKey);
-    console.log("Seller Public Key: ", sellerPublicKey);
-    console.log("Encrypted Symmetric Key: ", encryptedSymKey_Buyer);
-    console.log("Proof JSON: ", json_selldata_v120);
-    console.log("Pinata Pin: ", pin);
-    console.log("Proof Hash: ", proofHash58);
-    console.log("Proof Hash Digest: ", proofHash58Digest);
+    console.group('Subimt Data');
+    console.log('Buyer Address: ', buyerAddress);
+    console.log('Seller Address: ', sellerAddress);
+    console.log('Buyer Public Key: ', buyerPublicKey);
+    console.log('Seller Public Key: ', sellerPublicKey);
+    console.log('Encrypted Symmetric Key: ', encryptedSymKey_Buyer);
+    console.log('Proof JSON: ', json_selldata_v120);
+    console.log('Pinata Pin: ', pin);
+    console.log('Proof Hash: ', proofHash58);
+    console.log('Proof Hash Digest: ', proofHash58Digest);
     console.groupEnd();
 
     if (String(pin.IpfsHash) !== String(proofHash58)) {
-      console.log("Error with proof Hash.");
+      console.log('Error with proof Hash.');
       console.log(pin.IpfsHash);
       console.log(proofHash58);
       return;
     }
 
-    console.log("Data Saved.");
-    notification.success("Data Saved.");
+    console.log('Data Saved.');
+    notification.success('Data Saved.');
 
     //CHeck Fetch data
-    const responseIPFS = await axios.get("https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + pin.IpfsHash, {
-      headers: {
-        Accept: "text/plain",
+    const responseIPFS = await axios.get(
+      'https://sapphire-financial-fish-885.mypinata.cloud/ipfs/' + pin.IpfsHash,
+      {
+        headers: {
+          Accept: 'text/plain',
+        },
       },
-    });
+    );
     console.log(responseIPFS.data);
     // check response is ipfs valid content
     if (responseIPFS.data.msp_version !== version) {
-      console.log("Error with proof Hash.");
+      console.log('Error with proof Hash.');
       console.log(responseIPFS.data.msp_version);
       return;
     }
 
-    console.log("Data Retrieved.");
-    console.log("Proof Hash Digest: ", proofHash58Digest);
+    console.log('Data Retrieved.');
+    console.log('Proof Hash Digest: ', proofHash58Digest);
 
     runTx(feedCtx?.submitHash(proofHash58Digest), signer as Signer);
 
@@ -550,79 +651,89 @@ const ViewFeed: NextPage = () => {
   }
 
   async function retrievePost() {
-    console.log("Retrieving Data...");
+    console.log('Retrieving Data...');
 
-    const id = notification.loading("Retrieving Data...");
+    const id = notification.loading('Retrieving Data...');
     await fetchData();
 
     const decodeHash = await MecenateHelper.multihash({
       input: feedData[1][2].encryptedKey,
-      inputType: "sha2-256",
-      outputType: "b58",
+      inputType: 'sha2-256',
+      outputType: 'b58',
     });
 
-    console.log("Decoded Hash: ", decodeHash);
+    console.log('Decoded Hash: ', decodeHash);
 
     //#endregion
     const responseDecodeHash = await axios.get(
-      "https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + decodeHash,
+      'https://sapphire-financial-fish-885.mypinata.cloud/ipfs/' + decodeHash,
       {
         headers: {
-          Accept: "text/plain",
+          Accept: 'text/plain',
         },
       },
     );
 
-    const responseDecodeHahJSON = await JSON.parse(JSON.stringify(responseDecodeHash.data));
-    console.log("Response Decode Hash: ", responseDecodeHahJSON);
+    const responseDecodeHahJSON = await JSON.parse(
+      JSON.stringify(responseDecodeHash.data),
+    );
+    console.log('Response Decode Hash: ', responseDecodeHahJSON);
 
-    const encryptedSymKey = await JSON.parse(JSON.stringify(responseDecodeHahJSON.encryptedSymKey));
-    console.log("Encrypted Symmetric Key: ", encryptedSymKey);
+    const encryptedSymKey = await JSON.parse(
+      JSON.stringify(responseDecodeHahJSON.encryptedSymKey),
+    );
+    console.log('Encrypted Symmetric Key: ', encryptedSymKey);
 
     const secretKeyUint8Array = util.encodeBase64(secretKey);
-    console.log("PubKey:", encryptedSymKey.ephemPubKey)
+    console.log('PubKey:', encryptedSymKey.ephemPubKey);
 
     const decrypted = crypto.decrypt(
       encryptedSymKey.ciphertext,
       encryptedSymKey.nonce,
       encryptedSymKey.ephemPubKey,
-      secretKey
+      JSON.parse(kp).secretKey,
     );
 
-    console.log("Decrypted", decrypted);
+    console.log('Decrypted', decrypted);
 
     const _decodeHash = await MecenateHelper.multihash({
       input: responseDecodeHahJSON.proofhash.toString(),
-      inputType: "sha2-256",
-      outputType: "b58",
+      inputType: 'sha2-256',
+      outputType: 'b58',
     });
 
-    const url = "https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + _decodeHash;
+    const url =
+      'https://sapphire-financial-fish-885.mypinata.cloud/ipfs/' + _decodeHash;
 
     console.log(url);
 
     const responseProofHash = await axios.get(url, {
       headers: {
-        Accept: "text/plain",
+        Accept: 'text/plain',
       },
     });
 
     console.log(responseProofHash);
 
-    const responseProofHashJSON = JSON.parse(JSON.stringify(responseProofHash.data));
+    const responseProofHashJSON = JSON.parse(
+      JSON.stringify(responseProofHash.data),
+    );
 
     console.log(responseProofHashJSON);
 
     const response_Encrypteddatahash = await axios.get(
-      "https://sapphire-financial-fish-885.mypinata.cloud/ipfs/" + responseProofHashJSON.encryptedDatahash,
+      'https://sapphire-financial-fish-885.mypinata.cloud/ipfs/' +
+        responseProofHashJSON.encryptedDatahash,
       {
         headers: {
-          Accept: "text/plain",
+          Accept: 'text/plain',
         },
       },
     );
 
-    const response_Encrypteddatahash_JSON = JSON.parse(JSON.stringify(response_Encrypteddatahash.data));
+    const response_Encrypteddatahash_JSON = JSON.parse(
+      JSON.stringify(response_Encrypteddatahash.data),
+    );
 
     const decryptFile = MecenateHelper.crypto.symmetric.decryptMessage(
       decrypted,
@@ -631,12 +742,12 @@ const ViewFeed: NextPage = () => {
 
     if (decryptFile) {
       // wait 10 seconds
-      console.log("Decrypted Data: ", decryptFile);
+      console.log('Decrypted Data: ', decryptFile);
 
       const dataHash = await MecenateHelper.multihash({
         input: decryptFile,
-        inputType: "raw",
-        outputType: "hex",
+        inputType: 'raw',
+        outputType: 'hex',
       });
 
       const hashCheck = responseProofHashJSON.datahash === dataHash;
@@ -652,10 +763,21 @@ const ViewFeed: NextPage = () => {
         // Repair malformed base64 data
         const file = convertBase64ToFile(
           decryptFile,
-          String(postCount) + feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1],
+          String(postCount) +
+            feedCtx?.address +
+            '_decryptedData' +
+            '.' +
+            mimeType?.split('/')[1],
         );
 
-        saveAs(file, String(postCount) + feedCtx?.address + "_decryptedData" + "." + mimeType?.split("/")[1]);
+        saveAs(
+          file,
+          String(postCount) +
+            feedCtx?.address +
+            '_decryptedData' +
+            '.' +
+            mimeType?.split('/')[1],
+        );
       } else {
         notification.remove(id);
         notification.success(decryptFile);
@@ -668,7 +790,7 @@ const ViewFeed: NextPage = () => {
         hashCheck: hashCheck,
       };
     } else {
-      console.log("Error decrypting message.");
+      console.log('Error decrypting message.');
       return null;
     }
   }
@@ -676,19 +798,19 @@ const ViewFeed: NextPage = () => {
   async function revealPost() {
     const symKeyHash = await MecenateHelper.multihash({
       input: JSON.stringify({ symmetricKey: symmetricKey }),
-      inputType: "raw",
-      outputType: "b58",
+      inputType: 'raw',
+      outputType: 'b58',
     });
 
     const rawDataHash = await MecenateHelper.multihash({
       input: JSON.stringify({ rawData: postRawData }),
-      inputType: "raw",
-      outputType: "b58",
+      inputType: 'raw',
+      outputType: 'b58',
     });
 
     // IPFS needs Pinata account credentials.
     if (pinataApiKey === undefined || pinataApiSecret === undefined) {
-      console.log("Please call with Pinata Account Credentials");
+      console.log('Please call with Pinata Account Credentials');
       return;
     }
 
@@ -696,7 +818,7 @@ const ViewFeed: NextPage = () => {
     const pinata = await new pinataSDK(pinataApiKey, pinataApiSecret);
     const pinataAuth = await pinata.testAuthentication();
     if (pinataAuth.authenticated !== true) {
-      console.log("Pinata Authentication Failed.");
+      console.log('Pinata Authentication Failed.');
       return;
     }
 
@@ -708,32 +830,45 @@ const ViewFeed: NextPage = () => {
 
     pin = await pinata.pinJSONToIPFS({ rawData: postRawData });
 
-    console.log("Data Saved.");
+    console.log('Data Saved.');
 
     const AbiCoder = new ethers.utils.AbiCoder();
-    const dataEncoded = AbiCoder.encode(["string", "string"], [symKeyHash, rawDataHash]);
+    const dataEncoded = AbiCoder.encode(
+      ['string', 'string'],
+      [symKeyHash, rawDataHash],
+    );
 
     feedCtx?.connect(signer as any);
 
-    runTx(feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)), signer as Signer);
+    runTx(
+      feedCtx?.revealData(dataEncoded, keccak256(sismoData.auths[0].userId)),
+      signer as Signer,
+    );
 
     await fetchData();
   }
 
   async function finalizePost() {
-    console.log("Finalizing Data...");
-    console.log(valid)
-    console.log(feedCtx?.address)
-    console.log(feedData[1][0].postId)
-    console.log(feedData[1][2].encryptedData)
-
+    console.log('Finalizing Data...');
+    console.log(valid);
+    console.log(feedCtx?.address);
+    console.log(feedData[1][0].postId);
+    console.log(feedData[1][2].encryptedData);
 
     if (valid == true) {
       const encodedData = schemaEncoder.encodeData([
-        { name: "verified", value: true, type: "bool" },
-        { name: "feed", value: String(feedCtx?.address), type: "address" },
-        { name: "postId", value: String(feedData[1][0].postId), type: "bytes32" },
-        { name: "post", value: String(feedData[1][2].encryptedData), type: "bytes" },
+        { name: 'verified', value: true, type: 'bool' },
+        { name: 'feed', value: String(feedCtx?.address), type: 'address' },
+        {
+          name: 'postId',
+          value: String(feedData[1][0].postId),
+          type: 'bytes32',
+        },
+        {
+          name: 'post',
+          value: String(feedData[1][2].encryptedData),
+          type: 'bytes',
+        },
       ]);
 
       const data = {
@@ -746,7 +881,7 @@ const ViewFeed: NextPage = () => {
 
       eas.connect(signer as any);
 
-      console.log("Encoded Data: ", encodedData);
+      console.log('Encoded Data: ', encodedData);
 
       const tx = await eas.attest({
         schema: schemaUID,
@@ -754,13 +889,18 @@ const ViewFeed: NextPage = () => {
       });
 
       const newAttestationUID = await tx.wait();
-      console.log("New attestation UID:", newAttestationUID);
-      notification.success("UID: " + newAttestationUID)
+      console.log('New attestation UID:', newAttestationUID);
+      notification.success('UID: ' + newAttestationUID);
 
-      runTx(feedCtx?.finalizePost(valid, parseEther("0"), newAttestationUID), signer as Signer);
-
+      runTx(
+        feedCtx?.finalizePost(valid, parseEther('0'), newAttestationUID),
+        signer as Signer,
+      );
     } else {
-      runTx(feedCtx?.finalizePost(valid, parseEther(punishment), uid), signer as Signer);
+      runTx(
+        feedCtx?.finalizePost(valid, parseEther(punishment), uid),
+        signer as Signer,
+      );
     }
 
     await fetchData();
@@ -768,17 +908,22 @@ const ViewFeed: NextPage = () => {
 
   async function renounce() {
     runTx(feedCtx?.renouncePost(), signer as Signer);
-    notification.success("Refund successful");
+    notification.success('Refund successful');
   }
 
   //******************** Staking *********************//
 
   async function addStake() {
-    console.log("Adding Stake...");
+    console.log('Adding Stake...');
     runTx(
-      feedCtx?.addStake(Number(tokenId), signer?.getAddress(), parseEther(stakeAmount), {
-        value: Number(tokenId) == 0 ? parseEther(stakeAmount) : 0,
-      }),
+      feedCtx?.addStake(
+        Number(tokenId),
+        signer?.getAddress(),
+        parseEther(stakeAmount),
+        {
+          value: Number(tokenId) == 0 ? parseEther(stakeAmount) : 0,
+        },
+      ),
       signer as Signer,
     );
     await fetchData();
@@ -786,14 +931,14 @@ const ViewFeed: NextPage = () => {
 
   async function takeAll() {
     runTx(feedCtx?.takeFullStake(Number(tokenId), receiver), signer as Signer);
-    console.log("Take All Stake...");
+    console.log('Take All Stake...');
     await fetchData();
   }
 
   async function takeStake() {
     feedCtx?.connect(signer as any);
 
-    console.log("Take Stake...");
+    console.log('Take Stake...');
 
     runTx(
       feedCtx?.takeStake(Number(tokenId), receiver, parseEther(stakeAmount)),
@@ -814,7 +959,7 @@ const ViewFeed: NextPage = () => {
   };
 
   const convertBase64ToFile = (base64String: string, fileName: string) => {
-    const arr: any = base64String.split(",");
+    const arr: any = base64String.split(',');
     const mime = arr[0].match(/:(.*?);/)[1];
     const bstr = atob(arr[1]);
     let n = bstr.length;
@@ -826,17 +971,25 @@ const ViewFeed: NextPage = () => {
     return file;
   };
 
-  const downloadFile = ({ data, fileName, fileType }: { data: BlobPart; fileName: string; fileType: string }): void => {
+  const downloadFile = ({
+    data,
+    fileName,
+    fileType,
+  }: {
+    data: BlobPart;
+    fileName: string;
+    fileType: string;
+  }): void => {
     if (!data || !fileName || !fileType) {
-      throw new Error("Invalid inputs");
+      throw new Error('Invalid inputs');
     }
 
     const blob = new Blob([data], { type: fileType });
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.download = fileName;
     a.href = window.URL.createObjectURL(blob);
 
-    const clickEvt = new MouseEvent("click", {
+    const clickEvt = new MouseEvent('click', {
       view: window,
       bubbles: true,
       cancelable: true,
@@ -847,29 +1000,29 @@ const ViewFeed: NextPage = () => {
   };
 
   function encryptMessage(secretKey: string, message: string): string {
-    const algorithm = "aes-256-cbc"; // Algoritmo di cifratura
-    const key = crypto.createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
+    const algorithm = 'aes-256-cbc'; // Algoritmo di cifratura
+    const key = crypto.createHash('sha256').update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
     const iv = crypto.randomBytes(16); // Vettore di inizializzazione casuale
 
     const cipher = crypto.createCipheriv(algorithm, key, iv);
-    let encrypted = cipher.update(message, "utf8", "hex");
-    encrypted += cipher.final("hex");
+    let encrypted = cipher.update(message, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
 
     // Concatenare il vettore di inizializzazione e il messaggio cifrato
-    return iv.toString("hex") + encrypted;
+    return iv.toString('hex') + encrypted;
   }
 
   function decryptMessage(secretKey: string, encryptedMessage: string): string {
-    const algorithm = "aes-256-cbc"; // Algoritmo di cifratura
-    const key = crypto.createHash("sha256").update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
+    const algorithm = 'aes-256-cbc'; // Algoritmo di cifratura
+    const key = crypto.createHash('sha256').update(secretKey).digest(); // Creare una chiave utilizzando la parola segreta
 
     // Separare il vettore di inizializzazione dal messaggio cifrato
-    const iv = Buffer.from(encryptedMessage.slice(0, 32), "hex");
+    const iv = Buffer.from(encryptedMessage.slice(0, 32), 'hex');
     const encrypted = encryptedMessage.slice(32);
 
     const decipher = crypto.createDecipheriv(algorithm, key, iv);
-    let decrypted = decipher.update(encrypted, "hex", "utf8");
-    decrypted += decipher.final("utf8");
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
 
     return decrypted;
   }
@@ -877,74 +1030,92 @@ const ViewFeed: NextPage = () => {
   function getStatusText(status: any) {
     switch (status) {
       case 6:
-        return "Revealed";
+        return 'Revealed';
       case 5:
-        return "Punished";
+        return 'Punished';
       case 4:
-        return "Finalized";
+        return 'Finalized';
       case 3:
-        return "Submitted";
+        return 'Submitted';
       case 2:
-        return "Accepted";
+        return 'Accepted';
       case 1:
-        return "Proposed";
+        return 'Proposed';
       default:
-        return "Waiting for Creator";
+        return 'Waiting for Creator';
     }
   }
 
   async function decodeData() {
-    if (feedData[1][2].decryptedData != "0x30783030") {
-      const decryptedData = AbiCoder.decode(["string", "string"], feedData[1][2].decryptedData);
+    if (feedData[1][2].decryptedData != '0x30783030') {
+      const decryptedData = AbiCoder.decode(
+        ['string', 'string'],
+        feedData[1][2].decryptedData,
+      );
 
       const encryptedData = await MecenateHelper.multihash({
         input: feedData[1][2].encryptedData,
-        inputType: "sha2-256",
-        outputType: "b58",
+        inputType: 'sha2-256',
+        outputType: 'b58',
       });
 
       const encryptedKey = await MecenateHelper.multihash({
         input: feedData[1][2].encryptedKey,
-        inputType: "sha2-256",
-        outputType: "b58",
+        inputType: 'sha2-256',
+        outputType: 'b58',
       });
 
       notification.success(
         <div>
-          {" "}
+          {' '}
           <p>
-            <a href={`https://gateway.pinata.cloud/ipfs/${decryptedData[0]}`} target="_blank">
+            <a
+              href={`https://gateway.pinata.cloud/ipfs/${decryptedData[0]}`}
+              target="_blank"
+            >
               <p>Decrypted Data[0]: {decryptedData[0]}</p>
             </a>
           </p>
           <p>
-            <a href={`https://gateway.pinata.cloud/ipfs/${decryptedData[1]}`} target="_blank">
+            <a
+              href={`https://gateway.pinata.cloud/ipfs/${decryptedData[1]}`}
+              target="_blank"
+            >
               <p>Decrypted Data[1]: {decryptedData[1]}</p>
             </a>
           </p>
           <p>
-            <a href={`https://gateway.pinata.cloud/ipfs/${encryptedData}`} target="_blank">
+            <a
+              href={`https://gateway.pinata.cloud/ipfs/${encryptedData}`}
+              target="_blank"
+            >
               <p>Encrypted Data: {encryptedData}</p>
             </a>
           </p>
           <p>
-            <a href={`https://gateway.pinata.cloud/ipfs/${encryptedKey}`} target="_blank">
+            <a
+              href={`https://gateway.pinata.cloud/ipfs/${encryptedKey}`}
+              target="_blank"
+            >
               <p>Encrypted Key: {encryptedKey}</p>
             </a>
-          </p>{" "}
+          </p>{' '}
         </div>,
       );
     } else {
       const encryptedData = await MecenateHelper.multihash({
         input: feedData[1][2].encryptedData,
-        inputType: "sha2-256",
-        outputType: "b58",
+        inputType: 'sha2-256',
+        outputType: 'b58',
       });
 
       notification.info(
         <div>
           <p>
-            <a href={`https://gateway.pinata.cloud/ipfs/${encryptedData}`} target="_blank">
+            <a
+              href={`https://gateway.pinata.cloud/ipfs/${encryptedData}`}
+              target="_blank"
+            >
               <p>Encrypted Data: {encryptedData}</p>
             </a>
           </p>
@@ -963,7 +1134,7 @@ const ViewFeed: NextPage = () => {
   const uploadImageToIpfs = async (file: Blob | any) => {
     try {
       if (!file) {
-        throw new Error("No file specified");
+        throw new Error('No file specified');
       }
       console.log(file);
       return new Promise((resolve, reject) => {
@@ -976,7 +1147,7 @@ const ViewFeed: NextPage = () => {
         reader.onerror = event => {
           reject(event);
         };
-        notification.success("File uploaded to IPFS");
+        notification.success('File uploaded to IPFS');
         setImage(String(reader.result));
       });
     } catch (error) {
@@ -993,11 +1164,11 @@ const ViewFeed: NextPage = () => {
   };
 
   async function savePost(RawData: string): Promise<any | void> {
-    console.log("Saving Data...");
+    console.log('Saving Data...');
 
     // Check Pinata credentials.
     if (!pinataApiKey || !pinataApiSecret) {
-      console.log("Please call with Pinata Account Credentials");
+      console.log('Please call with Pinata Account Credentials');
       return;
     }
 
@@ -1005,7 +1176,7 @@ const ViewFeed: NextPage = () => {
     const pinata = new pinataSDK(pinataApiKey, pinataApiSecret);
     const pinataAuth = await pinata.testAuthentication();
     if (pinataAuth?.authenticated !== true) {
-      console.log("Pinata Authentication Failed.");
+      console.log('Pinata Authentication Failed.');
       return;
     }
 
@@ -1013,29 +1184,31 @@ const ViewFeed: NextPage = () => {
     const postData = await createPostData(RawData);
 
     if (!postData) {
-      console.log("Error creating post data.");
+      console.log('Error creating post data.');
       return;
     }
 
     // Save encrypted data to IPFS.
     try {
-      let pin = await pinata.pinJSONToIPFS({ encryptedData: postData.encryptedData });
+      let pin = await pinata.pinJSONToIPFS({
+        encryptedData: postData.encryptedData,
+      });
       if (pin?.IpfsHash !== postData.proofJson.encryptedDatahash) {
-        console.log("Error with Encrypted Data Hash.");
+        console.log('Error with Encrypted Data Hash.');
         return;
       }
 
       // Save proof JSON to IPFS.
       pin = await pinata.pinJSONToIPFS(postData.proofJson);
       if (pin.IpfsHash !== postData.proofhash) {
-        console.log("Error with proof Hash.");
+        console.log('Error with proof Hash.');
         return;
       }
 
-      console.log("Data Saved.");
+      console.log('Data Saved.');
       return postData;
     } catch (err) {
-      console.log("Error saving data to IPFS:", err);
+      console.log('Error saving data to IPFS:', err);
     }
   }
 
@@ -1044,12 +1217,12 @@ const ViewFeed: NextPage = () => {
   useEffect(() => {
     const fetchDataAsync = async () => {
       try {
-        console.log("Fetching Data...");
+        console.log('Fetching Data...');
         await fetchData();
         if (feedData.lenght != 0) await fetchAttestations();
         console.log(attestations);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       }
     };
 
@@ -1070,16 +1243,19 @@ const ViewFeed: NextPage = () => {
     const interval = setInterval(async () => {
       if (signer && feedData.length != 0) {
         feedCtx?.connect(signer as Signer);
-        const yourStake = await feedCtx?.getStake(feedData?.postdata?.settings?.tokenId, signer?.getAddress());
+        const yourStake = await feedCtx?.getStake(
+          feedData?.postdata?.settings?.tokenId,
+          signer?.getAddress(),
+        );
         const yourStakeETH = await feedCtx?.getStake(0, signer?.getAddress());
         const yourStakeMUSE = await feedCtx?.getStake(1, signer?.getAddress());
         const yourStakeDAI = await feedCtx?.getStake(2, signer?.getAddress());
 
-        console.log("Your Stake: ", yourStake);
+        console.log('Your Stake: ', yourStake);
         setYourStake(yourStake);
         setYourStakeETH(yourStakeETH);
         setYourStakeDAI(yourStakeDAI);
-        setYourStakeMUSE(yourStakeMUSE)
+        setYourStakeMUSE(yourStakeMUSE);
       }
     }, 5000); // call every 5 seconds
 
@@ -1094,19 +1270,18 @@ const ViewFeed: NextPage = () => {
 
   const handleSelectToken = async (e: any) => {
     const token = e;
-    if (token === "ETH") {
-      setTokenId("0");
-    } else if (token === "MUSE") {
-      setTokenId("1");
-    } else if (token === "DAI") {
-      setTokenId("2");
+    if (token === 'ETH') {
+      setTokenId('0');
+    } else if (token === 'MUSE') {
+      setTokenId('1');
+    } else if (token === 'DAI') {
+      setTokenId('2');
     }
-    console.log("Token ID: ", tokenId);
+    console.log('Token ID: ', tokenId);
   };
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10  min-w-fit bg-gradient-to-tl from-blue-950 to-slate-950">
-
       <div className="flex flex-col items-center pt-2 p-2 w-10/12 mx-auto   ">
         {feedData[0] != null ? (
           <div className="flex flex-col text-left rounded-lg  mt-5">
@@ -1114,7 +1289,10 @@ const ViewFeed: NextPage = () => {
               <div className="flex flex-col mb-5  min-w-fit items-left justify-center w-full">
                 <div className="flex flex-row gap-5 mx-10 my-5">
                   <div className="dropdown dropdown-bottom  ">
-                    <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
+                    <label
+                      tabIndex={0}
+                      className="hover:bg-secondary-focus btn btn-custom bg-inherit"
+                    >
                       <DocumentCheckIcon className="h-8 w-8 mx-2" /> Seller
                     </label>
                     <ul
@@ -1122,18 +1300,27 @@ const ViewFeed: NextPage = () => {
                       className="dropdown-content z-[1] menu p-2 shadow  rounded-box w-52  bg-gradient-to-tr from-slate-700 to-slate-800  "
                     >
                       <li>
-                        {" "}
-                        <label htmlFor="modal-create" className="feedData.postData font-semibold ">
+                        {' '}
+                        <label
+                          htmlFor="modal-create"
+                          className="feedData.postData font-semibold "
+                        >
                           Create
                         </label>
                       </li>
                       <li>
-                        <label htmlFor="modal-submit" className="feedData.postData font-semibold ">
+                        <label
+                          htmlFor="modal-submit"
+                          className="feedData.postData font-semibold "
+                        >
                           Submit
                         </label>
                       </li>
                       <li>
-                        <label htmlFor="modal-reveal" className="feedData.postData font-semibold ">
+                        <label
+                          htmlFor="modal-reveal"
+                          className="feedData.postData font-semibold "
+                        >
                           Reveal
                         </label>
                       </li>
@@ -1150,7 +1337,10 @@ const ViewFeed: NextPage = () => {
                     </ul>
                   </div>
                   <div className="dropdown dropdown-bottom ">
-                    <label tabIndex={0} className="hover:bg-secondary-focus  btn btn-custom bg-inherit">
+                    <label
+                      tabIndex={0}
+                      className="hover:bg-secondary-focus  btn btn-custom bg-inherit"
+                    >
                       <MegaphoneIcon className="h-8 w-8 mx-2" /> Buyer
                     </label>
                     <ul
@@ -1158,25 +1348,37 @@ const ViewFeed: NextPage = () => {
                       className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
                     >
                       <li>
-                        {" "}
-                        <label htmlFor="modal-accept" className=" font-semibold">
+                        {' '}
+                        <label
+                          htmlFor="modal-accept"
+                          className=" font-semibold"
+                        >
                           Accept
                         </label>
                       </li>
                       <li>
-                        <label htmlFor="modal-retrieve" className="font-semibold">
+                        <label
+                          htmlFor="modal-retrieve"
+                          className="font-semibold"
+                        >
                           Retrieve
                         </label>
                       </li>
                       <li>
-                        <label htmlFor="modal-finalize" className="font-semibold">
+                        <label
+                          htmlFor="modal-finalize"
+                          className="font-semibold"
+                        >
                           Finalize
                         </label>
                       </li>
                     </ul>
                   </div>
                   <div className="dropdown dropdown-bottom ">
-                    <label tabIndex={0} className="hover:bg-secondary-focus btn btn-custom bg-inherit">
+                    <label
+                      tabIndex={0}
+                      className="hover:bg-secondary-focus btn btn-custom bg-inherit"
+                    >
                       <ScaleIcon className="h-8 w-8 mx-2" /> Stake
                     </label>
                     <ul
@@ -1184,8 +1386,11 @@ const ViewFeed: NextPage = () => {
                       className="dropdown-content z-[1] menu p-2 shadow bg-gradient-to-tr from-slate-700 to-slate-800 rounded-box w-52"
                     >
                       <li>
-                        {" "}
-                        <label htmlFor="modal-stake" className="feedData.postData font-semibold">
+                        {' '}
+                        <label
+                          htmlFor="modal-stake"
+                          className="feedData.postData font-semibold"
+                        >
                           Stake
                         </label>
                       </li>
@@ -1203,39 +1408,41 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
               </div>
-            )
-              :
+            ) : (
               <div className="w-min mx-auto">
-                <button className="btn btn-custom " onClick={setup}>Setup</button>
+                <button className="btn btn-custom " onClick={setup}>
+                  Setup
+                </button>
               </div>
-            }
+            )}
             <div className="flex flex-wrap text-xl mb-5 mx-10 font-bold hover:text-success animate-pulse">
               {feedData.postdata.settings.status === 6
-                ? "Waiting for Seller"
+                ? 'Waiting for Seller'
                 : feedData.postdata.settings.status === 5
-                  ? "Waiting for Seller"
-                  : feedData.postdata.settings.status === 4
-                    ? "Waiting for Seller"
-                    : feedData.postdata.settings.status === 3
-                      ? "Waiting for buyer validate the data"
-                      : feedData.postdata.settings.status === 2
-                        ? "Waiting for submission from seller"
-                        : feedData.postdata.settings.status === 1
-                          ? "Waiting for Acceptance from a buyer"
-                          : "Waiting for Seller"}
+                ? 'Waiting for Seller'
+                : feedData.postdata.settings.status === 4
+                ? 'Waiting for Seller'
+                : feedData.postdata.settings.status === 3
+                ? 'Waiting for buyer validate the data'
+                : feedData.postdata.settings.status === 2
+                ? 'Waiting for submission from seller'
+                : feedData.postdata.settings.status === 1
+                ? 'Waiting for Acceptance from a buyer'
+                : 'Waiting for Seller'}
             </div>
             <div className="mx-10  font-base text-lg">
-              Smart Contract address is <strong>{addr}</strong>{" "}
+              Smart Contract address is <strong>{addr}</strong>{' '}
             </div>
             <div className="mx-10 font-base text-lg">
-              Your current deposit is{" "}
-              <strong>{formatEther(yourStakeETH)}{" "} </strong>ETH
-              {" "}
-              <strong>{formatEther(yourStakeDAI)}{" "} </strong>DAI
+              Your current deposit is{' '}
+              <strong>{formatEther(yourStakeETH)} </strong>ETH{' '}
+              <strong>{formatEther(yourStakeDAI)} </strong>DAI
               {/* <p> {formatEther(yourStakeMUSE)}{" "} "MUSE"</p> */}
             </div>
             <div className="mx-10  mb-5 font-base text-lg">
-              This seller had received <strong>{attestations && <>{attestations.length}</>}</strong> attestations
+              This seller had received{' '}
+              <strong>{attestations && <>{attestations.length}</>}</strong>{' '}
+              attestations
             </div>
 
             <div className="flex flex-col  my-20  min-w-fit items-left justify-center w-full">
@@ -1245,7 +1452,12 @@ const ViewFeed: NextPage = () => {
                   const currentStatusText = getStatusText(currentStatus);
 
                   return (
-                    <li className={`step ${statusText === currentStatusText ? "step-info" : ""}`} key={index}>
+                    <li
+                      className={`step ${
+                        statusText === currentStatusText ? 'step-info' : ''
+                      }`}
+                      key={index}
+                    >
                       {statusText}
                     </li>
                   );
@@ -1253,11 +1465,17 @@ const ViewFeed: NextPage = () => {
               </ul>
             </div>
             <div>
-              <input type="checkbox" id="modal-create" className="modal-toggle " />
+              <input
+                type="checkbox"
+                id="modal-create"
+                className="modal-toggle "
+              />
               <div className="modal ">
                 <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                   <div className="modal-header">
-                    <div className="modal-title text-2xl font-bold">Create Post</div>
+                    <div className="modal-title text-2xl font-bold">
+                      Create Post
+                    </div>
                     <label htmlFor="modal-create" className="btn btn-ghost">
                       <i className="fas fa-times"></i>
                     </label>
@@ -1270,7 +1488,9 @@ const ViewFeed: NextPage = () => {
                       value={postDuration}
                       onChange={e => setPostDuration(e.target.value)}
                     >
-                      <option className="bg-transparent">Select Duration</option>
+                      <option className="bg-transparent">
+                        Select Duration
+                      </option>
                       <option className="bg-transparent" value="0">
                         1 Days
                       </option>
@@ -1295,7 +1515,9 @@ const ViewFeed: NextPage = () => {
                       value={postStake}
                       onChange={e => setPostStake(e.target.value)}
                     />
-                    <label className="block text-base-500 mt-8">Use Staked Balance</label>
+                    <label className="block text-base-500 mt-8">
+                      Use Staked Balance
+                    </label>
                     <input
                       type="checkbox"
                       name="useStake"
@@ -1316,10 +1538,11 @@ const ViewFeed: NextPage = () => {
                       <option value="Nan">Select Token</option>
                       <option value="ETH">ETH</option>
                       {/*                       <option value="MUSE">MUSE</option>
- */}                      <option value="DAI">DAI</option>
+                       */}{' '}
+                      <option value="DAI">DAI</option>
                     </select>
 
-                    {tokenId == "1" || tokenId == "2" ? (
+                    {tokenId == '1' || tokenId == '2' ? (
                       <div>
                         <button
                           className="btn btn-primary w-full mt-4"
@@ -1331,7 +1554,9 @@ const ViewFeed: NextPage = () => {
                         </button>
                       </div>
                     ) : null}
-                    <label className="block text-base-500 mt-8">Buyer Payment </label>
+                    <label className="block text-base-500 mt-8">
+                      Buyer Payment{' '}
+                    </label>
 
                     <input
                       type="text"
@@ -1377,7 +1602,10 @@ const ViewFeed: NextPage = () => {
                               {imageFile ? (
                                 <p>{imageFile?.name}</p>
                               ) : (
-                                <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
+                                <p>
+                                  Drag &apos;n&apos; drop an image here, or
+                                  click to select a file
+                                </p>
                               )}
                             </div>
                           )}
@@ -1400,11 +1628,17 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
               </div>
-              <input type="checkbox" id="modal-submit" className="modal-toggle " />
+              <input
+                type="checkbox"
+                id="modal-submit"
+                className="modal-toggle "
+              />
               <div className="modal">
                 <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                   <div className="modal-header">
-                    <div className="modal-title text-2xl font-bold">Submit encrypted key</div>
+                    <div className="modal-title text-2xl font-bold">
+                      Submit encrypted key
+                    </div>
                     <label htmlFor="modal-submit" className="btn btn-ghost">
                       <i className="fas fa-times"></i>
                     </label>
@@ -1440,8 +1674,8 @@ const ViewFeed: NextPage = () => {
                       htmlFor="modal-submit"
                       className="btn"
                       onClick={async () => {
-                        setSecretKey("");
-                        setSymmetricKey("");
+                        setSecretKey('');
+                        setSymmetricKey('');
                       }}
                     >
                       Close
@@ -1449,11 +1683,17 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
               </div>
-              <input type="checkbox" id="modal-reveal" className="modal-toggle" />
+              <input
+                type="checkbox"
+                id="modal-reveal"
+                className="modal-toggle"
+              />
               <div className="modal">
                 <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                   <div className="modal-header">
-                    <div className="modal-title text-2xl font-bold">Reveal Post</div>
+                    <div className="modal-title text-2xl font-bold">
+                      Reveal Post
+                    </div>
                     <label htmlFor="modal-reveal" className="btn btn-ghost">
                       <i className="fas fa-times"></i>
                     </label>
@@ -1504,7 +1744,10 @@ const ViewFeed: NextPage = () => {
                               {imageFile ? (
                                 <p>{imageFile?.name}</p>
                               ) : (
-                                <p>Drag &apos;n&apos; drop an image here, or click to select a file</p>
+                                <p>
+                                  Drag &apos;n&apos; drop an image here, or
+                                  click to select a file
+                                </p>
                               )}
                             </div>
                           )}
@@ -1528,16 +1771,23 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
               </div>
-              <input type="checkbox" id="modal-accept" className="modal-toggle" />
+              <input
+                type="checkbox"
+                id="modal-accept"
+                className="modal-toggle"
+              />
               <div className="modal">
                 <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                   <div className="modal-header">
-                    <div className="modal-title text-2xl font-bold">Accept Post</div>
+                    <div className="modal-title text-2xl font-bold">
+                      Accept Post
+                    </div>
                     <label htmlFor="modal-accept" className="btn btn-ghost">
                       <i className="fas fa-times"></i>
                     </label>
                   </div>
-                  {feedData.postdata.settings.tokenId == 1 || feedData.postdata.settings.tokenId == 2 ? (
+                  {feedData.postdata.settings.tokenId == 1 ||
+                  feedData.postdata.settings.tokenId == 2 ? (
                     <div>
                       <button
                         className="btn btn-primary w-full mt-4 my-2"
@@ -1550,8 +1800,8 @@ const ViewFeed: NextPage = () => {
                     </div>
                   ) : null}
                   <div className="modal-body space-y-4 my-2 text-left">
-                    min required: {""}
-                    {formatEther(feedData[1][1].payment.toString())} {""}
+                    min required: {''}
+                    {formatEther(feedData[1][1].payment.toString())} {''}
                     <input
                       type="text"
                       className="input w-full mt-8"
@@ -1559,7 +1809,7 @@ const ViewFeed: NextPage = () => {
                       value={postPayment}
                       onChange={e => setPostPayment(e.target.value)}
                     />
-                    use stake: {""}
+                    use stake: {''}
                     <input
                       type="checkbox"
                       name="useStake"
@@ -1587,23 +1837,29 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
               </div>
-              <input type="checkbox" id="modal-retrieve" className="modal-toggle" />
+              <input
+                type="checkbox"
+                id="modal-retrieve"
+                className="modal-toggle"
+              />
               <div className="modal">
                 <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                   <div className="modal-header">
-                    <div className="modal-title text-2xl font-bold">Retrieve Post</div>
+                    <div className="modal-title text-2xl font-bold">
+                      Retrieve Post
+                    </div>
                     <label htmlFor="modal-retrieve" className="btn btn-ghost">
                       <i className="fas fa-times"></i>
                     </label>
                   </div>
                   <div className="modal-body space-y-4 text-left">
-                    <input
+                    {/*  <input
                       type="password"
                       className="input w-full"
                       placeholder="Secret Key"
                       value={secretKey}
                       onChange={e => setSecretKey(e.target.value)}
-                    />
+                    /> */}
                     <button
                       className="btn  w-full"
                       onClick={async () => {
@@ -1619,7 +1875,7 @@ const ViewFeed: NextPage = () => {
                       htmlFor="modal-retrieve"
                       className="btn"
                       onClick={async () => {
-                        setSecretKey("");
+                        setSecretKey('');
                       }}
                     >
                       Close
@@ -1627,11 +1883,17 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
               </div>
-              <input type="checkbox" id="modal-finalize" className="modal-toggle" />
+              <input
+                type="checkbox"
+                id="modal-finalize"
+                className="modal-toggle"
+              />
               <div className="modal">
                 <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                   <div className="modal-header">
-                    <div className="modal-title text-2xl font-bold">Finalize Post</div>
+                    <div className="modal-title text-2xl font-bold">
+                      Finalize Post
+                    </div>
                   </div>
 
                   <div className="modal-body space-y-4 text-left">
@@ -1675,7 +1937,11 @@ const ViewFeed: NextPage = () => {
                   </div>
                 </div>
               </div>
-              <input type="checkbox" id="modal-stake" className="modal-toggle" />
+              <input
+                type="checkbox"
+                id="modal-stake"
+                className="modal-toggle"
+              />
               <div className="modal">
                 <div className="modal-box rounded-lg shadow-xl bg-gradient-to-tl from-slate-900 to-slate-950">
                   <div className="modal-header">
@@ -1753,22 +2019,23 @@ const ViewFeed: NextPage = () => {
                     <p className="text-base">
                       <span className="font-bold">Post Status</span> <br />
                       {feedData.postdata.settings.status === 6
-                        ? "Revealed"
+                        ? 'Revealed'
                         : feedData.postdata.settings.status === 5
-                          ? "Punished"
-                          : feedData.postdata.settings.status === 4
-                            ? "Finalized"
-                            : feedData.postdata.settings.status === 3
-                              ? "Submitted"
-                              : feedData.postdata.settings.status === 2
-                                ? "Accepted"
-                                : feedData.postdata.settings.status === 1
-                                  ? "Proposed"
-                                  : "Waiting for Creator"}
+                        ? 'Punished'
+                        : feedData.postdata.settings.status === 4
+                        ? 'Finalized'
+                        : feedData.postdata.settings.status === 3
+                        ? 'Submitted'
+                        : feedData.postdata.settings.status === 2
+                        ? 'Accepted'
+                        : feedData.postdata.settings.status === 1
+                        ? 'Proposed'
+                        : 'Waiting for Creator'}
                     </p>
                     <div className="w-fit">
                       <p className="text-base">
-                        <span className="font-bold">Stake</span> <br /> {formatEther(feedData[1][1].stake.toString())} ETH
+                        <span className="font-bold">Stake</span> <br />{' '}
+                        {formatEther(feedData[1][1].stake.toString())} ETH
                       </p>
                     </div>
                     <div className="w-fit">
@@ -1787,16 +2054,22 @@ const ViewFeed: NextPage = () => {
                   <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 break-all">
                     <p>
                       <span className="font-bold">Creation</span> <br />
-                      {new Date(Number(feedData[1][0].creationTimeStamp) * 1000).toUTCString()}
+                      {new Date(
+                        Number(feedData[1][0].creationTimeStamp) * 1000,
+                      ).toUTCString()}
                     </p>
                     <p>
                       <span className="font-bold">Expire</span>
                       <br />
-                      {new Date(Number(feedData[1][0].endTimeStamp) * 1000).toString()}
+                      {new Date(
+                        Number(feedData[1][0].endTimeStamp) * 1000,
+                      ).toString()}
                     </p>
                     <p>
                       <span className="font-bold">Duration</span> <br />
-                      {Number(feedData[1][0].duration.toString() * 1000) / 86400000} days{" "}
+                      {Number(feedData[1][0].duration.toString() * 1000) /
+                        86400000}{' '}
+                      days{' '}
                     </p>
                     <p>
                       <span className="font-bold">postID</span> <br />
@@ -1805,35 +2078,35 @@ const ViewFeed: NextPage = () => {
                     <p>
                       <span className="font-bold">File Type</span> <br />
                       {feedData[1][0].postType.toString() == 0
-                        ? "Text"
+                        ? 'Text'
                         : feedData[1][0].postType.toString() == 1
-                          ? "Image"
-                          : feedData[1][0].postType.toString() == 2
-                            ? "Video"
-                            : feedData[1][0].postType.toString() == 3
-                              ? "Audio"
-                              : feedData[1][0].postType.toString() == 4
-                                ? "File"
-                                : null}
+                        ? 'Image'
+                        : feedData[1][0].postType.toString() == 2
+                        ? 'Video'
+                        : feedData[1][0].postType.toString() == 3
+                        ? 'Audio'
+                        : feedData[1][0].postType.toString() == 4
+                        ? 'File'
+                        : null}
                     </p>
                     <p>
                       <span className="font-bold">Status</span>
                       <br />
                       {feedData[1][0].status.toString() == 0
-                        ? "Waiting"
+                        ? 'Waiting'
                         : feedData[1][0].status.toString() == 1
-                          ? "Proposed"
-                          : feedData[1][0].status.toString() == 2
-                            ? "Accepted"
-                            : feedData[1][0].status.toString() == 3
-                              ? "Submitted"
-                              : feedData[1][0].status.toString() == 4
-                                ? "Finalized"
-                                : feedData[1][0].status.toString() == 5
-                                  ? "Punished"
-                                  : feedData[1][0].status.toString() == 6
-                                    ? "Revealed"
-                                    : null}
+                        ? 'Proposed'
+                        : feedData[1][0].status.toString() == 2
+                        ? 'Accepted'
+                        : feedData[1][0].status.toString() == 3
+                        ? 'Submitted'
+                        : feedData[1][0].status.toString() == 4
+                        ? 'Finalized'
+                        : feedData[1][0].status.toString() == 5
+                        ? 'Punished'
+                        : feedData[1][0].status.toString() == 6
+                        ? 'Revealed'
+                        : null}
                     </p>
                   </div>
                 </div>
@@ -1844,25 +2117,27 @@ const ViewFeed: NextPage = () => {
                   <h2 className="text-2xl font-bold">Punishment</h2>
                   <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 break-all">
                     <p>
-                      <span className="font-bold">Buyer </span> <br /> {feedData[1][1].buyer.toString()}
+                      <span className="font-bold">Buyer </span> <br />{' '}
+                      {feedData[1][1].buyer.toString()}
                     </p>
                     <p>
-                      <span className="font-bold">Seller</span> <br /> {feedData[1][1].seller.toString()}
+                      <span className="font-bold">Seller</span> <br />{' '}
+                      {feedData[1][1].seller.toString()}
                     </p>
                     <p>
-                      <span className="font-bold">Buyer Penalty</span> <br />{" "}
+                      <span className="font-bold">Buyer Penalty</span> <br />{' '}
                       {formatEther(feedData[1][1].penalty.toString())}
                     </p>
                     <p>
-                      <span className="font-bold">Seller Punishment</span> <br />{" "}
-                      {formatEther(feedData[1][1].punishment.toString())}
+                      <span className="font-bold">Seller Punishment</span>{' '}
+                      <br /> {formatEther(feedData[1][1].punishment.toString())}
                     </p>
                     <p>
-                      <span className="font-bold">Seller Stake</span> <br />{" "}
+                      <span className="font-bold">Seller Stake</span> <br />{' '}
                       {formatEther(feedData[1][1].stake.toString())}
                     </p>
                     <p>
-                      <span className="font-bold">Buyer Payment</span> <br />{" "}
+                      <span className="font-bold">Buyer Payment</span> <br />{' '}
                       {formatEther(feedData[1][1].payment.toString())}
                     </p>
                   </div>
@@ -1874,17 +2149,28 @@ const ViewFeed: NextPage = () => {
                   <h2 className="text-2xl font-bold">Data</h2>
                   <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <p>
-                      <span className="font-bold">Encrypted Data</span> <br />{" "}
-                      <span className="break-all">{feedData[1][2].encryptedData.toString()}</span>
+                      <span className="font-bold">Encrypted Data</span> <br />{' '}
+                      <span className="break-all">
+                        {feedData[1][2].encryptedData.toString()}
+                      </span>
                     </p>
                     <p>
-                      <span className="font-bold">Encrypted Key</span> <br />{" "}
-                      <span className="break-all"> {feedData[1][2].encryptedKey.toString()}</span>
+                      <span className="font-bold">Encrypted Key</span> <br />{' '}
+                      <span className="break-all">
+                        {' '}
+                        {feedData[1][2].encryptedKey.toString()}
+                      </span>
                     </p>
 
                     <p>
-                      <span className="font-bold">Decrypted Data IPFS Hash</span> <br />
-                      <span className="break-all"> {feedData[1][2].decryptedData.toString()}</span>
+                      <span className="font-bold">
+                        Decrypted Data IPFS Hash
+                      </span>{' '}
+                      <br />
+                      <span className="break-all">
+                        {' '}
+                        {feedData[1][2].decryptedData.toString()}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -1896,14 +2182,13 @@ const ViewFeed: NextPage = () => {
         )}
       </div>
     </div>
-
   );
 };
 
 function base64Mime(encoded: string) {
   let result = null;
 
-  if (typeof encoded !== "string") {
+  if (typeof encoded !== 'string') {
     return result;
   }
 

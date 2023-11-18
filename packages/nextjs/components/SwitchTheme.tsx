@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import { useDarkMode, useIsMounted } from "usehooks-ts";
-import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
+import React, { useEffect } from 'react';
+import { useDarkMode, useIsMounted } from 'usehooks-ts';
+import { MoonIcon, SunIcon } from '@heroicons/react/24/outline';
 
 const SwitchTheme = ({ className }: { className?: string }) => {
   const { isDarkMode, toggle } = useDarkMode(false);
@@ -8,7 +8,7 @@ const SwitchTheme = ({ className }: { className?: string }) => {
 
   useEffect(() => {
     const body = document.body;
-    body.setAttribute("data-theme", isDarkMode ? "dark" : "light");
+    body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
   return (
@@ -21,7 +21,10 @@ const SwitchTheme = ({ className }: { className?: string }) => {
         checked={isDarkMode}
       />
       {isMounted() && (
-        <label htmlFor="theme-toggle" className={`swap swap-rotate ${!isDarkMode ? "swap-active" : ""}`}>
+        <label
+          htmlFor="theme-toggle"
+          className={`swap swap-rotate ${!isDarkMode ? 'swap-active' : ''}`}
+        >
           <SunIcon className="swap-on h-5 w-5" />
           <MoonIcon className="swap-off h-5 w-5" />
         </label>

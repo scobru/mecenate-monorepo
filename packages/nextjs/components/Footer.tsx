@@ -1,11 +1,11 @@
-import React from "react";
-import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
-import { useAppStore } from "~~/services/store/store";
-import { HeartIcon } from "@heroicons/react/24/outline";
-import SwitchTheme from "./SwitchTheme";
-import { Faucet } from "~~/components/scaffold-eth";
-import { getTargetNetwork } from "~~/utils/scaffold-eth";
-import { hardhat } from "wagmi/chains";
+import React from 'react';
+import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { useAppStore } from '~~/services/store/store';
+import { HeartIcon } from '@heroicons/react/24/outline';
+import SwitchTheme from './SwitchTheme';
+import { Faucet } from '~~/components/scaffold-eth';
+import { getTargetNetwork } from '~~/utils/scaffold-eth';
+import { hardhat } from 'wagmi/chains';
 
 /**
  * Site footer
@@ -44,7 +44,7 @@ export default function Footer() {
             </div> */}
             <span>·</span>
             <div>
-              Built with <HeartIcon className="inline-block h-4 w-4" /> from{" "}
+              Built with <HeartIcon className="inline-block h-4 w-4" /> from{' '}
               <a
                 href="https://github.com/scobru"
                 target="_blank"
@@ -52,8 +52,8 @@ export default function Footer() {
                 className="underline underline-offset-2"
               >
                 Scobru
-              </a>{" "}
-              from 🏰{" "}
+              </a>{' '}
+              from 🏰{' '}
               <a
                 href="https://buidlguidl.com/"
                 target="_blank"
@@ -61,11 +61,16 @@ export default function Footer() {
                 className="underline underline-offset-2"
               >
                 BuidlGuidl
-              </a>{" "}
-              and{" "}
-              <a href="https://backdrop.so/" target="_blank" rel="noreferrer" className="underline underline-offset-2">
+              </a>{' '}
+              and{' '}
+              <a
+                href="https://backdrop.so/"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2"
+              >
                 Backdrop
-              </a>{" "}
+              </a>{' '}
               <a
                 href="https://github.com/scobru/mecenate-monorepo"
                 target="_blank"

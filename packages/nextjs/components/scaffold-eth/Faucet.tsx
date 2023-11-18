@@ -1,15 +1,15 @@
-import { ethers } from "ethers";
-import React, { useEffect, useState } from "react";
-import { useNetwork } from "wagmi";
-import { hardhat, localhost } from "wagmi/chains";
-import { useTransactor } from "~~/hooks/scaffold-eth";
-import { getLocalProvider, notification } from "~~/utils/scaffold-eth";
-import { BanknotesIcon } from "@heroicons/react/24/outline";
-import AddressInput from "./AddressInput";
-import EtherInput from "./EtherInput";
-import { getParsedEthersError } from "./Contract/utilsContract";
-import Address from "./Address";
-import Balance from "./Balance";
+import { ethers } from 'ethers';
+import React, { useEffect, useState } from 'react';
+import { useNetwork } from 'wagmi';
+import { hardhat, localhost } from 'wagmi/chains';
+import { useTransactor } from '~~/hooks/scaffold-eth';
+import { getLocalProvider, notification } from '~~/utils/scaffold-eth';
+import { BanknotesIcon } from '@heroicons/react/24/outline';
+import AddressInput from './AddressInput';
+import EtherInput from './EtherInput';
+import { getParsedEthersError } from './Contract/utilsContract';
+import Address from './Address';
+import Balance from './Balance';
 
 // Account index to use from generated hardhat accounts.
 const FAUCET_ACCOUNT_INDEX = 0;
@@ -19,9 +19,9 @@ const FAUCET_ACCOUNT_INDEX = 0;
  */
 export default function Faucet() {
   const [loading, setLoading] = useState(false);
-  const [inputAddress, setInputAddress] = useState("");
-  const [faucetAddress, setFaucetAddress] = useState("");
-  const [sendValue, setSendValue] = useState("");
+  const [inputAddress, setInputAddress] = useState('');
+  const [faucetAddress, setFaucetAddress] = useState('');
+  const [sendValue, setSendValue] = useState('');
 
   const { chain: ConnectedChain } = useNetwork();
   const provider = getLocalProvider(localhost);
@@ -38,11 +38,13 @@ export default function Faucet() {
       } catch (error) {
         notification.error(
           <>
-            <p className="font-bold mt-0 mb-1gi">Cannot connect to local provider</p>
+            <p className="font-bold mt-0 mb-1gi">
+              Cannot connect to local provider
+            </p>
             <p className="m-0">Did you forget to run `yarn chain`?</p>
           </>,
         );
-        console.error("⚡️ ~ file: Faucet.tsx:getFaucetAddress ~ error", error);
+        console.error('⚡️ ~ file: Faucet.tsx:getFaucetAddress ~ error', error);
       }
     };
     getFaucetAddress();
@@ -51,13 +53,16 @@ export default function Faucet() {
   const sendETH = async () => {
     try {
       setLoading(true);
-      await faucetTxn({ to: inputAddress, value: ethers.utils.parseEther(sendValue) }, signer);
+      await faucetTxn(
+        { to: inputAddress, value: ethers.utils.parseEther(sendValue) },
+        signer,
+      );
       setLoading(false);
-      setInputAddress("");
-      setSendValue("");
+      setInputAddress('');
+      setSendValue('');
     } catch (error) {
       const parsedError = getParsedEthersError(error);
-      console.error("⚡️ ~ file: Faucet.tsx:sendETH ~ error", error);
+      console.error('⚡️ ~ file: Faucet.tsx:sendETH ~ error', error);
       notification.error(parsedError);
       setLoading(false);
     }
@@ -83,7 +88,10 @@ export default function Faucet() {
           {/* dummy input to capture event onclick on modal box */}
           <input className="h-0 w-0 absolute top-0 left-0" />
           <h3 className="text-xl font-bold mb-3">Local Faucet</h3>
-          <label htmlFor="faucet-modal" className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3">
+          <label
+            htmlFor="faucet-modal"
+            className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3"
+          >
             ✕
           </label>
           <div className="space-y-3">
@@ -103,10 +111,14 @@ export default function Faucet() {
                 value={inputAddress}
                 onChange={value => setInputAddress(value)}
               />
-              <EtherInput placeholder="Amount to send" value={sendValue} onChange={value => setSendValue(value)} />
+              <EtherInput
+                placeholder="Amount to send"
+                value={sendValue}
+                onChange={value => setSendValue(value)}
+              />
               <button
                 className={`h-10 btn btn-primary btn-sm px-2 rounded-full space-x-3 ${
-                  loading ? "loading before:!w-4 before:!h-4 before:!mx-0" : ""
+                  loading ? 'loading before:!w-4 before:!h-4 before:!mx-0' : ''
                 }`}
                 onClick={sendETH}
                 disabled={loading}

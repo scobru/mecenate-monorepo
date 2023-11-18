@@ -1,11 +1,17 @@
-import Link from "next/link";
-import { FaucetButton } from "~~/components/scaffold-eth";
-import { WalletBadge } from "~~/components/scaffold-eth";
-import RainbowKitCustomConnectButton from "~~/components/scaffold-eth/RainbowKitCustomConnectButton";
-import { ArrowPathRoundedSquareIcon, Bars3Icon, BugAntIcon, DocumentIcon, KeyIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
-import { useOutsideClick } from "~~/hooks/scaffold-eth";
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import Link from 'next/link';
+import { FaucetButton } from '~~/components/scaffold-eth';
+import { WalletBadge } from '~~/components/scaffold-eth';
+import RainbowKitCustomConnectButton from '~~/components/scaffold-eth/RainbowKitCustomConnectButton';
+import {
+  ArrowPathRoundedSquareIcon,
+  Bars3Icon,
+  BugAntIcon,
+  DocumentIcon,
+  KeyIcon,
+} from '@heroicons/react/24/outline';
+import { useRouter } from 'next/router';
+import { useOutsideClick } from '~~/hooks/scaffold-eth';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 import {
   QuestionMarkCircleIcon,
@@ -15,12 +21,23 @@ import {
   Square3Stack3DIcon,
   MegaphoneIcon,
   HomeIcon,
-} from "@heroicons/react/24/outline";
-import { ArchiveBoxIcon, GifIcon, InboxIcon, SparklesIcon } from "@heroicons/react/20/solid";
-import { FaDollarSign, FaRegTimesCircle } from "react-icons/fa";
-import { BoltIcon, ClockIcon } from "@heroicons/react/24/solid";
+} from '@heroicons/react/24/outline';
+import {
+  ArchiveBoxIcon,
+  GifIcon,
+  InboxIcon,
+  SparklesIcon,
+} from '@heroicons/react/20/solid';
+import { FaDollarSign, FaRegTimesCircle } from 'react-icons/fa';
+import { BoltIcon, ClockIcon } from '@heroicons/react/24/solid';
 
-const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
+const NavLink = ({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) => {
   const router = useRouter();
   const isActive = router.pathname === href;
 
@@ -28,8 +45,9 @@ const NavLink = ({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       passHref
-      className={`${isActive ? "bg-secondary shadow-md" : ""
-        } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm font-semibold rounded-full gap-2`}
+      className={`${
+        isActive ? 'bg-secondary shadow-md' : ''
+      } hover:bg-secondary hover:shadow-md focus:bg-secondary py-2 px-3 text-sm font-semibold rounded-full gap-2`}
     >
       {children}
     </Link>
@@ -52,7 +70,7 @@ export default function Header() {
     <>
       <li>
         <NavLink href="/">
-          {" "}
+          {' '}
           <HomeIcon className="h-4 w-4" />
         </NavLink>
       </li>
@@ -125,7 +143,9 @@ export default function Header() {
       <div className="navbar-start w-auto lg:w-1/2">
         <div className="lg:hidden dropdown" ref={burgerMenuRef}>
           <button
-            className={`ml-1 btn btn-ghost ${isDrawerOpen ? "hover:bg-secondary" : "hover:bg-transparent"}`}
+            className={`ml-1 btn btn-ghost ${
+              isDrawerOpen ? 'hover:bg-secondary' : 'hover:bg-transparent'
+            }`}
             onClick={() => {
               setIsDrawerOpen(prevIsOpenState => !prevIsOpenState);
             }}
@@ -153,7 +173,9 @@ export default function Header() {
             <span className="font-bold  text-4xl"> ℳ</span>
           </div>
         </div>
-        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">{navLinks}</ul>{" "}
+        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
+          {navLinks}
+        </ul>{' '}
       </div>
 
       <div className="navbar-end flex-grow mr-4">

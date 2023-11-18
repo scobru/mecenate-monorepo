@@ -1,8 +1,16 @@
-import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { BigNumber } from "ethers";
-import { displayTxResult } from "./utilsDisplay";
+import { TransactionReceipt } from '@ethersproject/abstract-provider';
+import { BigNumber } from 'ethers';
+import { displayTxResult } from './utilsDisplay';
 
-const TxReceipt = (txResult: string | number | BigNumber | Record<string, any> | TransactionReceipt | undefined) => {
+const TxReceipt = (
+  txResult:
+    | string
+    | number
+    | BigNumber
+    | Record<string, any>
+    | TransactionReceipt
+    | undefined,
+) => {
   return (
     <div className="flex-wrap collapse mb-2">
       <input type="checkbox" className="min-h-0 peer" />

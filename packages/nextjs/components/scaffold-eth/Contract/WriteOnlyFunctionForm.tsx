@@ -1,19 +1,27 @@
-import { utils } from "ethers";
-import { Dispatch, SetStateAction, useState } from "react";
-import { useContractWrite, useNetwork, useWaitForTransaction } from "wagmi";
-import InputUI from "./InputUI";
-import TxReceipt from "./TxReceipt";
-import { getFunctionInputKey, getParsedContractFunctionArgs, getParsedEthersError } from "./utilsContract";
-import { TxValueInput } from "./utilsComponents";
-import { useTransactor } from "~~/hooks/scaffold-eth";
-import { notification, parseTxnValue, getTargetNetwork } from "~~/utils/scaffold-eth";
+import { utils } from 'ethers';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { useContractWrite, useNetwork, useWaitForTransaction } from 'wagmi';
+import InputUI from './InputUI';
+import TxReceipt from './TxReceipt';
+import {
+  getFunctionInputKey,
+  getParsedContractFunctionArgs,
+  getParsedEthersError,
+} from './utilsContract';
+import { TxValueInput } from './utilsComponents';
+import { useTransactor } from '~~/hooks/scaffold-eth';
+import {
+  notification,
+  parseTxnValue,
+  getTargetNetwork,
+} from '~~/utils/scaffold-eth';
 
 // TODO set sensible initial state values to avoid error on first render, also put it in utilsContract
 const getInitialFormState = (functionFragment: utils.FunctionFragment) => {
   const initialForm: Record<string, any> = {};
   functionFragment.inputs.forEach((input, inputIndex) => {
     const key = getFunctionInputKey(functionFragment, input, inputIndex);
-    initialForm[key] = "";
+    initialForm[key] = '';
   });
   return initialForm;
 };
@@ -29,8 +37,10 @@ export const WriteOnlyFunctionForm = ({
   contractAddress,
   setRefreshDisplayVariables,
 }: TWriteOnlyFunctionFormProps) => {
-  const [form, setForm] = useState<Record<string, any>>(() => getInitialFormState(functionFragment));
-  const [txValue, setTxValue] = useState("");
+  const [form, setForm] = useState<Record<string, any>>(() =>
+    getInitialFormState(functionFragment),
+  );
+  const [txValue, setTxValue] = useState('');
   const { chain } = useNetwork();
   const configuredChain = getTargetNetwork();
   const writeTxn = useTransactor();
@@ -49,7 +59,7 @@ export const WriteOnlyFunctionForm = ({
     functionName: functionFragment.name,
     abi: [functionFragment],
     args: getParsedContractFunctionArgs(form),
-    mode: "recklesslyUnprepared",
+    mode: 'recklesslyUnprepared',
     overrides: {
       value: txValue ? parseTxnValue(txValue) : undefined,
     },
@@ -90,18 +100,24 @@ export const WriteOnlyFunctionForm = ({
     <div className="flex flex-col gap-3">
       <p className="font-medium my-0 break-words">{functionFragment.name}</p>
       {inputs}
-      {functionFragment.payable ? <TxValueInput setTxValue={setTxValue} txValue={txValue} /> : null}
+      {functionFragment.payable ? (
+        <TxValueInput setTxValue={setTxValue} txValue={txValue} />
+      ) : null}
       <div className="flex justify-between gap-2">
-        <div className="flex-grow basis-0">{txResult ? <TxReceipt txResult={txResult} /> : null}</div>
+        <div className="flex-grow basis-0">
+          {txResult ? <TxReceipt txResult={txResult} /> : null}
+        </div>
         <div
           className={`flex ${
             writeDisabled &&
-            "tooltip before:content-[attr(data-tip)] before:right-[-10px] before:left-auto before:transform-none"
+            'tooltip before:content-[attr(data-tip)] before:right-[-10px] before:left-auto before:transform-none'
           }`}
-          data-tip={`${writeDisabled && "Wallet not connected or in the wrong network"}`}
+          data-tip={`${
+            writeDisabled && 'Wallet not connected or in the wrong network'
+          }`}
         >
           <button
-            className={`btn btn-secondary btn-sm ${isLoading ? "loading" : ""}`}
+            className={`btn btn-secondary btn-sm ${isLoading ? 'loading' : ''}`}
             disabled={writeDisabled}
             onClick={handleWrite}
           >

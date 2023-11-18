@@ -1,16 +1,19 @@
-import { Contract } from "ethers";
-import { useMemo, useState } from "react";
-import { useContract, useProvider } from "wagmi";
+import { Contract } from 'ethers';
+import { useMemo, useState } from 'react';
+import { useContract, useProvider } from 'wagmi';
 import {
   getAllContractFunctions,
   getContractReadOnlyMethodsWithParams,
   getContractVariablesAndNoParamsReadMethods,
   getContractWriteMethods,
-} from "./utilsContract";
-import { Balance, Address } from "~~/components/scaffold-eth";
-import { useDeployedContractInfo, useNetworkColor } from "~~/hooks/scaffold-eth";
-import { getTargetNetwork } from "~~/utils/scaffold-eth";
-import Spinner from "~~/components/Spinner";
+} from './utilsContract';
+import { Balance, Address } from '~~/components/scaffold-eth';
+import {
+  useDeployedContractInfo,
+  useNetworkColor,
+} from '~~/hooks/scaffold-eth';
+import { getTargetNetwork } from '~~/utils/scaffold-eth';
+import Spinner from '~~/components/Spinner';
 
 type TContractUIProps = {
   contractName: string;
@@ -20,14 +23,15 @@ type TContractUIProps = {
 /**
  * UI component to interface with deployed contracts.
  **/
-const ContractUI = ({ contractName, className = "" }: TContractUIProps) => {
+const ContractUI = ({ contractName, className = '' }: TContractUIProps) => {
   const configuredChain = getTargetNetwork();
   const provider = useProvider();
   const [refreshDisplayVariables, setRefreshDisplayVariables] = useState(false);
 
-  let contractAddress = "";
+  let contractAddress = '';
   let contractABI = [];
-  const { data: deployedContractData, isLoading: deployedContractLoading } = useDeployedContractInfo(contractName);
+  const { data: deployedContractData, isLoading: deployedContractLoading } =
+    useDeployedContractInfo(contractName);
   const networkColor = useNetworkColor();
   if (deployedContractData) {
     ({ address: contractAddress, abi: contractABI } = deployedContractData);
@@ -39,18 +43,34 @@ const ContractUI = ({ contractName, className = "" }: TContractUIProps) => {
     signerOrProvider: provider,
   });
 
-  const displayedContractFunctions = useMemo(() => getAllContractFunctions(contract), [contract]);
+  const displayedContractFunctions = useMemo(
+    () => getAllContractFunctions(contract),
+    [contract],
+  );
 
   const contractVariablesDisplay = useMemo(() => {
-    return getContractVariablesAndNoParamsReadMethods(contract, displayedContractFunctions, refreshDisplayVariables);
+    return getContractVariablesAndNoParamsReadMethods(
+      contract,
+      displayedContractFunctions,
+      refreshDisplayVariables,
+    );
   }, [contract, displayedContractFunctions, refreshDisplayVariables]);
 
   const contractMethodsDisplay = useMemo(
-    () => getContractReadOnlyMethodsWithParams(contract, displayedContractFunctions),
+    () =>
+      getContractReadOnlyMethodsWithParams(
+        contract,
+        displayedContractFunctions,
+      ),
     [contract, displayedContractFunctions],
   );
   const contractWriteMethods = useMemo(
-    () => getContractWriteMethods(contract, displayedContractFunctions, setRefreshDisplayVariables),
+    () =>
+      getContractWriteMethods(
+        contract,
+        displayedContractFunctions,
+        setRefreshDisplayVariables,
+      ),
     [contract, displayedContractFunctions],
   );
 
@@ -71,7 +91,9 @@ const ContractUI = ({ contractName, className = "" }: TContractUIProps) => {
   }
 
   return (
-    <div className={`grid grid-cols-1 lg:grid-cols-6 px-6 lg:px-10 lg:gap-12 w-full max-w-7xl my-0 ${className}`}>
+    <div
+      className={`grid grid-cols-1 lg:grid-cols-6 px-6 lg:px-10 lg:gap-12 w-full max-w-7xl my-0 ${className}`}
+    >
       <div className="col-span-5 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         <div className="col-span-1 flex flex-col">
           <div className="bg-base-100 border-base-300 border shadow-md shadow-secondary rounded-3xl px-6 lg:px-8 mb-6 space-y-1 py-4">
@@ -81,19 +103,26 @@ const ContractUI = ({ contractName, className = "" }: TContractUIProps) => {
                 <Address address={contractAddress} />
                 <div className="flex gap-1 items-center">
                   <span className="font-bold text-sm">Balance:</span>
-                  <Balance address={contractAddress} className="px-0 h-1.5 min-h-[0.375rem]" />
+                  <Balance
+                    address={contractAddress}
+                    className="px-0 h-1.5 min-h-[0.375rem]"
+                  />
                 </div>
               </div>
             </div>
             {configuredChain && (
               <p className="my-0 text-sm">
-                <span className="font-bold">Network</span>:{" "}
-                <span style={{ color: networkColor }}>{configuredChain.name}</span>
+                <span className="font-bold">Network</span>:{' '}
+                <span style={{ color: networkColor }}>
+                  {configuredChain.name}
+                </span>
               </p>
             )}
           </div>
           <div className="bg-base-300 rounded-3xl px-6 lg:px-8 py-4 shadow-lg shadow-base-300">
-            {contractVariablesDisplay.methods.length > 0 ? contractVariablesDisplay.methods : "No contract variables"}
+            {contractVariablesDisplay.methods.length > 0
+              ? contractVariablesDisplay.methods
+              : 'No contract variables'}
           </div>
         </div>
         <div className="col-span-1 lg:col-span-2 flex flex-col gap-6">
@@ -110,7 +139,9 @@ const ContractUI = ({ contractName, className = "" }: TContractUIProps) => {
                 </div>
               </div>
               <div className="collapse-content py-3 px-4 min-h-12 transition-all duration-200">
-                {contractMethodsDisplay.methods.length > 0 ? contractMethodsDisplay.methods : "No read methods"}
+                {contractMethodsDisplay.methods.length > 0
+                  ? contractMethodsDisplay.methods
+                  : 'No read methods'}
               </div>
             </div>
           </div>
@@ -127,7 +158,9 @@ const ContractUI = ({ contractName, className = "" }: TContractUIProps) => {
                 </div>
               </div>
               <div className="collapse-content py-3 px-4 min-h-12 transition-all duration-200">
-                {contractWriteMethods.methods.length > 0 ? contractWriteMethods.methods : "No write methods"}
+                {contractWriteMethods.methods.length > 0
+                  ? contractWriteMethods.methods
+                  : 'No write methods'}
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { useInterval } from "usehooks-ts";
-import { useProvider } from "wagmi";
-import { fetchPriceFromUniswap } from "~~/utils/scaffold-eth";
+import { useEffect, useState } from 'react';
+import { useInterval } from 'usehooks-ts';
+import { useProvider } from 'wagmi';
+import { fetchPriceFromUniswap } from '~~/utils/scaffold-eth';
 
 const enablePolling = false;
 const pollingTime = process.env.NEXT_PUBLIC_RPC_POLLING_INTERVAL

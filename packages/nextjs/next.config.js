@@ -2,17 +2,17 @@ module.exports = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "scobru.infura-ipfs.io",
-        port: "",
-        pathname: "/ipfs/**",
+        protocol: 'https',
+        hostname: 'scobru.infura-ipfs.io',
+        port: '',
+        pathname: '/ipfs/**',
       },
     ],
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
-      url: require.resolve("url/"),
+      url: require.resolve('url/'),
       fs: false,
     };
 
@@ -25,19 +25,19 @@ module.exports = {
   async headers() {
     return [
       {
-        source: "/", // this applies to all routes
+        source: '/', // this applies to all routes
         headers: [
           {
-            key: "Access-Control-Allow-Origin",
-            value: "http://localhost:3000/",
+            key: 'Access-Control-Allow-Origin',
+            value: 'http://localhost:3000/',
           },
           {
-            key: "Access-Control-Allow-Methods",
-            value: "GET, POST, PUT, DELETE, OPTIONS",
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
           },
           {
-            key: "Access-Control-Allow-Headers",
-            value: "Content-Type, Authorization",
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
           },
         ],
       },

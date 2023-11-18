@@ -1633,6 +1633,174 @@
             }
           ]
         },
+        "MecenateMarket": {
+          "address": "0x29F34330E9267CE13B4e7cDF7d9b80191979948B",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_feed",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "_description",
+                  "type": "bytes"
+                }
+              ],
+              "name": "createPost",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_postIndex",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getPost",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getPostCount",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getPosts",
+              "outputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "feed",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "description",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "enum Structures.Tokens",
+                      "name": "tokenId",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "stake",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "payment",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "postId",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct Structures.MarketPost[]",
+                  "name": "",
+                  "type": "tuple[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_postIndex",
+                  "type": "uint256"
+                }
+              ],
+              "name": "isActive",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "posts",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "feed",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "description",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "enum Structures.Tokens",
+                  "name": "tokenId",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "stake",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "payment",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "postId",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ]
+        },
         "MecenatePay": {
           "address": "0xDc7A41C229860aA1B67b83d6934C24d4Fd3aD629",
           "abi": [
@@ -1816,7 +1984,7 @@
           ]
         },
         "MecenateSend": {
-          "address": "0x7f4Abf7026DE4C3C3AF4AC6e67585249B094c32B",
+          "address": "0xb4A1BA3A5dB88fCeDdA785F359947520d298F8B6",
           "abi": [
             {
               "inputs": [
@@ -1824,10 +1992,58 @@
                   "internalType": "address",
                   "name": "_usersContract",
                   "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_treasuryContract",
+                  "type": "address"
                 }
               ],
               "stateMutability": "nonpayable",
               "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "receiver",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bytes",
+                  "name": "ipfsHash",
+                  "type": "bytes"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bytes",
+                  "name": "pubKey",
+                  "type": "bytes"
+                }
+              ],
+              "name": "HashSubmitted",
+              "type": "event"
             },
             {
               "anonymous": false,
@@ -1847,6 +2063,19 @@
               ],
               "name": "OwnershipTransferred",
               "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_treasuryContract",
+                  "type": "address"
+                }
+              ],
+              "name": "changeTreasuryContract",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
             },
             {
               "inputs": [
@@ -1914,6 +2143,19 @@
             },
             {
               "inputs": [],
+              "name": "globalFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "owner",
               "outputs": [
                 {
@@ -1959,16 +2201,16 @@
               "type": "function"
             },
             {
-              "inputs": [
+              "inputs": [],
+              "name": "treasuryContract",
+              "outputs": [
                 {
                   "internalType": "address",
-                  "name": "newUsersContract",
+                  "name": "",
                   "type": "address"
                 }
               ],
-              "name": "updateUsersContract",
-              "outputs": [],
-              "stateMutability": "nonpayable",
+              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -3975,174 +4217,6 @@
               "name": "transferOwnership",
               "outputs": [],
               "stateMutability": "nonpayable",
-              "type": "function"
-            }
-          ]
-        },
-        "MecenateMarket": {
-          "address": "0x29F34330E9267CE13B4e7cDF7d9b80191979948B",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_feed",
-                  "type": "address"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "_description",
-                  "type": "bytes"
-                }
-              ],
-              "name": "createPost",
-              "outputs": [],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_postIndex",
-                  "type": "uint256"
-                }
-              ],
-              "name": "getPost",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getPostCount",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "getPosts",
-              "outputs": [
-                {
-                  "components": [
-                    {
-                      "internalType": "address",
-                      "name": "feed",
-                      "type": "address"
-                    },
-                    {
-                      "internalType": "bytes",
-                      "name": "description",
-                      "type": "bytes"
-                    },
-                    {
-                      "internalType": "enum Structures.Tokens",
-                      "name": "tokenId",
-                      "type": "uint8"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "stake",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "uint256",
-                      "name": "payment",
-                      "type": "uint256"
-                    },
-                    {
-                      "internalType": "bytes32",
-                      "name": "postId",
-                      "type": "bytes32"
-                    }
-                  ],
-                  "internalType": "struct Structures.MarketPost[]",
-                  "name": "",
-                  "type": "tuple[]"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_postIndex",
-                  "type": "uint256"
-                }
-              ],
-              "name": "isActive",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "name": "posts",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "feed",
-                  "type": "address"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "description",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "enum Structures.Tokens",
-                  "name": "tokenId",
-                  "type": "uint8"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "stake",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "payment",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "postId",
-                  "type": "bytes32"
-                }
-              ],
-              "stateMutability": "view",
               "type": "function"
             }
           ]

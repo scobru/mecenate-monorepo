@@ -1,15 +1,20 @@
-import { CopyIcon } from "./assets/CopyIcon";
-import { DiamondIcon } from "./assets/DiamondIcon";
-import { HareIcon } from "./assets/HareIcon";
-import { ArrowSmallRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
-import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { CopyIcon } from './assets/CopyIcon';
+import { DiamondIcon } from './assets/DiamondIcon';
+import { HareIcon } from './assets/HareIcon';
+import { ArrowSmallRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { useScaffoldContractWrite } from '~~/hooks/scaffold-eth';
 
 export default function ContractInteraction() {
   const [visible, setVisible] = useState(true);
-  const [newGreeting, setNewGreeting] = useState("");
+  const [newGreeting, setNewGreeting] = useState('');
 
-  const { writeAsync, isLoading } = useScaffoldContractWrite("YourContract", "setGreeting", [newGreeting], "0.01");
+  const { writeAsync, isLoading } = useScaffoldContractWrite(
+    'YourContract',
+    'setGreeting',
+    [newGreeting],
+    '0.01',
+  );
 
   return (
     <div className="flex bg-base-300 relative pb-10">
@@ -17,19 +22,22 @@ export default function ContractInteraction() {
       <CopyIcon className="absolute bottom-0 left-36" />
       <HareIcon className="absolute right-0 bottom-24" />
       <div className="flex flex-col w-full mx-5 sm:mx-8 2xl:mx-20">
-        <div className={`mt-10 flex gap-2 ${visible ? "" : "invisible"} max-w-2xl`}>
+        <div
+          className={`mt-10 flex gap-2 ${visible ? '' : 'invisible'} max-w-2xl`}
+        >
           <div className="flex gap-5 bg-base-200 bg-opacity-80 z-0 p-7 rounded-2xl shadow-lg">
             <span className="text-3xl">👋🏻</span>
             <div>
               <div>
-                In this page you can see how some of our <strong>hooks & components</strong> work, and how you can bring
+                In this page you can see how some of our{' '}
+                <strong>hooks & components</strong> work, and how you can bring
                 them to life with your own design! Have fun and try it out!
               </div>
               <div className="mt-2">
-                Check out{" "}
+                Check out{' '}
                 <code className="italic bg-base-300 text-base font-bold [word-spacing:-0.5rem]">
                   packages / nextjs/pages / example-ui.tsx
-                </code>{" "}
+                </code>{' '}
                 and its underlying components.
               </div>
             </div>
@@ -43,7 +51,9 @@ export default function ContractInteraction() {
         </div>
 
         <div className="flex flex-col mt-6 px-7 py-8 bg-base-200 opacity-80 rounded-2xl shadow-lg border-2 border-primary">
-          <span className="text-4xl sm:text-6xl text-black">Set a Greeting_</span>
+          <span className="text-4xl sm:text-6xl text-black">
+            Set a Greeting_
+          </span>
 
           <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5">
             <input
@@ -56,7 +66,7 @@ export default function ContractInteraction() {
               <div className="flex rounded-full border-2 border-primary p-1">
                 <button
                   className={`btn btn-primary rounded-full capitalize font-normal font-white w-24 flex items-center gap-1 hover:gap-2 transition-all tracking-widest ${
-                    isLoading ? "loading" : ""
+                    isLoading ? 'loading' : ''
                   }`}
                   onClick={writeAsync}
                 >

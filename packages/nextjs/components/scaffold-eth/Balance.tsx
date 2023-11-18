@@ -1,4 +1,4 @@
-import { useAccountBalance } from "~~/hooks/scaffold-eth/useAccountBalance";
+import { useAccountBalance } from '~~/hooks/scaffold-eth/useAccountBalance';
 
 type TBalanceProps = {
   address?: string;
@@ -8,8 +8,9 @@ type TBalanceProps = {
 /**
  * Display (ETH & USD) balance of an ETH address.
  */
-export default function Balance({ address, className = "" }: TBalanceProps) {
-  const { balance, price, isError, isLoading, onToggleBalance, isEthBalance } = useAccountBalance(address);
+export default function Balance({ address, className = '' }: TBalanceProps) {
+  const { balance, price, isError, isLoading, onToggleBalance, isEthBalance } =
+    useAccountBalance(address);
 
   if (!address || isLoading || balance === null) {
     return (
@@ -24,7 +25,9 @@ export default function Balance({ address, className = "" }: TBalanceProps) {
 
   if (isError) {
     return (
-      <div className={`border-2 border-gray-400 rounded-md px-2 flex flex-col items-center max-w-fit cursor-pointer`}>
+      <div
+        className={`border-2 border-gray-400 rounded-md px-2 flex flex-col items-center max-w-fit cursor-pointer`}
+      >
         <div className="text-warning text-xs">Error</div>
       </div>
     );

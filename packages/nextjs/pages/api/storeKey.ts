@@ -1,7 +1,7 @@
-import axios from "axios";
-import fse from "fs-extra"
-import { Mogu } from "@scobru/mogu";
-import { EncryptedNode } from "@scobru/mogu/dist/db/db";
+import axios from 'axios';
+import fse from 'fs-extra';
+import { Mogu } from '@scobru/mogu';
+import { EncryptedNode } from '@scobru/mogu/dist/db/db';
 interface IResponse {
   error?: string;
   message?: string;
@@ -15,7 +15,7 @@ const fetchFromIpfs = async (cid: string): Promise<any> => {
     if (response.status === 200) {
       return response.data;
     } else {
-      throw new Error("Failed to fetch from IPFS via Pinata");
+      throw new Error('Failed to fetch from IPFS via Pinata');
     }
   } catch (err) {
     console.error(`Error fetching from IPFS via Pinata: ${err}`);
@@ -27,7 +27,7 @@ const mogu = new Mogu(
   process.env.NEXT_PUBLIC_APP_KEY,
   process.env.NEXT_PUBLIC_PINATA_API_KEY,
   process.env.NEXT_PUBLIC_PINATA_API_SECRET,
-  process.env.NEXT_PUBLIC_DB_NAME
+  process.env.NEXT_PUBLIC_DB_NAME,
 );
 
 export default async function handler(
@@ -39,28 +39,31 @@ export default async function handler(
   res: {
     status: (arg0: any) => {
       (): any;
-      new(): any;
-      json: { (arg0: IResponse): void; new(): any }; // Usa IResponse qui
-      end: { (): void; new(): any };
+      new (): any;
+      json: { (arg0: IResponse): void; new (): any }; // Usa IResponse qui
+      end: { (): void; new (): any };
     };
   },
 ) {
   let cid;
   let state;
 
-  if (fse.existsSync(process.cwd() + "/pages/api/data/cids.json")) {
-    const rawData = fse.readFileSync(process.cwd() + "/pages/api/data/cids.json", "utf8");
+  if (fse.existsSync(process.cwd() + '/pages/api/data/cids.json')) {
+    const rawData = fse.readFileSync(
+      process.cwd() + '/pages/api/data/cids.json',
+      'utf8',
+    );
     cid = JSON.parse(rawData);
   }
 
-  if (req.method === "POST") {
+  if (req.method === 'POST') {
     const { wallet, salt, iv, ciphertext } = req.body;
 
     const node: EncryptedNode = {
       id: String(wallet),
-      type: "FILE",
+      type: 'FILE',
       name: wallet,
-      parent: "",
+      parent: '',
       children: [],
       content: JSON.stringify({ salt, iv, ciphertext }),
       encrypted: true,
@@ -68,7 +71,7 @@ export default async function handler(
 
     // Cid not exists
     if (cid == null) {
-      console.log("CID not exists!")
+      console.log('CID not exists!');
 
       try {
         state = mogu.addNode(node);
@@ -78,25 +81,27 @@ export default async function handler(
 
       const hash = await mogu.store();
 
-      console.log("CID:", hash)
+      console.log('CID:', hash);
 
-      fse.writeFileSync(process.cwd() + "/pages/api/data/cids.json", JSON.stringify(hash));
+      fse.writeFileSync(
+        process.cwd() + '/pages/api/data/cids.json',
+        JSON.stringify(hash),
+      );
 
       return res.status(200).json({
-        message: "Key stored and pinned to IPFS via Pinata successfully",
+        message: 'Key stored and pinned to IPFS via Pinata successfully',
         data: hash,
       });
-
     } else {
-      console.log("CID exists!")
+      console.log('CID exists!');
 
       state = await mogu.load(String(cid));
 
-      console.log("Old CID", cid)
-      console.log("State:", state);
+      console.log('Old CID', cid);
+      console.log('State:', state);
 
       const storedState = mogu.queryByName(wallet);
-      console.log("StoredState:", storedState)
+      console.log('StoredState:', storedState);
 
       if (JSON.parse(JSON.stringify(storedState)).length != 0) {
         try {
@@ -105,15 +110,17 @@ export default async function handler(
           console.log(state);
 
           const hash = await mogu.store();
-          console.log("New CID", hash);
+          console.log('New CID', hash);
 
-          fse.writeFileSync(process.cwd() + "/pages/api/data/cids.json", JSON.stringify(hash));
+          fse.writeFileSync(
+            process.cwd() + '/pages/api/data/cids.json',
+            JSON.stringify(hash),
+          );
 
           return res.status(200).json({
-            message: "Key stored and pinned to IPFS via Pinata successfully",
+            message: 'Key stored and pinned to IPFS via Pinata successfully',
             data: hash,
           });
-
         } catch (error) {
           console.log(error);
         }
@@ -124,25 +131,26 @@ export default async function handler(
           console.log(state);
 
           const hash = await mogu.store();
-          console.log("New CID", hash);
+          console.log('New CID', hash);
 
-          fse.writeFileSync(process.cwd() + "/pages/api/data/cids.json", JSON.stringify(hash));
+          fse.writeFileSync(
+            process.cwd() + '/pages/api/data/cids.json',
+            JSON.stringify(hash),
+          );
 
           return res.status(200).json({
-            message: "Key stored and pinned to IPFS via Pinata successfully",
+            message: 'Key stored and pinned to IPFS via Pinata successfully',
             data: hash,
           });
-
         } catch (error) {
           console.log(error);
         }
       }
     }
-
   }
 
   // GET Section
-  if (req.method === "GET") {
+  if (req.method === 'GET') {
     const mogu = new Mogu(
       process.env.NEXT_PUBLIC_APP_KEY,
       process.env.NEXT_PUBLIC_PINATA_API_KEY,
@@ -154,30 +162,35 @@ export default async function handler(
     let cid;
     let state;
 
-    if (fse.existsSync(process.cwd() + "/pages/api/data/cids.json")) {
-      const rawData = fse.readFileSync(process.cwd() + "/pages/api/data/cids.json", "utf8");
+    if (fse.existsSync(process.cwd() + '/pages/api/data/cids.json')) {
+      const rawData = fse.readFileSync(
+        process.cwd() + '/pages/api/data/cids.json',
+        'utf8',
+      );
       cid = JSON.parse(rawData);
     }
 
-    console.log("IPFS hash", cid);
-    console.log(wallet)
+    console.log('IPFS hash', cid);
+    console.log(wallet);
 
     try {
       state = await mogu.load(String(cid));
-      console.log(state)
+      console.log(state);
       state = await mogu.queryByName(wallet);
-      console.log(state)
+      console.log(state);
     } catch (error) {
       console.log(error);
     }
 
     state = JSON.stringify(state);
-    console.log(state)
+    console.log(state);
 
     if (state) {
       res.status(200).json({ data: state });
     } else {
-      res.status(404).json({ message: "No private key found for this contract address" });
+      res
+        .status(404)
+        .json({ message: 'No private key found for this contract address' });
     }
   }
 }

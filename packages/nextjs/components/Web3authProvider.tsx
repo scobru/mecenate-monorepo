@@ -1,21 +1,30 @@
-import React, { createContext, use, useContext, useEffect, useState } from "react";
-import { Web3Auth } from "@web3auth/modal";
-import { IProvider } from "@web3auth/base";
-import { formatEther, id } from "ethers/lib/utils.js";
-import { Signer, Wallet, ethers } from "ethers";
+import React, {
+  createContext,
+  use,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { Web3Auth } from '@web3auth/modal';
+import { IProvider } from '@web3auth/base';
+import { formatEther, id } from 'ethers/lib/utils.js';
+import { Signer, Wallet, ethers } from 'ethers';
 
-import { CHAIN_NAMESPACES, IAdapter } from "@web3auth/base";
-import { MetamaskAdapter } from "@web3auth/metamask-adapter";
-import { TorusWalletAdapter } from "@web3auth/torus-evm-adapter";
-import { useAppStore } from "~~/services/store/store";
+import { CHAIN_NAMESPACES, IAdapter } from '@web3auth/base';
+import { MetamaskAdapter } from '@web3auth/metamask-adapter';
+import { TorusWalletAdapter } from '@web3auth/torus-evm-adapter';
+import { useAppStore } from '~~/services/store/store';
 
 // Plugins
-import { TorusWalletConnectorPlugin } from "@web3auth/torus-wallet-connector-plugin";
+import { TorusWalletConnectorPlugin } from '@web3auth/torus-wallet-connector-plugin';
 
 // Adapters
 // import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
-import { WalletConnectV2Adapter, getWalletConnectV2Settings } from "@web3auth/wallet-connect-v2-adapter";
-import RPC from "../utils/ethersRPC"; // for using web3.js
+import {
+  WalletConnectV2Adapter,
+  getWalletConnectV2Settings,
+} from '@web3auth/wallet-connect-v2-adapter';
+import RPC from '../utils/ethersRPC'; // for using web3.js
 
 interface IWeb3authContext {
   signer: Signer | null;
@@ -38,12 +47,14 @@ interface IWeb3authContext {
   createWallet: () => void;
 }
 
-export const Web3authContext = createContext<IWeb3authContext | undefined>(undefined);
+export const Web3authContext = createContext<IWeb3authContext | undefined>(
+  undefined,
+);
 
 export const useWeb3auth = () => {
   const context = useContext(Web3authContext);
   if (!context) {
-    throw new Error("useWeb3auth must be used within a Web3authProvider");
+    throw new Error('useWeb3auth must be used within a Web3authProvider');
   }
   return context;
 };
@@ -52,17 +63,24 @@ interface Web3authProviderProps {
   children: React.ReactNode;
 }
 
-export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) => {
+export const Web3authProvider: React.FC<Web3authProviderProps> = ({
+  children,
+}) => {
   const { signer, setSigner } = useAppStore();
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
-  const [torusPlugin, setTorusPlugin] = useState<TorusWalletConnectorPlugin | null>(null);
+  const [torusPlugin, setTorusPlugin] =
+    useState<TorusWalletConnectorPlugin | null>(null);
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [ethersProvider, setEthersProvider] = useState<ethers.providers.JsonRpcProvider | null>(null);
-  const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const [ethersProvider, setEthersProvider] =
+    useState<ethers.providers.JsonRpcProvider | null>(null);
+  const publicProvider = new ethers.providers.JsonRpcProvider(
+    process.env.NEXT_PUBLIC_RPC_URL,
+  );
 
-  const clientId = "BNtxg-XlYHBoZ0hMJtxcVx0t23BVW8ndPR2QSLusYQmU1kFJZwvps8WxTXxNJOKuHorgaBk0f1d8mZl0JlHwUgI"; // get from https://dashboard.web3auth.io
+  const clientId =
+    'BNtxg-XlYHBoZ0hMJtxcVx0t23BVW8ndPR2QSLusYQmU1kFJZwvps8WxTXxNJOKuHorgaBk0f1d8mZl0JlHwUgI'; // get from https://dashboard.web3auth.io
 
   useEffect(() => {
     const init = async () => {
@@ -71,8 +89,8 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
           clientId,
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
-            chainId: "0x14a33",
-            rpcTarget: "https://goerli.base.org", // This is the public RPC we have added, please pass on your own endpoint while creating an app
+            chainId: '0x14a33',
+            rpcTarget: 'https://goerli.base.org', // This is the public RPC we have added, please pass on your own endpoint while creating an app
           },
           // uiConfig refers to the whitelabeling options, which is available only on Growth Plan and above
           // Please remove this parameter if you're on the Base Plan
@@ -87,7 +105,7 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
             primaryButton: "socialLogin", // "externalLogin" | "socialLogin" | "emailLogin"
             displayErrorsOnModal: true,
           }, */
-          web3AuthNetwork: "sapphire_mainnet",
+          web3AuthNetwork: 'sapphire_mainnet',
         });
 
         // plugins and adapters are optional and can be added as per your requirement
@@ -97,13 +115,13 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
         const torusPlugin = new TorusWalletConnectorPlugin({
           torusWalletOpts: {
-            buttonPosition: "bottom-left",
+            buttonPosition: 'bottom-left',
           },
           walletInitOptions: {
             whiteLabel: {
-              theme: { isDark: true, colors: { primary: "#00a8ff" } },
-              logoDark: "https://web3auth.io/images/w3a-L-Favicon-1.svg",
-              logoLight: "https://web3auth.io/images/w3a-D-Favicon-1.svg",
+              theme: { isDark: true, colors: { primary: '#00a8ff' } },
+              logoDark: 'https://web3auth.io/images/w3a-L-Favicon-1.svg',
+              logoLight: 'https://web3auth.io/images/w3a-D-Favicon-1.svg',
             },
             useWalletConnect: true,
             enableLogging: true,
@@ -125,7 +143,11 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
         // web3auth.configureAdapter(walletConnectV1Adapter);
 
         // adding wallet connect v2 adapter
-        const defaultWcSettings = await getWalletConnectV2Settings("eip155", [1], "04309ed1007e77d1f119b85205bb779d");
+        const defaultWcSettings = await getWalletConnectV2Settings(
+          'eip155',
+          [1],
+          '04309ed1007e77d1f119b85205bb779d',
+        );
         const walletConnectV2Adapter = new WalletConnectV2Adapter({
           adapterSettings: { ...defaultWcSettings.adapterSettings },
           loginSettings: { ...defaultWcSettings.loginSettings },
@@ -138,11 +160,11 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
         const metamaskAdapter = new MetamaskAdapter({
           clientId,
           sessionTime: 3600, // 1 hour in seconds
-          web3AuthNetwork: "cyan",
+          web3AuthNetwork: 'cyan',
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
-            chainId: "0x14a33",
-            rpcTarget: "https://goerli.base.org", // This is the public RPC we have added, please pass on your own endpoint while creating an app
+            chainId: '0x14a33',
+            rpcTarget: 'https://goerli.base.org', // This is the public RPC we have added, please pass on your own endpoint while creating an app
           },
         });
 
@@ -177,7 +199,9 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
         });
 
         // it will add/update  the torus-evm adapter in to web3auth class
-        web3auth.configureAdapter(torusWalletAdapter as unknown as IAdapter<unknown>);
+        web3auth.configureAdapter(
+          torusWalletAdapter as unknown as IAdapter<unknown>,
+        );
 
         setWeb3auth(web3auth);
         await createWallet();
@@ -193,7 +217,7 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
         if (accountAddress) setLoggedIn(true);
 
-        if (web3auth?.status === "connected") {
+        if (web3auth?.status === 'connected') {
           setLoggedIn(true);
         }
       } catch (error) {
@@ -202,7 +226,7 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
     };
     init();
 
-    const savedLoggedInStatus = localStorage.getItem("loggedIn");
+    const savedLoggedInStatus = localStorage.getItem('loggedIn');
     if (savedLoggedInStatus) {
       setLoggedIn(JSON.parse(savedLoggedInStatus));
     }
@@ -210,27 +234,29 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
   useEffect(() => {
     // Quando lo stato di loggedIn cambia, salvalo in localStorage
-    localStorage.setItem("loggedIn", JSON.stringify(loggedIn));
+    localStorage.setItem('loggedIn', JSON.stringify(loggedIn));
   }, [loggedIn]);
 
   useEffect(() => {
     console.log(web3auth?.status);
-    if (web3auth?.status == "connected") {
+    if (web3auth?.status == 'connected') {
       setLoggedIn(true);
       getPrivateKey();
       console.log(web3auth);
       console.log(web3auth.provider);
-      const ethersProvider = new ethers.providers.Web3Provider(web3auth?.provider as IProvider);
+      const ethersProvider = new ethers.providers.Web3Provider(
+        web3auth?.provider as IProvider,
+      );
       setSigner(ethersProvider.getSigner());
-      setTorusPlugin(torusPlugin)
-    } else if (web3auth?.status == "not_ready") {
+      setTorusPlugin(torusPlugin);
+    } else if (web3auth?.status == 'not_ready') {
       setLoggedIn(false);
     }
   }, [loading, loggedIn, web3auth?.status]);
 
   const login = async () => {
     if (!web3auth) {
-      uiConsole("web3auth not initialized yet");
+      uiConsole('web3auth not initialized yet');
       return;
     }
     const web3authProvider = await web3auth.connect();
@@ -239,7 +265,7 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
   const authenticateUser = async () => {
     if (!web3auth) {
-      uiConsole("web3auth not initialized yet");
+      uiConsole('web3auth not initialized yet');
       return;
     }
     const idToken = await web3auth.authenticateUser();
@@ -248,7 +274,7 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
   const getUserInfo = async () => {
     if (!web3auth) {
-      uiConsole("web3auth not initialized yet");
+      uiConsole('web3auth not initialized yet');
       return;
     }
     const user = await web3auth.getUserInfo();
@@ -257,18 +283,18 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
   const logout = async () => {
     if (!web3auth) {
-      uiConsole("web3auth not initialized yet");
+      uiConsole('web3auth not initialized yet');
       return;
     }
     await web3auth.logout();
     setProvider(null);
     setLoggedIn(false);
-    localStorage.removeItem("kp");
+    localStorage.removeItem('kp');
   };
 
   const showWCM = async () => {
     if (!torusPlugin) {
-      uiConsole("torus plugin not initialized yet");
+      uiConsole('torus plugin not initialized yet');
       return;
     }
     torusPlugin.showWalletConnectScanner();
@@ -277,21 +303,21 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
   const initiateTopUp = async () => {
     if (!torusPlugin) {
-      uiConsole("torus plugin not initialized yet");
+      uiConsole('torus plugin not initialized yet');
       return;
     }
-    torusPlugin.initiateTopup("moonpay", {
-      selectedAddress: "0x8cFa648eBfD5736127BbaBd1d3cAe221B45AB9AF",
-      selectedCurrency: "USD",
+    torusPlugin.initiateTopup('moonpay', {
+      selectedAddress: '0x8cFa648eBfD5736127BbaBd1d3cAe221B45AB9AF',
+      selectedCurrency: 'USD',
       fiatValue: 100,
-      selectedCryptoCurrency: "ETH",
-      chainNetwork: "mainnet",
+      selectedCryptoCurrency: 'ETH',
+      chainNetwork: 'mainnet',
     });
   };
 
   const getChainId = async () => {
     if (!web3auth?.provider) {
-      uiConsole("provider not initialized yet");
+      uiConsole('provider not initialized yet');
       return;
     }
     const rpc = new RPC(web3auth.provider);
@@ -301,41 +327,41 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
   const addChain = async () => {
     if (!web3auth?.provider) {
-      uiConsole("provider not initialized yet");
+      uiConsole('provider not initialized yet');
       return;
     }
     const newChain = {
-      chainId: "0x5",
-      displayName: "Goerli",
+      chainId: '0x5',
+      displayName: 'Goerli',
       chainNamespace: CHAIN_NAMESPACES.EIP155,
-      tickerName: "Goerli",
-      ticker: "ETH",
+      tickerName: 'Goerli',
+      ticker: 'ETH',
       decimals: 18,
-      rpcTarget: "https://rpc.ankr.com/eth_goerli",
-      blockExplorer: "https://goerli.etherscan.io",
+      rpcTarget: 'https://rpc.ankr.com/eth_goerli',
+      blockExplorer: 'https://goerli.etherscan.io',
     };
 
     await web3auth?.addChain(newChain);
-    uiConsole("New Chain Added");
+    uiConsole('New Chain Added');
   };
 
   const switchChain = async () => {
     if (!web3auth?.provider) {
-      uiConsole("provider not initialized yet");
+      uiConsole('provider not initialized yet');
       return;
     }
-    await web3auth?.switchChain({ chainId: "0x5" });
-    uiConsole("Chain Switched");
+    await web3auth?.switchChain({ chainId: '0x5' });
+    uiConsole('Chain Switched');
   };
 
   const getAccounts = async () => {
     if (!web3auth?.provider) {
-      uiConsole("provider not initialized yet");
+      uiConsole('provider not initialized yet');
       return;
     }
     const rpc = new RPC(web3auth?.provider);
     const address = await rpc.getAccounts();
-    if (web3auth.cachedAdapter == "metamask") {
+    if (web3auth.cachedAdapter == 'metamask') {
       uiConsole(address);
     } else {
       uiConsole(address);
@@ -344,7 +370,7 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
   const getBalance = async () => {
     if (!web3auth?.provider) {
-      uiConsole("provider not initialized yet");
+      uiConsole('provider not initialized yet');
       return;
     }
     const rpc = new RPC(web3auth?.provider);
@@ -352,12 +378,12 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
     // fetch baance with public provider
     const account = await rpc.getAccounts();
     const balance = await publicProvider.getBalance(account);
-    uiConsole(formatEther(balance) + " ETH");
+    uiConsole(formatEther(balance) + ' ETH');
   };
 
   const sendTransaction = async () => {
     if (!web3auth?.provider) {
-      uiConsole("provider not initialized yet");
+      uiConsole('provider not initialized yet');
       return;
     }
     const rpc = new RPC(web3auth?.provider);
@@ -367,7 +393,7 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
   const signMessage = async () => {
     if (!web3auth?.provider) {
-      uiConsole("provider not initialized yet");
+      uiConsole('provider not initialized yet');
       return;
     }
     const rpc = new RPC(web3auth?.provider);
@@ -377,39 +403,39 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
 
   const getPrivateKey = async () => {
     if (!web3auth?.provider) {
-      uiConsole("provider not initialized yet");
+      uiConsole('provider not initialized yet');
       return;
     }
-    if (web3auth?.cachedAdapter != "metamask") {
+    if (web3auth?.cachedAdapter != 'metamask') {
       const rpc = new RPC(web3auth?.provider);
       const privateKey = await rpc.getPrivateKey();
       uiConsole(privateKey);
     } else {
-      uiConsole("Private key not available for metamask");
+      uiConsole('Private key not available for metamask');
     }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function uiConsole(...args: any[]): void {
-    const el = document.querySelector("#console>pre");
+    const el = document.querySelector('#console>pre');
     if (el) {
       el.innerHTML = JSON.parse(JSON.stringify(args || {}, null, 2));
     }
   }
 
   const createWallet = async () => {
-    console.log("Start createWallet");
+    console.log('Start createWallet');
 
     const cachedAdapter = web3auth?.cachedAdapter;
 
-    console.log("Provider:", provider);
+    console.log('Provider:', provider);
 
-    if (cachedAdapter == "metamask" && web3auth && provider) {
-      console.log("metamask");
+    if (cachedAdapter == 'metamask' && web3auth && provider) {
+      console.log('metamask');
       const rpc = new RPC(provider);
       const ethersProvider = new ethers.providers.Web3Provider(provider);
       setSigner(ethersProvider.getSigner());
-    } else if (cachedAdapter == "openlogin" && provider) {
+    } else if (cachedAdapter == 'openlogin' && provider) {
       const rpc = new RPC(provider);
       const privateKey = await rpc.getPrivateKey();
 
@@ -419,8 +445,8 @@ export const Web3authProvider: React.FC<Web3authProviderProps> = ({ children }) 
   };
 
   useEffect(() => {
-    console.log("Current web3auth", web3auth);
-    if (web3auth) console.log("Current web3auth?.provider", web3auth.provider);
+    console.log('Current web3auth', web3auth);
+    if (web3auth) console.log('Current web3auth?.provider', web3auth.provider);
   }, [web3auth]);
 
   return (

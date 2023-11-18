@@ -1,16 +1,19 @@
-import { utils } from "ethers";
-import { useState } from "react";
-import { useContractRead } from "wagmi";
-import { displayTxResult } from "./utilsDisplay";
-import InputUI from "./InputUI";
-import { getFunctionInputKey, getParsedContractFunctionArgs } from "./utilsContract";
-import { getTargetNetwork, notification } from "~~/utils/scaffold-eth";
+import { utils } from 'ethers';
+import { useState } from 'react';
+import { useContractRead } from 'wagmi';
+import { displayTxResult } from './utilsDisplay';
+import InputUI from './InputUI';
+import {
+  getFunctionInputKey,
+  getParsedContractFunctionArgs,
+} from './utilsContract';
+import { getTargetNetwork, notification } from '~~/utils/scaffold-eth';
 
 const getInitialFormState = (functionFragment: utils.FunctionFragment) => {
   const initialForm: Record<string, any> = {};
   functionFragment.inputs.forEach((input, inputIndex) => {
     const key = getFunctionInputKey(functionFragment, input, inputIndex);
-    initialForm[key] = "";
+    initialForm[key] = '';
   });
   return initialForm;
 };
@@ -20,8 +23,13 @@ type TReadOnlyFunctionFormProps = {
   contractAddress: string;
 };
 
-export const ReadOnlyFunctionForm = ({ functionFragment, contractAddress }: TReadOnlyFunctionFormProps) => {
-  const [form, setForm] = useState<Record<string, any>>(() => getInitialFormState(functionFragment));
+export const ReadOnlyFunctionForm = ({
+  functionFragment,
+  contractAddress,
+}: TReadOnlyFunctionFormProps) => {
+  const [form, setForm] = useState<Record<string, any>>(() =>
+    getInitialFormState(functionFragment),
+  );
   const [result, setResult] = useState<unknown>();
   const configuredChain = getTargetNetwork();
 
@@ -67,7 +75,7 @@ export const ReadOnlyFunctionForm = ({ functionFragment, contractAddress }: TRea
           )}
         </div>
         <button
-          className={`btn btn-secondary btn-sm ${isFetching ? "loading" : ""}`}
+          className={`btn btn-secondary btn-sm ${isFetching ? 'loading' : ''}`}
           onClick={async () => {
             const { data } = await refetch();
             setResult(data);

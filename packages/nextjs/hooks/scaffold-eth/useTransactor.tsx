@@ -1,12 +1,19 @@
-import { TransactionRequest, TransactionResponse, TransactionReceipt } from "@ethersproject/abstract-provider";
-import { SendTransactionResult } from "@wagmi/core";
-import { Signer } from "ethers";
-import { utils } from "ethers";
-import { getParsedEthersError } from "~~/components/scaffold-eth/Contract/utilsContract";
-import { getBlockExplorerTxLink, notification } from "~~/utils/scaffold-eth";
+import {
+  TransactionRequest,
+  TransactionResponse,
+  TransactionReceipt,
+} from '@ethersproject/abstract-provider';
+import { SendTransactionResult } from '@wagmi/core';
+import { Signer } from 'ethers';
+import { utils } from 'ethers';
+import { getParsedEthersError } from '~~/components/scaffold-eth/Contract/utilsContract';
+import { getBlockExplorerTxLink, notification } from '~~/utils/scaffold-eth';
 
 type TTransactionFunc = (
-  tx: Promise<SendTransactionResult> | utils.Deferrable<TransactionRequest> | undefined,
+  tx:
+    | Promise<SendTransactionResult>
+    | utils.Deferrable<TransactionRequest>
+    | undefined,
   signer?: Signer | undefined,
   callback?: ((_param: any) => void) | undefined,
 ) => Promise<Record<string, any> | undefined>;
@@ -14,12 +21,23 @@ type TTransactionFunc = (
 /**
  * Custom notification content for TXs.
  */
-const TxnNotification = ({ message, blockExplorerLink }: { message: string; blockExplorerLink?: string }) => {
+const TxnNotification = ({
+  message,
+  blockExplorerLink,
+}: {
+  message: string;
+  blockExplorerLink?: string;
+}) => {
   return (
     <div className={`flex flex-col ml-1 cursor-default`}>
       <p className="my-0">{message}</p>
       {blockExplorerLink && blockExplorerLink.length > 0 ? (
-        <a href={blockExplorerLink} target="_blank" rel="noreferrer" className="block underline text-md">
+        <a
+          href={blockExplorerLink}
+          target="_blank"
+          rel="noreferrer"
+          className="block underline text-md"
+        >
           checkout out transaction
         </a>
       ) : null}
@@ -35,43 +53,63 @@ const TxnNotification = ({ message, blockExplorerLink }: { message: string; bloc
 export const useTransactor = (/* _signer?: Signer */): TTransactionFunc => {
   const result: TTransactionFunc = async (tx, signer, callback) => {
     if (!signer) {
-      notification.error("Wallet/Signer not connected");
-      console.error("⚡️ ~ file: useTransactor.tsx ~ error");
+      notification.error('Wallet/Signer not connected');
+      console.error('⚡️ ~ file: useTransactor.tsx ~ error');
       return;
     }
 
     let notificationId = null;
     let transactionReceipt: TransactionReceipt | undefined;
-    let transactionResponse: SendTransactionResult | TransactionResponse | undefined;
+    let transactionResponse:
+      | SendTransactionResult
+      | TransactionResponse
+      | undefined;
     try {
       const provider = signer.provider;
       const network = await provider?.getNetwork();
 
-      notificationId = notification.loading(<TxnNotification message="Awaiting for user confirmation" />);
+      notificationId = notification.loading(
+        <TxnNotification message="Awaiting for user confirmation" />,
+      );
       if (tx instanceof Promise) {
         // Tx is already prepared by the caller
         transactionResponse = await tx;
       } else if (tx != null) {
         transactionResponse = await signer.sendTransaction(tx);
       } else {
-        throw new Error("Incorrect transaction passed to transactor");
+        throw new Error('Incorrect transaction passed to transactor');
       }
       notification.remove(notificationId);
 
-      const blockExplorerTxURL = network ? getBlockExplorerTxLink(network, transactionResponse.hash) : "";
+      const blockExplorerTxURL = network
+        ? getBlockExplorerTxLink(network, transactionResponse.hash)
+        : '';
 
       notificationId = notification.loading(
-        <TxnNotification message="Mining transaction, Hold tight!" blockExplorerLink={blockExplorerTxURL} />,
+        <TxnNotification
+          message="Mining transaction, Hold tight!"
+          blockExplorerLink={blockExplorerTxURL}
+        />,
       );
       transactionReceipt = await transactionResponse.wait();
       notification.remove(notificationId);
 
-      notification.success(<TxnNotification message="Mined successfully !" blockExplorerLink={blockExplorerTxURL} />, {
-        icon: "🎉",
-      });
+      notification.success(
+        <TxnNotification
+          message="Mined successfully !"
+          blockExplorerLink={blockExplorerTxURL}
+        />,
+        {
+          icon: '🎉',
+        },
+      );
 
       if (transactionReceipt) {
-        if (callback != null && transactionReceipt.blockHash != null && transactionReceipt.confirmations >= 1) {
+        if (
+          callback != null &&
+          transactionReceipt.blockHash != null &&
+          transactionReceipt.confirmations >= 1
+        ) {
           callback({ ...transactionResponse, ...transactionReceipt });
         }
       }
@@ -80,7 +118,7 @@ export const useTransactor = (/* _signer?: Signer */): TTransactionFunc => {
         notification.remove(notificationId);
       }
       // TODO handle error properly
-      console.error("⚡️ ~ file: useTransactor.ts ~ error", error);
+      console.error('⚡️ ~ file: useTransactor.ts ~ error', error);
       const message = getParsedEthersError(error);
       notification.error(message);
     }

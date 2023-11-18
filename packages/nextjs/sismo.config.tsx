@@ -5,11 +5,11 @@ import {
   AuthRequest,
   ClaimRequest,
   SismoConnectConfig,
-} from "@sismo-core/sismo-connect-client";
+} from '@sismo-core/sismo-connect-client';
 
 export { ClaimType, AuthType };
 export const CONFIG: SismoConnectConfig = {
-  appId: "0x6c434d2de6efa3e7169bc58843b74d74",
+  appId: '0x6c434d2de6efa3e7169bc58843b74d74',
 };
 export const AUTHS: AuthRequest[] = [
   // vaultId = hash(vaultSecret, appId).
@@ -19,5 +19,5 @@ export const AUTHS: AuthRequest[] = [
 ];
 
 export const SIGNATURE_REQUEST: SignatureRequest = {
-  message: "I Love Sismo!",
+  message: 'I Love Sismo!',
 };

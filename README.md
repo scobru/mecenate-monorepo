@@ -11,25 +11,25 @@
 We are thrilled to announce version 2 of Mecenate with the following enhancements:
 
 enjoy the beta on : [https://mecenate.vercel.app/](https://mecenate.vercel.app/)
+Join the beta tester here: <https://backdropbeta.com/mecenate-monorepo/join/I4mh3AZL>
 
 ## SUMMARY
-
-***
 
 * [NEW IN V2](./#new-in-v2)
 * [WHAT'S IS THIS?](./#whats-this)
 * [HOW IT WORKS?](./#how-it-works)
-* [WORKFLOW](./#workflow)
+* [WORKFLOW FEEDS](./#workflow-feeds)
+* [WORKFLOW SENDS](./#workflow-send)
 * [STANDARDS](./#standards)
 * [PACKAGES](./#packages)
 * [QUICK START](./#quick-start)
 
 ## NEW IN V2
 
-***
-
 ### Smart Contract
 
+* [x] **MecenateSend**: New Layer that allow to send ETH or ERC20 with privacy.
+* [x] **MecenateMarket**: Allow all seller to post into a board the data that they want to sell public.
 * [x] **Multi-Token Usage**: Now supports ETH, DAI, and MUSE (the protocol token) as currencies for feeds.
 * [x] **Security and Gas Fee Optimization**: Improved security measures and optimized gas fees for better performance.
 * [x] **Mecenate EAS Resolver Contract**: Introduced the Mecenate EAS Resolver contract to ensure the attestations are genuinely valid.
@@ -39,16 +39,15 @@ enjoy the beta on : [https://mecenate.vercel.app/](https://mecenate.vercel.app/)
 
 ### UI
 
+* [x] **Send section added in the UI**
+* [x] **Market section added in the UI**
 * [x] **Account Abstraction and Social Login**: Implemented Account Abstraction and social login functionalities using Web3Auth.
 * [x] **Sismo Implementation**: Integrated Sismo to verify user identity via zkproof without requiring the user to provide any data to the platform.
 * [x] **Payment with DAI**: We add DAI as payment for feeds
-* [x] **Brand new style in the UI**
 
 Documentation: [https://scobru.gitbook.io/mecenatedocs/](https://scobru.gitbook.io/mecenatedocs/)
 
 ## WHAT'S THIS?
-
-***
 
 Mecenate is a protocol composed by a set of smart contracts that assicure the user's privacy and the integrity of the data. The protocol would to be open source and decentralized. All the fees are distributed to the Mecenate users.
 
@@ -58,8 +57,6 @@ Mecenate consists of several applications, including:
 * **📣Mecenate Bay:** A marketplace build on top of Mecenate Feeds for sourcing ANY kind of information (secrets, predictions etc). Requests for information are matched with a stake by "fulfillers" who get paid if the information meets the set parameters. ETH is used for staking. Ethers from punished fulfillers are sent to the Mecenate treasury and distributed between users protocol.
 
 ## HOW IT WORKS?
-
-***
 
 **QUESTION** Enter a short explanation of what you're looking for. This can include links, Twitter handles and hastags. Make your descriptions as clear as possible.
 
@@ -71,17 +68,17 @@ Mecenate consists of several applications, including:
 
 **PUNISH PERIOD** How many days after your request is fulfilled you have to verify the quality of the information provided. Within this window, you may punish the fulfiller. After this time their stake and reward are released. You may decide to release it early if you are satisfied with the submission. The default value is good for most requests.
 
-## WORKFLOW
-
-***
+## WORKFLOW IDENTITY
 
 ### New User Registration
 
 1. **Initial Connection**: New user connects to `MecenateClient` or `MecenateUI`.
 2. **Key Generation**: `MecenateClient` generates asymmetric encryption keys `PubKey, PrivKey`.
 3. **Identity Verification**: User verifies their identity through Sismo zk-proof.
-4. **Key Storage**: User stores the private key (`pk`) in a safe place.
+4. **Key Storage**: User sign a tx to create his unique Key Pair stored encrypted on IPFS.
 5. **Registration**: `MecenateClient` calls `registerUser(evmAccount, vaultID, pubKey)`.
+
+## WORKFLOW FEEDS
 
 ### Creating a Post
 
@@ -117,13 +114,58 @@ Mecenate consists of several applications, including:
 1. **SymKey Upload**: `MecenateClient_Seller` uploads `SymKey` to IPFS at `multihashformat(keyhash)`.
 2. **Raw Data Upload**: `MecenateClient_Seller` uploads `rawdata` to IPFS at `multihashformat(datahash)`.
 
-## STANDARDS
+## WORKFLOW SEND
 
-***
+### Send a Payment
+
+1. **Set the transaction**: The user selects the recipient and the amount to send. The recipient must be registered to the protocol.
+2. **Stealth Address Generation**: The user generates a `Stealth_Address` derived from the `PubKey_Receiver` fetched from the `MecenateUser` contract, and a `random_string`
+3. **SubmitHash**: The user encrypts the `random_string` with the `PubKey_Receiver`, generate the json_payData_v100 and uploads it to IPFS:
+
+```javascript
+const json_payData_v100 = {
+   encryptedR: `enrypted_random_string`
+   nonce: nonce,
+   ephemeralPubKey:`PubKey_Sender`
+   };
+```
+
+After upload we get an `ipfs_hash`.
+User Encode paramaters into a `encoded` structure like this:
+
+```javascript
+const encoded = ethers.utils.defaultAbiCoder.encode(
+   [
+      "bytes",
+      "bytes",
+      "address",
+      "address",
+      "uint256"
+   ],
+   [
+   ipfsHash,
+      `ipfs_hash`
+      `PubKey_Receiver`,
+      `Stealth_Address`,
+      token_address,
+      amount_to_send
+   ]);
+```
+
+Subsequently, the user will call `submitHash(encoded)` to store this information in the MecenateSend contract.
+4. **Send funds to stealth Address**: `MecenateSend` sends the funds to the `Stealth_Address` generated by the user, and stores in a mapping the `encoded` corresponding to the `PubKey_Receiver`.
+
+### Receive a Payment
+
+1. **Select the receiver**: The user selects a `Receiver_Address` for their withdrawal and calls the `getHash()` function to check if there are `encoded`  data associated with their `PubKey_Receiver`.
+2. **Decrypt and generate the PK**: If the encrypted data exists, the user decrypts it, obtaining the `random_string` that multiplies by their `PubKey_Receiver`, thus obtaining the `Stealth_Address_PrivateKey` of the `Stealth_Address`.
+3. **Withdraw**: Having `Stealth_Address_PrivateKey`, the user sends the funds from the frontend to the `Receiver_Address` selected at the beginning.
+
+## STANDARDS
 
 This standard outlines how to encode data for transfering access to an mecenate data proof. Transfering access occurs when the creator of the proof allows an other party to access the data.
 
-```
+```bash
 Buffer(JSON.stringify({
   msp_version: <v1.0.0>,
   proofhash: <ipld_sha2_256 proof>,
@@ -143,8 +185,6 @@ more infos [here](standards/MSP\_1000.md)
 
 ## PACKAGES
 
-***
-
 **packages/nextjs** - package for the UI build in nextJS&#x20;
 
 **packages/hardhat** - package with smart contracts build with Hardhat
@@ -152,8 +192,6 @@ more infos [here](standards/MSP\_1000.md)
 **packages/client** - SDK and command line interface, usefull to interact with the protocol.
 
 ## QUICK START
-
-***
 
 1. Clone this repo & install dependencies
 
@@ -177,11 +215,11 @@ more infos [here](standards/MSP\_1000.md)
     NEXT_PUBLIC_ALCHEMY_SECRET=
     NEXT_PUBLIC_INFURA_API_KEY=
     NEXT_PUBLIC_TELEGRAM_TOKEN=
-    NEXT_PUBLIC_DAI_ADDRESS_BASE=0x7B027042374F2002614A71e5FF2228B1c862B67b  # BaseGoerli
-    NEXT_PUBLIC_MUSE_ADDRESS_BASE=0x614cA0b2fFde43704BD122B732dAF9a2B953594d # BaseGoerli
-    NEXT_PUBLIC_WETH_ADDRESS_BASE=0xa3a0460606Bb07A44Ff47fB90f2532F99de99534 # BaseGoerli
+    NEXT_PUBLIC_DAI_ADDRESS_BASE="0x7B027042374F2002614A71e5FF2228B1c862B67b"
+    NEXT_PUBLIC_MUSE_ADDRESS_BASE="0x614cA0b2fFde43704BD122B732dAF9a2B953594d"
+    NEXT_PUBLIC_WETH_ADDRESS_BASE="0xa3a0460606Bb07A44Ff47fB90f2532F99de99534"
     NEXT_PUBLIC_APP_KEY=""
-    NEXT_PUBLIC_APP_NONCE=""
+    NEXT_PUBLIC_DB_NAME=""
     ```
 
 3. On a third terminal, start your NextJS app:
@@ -189,8 +227,6 @@ more infos [here](standards/MSP\_1000.md)
     ```bash
     yarn start
     ```
-
-###
 
 ### Contribution
 

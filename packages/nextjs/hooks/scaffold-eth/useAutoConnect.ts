@@ -1,7 +1,10 @@
-import { useEffect } from "react";
-import { Connector, useAccount, useConnect } from "wagmi";
-import { useEffectOnce, useLocalStorage } from "usehooks-ts";
-import { burnerWalletId, defaultBurnerChainId } from "~~/services/web3/wagmi-burner/BurnerConnector";
+import { useEffect } from 'react';
+import { Connector, useAccount, useConnect } from 'wagmi';
+import { useEffectOnce, useLocalStorage } from 'usehooks-ts';
+import {
+  burnerWalletId,
+  defaultBurnerChainId,
+} from '~~/services/web3/wagmi-burner/BurnerConnector';
 
 export type TAutoConnect = {
   /**
@@ -16,7 +19,7 @@ export type TAutoConnect = {
   autoConnect: boolean;
 };
 
-const walletIdStorageKey = "scaffoldEth2.wallet";
+const walletIdStorageKey = 'scaffoldEth2.wallet';
 
 /**
  * This function will get the initial wallet connector (if any), the app will connect to
@@ -31,7 +34,7 @@ const getInitialConnector = (
   connectors: Connector<any, any, any>[],
 ): { connector: Connector | undefined; chainId?: number } | undefined => {
   const allowBurner = config.enableBurnerWallet;
-  const isLocalChainSelected = process.env.NEXT_PUBLIC_NETWORK === "hardhat";
+  const isLocalChainSelected = process.env.NEXT_PUBLIC_NETWORK === 'hardhat';
 
   if (!previousWalletId) {
     // The user was not connected to a wallet
@@ -59,26 +62,36 @@ const getInitialConnector = (
  * @param config
  */
 export const useAutoConnect = (config: TAutoConnect): void => {
-  const [walletId, setWalletId] = useLocalStorage<string>(walletIdStorageKey, "");
+  const [walletId, setWalletId] = useLocalStorage<string>(
+    walletIdStorageKey,
+    '',
+  );
   const connectState = useConnect();
   const accountState = useAccount();
 
   useEffect(() => {
     if (accountState.isConnected) {
       // user is connected, set walletName
-      setWalletId(accountState.connector?.id ?? "");
+      setWalletId(accountState.connector?.id ?? '');
     } else {
       // user has disconnected, reset walletName
-      setWalletId("");
+      setWalletId('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountState.isConnected, accountState.connector?.name]);
 
   useEffectOnce(() => {
-    const initialConnector = getInitialConnector(config, walletId, connectState.connectors);
+    const initialConnector = getInitialConnector(
+      config,
+      walletId,
+      connectState.connectors,
+    );
 
     if (initialConnector?.connector) {
-      connectState.connect({ connector: initialConnector.connector, chainId: initialConnector.chainId });
+      connectState.connect({
+        connector: initialConnector.connector,
+        chainId: initialConnector.chainId,
+      });
     }
   });
 };

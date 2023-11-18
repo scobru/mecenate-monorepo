@@ -1,21 +1,29 @@
-import type { NextPage } from "next";
-import React, { useCallback, useEffect, useMemo } from "react";
-import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
-import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { ContractInterface, Signer, Wallet, ethers } from "ethers";
-import Link from "next/link";
-import { useTransactor } from "~~/hooks/scaffold-eth";
-import { formatEther } from "ethers/lib/utils.js";
-import { useAppStore } from "~~/services/store/store";
+import type { NextPage } from 'next';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useProvider, useNetwork, useSigner, useContract } from 'wagmi';
+import { getDeployedContract } from '../components/scaffold-eth/Contract/utilsContract';
+import { ContractInterface, Signer, Wallet, ethers } from 'ethers';
+import Link from 'next/link';
+import { useTransactor } from '~~/hooks/scaffold-eth';
+import { formatEther } from 'ethers/lib/utils.js';
+import { useAppStore } from '~~/services/store/store';
 
 const Feeds: NextPage = () => {
-  const deployedContractFactory = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateFeedFactory");
-  const deployedContractTreasury = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateTreasury");
+  const deployedContractFactory = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MecenateFeedFactory',
+  );
+  const deployedContractTreasury = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MecenateTreasury',
+  );
   const [feeds, setFeeds] = React.useState<string[]>([]);
   const [feedsInfos, setFeedsInfos] = React.useState<Feed[]>([]);
   const [onlyYourFeeds, setOnlyYourFeeds] = React.useState<boolean>(false);
   const [sismoData, setSismoData] = React.useState<any>(null);
-  const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const publicProvider = new ethers.providers.JsonRpcProvider(
+    process.env.NEXT_PUBLIC_RPC_URL,
+  );
   const runTx = useTransactor();
 
   const { signer } = useAppStore();
@@ -84,19 +92,19 @@ const Feeds: NextPage = () => {
   useEffect(() => {
     if (factoryCtx) {
       getFeeds();
-      const storedData = localStorage.getItem("sismoData");
-      const storedSismoResponse = localStorage.getItem("sismoResponse");
+      const storedData = localStorage.getItem('sismoData');
+      const storedSismoResponse = localStorage.getItem('sismoResponse');
 
       if (storedData && storedSismoResponse) {
         setSismoData(JSON.parse(storedData));
       } else {
-        console.warn("Stored ethWallet or its privateKey is undefined.");
+        console.warn('Stored ethWallet or its privateKey is undefined.');
       }
     }
   }, [onlyYourFeeds]);
 
   const buildFeed = async () => {
-    console.log(factoryCtx?.address, treasuryCtx?.address, sismoData)
+    console.log(factoryCtx?.address, treasuryCtx?.address, sismoData);
     if (!factoryCtx || !treasuryCtx || !runTx || !sismoData) return;
     const fee = await treasuryCtx?.fixedFee();
     runTx(factoryCtx?.buildFeed({ value: fee }), signer);
@@ -110,47 +118,67 @@ const Feeds: NextPage = () => {
         <div key={i}>
           <Link href={`/viewFeed?addr=${feed}`} passHref>
             <div className="card card-shadow  bg-gradient-to-br from-blue-950 to-slate-900 opacity-80 grid grid-cols-12 gap-4 border rounded-xl p-4 hover:bg-opacity-95 transition-all duration-300 ease-in-out transform hover:scale-105  text-base-content ">
-              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Currency:</div>
-              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
-                {Number(feedsInfos[i].tokenId) == 0 ? "ETH" : Number(feedsInfos[i].tokenId) == 1 ? "MUSE" : "DAI"}{" "}
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">
+                Currency:
               </div>
-              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Addr:</div>
+              <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
+                {Number(feedsInfos[i].tokenId) == 0
+                  ? 'ETH'
+                  : Number(feedsInfos[i].tokenId) == 1
+                  ? 'MUSE'
+                  : 'DAI'}{' '}
+              </div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">
+                Addr:
+              </div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {feed}
               </div>
-              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Seller Stake:</div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">
+                Seller Stake:
+              </div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {formatEther(feedsInfos[i]?.sellerStake)} ETH
               </div>
-              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Total Locked:</div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">
+                Total Locked:
+              </div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {formatEther(String(feedsInfos[i].totalStake))} ETH
               </div>
-              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Buyer Payment:</div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">
+                Buyer Payment:
+              </div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {formatEther(String(feedsInfos[i].paymentRequested))} ETH
               </div>
-              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Count:</div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">
+                Count:
+              </div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {String(feedsInfos[i].postCount)}
               </div>
-              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Status:</div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">
+                Status:
+              </div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {Number(feedsInfos[i].status) === 6
-                  ? "Revealed"
+                  ? 'Revealed'
                   : Number(feedsInfos[i].status) === 5
-                    ? "Punished"
-                    : Number(feedsInfos[i].status) === 4
-                      ? "Finalized"
-                      : Number(feedsInfos[i].status) === 3
-                        ? "Submitted"
-                        : Number(feedsInfos[i].status) === 2
-                          ? "Accepted"
-                          : Number(feedsInfos[i].status) === 1
-                            ? "Proposed"
-                            : "Waiting for Creator"}
+                  ? 'Punished'
+                  : Number(feedsInfos[i].status) === 4
+                  ? 'Finalized'
+                  : Number(feedsInfos[i].status) === 3
+                  ? 'Submitted'
+                  : Number(feedsInfos[i].status) === 2
+                  ? 'Accepted'
+                  : Number(feedsInfos[i].status) === 1
+                  ? 'Proposed'
+                  : 'Waiting for Creator'}
               </div>
-              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">Version:</div>
+              <div className="col-span-2 font-bold animate__animated animate__fadeInLeft">
+                Version:
+              </div>
               <div className="col-span-4 overflow-hidden text-truncate animate__animated animate__fadeInRight">
                 {String(feedsInfos[i].version)}
               </div>
@@ -169,12 +197,11 @@ const Feeds: NextPage = () => {
       </div> */}
 
       <h1 className="text-4xl mb-3 font-light text-white   text-center mt-10">
-        POST YOUR DATA{" "}
-        AND SELL IT
+        POST YOUR DATA AND SELL IT
       </h1>
       <h1 className="text-lg  mb-8  font-light text-white  text-center ">
-        Post your encrypted data and stake an amount of ETH or ERC20
-        {" "} to prove quality and value of your data.
+        Post your encrypted data and stake an amount of ETH or ERC20 to prove
+        quality and value of your data.
       </h1>
       <div className="mx-auto  w-fit text-center items-center"></div>
       <div className="flex flex-row items-center mb-5  gap-4 text-lg p-5 font-heading">

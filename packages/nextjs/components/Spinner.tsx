@@ -1,6 +1,12 @@
-import React from "react";
+import React from 'react';
 
-export default function Spinner({ width, height }: { width?: string; height?: string }) {
+export default function Spinner({
+  width,
+  height,
+}: {
+  width?: string;
+  height?: string;
+}) {
   return (
     <svg
       aria-hidden="true"

@@ -1,6 +1,6 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { useAppStore } from "~~/services/store/store";
-import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import { useAppStore } from '~~/services/store/store';
+import { ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
 
 type TEtherInputProps = {
   onChange?: (arg: string) => void;
@@ -14,9 +14,14 @@ type TEtherInputProps = {
  *
  * onChange will always be called with the value in ETH
  */
-export default function EtherInput({ value, name, placeholder, onChange }: TEtherInputProps) {
-  const [ethValue, setEthValue] = useState("");
-  const [displayValue, setDisplayValue] = useState("");
+export default function EtherInput({
+  value,
+  name,
+  placeholder,
+  onChange,
+}: TEtherInputProps) {
+  const [ethValue, setEthValue] = useState('');
+  const [displayValue, setDisplayValue] = useState('');
   const [usdMode, setUSDMode] = useState(false);
 
   const ethPrice = useAppStore(state => state.ethPrice);
@@ -27,8 +32,8 @@ export default function EtherInput({ value, name, placeholder, onChange }: TEthe
   useEffect(() => {
     // Reset when clearing controlled input
     if (!currentValue) {
-      setDisplayValue("");
-      setEthValue("");
+      setDisplayValue('');
+      setEthValue('');
     }
   }, [currentValue]);
 
@@ -63,7 +68,9 @@ export default function EtherInput({ value, name, placeholder, onChange }: TEthe
       if (Number.isNaN(parsedCurrentDisplayValue)) {
         setDisplayValue(displayValue);
       } else {
-        const ethValueConversion = (parsedCurrentDisplayValue / ethPrice).toString();
+        const ethValueConversion = (
+          parsedCurrentDisplayValue / ethPrice
+        ).toString();
         setDisplayValue(ethValueConversion);
         setEthValue(ethValueConversion);
       }
@@ -74,7 +81,9 @@ export default function EtherInput({ value, name, placeholder, onChange }: TEthe
       if (Number.isNaN(parsedCurrentEthValue)) {
         setDisplayValue(currentValue);
       } else {
-        setDisplayValue((parseFloat(currentValue) * ethPrice).toFixed(2).toString());
+        setDisplayValue(
+          (parseFloat(currentValue) * ethPrice).toFixed(2).toString(),
+        );
       }
     }
     setUSDMode(!usdMode);
@@ -85,7 +94,7 @@ export default function EtherInput({ value, name, placeholder, onChange }: TEthe
       <div className="rounded-full border-2 border-base-300">
         <div className="form-control grow">
           <div className="flex w-full items-center">
-            <span className="pl-4 text-primary">{usdMode ? "$" : "Ξ"}</span>
+            <span className="pl-4 text-primary">{usdMode ? '$' : 'Ξ'}</span>
             <input
               name={name}
               type="text"
@@ -99,7 +108,10 @@ export default function EtherInput({ value, name, placeholder, onChange }: TEthe
               onClick={toggleMode}
               disabled={!usdMode && !ethPrice}
             >
-              <ArrowsRightLeftIcon className="h-3 w-3 cursor-pointer" aria-hidden="true" />
+              <ArrowsRightLeftIcon
+                className="h-3 w-3 cursor-pointer"
+                aria-hidden="true"
+              />
             </button>
           </div>
         </div>

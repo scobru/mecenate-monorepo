@@ -1,9 +1,9 @@
-import { Contract, utils } from "ethers";
-import DisplayVariable from "~~/components/scaffold-eth/Contract/DisplayVariables";
-import { ReadOnlyFunctionForm } from "./ReadOnlyFunctionForm";
-import { WriteOnlyFunctionForm } from "./WriteOnlyFunctionForm";
-import { Dispatch, SetStateAction } from "react";
-import ContractData from "../../../generated/hardhat_contracts.json";
+import { Contract, utils } from 'ethers';
+import DisplayVariable from '~~/components/scaffold-eth/Contract/DisplayVariables';
+import { ReadOnlyFunctionForm } from './ReadOnlyFunctionForm';
+import { WriteOnlyFunctionForm } from './WriteOnlyFunctionForm';
+import { Dispatch, SetStateAction } from 'react';
+import ContractData from '../../../generated/hardhat_contracts.json';
 
 type GeneratedContractType = {
   address: string;
@@ -34,8 +34,14 @@ const getDeployedContract = (
  * @param {Contract} contract
  * @returns {utils.FunctionFragment[]} array of function fragments
  */
-const getAllContractFunctions = (contract: Contract | null): utils.FunctionFragment[] => {
-  return contract ? Object.values(contract.interface.functions).filter(fn => fn.type === "function") : [];
+const getAllContractFunctions = (
+  contract: Contract | null,
+): utils.FunctionFragment[] => {
+  return contract
+    ? Object.values(contract.interface.functions).filter(
+        fn => fn.type === 'function',
+      )
+    : [];
 };
 
 /**
@@ -56,7 +62,9 @@ const getContractVariablesAndNoParamsReadMethods = (
       ? contractMethodsAndVariables
           .map(fn => {
             const isQueryableWithNoParams =
-              (fn.stateMutability === "view" || fn.stateMutability === "pure") && fn.inputs.length === 0;
+              (fn.stateMutability === 'view' ||
+                fn.stateMutability === 'pure') &&
+              fn.inputs.length === 0;
             if (isQueryableWithNoParams) {
               return (
                 <DisplayVariable
@@ -90,9 +98,17 @@ const getContractReadOnlyMethodsWithParams = (
       ? contractMethodsAndVariables
           .map(fn => {
             const isQueryableWithParams =
-              (fn.stateMutability === "view" || fn.stateMutability === "pure") && fn.inputs.length > 0;
+              (fn.stateMutability === 'view' ||
+                fn.stateMutability === 'pure') &&
+              fn.inputs.length > 0;
             if (isQueryableWithParams) {
-              return <ReadOnlyFunctionForm key={fn.name} functionFragment={fn} contractAddress={contract.address} />;
+              return (
+                <ReadOnlyFunctionForm
+                  key={fn.name}
+                  functionFragment={fn}
+                  contractAddress={contract.address}
+                />
+              );
             }
             return null;
           })
@@ -118,7 +134,8 @@ const getContractWriteMethods = (
     methods: contract
       ? contractMethodsAndVariables
           .map(fn => {
-            const isWriteableFunction = fn.stateMutability !== "view" && fn.stateMutability !== "pure";
+            const isWriteableFunction =
+              fn.stateMutability !== 'view' && fn.stateMutability !== 'pure';
             if (isWriteableFunction) {
               return (
                 <WriteOnlyFunctionForm
@@ -149,7 +166,7 @@ const getFunctionInputKey = (
   inputIndex: number,
 ): string => {
   const name = input?.name || `input_${inputIndex}_`;
-  return functionInfo.name + "_" + name + "_" + input.type;
+  return functionInfo.name + '_' + name + '_' + input.type;
 };
 
 /**
@@ -170,7 +187,7 @@ const getParsedEthersError = (e: any): string => {
     message = e.message;
   }
 
-  console.log("Attempt to clean up:", message);
+  console.log('Attempt to clean up:', message);
   try {
     const obj = JSON.parse(message);
     if (obj && obj.body) {
@@ -190,14 +207,14 @@ const getParsedContractFunctionArgs = (form: Record<string, any>) => {
   const keys = Object.keys(form);
   const parsedArguments = keys.map(key => {
     try {
-      const keySplitArray = key.split("_");
+      const keySplitArray = key.split('_');
       const baseTypeOfArg = keySplitArray[keySplitArray.length - 1];
       let valueOfArg = form[key];
 
-      if (["array", "tuple"].includes(baseTypeOfArg)) {
+      if (['array', 'tuple'].includes(baseTypeOfArg)) {
         valueOfArg = JSON.parse(valueOfArg);
-      } else if (baseTypeOfArg === "bool") {
-        if (["true", "1", "0x1", "0x01", "0x0001"].includes(valueOfArg)) {
+      } else if (baseTypeOfArg === 'bool') {
+        if (['true', '1', '0x1', '0x01', '0x0001'].includes(valueOfArg)) {
           valueOfArg = 1;
         } else {
           valueOfArg = 0;

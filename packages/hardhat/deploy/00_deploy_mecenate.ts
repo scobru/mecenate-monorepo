@@ -203,7 +203,7 @@ const deployYourContract: DeployFunction = async function (
 
   mecenateSend.receipt &&
     console.log(
-      "Mecenate Pay  deployed at:",
+      "Mecenate Sends  deployed at:",
       mecenateSend.receipt.contractAddress,
     );
 };

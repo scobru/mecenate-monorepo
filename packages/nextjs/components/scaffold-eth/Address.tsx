@@ -1,32 +1,44 @@
-import React, { useEffect, useState } from "react";
-import Blockies from "react-blockies";
-import { DocumentDuplicateIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import { useEnsAvatar, useEnsName } from "wagmi";
-import { ethers } from "ethers";
+import React, { useEffect, useState } from 'react';
+import Blockies from 'react-blockies';
+import {
+  DocumentDuplicateIcon,
+  CheckCircleIcon,
+} from '@heroicons/react/24/outline';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useEnsAvatar, useEnsName } from 'wagmi';
+import { ethers } from 'ethers';
 
 const blockExplorerLink = (address: string, blockExplorer?: string) =>
-  `${blockExplorer || "https://etherscan.io/"}address/${address}`;
+  `${blockExplorer || 'https://etherscan.io/'}address/${address}`;
 
 type TAddressProps = {
   address?: string;
   blockExplorer?: string;
   disableAddressLink?: boolean;
-  format?: "short" | "long";
+  format?: 'short' | 'long';
 };
 
 /**
  * Displays an address (or ENS) with a Blockie image and option to copy address.
  */
-export default function Address({ address, blockExplorer, disableAddressLink, format }: TAddressProps) {
+export default function Address({
+  address,
+  blockExplorer,
+  disableAddressLink,
+  format,
+}: TAddressProps) {
   const [ens, setEns] = useState<string | null>();
   const [ensAvatar, setEnsAvatar] = useState<string | null>();
   const [addressCopied, setAddressCopied] = useState(false);
 
-  const { data: fetchedEns } = useEnsName({ address, enabled: ethers.utils.isAddress(address ?? ""), chainId: 1 });
+  const { data: fetchedEns } = useEnsName({
+    address,
+    enabled: ethers.utils.isAddress(address ?? ''),
+    chainId: 1,
+  });
   const { data: fetchedEnsAvatar } = useEnsAvatar({
     address,
-    enabled: ethers.utils.isAddress(address ?? ""),
+    enabled: ethers.utils.isAddress(address ?? ''),
     chainId: 1,
     cacheTime: 30_000,
   });
@@ -57,11 +69,11 @@ export default function Address({ address, blockExplorer, disableAddressLink, fo
   }
 
   const explorerLink = blockExplorerLink(address, blockExplorer);
-  let displayAddress = address?.slice(0, 5) + "..." + address?.slice(-4);
+  let displayAddress = address?.slice(0, 5) + '...' + address?.slice(-4);
 
   if (ens) {
     displayAddress = ens;
-  } else if (format === "long") {
+  } else if (format === 'long') {
     displayAddress = address;
   }
 
@@ -71,15 +83,31 @@ export default function Address({ address, blockExplorer, disableAddressLink, fo
         {ensAvatar ? (
           // Don't want to use nextJS Image here (and adding remote patterns for the URL)
           // eslint-disable-next-line
-          <img className="rounded-full" src={ensAvatar} width={24} height={24} alt={`${address} avatar`} />
+          <img
+            className="rounded-full"
+            src={ensAvatar}
+            width={24}
+            height={24}
+            alt={`${address} avatar`}
+          />
         ) : (
-          <Blockies className="mx-auto rounded-full" size={8} seed={address.toLowerCase()} scale={3} />
+          <Blockies
+            className="mx-auto rounded-full"
+            size={8}
+            seed={address.toLowerCase()}
+            scale={3}
+          />
         )}
       </div>
       {disableAddressLink ? (
         <span className="ml-1.5 text-lg font-normal">{displayAddress}</span>
       ) : (
-        <a className="ml-1.5 text-lg font-normal" target="_blank" href={explorerLink} rel="noopener noreferrer">
+        <a
+          className="ml-1.5 text-lg font-normal"
+          target="_blank"
+          href={explorerLink}
+          rel="noopener noreferrer"
+        >
           {displayAddress}
         </a>
       )}

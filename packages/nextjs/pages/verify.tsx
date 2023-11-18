@@ -1,26 +1,32 @@
-import type { NextPage } from "next";
-import React, { useEffect } from "react";
-import { SismoConnectButton, SismoConnectResponse, SismoConnectVerifiedResult } from "@sismo-core/sismo-connect-react";
-import { CONFIG, AUTHS, SIGNATURE_REQUEST } from "../sismo.config";
-import Spinner from "~~/components/Spinner";
+import type { NextPage } from 'next';
+import React, { useEffect } from 'react';
+import {
+  SismoConnectButton,
+  SismoConnectResponse,
+  SismoConnectVerifiedResult,
+} from '@sismo-core/sismo-connect-react';
+import { CONFIG, AUTHS, SIGNATURE_REQUEST } from '../sismo.config';
+import Spinner from '~~/components/Spinner';
 
 const Verify: NextPage = () => {
-  const [sismoConnectVerifiedResult, setSismoConnectVerifiedResult] = React.useState<SismoConnectVerifiedResult>();
-  const [sismoConnectResponse, setSismoConnectResponse] = React.useState<SismoConnectResponse>();
+  const [sismoConnectVerifiedResult, setSismoConnectVerifiedResult] =
+    React.useState<SismoConnectVerifiedResult>();
+  const [sismoConnectResponse, setSismoConnectResponse] =
+    React.useState<SismoConnectResponse>();
   const [responseBytes, setResponseBytes] = React.useState<string>();
   const [sismoData, setSismoData] = React.useState<any>(null);
-  const [pageState, setPageState] = React.useState<string>("init");
+  const [pageState, setPageState] = React.useState<string>('init');
   const [error, setError] = React.useState<string>();
 
   /* *************************  Reset state *****************************/
   function resetApp() {
     resetLocalStorage();
-    window.location.href = "/verify";
+    window.location.href = '/verify';
   }
   const resetLocalStorage = async function resetLocalStorage() {
-    localStorage.removeItem("verified");
-    localStorage.removeItem("sismoData");
-    localStorage.removeItem("sismoResponse");
+    localStorage.removeItem('verified');
+    localStorage.removeItem('sismoData');
+    localStorage.removeItem('sismoResponse');
   };
   const handleCopy = () => {
     navigator.clipboard.writeText(String(responseBytes));
@@ -28,11 +34,10 @@ const Verify: NextPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen ">
-
       <div className="max-w-3xl text-center my-2 text-base-content">
         <div className="flex flex-col  items-center mb-20">
           <div className="text-center w-full">
-            {pageState == "init" && !sismoData ? (
+            {pageState == 'init' && !sismoData ? (
               <>
                 <div className="text-center sm:p-2 lg:p-4">
                   <SismoConnectButton
@@ -41,16 +46,16 @@ const Verify: NextPage = () => {
                     signature={SIGNATURE_REQUEST}
                     text="Join With Sismo"
                     onResponse={async (response: SismoConnectResponse) => {
-                      console.log("Verify");
+                      console.log('Verify');
 
                       setSismoConnectResponse(response);
 
-                      setPageState("verifying");
+                      setPageState('verifying');
                       try {
-                        const verifiedResult = await fetch("/api/verify", {
-                          method: "POST",
+                        const verifiedResult = await fetch('/api/verify', {
+                          method: 'POST',
                           headers: {
-                            "Content-Type": "application/json",
+                            'Content-Type': 'application/json',
                           },
                           body: JSON.stringify({
                             ...response,
@@ -61,21 +66,24 @@ const Verify: NextPage = () => {
 
                         if (verifiedResult.ok) {
                           setSismoConnectVerifiedResult(data);
-                          localStorage.setItem("sismoData", JSON.stringify(await data));
-                          setPageState("verified");
+                          localStorage.setItem(
+                            'sismoData',
+                            JSON.stringify(await data),
+                          );
+                          setPageState('verified');
                         } else {
-                          setPageState("error");
+                          setPageState('error');
                           setError(data.error.toString()); // or JSON.stringify(data.error)
                         }
                       } catch (error) {
-                        console.error("Error:", error);
-                        setPageState("error");
+                        console.error('Error:', error);
+                        setPageState('error');
                         setError(error as any);
                       }
                     }}
                     onResponseBytes={async (responseBytes: string) => {
                       setResponseBytes(responseBytes);
-                      localStorage.setItem("sismoResponse", responseBytes);
+                      localStorage.setItem('sismoResponse', responseBytes);
                     }}
                   />
                 </div>
@@ -83,15 +91,19 @@ const Verify: NextPage = () => {
             ) : (
               <>
                 <div>
-                  {pageState == "verifying" ? (
+                  {pageState == 'verifying' ? (
                     <div className="text-center items-center flex flex-row gap-3">
-                      <Spinner></Spinner>{" "}
-                      <div className="text-blue-500 text-center font-semibold">Verifying ZK Proofs...</div>
+                      <Spinner></Spinner>{' '}
+                      <div className="text-blue-500 text-center font-semibold">
+                        Verifying ZK Proofs...
+                      </div>
                     </div>
                   ) : (
                     <>
                       {Boolean(error) ? (
-                        <div className="text-red-500 font-bold">Error verifying ZK Proofs: {error}</div>
+                        <div className="text-red-500 font-bold">
+                          Error verifying ZK Proofs: {error}
+                        </div>
                       ) : (
                         <div className="flex flex-col ">
                           <button className="btn btn-custom" onClick={resetApp}>
@@ -99,7 +111,10 @@ const Verify: NextPage = () => {
                           </button>
                           {responseBytes && (
                             <div className="flex flex-col items-center justify-center break-all">
-                              <button className="btn btn-ghost my-5" onClick={handleCopy}>
+                              <button
+                                className="btn btn-ghost my-5"
+                                onClick={handleCopy}
+                              >
                                 Copy to clipboard
                               </button>
                               {responseBytes}

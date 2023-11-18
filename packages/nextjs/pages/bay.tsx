@@ -1,29 +1,46 @@
-import type { NextPage } from "next";
-import React, { useCallback, useEffect, useMemo } from "react";
-import { useProvider, useNetwork, useSigner, useContract } from "wagmi";
-import { getDeployedContract } from "../components/scaffold-eth/Contract/utilsContract";
-import { Contract, ContractInterface, Signer, ethers } from "ethers";
-import { formatEther, keccak256, parseEther } from "ethers/lib/utils.js";
-import { useScaffoldContractWrite, useTransactor } from "~~/hooks/scaffold-eth";
-import { notification } from "~~/utils/scaffold-eth";
-import axios from "axios";
-import { useAppStore } from "~~/services/store/store";
+import type { NextPage } from 'next';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useProvider, useNetwork, useSigner, useContract } from 'wagmi';
+import { getDeployedContract } from '../components/scaffold-eth/Contract/utilsContract';
+import { Contract, ContractInterface, Signer, ethers } from 'ethers';
+import { formatEther, keccak256, parseEther } from 'ethers/lib/utils.js';
+import { useScaffoldContractWrite, useTransactor } from '~~/hooks/scaffold-eth';
+import { notification } from '~~/utils/scaffold-eth';
+import axios from 'axios';
+import { useAppStore } from '~~/services/store/store';
 
 const Bay: NextPage = () => {
-  const deployedContractBay = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateBay");
-  const deployedContractIdentity = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateIdentity");
-  const deployedContractVault = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MecenateVault");
-  const deployedContractDai = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MockDai");
-  const deployedContractMUSE = getDeployedContract(String(process.env.NEXT_PUBLIC_CHAIN_ID), "MUSE");
+  const deployedContractBay = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MecenateBay',
+  );
+  const deployedContractIdentity = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MecenateIdentity',
+  );
+  const deployedContractVault = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MecenateVault',
+  );
+  const deployedContractDai = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MockDai',
+  );
+  const deployedContractMUSE = getDeployedContract(
+    String(process.env.NEXT_PUBLIC_CHAIN_ID),
+    'MUSE',
+  );
 
   const [requests, setRequests] = React.useState<BayRequest[]>([]);
-  const [requestString, setRequestString] = React.useState<string>("");
-  const [requestPayment, setRequestPayment] = React.useState<string>("");
-  const [requestStake, setRequestStake] = React.useState<string>("");
-  const [requestAddress, setRequestAddress] = React.useState<string>("");
+  const [requestString, setRequestString] = React.useState<string>('');
+  const [requestPayment, setRequestPayment] = React.useState<string>('');
+  const [requestStake, setRequestStake] = React.useState<string>('');
+  const [requestAddress, setRequestAddress] = React.useState<string>('');
   const [tokenId, setTokenId] = React.useState<number>(0);
 
-  const publicProvider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const publicProvider = new ethers.providers.JsonRpcProvider(
+    process.env.NEXT_PUBLIC_RPC_URL,
+  );
   const runTx = useTransactor();
   const { signer } = useAppStore();
 
@@ -120,7 +137,7 @@ const Bay: NextPage = () => {
       request: _request,
       payment: parseEther(requestPayment),
       stake: parseEther(requestStake),
-      postAddress: "0x0000000000000000000000000000000000000000",
+      postAddress: '0x0000000000000000000000000000000000000000',
       accepted: false,
       postCount: 0,
       tokenId: tokenId,
@@ -145,7 +162,9 @@ const Bay: NextPage = () => {
   }, [deployedContractBay, getAllRequest]);
 
   const sendPublicTelegramMessage = async () => {
-    const url = `https://api.telegram.org/bot${String(process.env.NEXT_PUBLIC_TELEGRAM_TOKEN)}/sendMessage`;
+    const url = `https://api.telegram.org/bot${String(
+      process.env.NEXT_PUBLIC_TELEGRAM_TOKEN,
+    )}/sendMessage`;
 
     const message = {
       message: requestString,
@@ -157,34 +176,40 @@ const Bay: NextPage = () => {
 
     try {
       const response = await axios.post(url, {
-        chat_id: "@mecenate_channel",
+        chat_id: '@mecenate_channel',
         text: formattedText,
-        parse_mode: "HTML",
+        parse_mode: 'HTML',
       });
 
-      console.log("Message sent:", response.data);
+      console.log('Message sent:', response.data);
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
     }
-    notification.success("Message sent successfully");
+    notification.success('Message sent successfully');
   };
 
   const handleSelectToken = async (e: any) => {
     const token = e;
-    if (token === "ETH") {
+    if (token === 'ETH') {
       setTokenId(0);
-    } else if (token === "MUSE") {
+    } else if (token === 'MUSE') {
       setTokenId(1);
-    } else if (token === "DAI") {
+    } else if (token === 'DAI') {
       setTokenId(2);
     }
   };
 
   const handleApproveToken = async () => {
     if (tokenId == 1) {
-      runTx(museCtx?.approve(bayCtx?.address, parseEther(requestPayment)), signer);
+      runTx(
+        museCtx?.approve(bayCtx?.address, parseEther(requestPayment)),
+        signer,
+      );
     } else if (tokenId == 2) {
-      runTx(daiCtx?.approve(bayCtx?.address, parseEther(requestPayment)), signer);
+      runTx(
+        daiCtx?.approve(bayCtx?.address, parseEther(requestPayment)),
+        signer,
+      );
     }
   };
 
@@ -205,16 +230,19 @@ const Bay: NextPage = () => {
         </div>
  */}
         <h1 className="text-4xl mb-3 font-light text-white   text-center mt-10">
-          MAKE YOUR REQUEST{" "}
-          FIND A SELLER AND GET YOUR DATA
+          MAKE YOUR REQUEST FIND A SELLER AND GET YOUR DATA
         </h1>
         <h1 className="text-lg  mb-8  font-light text-white  text-center ">
-          Ask for a data, set a reward, a stake amount as warrancy and wait for a seller to fullfill your request
+          Ask for a data, set a reward, a stake amount as warrancy and wait for
+          a seller to fullfill your request
         </h1>
 
         <div className="flex flex-col min-w-fit mx-auto items-center mb-20 ">
           <div className="card bg-slate-400 rounded-lg shadow-2xl shadow-primary py-2   p-4 m-4 text-black">
-            <label className="text-black font-semibold text-sm" htmlFor="request">
+            <label
+              className="text-black font-semibold text-sm"
+              htmlFor="request"
+            >
               What do you want?
             </label>
 
@@ -225,7 +253,10 @@ const Bay: NextPage = () => {
               placeholder="Enter Request"
               onChange={e => setRequestString(e.target.value)}
             />
-            <label className="text-black font-semibold text-sm" htmlFor="request">
+            <label
+              className="text-black font-semibold text-sm"
+              htmlFor="request"
+            >
               Currency
             </label>
             <select
@@ -238,9 +269,13 @@ const Bay: NextPage = () => {
               <option value="ETH">ETH</option>
               <option value="DAI">DAI</option>
               {/*               <option value="MUSE">MUSE</option>
- */}            </select>
+               */}{' '}
+            </select>
 
-            <label className="text-black font-semibold text-sm" htmlFor="request">
+            <label
+              className="text-black font-semibold text-sm"
+              htmlFor="request"
+            >
               Reward
             </label>
             <input
@@ -259,7 +294,10 @@ const Bay: NextPage = () => {
             >
               Approve
             </button>
-            <label className="text-black font-semibold text-sm" htmlFor="request">
+            <label
+              className="text-black font-semibold text-sm"
+              htmlFor="request"
+            >
               Staker Fullfill
             </label>
             <input
@@ -290,41 +328,59 @@ const Bay: NextPage = () => {
                 <div className=" bg-gradient-to-tl from-slate-700 to-slate-900rounded-t-xl break-all">
                   <div className="text-left p-5">
                     <span className="font-light text-left">WANTED</span>
-                    <div className="text-2xl font-bold">{ethers.utils.parseBytes32String(request.request)}</div>
-                    <a className="link-hover" href={`/viewFeed?addr=${request.postAddress}`}>
-                      {" "}
+                    <div className="text-2xl font-bold">
+                      {ethers.utils.parseBytes32String(request.request)}
+                    </div>
+                    <a
+                      className="link-hover"
+                      href={`/viewFeed?addr=${request.postAddress}`}
+                    >
+                      {' '}
                       {request.postAddress}
                     </a>
                   </div>
                   <div className="text-right p-5 ">
-                    <div className="text-xl font-regular">{formatEther(request.payment)} ETH</div>
+                    <div className="text-xl font-regular">
+                      {formatEther(request.payment)} ETH
+                    </div>
                     <div className=" text-md font-light">Reward</div>
                   </div>
                   <div className="text-right p-5 break-all">
-                    <div className=" font-regular text-sm">{request.postId} </div>
+                    <div className=" font-regular text-sm">
+                      {request.postId}{' '}
+                    </div>
                     <div className=" text-md font-light">PostID</div>
                   </div>
                 </div>
                 <div className="bg-gradient-to-tl from-blue-950 to-slate-900  rounded-b-xl ">
                   <div className="text-left p-5 space-y-">
                     <div className="font-medium">
-                      Fulfiller must stake{" "}
+                      Fulfiller must stake{' '}
                       <strong>
-                        {formatEther(request.stake)}{" "}
-                        {request.tokenId == 0 ? "ETH" : "DAI" ? request.tokenId == 2 : "MUSE"}{" "}
+                        {formatEther(request.stake)}{' '}
+                        {request.tokenId == 0
+                          ? 'ETH'
+                          : 'DAI'
+                          ? request.tokenId == 2
+                          : 'MUSE'}{' '}
                       </strong>
                     </div>
                     <div className="font-medium">
                       Requester can pay
                       <strong>
-                        {" "}
-                        {formatEther(request.payment)}{" "}
-                        {request.tokenId == 0 ? "ETH" : "DAI" ? request.tokenId == 2 : "MUSE"}{" "}
+                        {' '}
+                        {formatEther(request.payment)}{' '}
+                        {request.tokenId == 0
+                          ? 'ETH'
+                          : 'DAI'
+                          ? request.tokenId == 2
+                          : 'MUSE'}{' '}
                       </strong>
                       to destroy stake
                     </div>
                     <div className="font-medium">
-                      This feed had already fullfill <strong>{String(request.postCount)}</strong> requests
+                      This feed had already fullfill{' '}
+                      <strong>{String(request.postCount)}</strong> requests
                     </div>
                     <div className="font-medium">
                       Accepted: <strong>{String(request.accepted)}</strong>
@@ -349,7 +405,10 @@ const Bay: NextPage = () => {
                       accept
                     </button>
                     <button>
-                      <a className="link link-hover hover:font-semibold " href={"/feeds"}>
+                      <a
+                        className="link link-hover hover:font-semibold "
+                        href={'/feeds'}
+                      >
                         answer
                       </a>
                     </button>

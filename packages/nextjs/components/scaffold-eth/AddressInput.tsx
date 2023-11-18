@@ -1,8 +1,8 @@
-import { ChangeEvent, useEffect, useState } from "react";
-import Blockies from "react-blockies";
-import { useEnsAddress, useEnsAvatar, useEnsName } from "wagmi";
-import ethers from "ethers";
-import { isAddress } from "ethers/lib/utils.js";
+import { ChangeEvent, useEffect, useState } from 'react';
+import Blockies from 'react-blockies';
+import { useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi';
+import ethers from 'ethers';
+import { isAddress } from 'ethers/lib/utils.js';
 type TAddressInputProps = {
   onChange?: (arg: string) => void;
   placeholder?: string;
@@ -11,17 +11,23 @@ type TAddressInputProps = {
 };
 
 // ToDo:  move this function to an utility file
-const isENS = (address = "") => address.endsWith(".eth") || address.endsWith(".xyz");
+const isENS = (address = '') =>
+  address.endsWith('.eth') || address.endsWith('.xyz');
 
 /**
  * Address input with ENS name resolution
  */
-const AddressInput = ({ value, name, placeholder, onChange }: TAddressInputProps) => {
-  const [address, setAddress] = useState("");
-  const [resolvedEns, setResolvedEns] = useState("");
+const AddressInput = ({
+  value,
+  name,
+  placeholder,
+  onChange,
+}: TAddressInputProps) => {
+  const [address, setAddress] = useState('');
+  const [resolvedEns, setResolvedEns] = useState('');
 
   // Controlled vs Uncontrolled input.
-  const currentValue = value !== undefined ? value : address || "";
+  const currentValue = value !== undefined ? value : address || '';
 
   const { data: ensAddress, isLoading: isEnsAddressLoading } = useEnsAddress({
     name: address,
@@ -49,8 +55,8 @@ const AddressInput = ({ value, name, placeholder, onChange }: TAddressInputProps
   useEffect(() => {
     // Reset when clearing controlled input
     if (!currentValue) {
-      setResolvedEns("");
-      setAddress("");
+      setResolvedEns('');
+      setAddress('');
     }
   }, [currentValue]);
 
@@ -76,7 +82,7 @@ const AddressInput = ({ value, name, placeholder, onChange }: TAddressInputProps
   }, [ensName, resolvedEns]);
 
   const onChangeAddress = async (event: ChangeEvent<HTMLInputElement>) => {
-    setResolvedEns("");
+    setResolvedEns('');
     setAddress(event.target.value);
     if (onChange) {
       onChange(event.target.value);
@@ -89,11 +95,15 @@ const AddressInput = ({ value, name, placeholder, onChange }: TAddressInputProps
         <div className="flex w-full">
           {resolvedEns && (
             <div className="flex bg-base-300 rounded-l-full items-center">
-              <span className={ensAvatar ? "w-[35px]" : ""}>
+              <span className={ensAvatar ? 'w-[35px]' : ''}>
                 {ensAvatar && (
                   // Don't want to use nextJS Image here (and adding remote patterns for the URL)
                   // eslint-disable-next-line
-                  <img className="w-full rounded-full" src={ensAvatar} alt={`${ensAddress} avatar`} />
+                  <img
+                    className="w-full rounded-full"
+                    src={ensAvatar}
+                    alt={`${ensAddress} avatar`}
+                  />
                 )}
               </span>
               <span className="text-accent px-2">{resolvedEns}</span>
@@ -104,14 +114,21 @@ const AddressInput = ({ value, name, placeholder, onChange }: TAddressInputProps
             type="text"
             placeholder={placeholder}
             className={`input input-ghost focus:outline-none focus:bg-transparent focus:text-gray-400 h-[2.2rem] min-h-[2.2rem] border w-full font-medium placeholder:text-accent/50 text-gray-400 grow ${
-              ensAddress === null ? "input-error" : ""
+              ensAddress === null ? 'input-error' : ''
             }`}
             value={currentValue}
             onChange={onChangeAddress}
             disabled={isLoading}
             autoComplete="off"
           />
-          {address && <Blockies className="!rounded-full" seed={address?.toLowerCase() as string} size={7} scale={5} />}
+          {address && (
+            <Blockies
+              className="!rounded-full"
+              seed={address?.toLowerCase() as string}
+              size={7}
+              scale={5}
+            />
+          )}
         </div>
       </div>
     </div>

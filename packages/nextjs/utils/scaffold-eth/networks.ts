@@ -1,6 +1,6 @@
-import { Network } from "@ethersproject/networks";
-import * as chains from "wagmi/chains";
-import scaffoldConfig from "~~/scaffold.config";
+import { Network } from '@ethersproject/networks';
+import * as chains from 'wagmi/chains';
+import scaffoldConfig from '~~/scaffold.config';
 
 export type TChainAttributes = {
   // color | [lightThemeColor, darkThemeColor]
@@ -12,48 +12,48 @@ export type TChainAttributes = {
 
 export const NETWORKS_EXTRA_DATA: Record<string, TChainAttributes> = {
   [chains.hardhat.id]: {
-    color: "#b8af0c",
+    color: '#b8af0c',
   },
   [chains.mainnet.id]: {
-    color: "#ff8b9e",
+    color: '#ff8b9e',
   },
   [chains.sepolia.id]: {
-    color: ["#5f4bb6", "#87ff65"],
+    color: ['#5f4bb6', '#87ff65'],
   },
   [chains.goerli.id]: {
-    color: "#0975F6",
+    color: '#0975F6',
   },
   [chains.gnosis.id]: {
-    color: "#48a9a6",
+    color: '#48a9a6',
   },
   [chains.polygon.id]: {
-    color: "#2bbdf7",
-    nativeCurrencyTokenAddress: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
+    color: '#2bbdf7',
+    nativeCurrencyTokenAddress: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
   },
   [chains.polygonMumbai.id]: {
-    color: "#92D9FA",
-    nativeCurrencyTokenAddress: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
+    color: '#92D9FA',
+    nativeCurrencyTokenAddress: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
   },
   [chains.optimismGoerli.id]: {
-    color: "#f01a37",
+    color: '#f01a37',
   },
   [chains.optimism.id]: {
-    color: "#f01a37",
+    color: '#f01a37',
   },
   [chains.arbitrumGoerli.id]: {
-    color: "#28a0f0",
+    color: '#28a0f0',
   },
   [chains.arbitrum.id]: {
-    color: "#28a0f0",
+    color: '#28a0f0',
   },
   [chains.fantom.id]: {
-    color: "#1969ff",
+    color: '#1969ff',
   },
   [chains.fantomTestnet.id]: {
-    color: "#1969ff",
+    color: '#1969ff',
   },
   [chains.baseGoerli.id]: {
-    color: "#1969ff",
+    color: '#1969ff',
   },
 };
 
@@ -74,7 +74,7 @@ export function getBlockExplorerTxLink(network: Network, txnHash: string) {
   });
 
   if (targetChainArr.length === 0) {
-    return "";
+    return '';
   }
 
   const targetChain = targetChainArr[0] as keyof typeof chains;
@@ -82,7 +82,7 @@ export function getBlockExplorerTxLink(network: Network, txnHash: string) {
   const blockExplorerTxURL = chains[targetChain]?.blockExplorers?.default?.url;
 
   if (!blockExplorerTxURL) {
-    return "";
+    return '';
   }
 
   return `${blockExplorerTxURL}/tx/${txnHash}`;
@@ -94,7 +94,10 @@ export function getBlockExplorerTxLink(network: Network, txnHash: string) {
  * @param address
  * @returns block explorer address URL and etherscan URL if block explorer URL is not present for wagmi network
  */
-export function getBlockExplorerAddressLink(network: chains.Chain, address: string) {
+export function getBlockExplorerAddressLink(
+  network: chains.Chain,
+  address: string,
+) {
   const blockExplorerBaseURL = network.blockExplorers?.default?.url;
   if (!blockExplorerBaseURL) {
     return `https://etherscan.io/address/${address}`;

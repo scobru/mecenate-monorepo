@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 exports.__esModule = true;
 exports.useAppStore = void 0;
-var zustand_1 = require("zustand");
-exports.useAppStore = zustand_1["default"](function (set) {
+var zustand_1 = require('zustand');
+exports.useAppStore = zustand_1['default'](function (set) {
   return {
     ethPrice: 0,
     setEthPrice: function (newValue) {

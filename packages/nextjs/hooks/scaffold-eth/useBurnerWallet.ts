@@ -1,10 +1,10 @@
-import { BytesLike, ethers, Signer, Wallet } from "ethers";
-import { useEffect, useCallback, useRef } from "react";
-import { useProvider } from "wagmi";
-import { useDebounce } from "use-debounce";
-import { useLocalStorage } from "usehooks-ts";
+import { BytesLike, ethers, Signer, Wallet } from 'ethers';
+import { useEffect, useCallback, useRef } from 'react';
+import { useProvider } from 'wagmi';
+import { useDebounce } from 'use-debounce';
+import { useLocalStorage } from 'usehooks-ts';
 
-const burnerStorageKey = "scaffoldEth2.burnerWallet.sk";
+const burnerStorageKey = 'scaffoldEth2.burnerWallet.sk';
 
 /**
  * Is the private key valid
@@ -28,7 +28,7 @@ const newDefaultWallet = ethers.Wallet.createRandom();
  * @returns
  */
 export const saveBurnerSK = (wallet: Wallet): void => {
-  if (typeof window != "undefined" && window != null) {
+  if (typeof window != 'undefined' && window != null) {
     window?.localStorage?.setItem(burnerStorageKey, wallet.privateKey);
   }
 };
@@ -40,9 +40,11 @@ export const saveBurnerSK = (wallet: Wallet): void => {
  * @returns
  */
 export const loadBurnerSK = (): string => {
-  let currentSk = "";
-  if (typeof window != "undefined" && window != null) {
-    currentSk = window?.localStorage?.getItem?.(burnerStorageKey)?.replaceAll('"', "") ?? "";
+  let currentSk = '';
+  if (typeof window != 'undefined' && window != null) {
+    currentSk =
+      window?.localStorage?.getItem?.(burnerStorageKey)?.replaceAll('"', '') ??
+      '';
   }
 
   if (!!currentSk && isValidSk(currentSk)) {
@@ -88,7 +90,10 @@ export type TBurnerSigner = {
  * @returns IBurnerSigner
  */
 export const useBurnerWallet = (): TBurnerSigner => {
-  const [burnerSk, setBurnerSk] = useLocalStorage<BytesLike>(burnerStorageKey, newDefaultWallet.privateKey);
+  const [burnerSk, setBurnerSk] = useLocalStorage<BytesLike>(
+    burnerStorageKey,
+    newDefaultWallet.privateKey,
+  );
 
   const provider = useProvider();
   const walletRef = useRef<Wallet>();
@@ -104,7 +109,7 @@ export const useBurnerWallet = (): TBurnerSigner => {
    * callback to save current wallet sk
    */
   const saveBurner = useCallback(() => {
-    setBurnerSk(walletRef.current?.privateKey ?? "");
+    setBurnerSk(walletRef.current?.privateKey ?? '');
   }, [setBurnerSk]);
 
   /**
@@ -112,18 +117,18 @@ export const useBurnerWallet = (): TBurnerSigner => {
    */
   const generateNewBurner = useCallback(() => {
     if (provider && !isCreatingNewBurnerRef.current) {
-      console.log("🔑 Create new burner wallet...");
+      console.log('🔑 Create new burner wallet...');
       isCreatingNewBurnerRef.current = true;
 
       const wallet = Wallet.createRandom().connect(provider);
       setBurnerSk(() => {
-        console.log("🔥 ...Save new burner wallet");
+        console.log('🔥 ...Save new burner wallet');
         isCreatingNewBurnerRef.current = false;
         return wallet.privateKey;
       });
       return wallet;
     } else {
-      console.log("⚠ Could not create burner wallet");
+      console.log('⚠ Could not create burner wallet');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider?.network?.chainId]);
@@ -142,7 +147,7 @@ export const useBurnerWallet = (): TBurnerSigner => {
       }
 
       if (wallet == null) {
-        throw "Error:  Could not create burner wallet";
+        throw 'Error:  Could not create burner wallet';
       }
       walletRef.current = wallet;
       saveBurner?.();

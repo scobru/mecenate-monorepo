@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
-import { ApolloClient, InMemoryCache, createHttpLink, gql } from "@apollo/client";
-import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { useInterval } from "usehooks-ts";
-import { Address } from "~~/components/scaffold-eth";
-import scaffoldConfig from "~~/scaffold.config";
-import { toUtf8String } from "ethers/lib/utils.js";
-import { Signer, ethers } from "ethers";
-import Link from "next/link";
-import MecenateHelper from "@scobru/crypto-ipfs";
+import { useEffect, useState } from 'react';
+import {
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+  gql,
+} from '@apollo/client';
+import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk';
+import { useInterval } from 'usehooks-ts';
+import { Address } from '~~/components/scaffold-eth';
+import scaffoldConfig from '~~/scaffold.config';
+import { toUtf8String } from 'ethers/lib/utils.js';
+import { Signer, ethers } from 'ethers';
+import Link from 'next/link';
+import MecenateHelper from '@scobru/crypto-ipfs';
 
 type TAttestation = {
   id: string;
@@ -22,9 +27,11 @@ const Attestations = () => {
   const [attestations, setAttestations] = useState<TAttestation[]>([]);
   const [ipfsHashes, setIpfsHashes] = useState<string[]>([]);
 
-  const schemaEncoder = new SchemaEncoder("bool verified ,address feed, bytes32 postId, bytes post,");
+  const schemaEncoder = new SchemaEncoder(
+    'bool verified ,address feed, bytes32 postId, bytes post,',
+  );
 
-  const graphUri = "https://base-goerli-predeploy.easscan.org/graphql";
+  const graphUri = 'https://base-goerli-predeploy.easscan.org/graphql';
 
   const httpLink = createHttpLink({
     uri: graphUri,
@@ -48,18 +55,23 @@ const Attestations = () => {
   `;
 
   const fetchAttestations = async () => {
-    console.log("attests");
+    console.log('attests');
 
     const newAttestations = await apolloClient.query({
       query: getAttestationsGraphQl,
       variables: {
-        where: { schemaId: { equals: "0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a" } },
+        where: {
+          schemaId: {
+            equals:
+              '0x826a8867a8fa45929593ef87a5b94e5800de3f2e3f7fbc93a995069777076e6a',
+          },
+        },
       },
     });
 
     setIsLoading(false);
 
-    console.log("newAttestations: ", newAttestations);
+    console.log('newAttestations: ', newAttestations);
 
     setAttestations(newAttestations.data.attestations);
   };
@@ -77,11 +89,11 @@ const Attestations = () => {
   async function getIPFSHash(data: string, index: number): Promise<void> {
     const hash: string = await MecenateHelper.multihash({
       input: data,
-      inputType: "sha2-256",
-      outputType: "b58",
+      inputType: 'sha2-256',
+      outputType: 'b58',
     });
 
-    console.log("hash: ", hash);
+    console.log('hash: ', hash);
 
     const newIpfsHashes = [...ipfsHashes];
     newIpfsHashes[index] = hash;
@@ -90,17 +102,21 @@ const Attestations = () => {
 
   useEffect(() => {
     attestations.forEach((attestation, index) => {
-      getIPFSHash(schemaEncoder.decodeData(attestation.data)[2].value.value.toString(), index);
+      getIPFSHash(
+        schemaEncoder.decodeData(attestation.data)[2].value.value.toString(),
+        index,
+      );
     });
   }, [attestations]);
 
   return (
     <div className="flex flex-col justify-center items-center py-10 px-5 sm:px-0 lg:py-auto max-w-[100vw] ">
       <h1 className="text-4xl mb-3 font-light text-white   text-center mt-10">
-        ATTESTATION FOR RIGHT DATA{" "}
+        ATTESTATION FOR RIGHT DATA{' '}
       </h1>
       <h1 className="text-lg  mb-8  font-light text-white  text-center ">
-        The list of attestations made by buyer when seller has delivered correct data.
+        The list of attestations made by buyer when seller has delivered correct
+        data.
       </h1>
       <div className="flex justify-center overflow-x-auto md:overflow-visible ">
         <div className="w-full md:min-w-full shadow-lg">
@@ -110,10 +126,14 @@ const Attestations = () => {
                 <th className="bg-primary text-white p-1.5 sml:p-4">UID</th>
                 <th className="bg-primary text-white p-1.5 sml:p-4">BUYER</th>
                 <th className="bg-primary text-white p-1.5 sml:p-4">SELLER</th>
-                <th className="bg-primary text-white p-1.5 sml:p-4">RESOLVED</th>
+                <th className="bg-primary text-white p-1.5 sml:p-4">
+                  RESOLVED
+                </th>
                 <th className="bg-primary text-white p-1.5 sml:p-4">FEED</th>
                 <th className="bg-primary text-white p-1.5 sml:p-4">POST</th>
-                <th className="bg-primary text-white p-1.5 sml:p-4">CREATED AT</th>
+                <th className="bg-primary text-white p-1.5 sml:p-4">
+                  CREATED AT
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -131,7 +151,10 @@ const Attestations = () => {
                         rel="noreferrer"
                         className="flex"
                       >
-                        <span className="list__container--first_row-data">{attestation.id.slice(0, 20)}</span>...
+                        <span className="list__container--first_row-data">
+                          {attestation.id.slice(0, 20)}
+                        </span>
+                        ...
                       </a>
                     </td>
                     <td className="md:table-cell p-1 md:p-2">
@@ -141,21 +164,31 @@ const Attestations = () => {
                       <Address address={attestation.recipient} format="short" />
                     </td>
                     <td className="md:table-cell p-1 md:p-2">
-                      {schemaEncoder.decodeData(attestation.data)[0].value.value.toString()}
+                      {schemaEncoder
+                        .decodeData(attestation.data)[0]
+                        .value.value.toString()}
                     </td>
                     <td className="md:table-cell p-1 md:p-2">
                       <Address
-                        address={schemaEncoder.decodeData(attestation.data)[1].value.value.toString()}
+                        address={schemaEncoder
+                          .decodeData(attestation.data)[1]
+                          .value.value.toString()}
                         format="short"
                       />
                     </td>
                     <td className="md:table-cell p-1 md:p-2">
-                      <Link className="link-hover " href={`https://ipfs.io/ipfs/${ipfsHashes[index]}`} target="_blank">
+                      <Link
+                        className="link-hover "
+                        href={`https://ipfs.io/ipfs/${ipfsHashes[index]}`}
+                        target="_blank"
+                      >
                         ipfs
                       </Link>
                     </td>
                     <td className="md:table-cell p-1 md:p-2">
-                      {new Date(attestation.timeCreated * 1000).toLocaleString()}
+                      {new Date(
+                        attestation.timeCreated * 1000,
+                      ).toLocaleString()}
                     </td>
                   </tr>
                 );

@@ -13,12 +13,23 @@ contract MecenateSend is Ownable {
     mapping(bytes => bytes) public encryptedKeys;
 
     address public usersContract;
+    address public treasuryContract;
 
     uint256 public fixedFee = 0.01 ether;
 
-    constructor(address _usersContract) {
+    constructor(address _usersContract, address _treasuryContract) {
         usersContract = _usersContract;
+        treasuryContract = _treasuryContract;
     }
+
+    event HashSubmitted(
+        address sender,
+        address receiver,
+        address token,
+        uint256 amount,
+        bytes ipfsHash,
+        bytes pubKey
+    );
 
     function submitHash(bytes memory encryptedData) public payable {
         (
@@ -38,10 +49,12 @@ contract MecenateSend is Ownable {
         );
 
         encryptedKeys[pubKey] = ipfsHash;
+        uint256 fee = (amount *
+            IMecenateTreasury(treasuryContract).globalFee()) / 10000;
 
         if (token == address(0)) {
-            require(msg.value >= amount + fixedFee, "Wrong Fee Value");
-            uint256 amountToSend = msg.value - fixedFee;
+            require(msg.value >= amount + fee, "Wrong Fee Value");
+            uint256 amountToSend = msg.value - fee;
             // require(address(receiver).balance == 0, "Receiver has balance");
             payable(receiver).transfer(amountToSend);
         } else {
@@ -50,6 +63,7 @@ contract MecenateSend is Ownable {
                 tokenContract.allowance(msg.sender, address(this)) >= amount,
                 "Not enough allowance"
             );
+
             // require(
             //     tokenContract.balanceOf(msg.sender) == 0,
             //     "Receiver has balance"
@@ -57,14 +71,29 @@ contract MecenateSend is Ownable {
 
             tokenContract.safeTransferFrom(msg.sender, receiver, amount);
         }
+
+        emit HashSubmitted(
+            msg.sender,
+            receiver,
+            token,
+            amount,
+            ipfsHash,
+            pubKey
+        );
+    }
+
+    function globalFee() external view returns (uint256) {
+        return IMecenateTreasury(treasuryContract).globalFee();
     }
 
     function getHash(bytes memory pubKey) public view returns (bytes memory) {
         return encryptedKeys[pubKey];
     }
 
-    function updateUsersContract(address newUsersContract) public onlyOwner {
-        usersContract = newUsersContract;
+    function changeTreasuryContract(
+        address _treasuryContract
+    ) external onlyOwner {
+        treasuryContract = _treasuryContract;
     }
 
     function changeUsersContract(address _usersContract) external onlyOwner {
