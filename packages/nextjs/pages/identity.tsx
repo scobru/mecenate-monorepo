@@ -235,8 +235,6 @@ const Identity: NextPage = () => {
   }
 
   async function createPair() {
-    generateKeyPairFromSeed(publicProvider, signer);
-
     let kp = await generateKeyPairFromSeed(publicProvider, signer);
 
     if (kp) {

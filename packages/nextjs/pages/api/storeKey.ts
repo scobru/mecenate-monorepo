@@ -70,7 +70,7 @@ export default async function handler(
     };
 
     // Cid not exists
-    if (cid == null) {
+    if (cid == '') {
       console.log('CID not exists!');
 
       try {
@@ -99,7 +99,7 @@ export default async function handler(
 
       console.log('Old CID', cid);
       console.log('State:', state);
-
+      console.log('Wallet:', wallet);
       const storedState = mogu.queryByName(wallet);
       console.log('StoredState:', storedState);
 
@@ -108,6 +108,8 @@ export default async function handler(
           state = mogu.load(String(cid));
           state = mogu.updateNode(node);
           console.log(state);
+
+          //mogu.unpin(String(cid));
 
           const hash = await mogu.store();
           console.log('New CID', hash);
@@ -126,10 +128,10 @@ export default async function handler(
         }
       } else {
         try {
-          state = mogu.load(String(cid));
           state = mogu.addNode(node);
           console.log(state);
 
+          await mogu.unpin(cid);
           const hash = await mogu.store();
           console.log('New CID', hash);
 
